@@ -1048,6 +1048,21 @@ pairtools parse \
     --walks-policy mask \
     "bams/SRR7939018.bam" \
         2> >(tee -a "pairs/err_out/SRR7939018.stderr.txt" >&2)
+
+
+❯ pairtools parse \
+>     -o "${a_pairs}" \
+>     -c "${a_size}" \
+>     --drop-sam \
+>     --drop-seq \
+>     --output-stats "${a_stats}" \
+>     --assembly "${assembly}" \
+>     --no-flip \
+>     --add-columns mapq \
+>     --walks-policy mask \
+>     "${a_bam}" \
+>         2> >(tee -a "${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).stderr.txt" >&2)
+[E::idx_find_and_load] Could not retrieve index file for 'bams/SRR7939018.bam'
 ```
 </details>
 <br />
