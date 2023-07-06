@@ -5,76 +5,80 @@
 
 <!-- MarkdownTOC -->
 
-1. [Install packages necessary for processing Micro-C data](#install-packages-necessary-for-processing-micro-c-data)
-    1. [Remote installation](#remote-installation)
+1. [Install packages necessary for processing, analyzing Micro-C data](#install-packages-necessary-for-processing-analyzing-micro-c-data)
+    1. [Remote and local \(work\) installations](#remote-and-local-work-installations)
         1. [Install mamba packages](#install-mamba-packages)
             1. [Code](#code)
             1. [Printed](#printed)
         1. [Install atria](#install-atria)
             1. [Code](#code-1)
             1. [Printed](#printed-1)
-    1. [Local installation](#local-installation)
-        1. [Install mamba packages](#install-mamba-packages-1)
+        1. [Install HiGlass](#install-higlass)
             1. [Code](#code-2)
             1. [Printed](#printed-2)
-        1. [Install atria](#install-atria-1)
-            1. [Code](#code-3)
 1. [Work through the steps of pairtools](#work-through-the-steps-of-pairtools)
     1. [0. Get situated](#0-get-situated)
         1. [Get to work directory, initialize environment](#get-to-work-directory-initialize-environment)
-            1. [Code](#code-4)
+            1. [Code](#code-3)
         1. [Initialize variables, create outdirectories](#initialize-variables-create-outdirectories)
-            1. [Code](#code-5)
+            1. [Code](#code-4)
             1. [Printed](#printed-3)
     1. [1. Trim fastq files](#1-trim-fastq-files)
-        1. [Code](#code-6)
+        1. [Code](#code-5)
         1. [Printed](#printed-4)
     1. [2. Align datasets](#2-align-datasets)
-        1. [Code](#code-7)
+        1. [Code](#code-6)
         1. [Printed](#printed-5)
     1. [3. Run `pairtools parse`](#3-run-pairtools-parse)
-        1. [Code](#code-8)
+        1. [Code](#code-7)
         1. [Printed](#printed-6)
             1. [Check the documentation](#check-the-documentation)
-            1. [`pairtools parse`](#pairtools-parse)
+                1. [`pairtools parse`](#pairtools-parse)
+                1. [`pairtools parse2`](#pairtools-parse2)
+            1. [Run `pairtools parse`](#run-pairtools-parse)
+            1. [Run `pairtools parse2`](#run-pairtools-parse2)
             1. [Examine the pairs outfile](#examine-the-pairs-outfile)
             1. [Examine the stats outfile](#examine-the-stats-outfile)
     1. [4. Run `pairtools sort`](#4-run-pairtools-sort)
-        1. [Code](#code-9)
+        1. [Code](#code-8)
         1. [Printed](#printed-7)
             1. [Check the documentation](#check-the-documentation-1)
-            1. [`pairtools sort`](#pairtools-sort)
+            1. [Run `pairtools sort`](#run-pairtools-sort)
             1. [Examine the sorted pairs outfile](#examine-the-sorted-pairs-outfile)
     1. [5. Run `pairtools dedup` and `pairtools split`](#5-run-pairtools-dedup-and-pairtools-split)
-        1. [Code](#code-10)
+        1. [Code](#code-9)
         1. [Printed](#printed-8)
             1. [Check the documentation](#check-the-documentation-2)
-            1. [`pairtools dedup`](#pairtools-dedup)
+            1. [Run `pairtools dedup`](#run-pairtools-dedup)
             1. [Check the various outfiles](#check-the-various-outfiles)
             1. [Examine the unique pairs](#examine-the-unique-pairs)
             1. [Check the stats outfile](#check-the-stats-outfile)
-        1. [Notes](#notes)
     1. [6. Run `pairtools select`](#6-run-pairtools-select)
-        1. [Code](#code-11)
+        1. [Code](#code-10)
         1. [Printed](#printed-9)
             1. [Check the documentation](#check-the-documentation-3)
             1. [`pairtools select`](#pairtools-select)
     1. [7. Run `pairtools stats`](#7-run-pairtools-stats)
-        1. [Code](#code-12)
+        1. [Code](#code-11)
         1. [Printed](#printed-10)
             1. [Check the documentation](#check-the-documentation-4)
+            1. [Do a trial run of `pairtools stats`](#do-a-trial-run-of-pairtools-stats)
+            1. [Check the contents of the stats files](#check-the-contents-of-the-stats-files)
     1. [8. Load pairs to cooler](#8-load-pairs-to-cooler)
-        1. [Code](#code-13)
+        1. [Code](#code-12)
         1. [Printed](#printed-11)
+    1. [9. Generate a multi-resolution cooler by coarsening](#9-generate-a-multi-resolution-cooler-by-coarsening)
+        1. [Code](#code-13)
+        1. [Printed](#printed-12)
 
 <!-- /MarkdownTOC -->
 <br />
 <br />
 
-<a id="install-packages-necessary-for-processing-micro-c-data"></a>
-## Install packages necessary for processing Micro-C data
-<a id="remote-installation"></a>
-### Remote installation
+<a id="install-packages-necessary-for-processing-analyzing-micro-c-data"></a>
+## Install packages necessary for processing, analyzing Micro-C data
+<a id="remote-and-local-work-installations"></a>
+### Remote and local (work) installations
 <a id="install-mamba-packages"></a>
 #### Install mamba packages
 <a id="code"></a>
@@ -1965,33 +1969,47 @@ pigz 2.6
 </details>
 <br />
 
-<a id="local-installation"></a>
-### Local installation
-*Bioconda installs not working when configuring conda environment for work with osx-64; `#TODO` `#IMPORTANT` [troubleshoot this later](https://www.google.com/search?q=how+to+use+bioconda+with+apple+m1&oq=how+to+use+bioconda+with+apple+m1&aqs=chrome..69i57j33i160l2.5494j1j4&sourceid=chrome&ie=UTF-8)*
-
-<a id="install-mamba-packages-1"></a>
-#### Install mamba packages
+<a id="install-higlass"></a>
+#### Install HiGlass
 <a id="code-2"></a>
 ##### Code
 <details>
-<summary><i>Code: Local installation</i></summary>
+<summary><i>Code: Install HiGlass</i></summary>
 
 ```bash
 #!/bin/bash
 
-run=FALSE
-if [[ "${run}" == TRUE ]]; then
-    create_x86_conda_environment pairtools_env
-    conda activate pairtools_env
+docker pull higlass/higlass-docker
 
-    conda install \
-        -c conda-forge \
-        parallel mamba python==3.10.11
+p_proj="${HOME}/projects-etc/2023_rDNA"
+p_data="results/2023-0307_work_Micro-C_align-process/cool"
+docker run \
+    --detach \
+    --publish 8888:80 \
+    --volume "${p_proj}/${p_data}":/data \
+    --volume /tmp:/tmp \
+    --name higlass-container \
+    higlass/higlass-docker
 
-    mamba install \
-        -c bioconda \
-            bioframe cooler coolpuppy cooltools pairtools rename
-fi
+docker exec higlass-container ls /tmp
+
+docker exec higlass-container ls /data
+
+docker exec higlass-container python higlass-server/manage.py
+
+docker exec higlass-container \
+    python higlass-server/manage.py ingest_tileset \
+        --help
+
+docker exec higlass-container \
+    python higlass-server/manage.py ingest_tileset \
+        --filename /data/SRR7939018.mcool \
+        --filetype cooler \
+        --datatype matrix
+
+curl http://localhost:8888/api/v1/tilesets/
+
+#  OK, it works!
 ```
 </details>
 <br />
@@ -1999,33 +2017,221 @@ fi
 <a id="printed-2"></a>
 ##### Printed
 <details>
-<summary><i>Printed: Local installation</i></summary>
+<summary><i>Printed: Install HiGlass</i></summary>
 
 ```txt
+❯ docker pull higlass/higlass-docker
+Using default tag: latest
+latest: Pulling from higlass/higlass-docker
+d5fd17ec1767: Pulling fs layer
+6422b34437d1: Pulling fs layer
+73ba2a1f7dde: Pulling fs layer
+be7b46dd5fea: Pull complete
+8e49199e85ef: Pull complete
+c4bc881d58e8: Pull complete
+7e92b57a2901: Pull complete
+73494564efa9: Pull complete
+25a49216c3dd: Pull complete
+7e56303d188d: Pull complete
+cb397a031840: Pull complete
+47426cb8475b: Pull complete
+18d1fff970dc: Pull complete
+31cd83a82e3a: Pull complete
+6e212c033c2f: Pull complete
+858c081be2ec: Pull complete
+c0ebabb2a4c6: Pull complete
+f34c90f97dee: Pull complete
+8f70b9cc5016: Pull complete
+7b2a69766534: Pull complete
+664b2e582166: Pull complete
+00999032f45f: Pull complete
+005726487002: Pull complete
+6a95d91a5ea2: Pull complete
+1b6b1e33ec51: Pull complete
+7faf3b9639a6: Pull complete
+7ed67a9571e7: Pull complete
+4874337f42dd: Pull complete
+dbf7f0095fb7: Pull complete
+8eacd44b5df6: Pull complete
+28c526f559b7: Pull complete
+c85cc3debbfa: Pull complete
+a24258ad5e79: Pull complete
+7c824922df97: Pull complete
+986f0c2fd500: Pull complete
+b8e6ea53c571: Pull complete
+ccd504d2c3ab: Pull complete
+bba21be499c8: Pull complete
+7d1666b76740: Pull complete
+1827f5e2fb4c: Pull complete
+ddace0d6fcbb: Pull complete
+c667579fa023: Pull complete
+f75751a34098: Pull complete
+4bdd777d5874: Pull complete
+d444e5b29dfc: Pull complete
+7105c723ac40: Pull complete
+bda2027762ed: Pull complete
+165027e61dac: Pull complete
+88d1b18b6097: Pull complete
+b33c77120c03: Pull complete
+3afed2112162: Pull complete
+238d8bcf1bcd: Pull complete
+b121772f90f5: Pull complete
+4d1268299691: Pull complete
+1c919e8bfe46: Pull complete
+ec711eb804c9: Pull complete
+8af1fb80bb3d: Pull complete
+49e91ddf8a4d: Pull complete
+c3c1bcf5271a: Pull complete
+1959dce88875: Pull complete
+283fcf5322e1: Pull complete
+9b159be10719: Pull complete
+2266b7eb1b79: Pull complete
+3e027315972d: Pull complete
+3c326248b97d: Pull complete
+Digest: sha256:44086069ee7d4d3f6f3f0012569789ec138f42b84aa44357826c0b6753eb28de
+Status: Downloaded newer image for higlass/higlass-docker:latest
+docker.io/higlass/higlass-docker:latest
 
-```
-</details>
-<br />
 
-<a id="install-atria-1"></a>
-#### Install atria
-<a id="code-3"></a>
-##### Code
-<details>
-<summary><i>Code: Install atria</i></summary>
+❯ docker run \
+>     --detach \
+>     --publish 8888:80 \
+>     --volume "${p_proj}/${p_data}":/data \
+>     --volume /tmp:/tmp \
+>     --name higlass-container \
+>     higlass/higlass-docker
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+5397123fc9c47ee2692fe0dd886e5fcf25964337da3b3a8319bfb74f282d7ebb
 
-```bash
-#!/bin/bash
 
-```
-</details>
-<br />
+❯ docker exec higlass-container ls /tmp
+Sublime Text.4cff18d2bab96a93366319a9e0fa060d.5708d8b708dcd64d09ce50548896f0ba.sock
+com.apple.launchd.La7pS0GCfq
+com.snowsoftware.Inventory.stderr
+com.snowsoftware.Inventory.stdout
+nginx-stderr---supervisor-16ir53mh.log
+nginx-stdout---supervisor-xb5wb32h.log
+powerlog
+uwsgi-stderr---supervisor-039wh_6o.log
+uwsgi-stdout---supervisor-yhwmdgo2.log
 
-<details>
-<summary><i>Printed: Install atria</i></summary>
 
-```txt
+❯ docker exec higlass-container ls /data
+SRR7939018.mcool
+db.sqlite3
+log
 
+
+❯ docker exec higlass-container python higlass-server/manage.py
+
+Type 'manage.py help <subcommand>' for help on a specific subcommand.
+
+Available subcommands:
+
+[auth]
+    changepassword
+    createsuperuser
+
+[contenttypes]
+    remove_stale_contenttypes
+
+[django]
+    check
+    compilemessages
+    createcachetable
+    dbshell
+    diffsettings
+    dumpdata
+    flush
+    inspectdb
+    loaddata
+    makemessages
+    makemigrations
+    migrate
+    sendtestemail
+    shell
+    showmigrations
+    sqlflush
+    sqlmigrate
+    sqlsequencereset
+    squashmigrations
+    startapp
+    startproject
+    test
+    testserver
+
+[guardian]
+    clean_orphan_obj_perms
+
+[rest_framework]
+    generateschema
+
+[sessions]
+    clearsessions
+
+[staticfiles]
+    collectstatic
+    findstatic
+    runserver
+
+[tilesets]
+    delete_tileset
+    ingest_tileset
+    list_tilesets
+    modify_tileset
+
+
+❯ docker exec higlass-container \
+>     python higlass-server/manage.py ingest_tileset \
+>         --help
+usage: manage.py ingest_tileset [-h] [--filename FILENAME]
+                                [--indexfile INDEXFILE] [--datatype DATATYPE]
+                                [--filetype FILETYPE]
+                                [--coordSystem COORDSYSTEM]
+                                [--coordSystem2 COORDSYSTEM2] [--uid UID]
+                                [--name NAME] [--project-name PROJECT_NAME]
+                                [--no-upload] [--version] [-v {0,1,2,3}]
+                                [--settings SETTINGS]
+                                [--pythonpath PYTHONPATH] [--traceback]
+                                [--no-color] [--force-color]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --filename FILENAME
+  --indexfile INDEXFILE
+  --datatype DATATYPE
+  --filetype FILETYPE
+  --coordSystem COORDSYSTEM
+  --coordSystem2 COORDSYSTEM2
+  --uid UID
+  --name NAME
+  --project-name PROJECT_NAME
+  --no-upload           Skip upload
+  --version             show program's version number and exit
+  -v {0,1,2,3}, --verbosity {0,1,2,3}
+                        Verbosity level; 0=minimal output, 1=normal output,
+                        2=verbose output, 3=very verbose output
+  --settings SETTINGS   The Python path to a settings module, e.g.
+                        "myproject.settings.main". If this isn't provided, the
+                        DJANGO_SETTINGS_MODULE environment variable will be
+                        used.
+  --pythonpath PYTHONPATH
+                        A directory to add to the Python path, e.g.
+                        "/home/djangoprojects/myproject".
+  --traceback           Raise on CommandError exceptions
+  --no-color            Don't colorize the command output.
+  --force-color         Force colorization of the command output.
+
+
+❯ docker exec higlass-container \
+>     python higlass-server/manage.py ingest_tileset \
+>         --filename /data/SRR7939018.mcool \
+>         --filetype cooler \
+>         --datatype matrix
+
+
+❯ curl http://localhost:8888/api/v1/tilesets/
+{"count":1,"next":null,"previous":null,"results":[{"uuid":"SSibmIFARuGpkcdcXMRi0w","datafile":"http://localhost:8888/api/v1/tilesets/media/uploads/SRR7939018.mcool","filetype":"cooler","datatype":"matrix","name":"SRR7939018.mcool","coordSystem":"","coordSystem2":"","created":"2023-07-06T22:36:07.679853Z","project":"SVNc_qSfRkGab57HGsyjvQ","project_name":"","description":"","private":false}]}%
 ```
 </details>
 <br />
@@ -2037,7 +2243,7 @@ fi
 ### 0. Get situated
 <a id="get-to-work-directory-initialize-environment"></a>
 #### Get to work directory, initialize environment
-<a id="code-4"></a>
+<a id="code-3"></a>
 ##### Code
 <details>
 <summary><i>Code: Get to work directory, initialize environment</i></summary>
@@ -2051,15 +2257,13 @@ cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307" ||
     echo "cd'ing failed; check on this..."
 
 source activate pairtools_env
-
-alias atria="\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
 ```
 </details>
 <br />
 
 <a id="initialize-variables-create-outdirectories"></a>
 #### Initialize variables, create outdirectories
-<a id="code-5"></a>
+<a id="code-4"></a>
 ##### Code
 <details>
 <summary><i>Code: Initialize variables, create outdirectories</i></summary>
@@ -2078,9 +2282,11 @@ f_pre="SRR7939018"  # ., "${p_fq}/${f_pre}"*
 a_fq_1="${p_fq}/${f_pre}_1.fastq.gz"  # ., "${a_fq_1}"
 a_fq_2="${p_fq}/${f_pre}_2.fastq.gz"  # ., "${a_fq_2}"
 
-d_trim="01_trim"
+d_trim="01_trim"  # ., "${d_trim}"
+a_afq_1="${d_trim}/${f_pre}_1.atria.fastq.gz"  # ., "${a_afq_1}"
+a_afq_2="${d_trim}/${f_pre}_2.atria.fastq.gz"  # ., "${a_afq_2}"
 
-d_bam="bams"  # echo "${d_bam}"
+d_bam="02_aln"  # echo "${d_bam}"
 f_bam="${f_pre}.bam"  # echo "${f_bam}"
 a_bam="${d_bam}/${f_bam}"  # echo "${a_bam}"
 
@@ -2093,49 +2299,69 @@ p_size="${HOME}/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-pro
 f_size="S288C_reference_sequence_R64-3-1_20210421.size"  # ., "${p_size}/${f_size}"
 a_size="${p_size}/${f_size}"  # ., "${a_size}"
 
-d_pairs="pairs"  # echo "${d_pairs}"
-f_pairs="${f_pre}.txt.gz"  # echo "${f_pairs}"
+d_pairs="03_parse"  # echo "${d_pairs}"
+# f_pairs="${f_pre}.txt.gz"  # echo "${f_pairs}"
+f_pairs="${f_pre}.p2.txt.gz"  # echo "${f_pairs}"
 a_pairs="${d_pairs}/${f_pairs}"  # echo "${a_pairs}"
 
 assembly="S288C_R64-3-1"  # echo "${assembly}"
 
-d_stats="stats"  # echo "${d_stats}"
+d_stats="06_stats"  # echo "${d_stats}"
 f_stats="${f_pre}.stats.txt"  # echo "${f_stats}"
 a_stats="${d_stats}/${f_stats}"  # echo "${a_stats}"
 
 #  For pairtools sort
-d_sort="pairs"  # echo "${d_sort}"
+d_sort="04_sort"  # echo "${d_sort}"
 f_sort="${f_pre}.sort.txt.gz"  # echo "${f_sort}"
 a_sort="${d_sort}/${f_sort}"  # echo "${a_sort}"
 
 #  For pairtools dedup
-d_dedup="dedup"  # echo "${d_dedup}"
+d_dedup="05_dedup"  # echo "${d_dedup}"
 
 f_dedup_pre="${f_pre}.nodups"  # echo "${f_dedup_pre}"
 f_dup_pre="${f_pre}.dups"  # echo "${f_dup_pre}"
 f_unmap_pre="${f_pre}.unmapped"  # echo "${f_unmap_pre}"
 
-a_dedup_pre_pairs="${d_dedup}/pairs/${f_pre}.nodups.pairs.gz"  # echo "${a_dedup_pre_pairs}"
-a_dedup_pre_bam="${d_dedup}/bam/${f_pre}.nodups.bam"  # echo "${a_dedup_pre_bam}"
-
-a_dup_pre_pairs="${d_dedup}/pairs/${f_pre}.dups.pairs.gz"  # echo "${a_dup_pre_pairs}"
-a_dup_pre_bam="${d_dedup}/bam/${f_pre}.dups.bam"  # echo "${a_dup_pre_bam}"
-
-a_unmap_pre_pairs="${d_dedup}/pairs/${f_pre}.unmapped.pairs.gz"  # echo "${a_unmap_pre_pairs}"
-a_unmap_pre_bam="${d_dedup}/bam/${f_pre}.unmapped.bam"  # echo "${a_unmap_pre_bam}"
+a_dedup_pre_pairs="${d_dedup}/${f_pre}.nodups.pairs.gz"  # echo "${a_dedup_pre_pairs}"
+a_dup_pre_pairs="${d_dedup}/${f_pre}.dups.pairs.gz"  # echo "${a_dup_pre_pairs}"
+a_unmap_pre_pairs="${d_dedup}/${f_pre}.unmapped.pairs.gz"  # echo "${a_unmap_pre_pairs}"
 
 f_dedup_stats="${f_pre}.dedup.stats.txt"  # echo "${f_dedup_stats}"
 a_dedup_stats="${d_stats}/${f_dedup_stats}"  # echo "${a_dedup_stats}"
 
-max_mismatch=3  # echo "${max_mismatch}"
+#  For subsequent calls to pairtools stats
+f_dedup_pre_pairs_stats="${f_dedup_pre}.stats.txt"  # echo "${f_dedup_pre_pairs_stats}"
+f_dup_pre_pairs_stats="${f_dup_pre}.stats.txt"  # echo "${f_dup_pre_pairs_stats}"
+f_unmap_pre_pairs_stats="${f_unmap_pre}.stats.txt"  # echo "${f_unmap_pre_pairs_stats}"
+
+a_dedup_pre_pairs_stats="${d_stats}/${f_dedup_pre_pairs_stats}"  # echo "${a_dedup_pre_pairs_stats}"
+a_dup_pre_pairs_stats="${d_stats}/${f_dup_pre_pairs_stats}"  # echo "${a_dup_pre_pairs_stats}"
+a_unmap_pre_pairs_stats="${d_stats}/${f_unmap_pre_pairs_stats}"  # echo "${a_unmap_pre_pairs_stats}"
+
+max_mismatch=0  # echo "${max_mismatch}"
+
+#  For cooler cload pairs
+bin_initial=50  # echo "${bin_initial}"
+
+d_cload="07_cload"  # echo "${d_cload}"
+f_cload="${f_pre}.cload.cool"  # echo "${f_cload}"
+a_cload="${d_cload}/${f_cload}"  # echo "${a_cload}"
+
+#  For cooler zoomify
+d_zoom="08_zoom"  # echo "${d_zoom}"
+f_zoom="${f_pre}.mcool"  # echo "${f_zoom}"
+a_zoom="${d_zoom}/${f_zoom}"  # echo "${a_zoom}"
 
 
 #  Create outdirectories ------------------------------------------------------
 if [[ ! -d "${d_trim}" ]]; then mkdir -p "${d_trim}/err_out"; fi
 if [[ ! -d "${d_bam}" ]]; then mkdir -p "${d_bam}/err_out"; fi
 if [[ ! -d "${d_pairs}" ]]; then mkdir -p "${d_pairs}/err_out"; fi
+if [[ ! -d "${d_sort}" ]]; then mkdir -p "${d_sort}/err_out"; fi
 if [[ ! -d "${d_stats}" ]]; then mkdir -p "${d_stats}"; fi
-if [[ ! -d "${d_dedup}" ]]; then mkdir -p ${d_dedup}/{pairs,bam,err_out}; fi
+if [[ ! -d "${d_dedup}" ]]; then mkdir -p "${d_dedup}/err_out"; fi
+if [[ ! -d "${d_cload}" ]]; then mkdir -p "${d_cload}/err_out"; fi
+if [[ ! -d "${d_zoom}" ]]; then mkdir -p "${d_zoom}/err_out"; fi
 ```
 </details>
 <br />
@@ -2150,36 +2376,48 @@ if [[ ! -d "${d_dedup}" ]]; then mkdir -p ${d_dedup}/{pairs,bam,err_out}; fi
 mkdir: created directory '01_trim'
 mkdir: created directory '01_trim/err_out'
 
-```
 
-
-```txt
 ❯ if [[ ! -d "${d_bam}" ]]; then mkdir -p "${d_bam}/err_out"; fi
-mkdir: created directory 'bams'
-mkdir: created directory 'bams/err_out'
+mkdir: created directory '02_aln'
+mkdir: created directory '02_aln/err_out'
 
 
 ❯ if [[ ! -d "${d_pairs}" ]]; then mkdir -p "${d_pairs}/err_out"; fi
-mkdir: created directory 'pairs'
-mkdir: created directory 'pairs/err_out'
+mkdir: created directory '03_parse'
+mkdir: created directory '03_parse/err_out'
 
 
 ❯ if [[ ! -d "${d_stats}" ]]; then mkdir -p "${d_stats}"; fi
-mkdir: created directory 'stats'
+mkdir: created directory '0X_stats'
+
+
+❯ if [[ ! -d "${d_sort}" ]]; then mkdir -p "${d_sort}/err_out"; fi
+mkdir: created directory '04_sort'
+mkdir: created directory '04_sort/err_out'
 
 
 ❯ if [[ ! -d "${d_dedup}" ]]; then mkdir -p ${d_dedup}/{pairs,bam,err_out}; fi
-mkdir: created directory 'dedup'
-mkdir: created directory 'dedup/pairs'
-mkdir: created directory 'dedup/bam'
-mkdir: created directory 'dedup/err_out'
+mkdir: created directory '05_dedup'
+mkdir: created directory '05_dedup/pairs'
+mkdir: created directory '05_dedup/bam'
+mkdir: created directory '05_dedup/err_out'
+
+
+❯ if [[ ! -d "${d_cload}" ]]; then mkdir -p "${d_cload}/err_out"; fi
+mkdir: created directory '06_cload'
+mkdir: created directory '06_cload/err_out'
+
+
+❯ if [[ ! -d "${d_zoom}" ]]; then mkdir -p "${d_zoom}/err_out"; fi
+mkdir: created directory '07_zoom'
+mkdir: created directory '07_zoom/err_out'
 ```
 </details>
 <br />
 
 <a id="1-trim-fastq-files"></a>
 ### 1. Trim fastq files
-<a id="code-6"></a>
+<a id="code-5"></a>
 #### Code
 <details>
 <summary><i>Code: 1. Trim fastq files</i></summary>
@@ -2192,13 +2430,13 @@ run=TRUE
 [[ "${run}" == TRUE ]] &&
     {
         echo """
+        alias atria=\"\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria\"
         atria \\
             -t \"${threads}\" \\
             -r \"${a_fq_1}\" \\
             -R \"${a_fq_2}\" \\
             -o \"${d_trim}\" \\
-            --no-length-filtration \\
-            --stats
+            --no-length-filtration
         """
     }
 
@@ -2206,25 +2444,22 @@ run=TRUE
 run=TRUE
 [[ "${run}" == TRUE ]] &&
     {
-        #  Switch away from v3.2.2 (rDNA) to v3.2.1 (transcriptome-construction)
-        alias atria="\${HOME}/tsukiyamalab/kalavatt/2022_transcriptome-construction/software/Atria/app-3.2.1/bin/atria"
+        #  See paths to two versions of atria: v3.2.2 (2023_rDNA) to v3.2.1 (2022_transcriptome-construction)
+        #+ (transcriptome-construction)
+        # alias atria="\${HOME}/tsukiyamalab/kalavatt/2022_transcriptome-construction/software/Atria/app-3.2.1/bin/atria"
+        alias atria="\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
         atria \
             -t "${threads}" \
             -r "${a_fq_1}" \
             -R "${a_fq_2}" \
             -o "${d_trim}" \
-            --no-length-filtration \
-            --stats
+            --no-length-filtration
     }
 
-alias atria="\${HOME}/tsukiyamalab/kalavatt/2022_transcriptome-construction/software/Atria/app-3.2.1/bin/atria"
-alias atria="\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
-atria \
-    -t "${threads}" \
-    -r "${a_fq_1}" \
-    -R "${a_fq_2}" \
-    -o "${d_trim}" \
-    --no-length-filtration  # It's the call to --stats that results in the nested task error!
+#  Store logs in err_out/
+if compgen -G ${d_trim}/*.{log,log.json} > /dev/null; then
+    mv ${d_trim}/*.{log,log.json} "${d_trim}/err_out"
+fi
 ```
 </details>
 <br />
@@ -2235,26 +2470,26 @@ atria \
 <summary><i>Printed: 1. Trim fastq files</i></summary>
 
 ```txt
-❯ [[ "${run}" == TRUE ]] &&
->     {
->         echo """
->         atria \\
->             -t \"${threads}\" \\
->             -r \"${a_fq_1}\" \\
->             -R \"${a_fq_2}\" \\
->             -o \"${d_trim}\" \\
->             --no-length-filtration \\
->             --stats
->         """
->     }
+❯ echo """
+> alias atria=\"\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria\"
+> atria \\
+>     -t \"${threads}\" \\
+>     -r \"${a_fq_1}\" \\
+>     -R \"${a_fq_2}\" \\
+>     -o \"${d_trim}\" \\
+>     --no-length-filtration
+> """
 
-        atria \
-            -t "8" \
-            -r "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz" \
-            -R "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz" \
-            -o "01_trim" \
-            --no-length-filtration \
-            --stats
+alias atria="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
+atria \
+    -t "8" \
+    -r "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz" \
+    -R "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz" \
+    -o "01_trim" \
+    --no-length-filtration
+
+
+❯ alias atria="\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
 
 
 ❯ atria \
@@ -2262,56 +2497,13 @@ atria \
 >     -r "${a_fq_1}" \
 >     -R "${a_fq_2}" \
 >     -o "${d_trim}" \
->     --no-length-filtration \
->     --stats
+>     --no-length-filtration
 pigz 2.6
 ┌ Info: ATRIA VERSIONS
 │   atria = "v3.2.2"
 └   julia = "v1.8.5"
 ┌ Info: ATRIA ARGUMENTS
-└   command = `-t 8 -r /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz -R /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz -o 01_trim --no-length-filtration --stats`
-┌ Info: ATRIA OUTPUT FILES
-│   read1 = "01_trim/SRR7939018_1.atria.fastq.gz"
-└   read2 = "01_trim/SRR7939018_2.atria.fastq.gz"
-┌ Info: ATRIA TRIMMERS AND FILTERS
-│   adapter_trimming = true
-│   consensus_calling = true
-│   hard_clip_3_end = false
-│   hard_clip_5_end = false
-│   quality_trimming = true
-│   tail_N_trimming = true
-│   max_N_filtering = true
-└   length_filtering = false
-TaskFailedException
-
-    nested task error: UndefVarError: is_concensused not defined
-    Stacktrace:
-     [1] macro expansion
-       @ /fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/src/Trimmer/wrapper.jl:435 [inlined]
-     [2] (::Atria.Trimmer.var"#2#threadsfor_fun#49"{Atria.Trimmer.var"#2#threadsfor_fun#48#50"{Vector{Atria.FqRecords.FqRecord}, Vector{Atria.FqRecords.FqRecord}, Vector{Bool}, Int64, StepRange{Int64, Int64}}})(tid::Int64; onethread::Bool)
-       @ Atria.Trimmer ./threadingconstructs.jl:84
-     [3] #2#threadsfor_fun
-       @ ./threadingconstructs.jl:51 [inlined]
-     [4] (::Base.Threads.var"#1#2"{Atria.Trimmer.var"#2#threadsfor_fun#49"{Atria.Trimmer.var"#2#threadsfor_fun#48#50"{Vector{Atria.FqRecords.FqRecord}, Vector{Atria.FqRecords.FqRecord}, Vector{Bool}, Int64, StepRange{Int64, Int64}}}, Int64})()
-       @ Base.Threads ./threadingconstructs.jl:30
-
-
-❯ alias atria="\${HOME}/tsukiyamalab/kalavatt/2022_transcriptome-construction/software/Atria/app-3.2.1/bin/atria"
-
-
-❯ atria \
->     -t "${threads}" \
->     -r "${a_fq_1}" \
->     -R "${a_fq_2}" \
->     -o "${d_trim}" \
->     --no-length-filtration \
->     --stats
-pigz 2.6
-┌ Info: ATRIA VERSIONS
-│   atria = "v3.2.1"
-└   julia = "v1.8.5"
-┌ Info: ATRIA ARGUMENTS
-└   command = `-t 8 -r /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz -R /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz -o 01_trim --no-length-filtration --stats`
+└   command = `-t 8 -r /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz -R /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz -o 01_trim --no-length-filtration`
 ┌ Info: ATRIA OUTPUT FILES
 │   read1 = "01_trim/SRR7939018_1.atria.fastq.gz"
 └   read2 = "01_trim/SRR7939018_2.atria.fastq.gz"
@@ -2508,51 +2700,18 @@ pigz 2.6
 ┌ Info: ATRIA COMPLETE
 │   read1 = "01_trim/SRR7939018_1.atria.fastq.gz"
 └   read2 = "01_trim/SRR7939018_2.atria.fastq.gz"
+
+
+❯ mv ${d_trim}/*.{log,log.json} "${d_trim}/err_out"
+'01_trim/SRR7939018_1.atria.log' -> '01_trim/err_out/SRR7939018_1.atria.log'
+'01_trim/SRR7939018_1.atria.log.json' -> '01_trim/err_out/SRR7939018_1.atria.log.json'
 ```
-Encounter error with version 3.2.2 but not version 3.2.1
-```txt
-#  Contents of 01_trim
-❯ .,s
--rw-rw---- 1 kalavatt   20 Jul  5 19:12 ./SRR7939018_1.atria.fastq.gz
--rw-rw---- 1 kalavatt 1.2K Jul  5 19:12 ./SRR7939018_1.atria.log
--rw-rw---- 1 kalavatt   20 Jul  5 19:12 ./SRR7939018_2.atria.fastq.gz
-
-./01_trim:
-total 3.2G
-drwxrws--- 2 kalavatt  130 Jul  5 19:19 ./
-drwxrws--- 4 kalavatt  180 Jul  5 19:15 ../
--rw-rw---- 1 kalavatt 927M Jul  5 19:24 SRR7939018_1.atria.fastq.gz
--rw-rw---- 1 kalavatt    0 Jul  5 19:19 SRR7939018_1.atria.log
--rw-rw---- 1 kalavatt 1.9G Jul  5 19:24 SRR7939018_2.atria.fastq.gz
-
-./err_out:
-total 64K
-drwxrws--- 2 kalavatt   0 Jul  5 19:08 ./
-drwxrws--- 4 kalavatt 180 Jul  5 19:15 ../
-
-
-❯ .,
-total 232K
-drwxrws--- 4 kalavatt  180 Jul  5 19:15 ./
-drwxrws--- 7 kalavatt  228 Jul  5 19:08 ../
-drwxrws--- 2 kalavatt  130 Jul  5 19:19 01_trim/
-drwxrws--- 2 kalavatt    0 Jul  5 19:08 err_out/
--rw-rw---- 1 kalavatt   20 Jul  5 19:12 SRR7939018_1.atria.fastq.gz
--rw-rw---- 1 kalavatt 1.2K Jul  5 19:12 SRR7939018_1.atria.log
--rw-rw---- 1 kalavatt   20 Jul  5 19:12 SRR7939018_2.atria.fastq.gz
-```
-
-v3.2.1 created a new subdirectory called 01_trim/ within outdir 01_trim/&mdash;could this be the source of the issue?
-
-Also, `is_concensused` is part of src/Trimmer/wrapper.jl and seems to be associated with the `--stats` switch&mdash;could this be the source of the issue?
-`#TOBECONTINUED` `#TOMORROW`  
-`#TODO` Make a minimal example pair of fastq files for setting up and testing the pipeline
 </details>
 <br />
 
 <a id="2-align-datasets"></a>
 ### 2. Align datasets
-<a id="code-7"></a>
+<a id="code-6"></a>
 #### Code
 <details>
 <summary><i>Code: 2. Align datasets</i></summary>
@@ -2563,7 +2722,7 @@ Also, `is_concensused` is part of src/Trimmer/wrapper.jl and seems to be associa
 module purge
 ml BWA/0.7.17-GCCcore-11.2.0 SAMtools/1.16.1-GCC-11.2.0
 
-#  pairtools parse expects unsorted bams, so don't run the following chunk,
+#  pairtools parse expects unsorted bams, so *don't* run the following chunk,
 #+ which sees the bwa mem outstream piped to samtools sort; more information:
 #+ github.com/open2c/pairtools/issues/178#issuecomment-1554866847
 problem=FALSE
@@ -2607,6 +2766,23 @@ problem=FALSE
     }
 
 #  This call to bwa mem is correct for subsequent use with pairtools parse
+correct_echo=TRUE
+[[ "${correct_echo}" == TRUE ]] &&
+    {
+        echo """
+        {
+            bwa mem \\
+                -t \"${threads}\" \\
+                -SP \\
+                \"${a_index}\" \\
+                \"${a_afq_1}\" \\
+                \"${a_afq_2}\" \\
+                    | samtools view -@ ${threads} -S -b > \"${a_bam}\"
+        } \\
+            2> >(tee \"${d_bam}/err_out/$(basename ${a_bam} .bam).stderr.txt\" >&2)
+        """
+    }
+
 correct=TRUE
 [[ "${correct}" == TRUE ]] &&
     {
@@ -2650,26 +2826,35 @@ correct=TRUE
 ❯ ml BWA/0.7.17-GCCcore-11.2.0 SAMtools/1.16.1-GCC-11.2.0
 
 
-❯ echo """
-> {
->     bwa mem \\
->         -t \"${threads}\" \\
->         -SP \"${a_index}\" \"${a_fq_1}\" \"${a_fq_2}\" \\
->             | samtools sort \\
->                 -@ ${threads} \\
->                 -O bam \\
->                 -o \"${a_bam}\"
-> 
->     if [[ -f \"${a_bam}\" ]]; then
->         samtools index \\
->             -@ ${threads} \\
->             \"${a_bam}\"
->     fi
-> } \\
->     2> >(tee \"${d_bam}/err_out/$(basename ${a_bam} .bam).stderr.txt\" >&2)
-> """
+❯ [[ "${correct_echo}" == TRUE ]] &&
+>     {
+>         echo """
+>         {
+>             bwa mem \\
+>                 -t \"${threads}\" \\
+>                 -SP \\
+>                 \"${a_index}\" \\
+>                 \"${a_afq_1}\" \\
+>                 \"${a_afq_2}\" \\
+>                     | samtools view -@ ${threads} -S -b > \"${a_bam}\"
+>         } \\
+>             2> >(tee \"${d_bam}/err_out/$(basename ${a_bam} .bam).stderr.txt\" >&2)
+>         """
+>     }
 
-❯ [[ "${run}" == TRUE ]] &&
+        {
+            bwa mem \
+                -t "8" \
+                -SP \
+                "/home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa" \
+                "01_trim/SRR7939018_1.atria.fastq.gz" \
+                "01_trim/SRR7939018_2.atria.fastq.gz" \
+                    | samtools view -@ 8 -S -b > "02_aln/SRR7939018.bam"
+        } \
+            2> >(tee "02_aln/err_out/SRR7939018.stderr.txt" >&2)
+
+
+❯ [[ "${correct}" == TRUE ]] &&
 >     {
 >         echo """
 >         {
@@ -2698,24 +2883,31 @@ correct=TRUE
 
         {
             bwa mem \
-                -t "16" \
+                -t "8" \
                 -SP \
                 "/home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa" \
                 "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz" \
                 "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz" \
-                    | samtools view -@ 16 -S -b > "bams/SRR7939018.bam"
+                    | samtools view -@ 8 -S -b > "02_aln/SRR7939018.bam"
         } \
-            2> >(tee "bams/err_out/SRR7939018.stderr.txt" >&2)
+            2> >(tee "02_aln/err_out/SRR7939018.stderr.txt" >&2)
 
 [M::bwa_idx_load_from_disk] read 0 ALT contigs
-*(see stderr txt file)*
+[M::process] read 1600000 sequences (80000000 bp)...
+[M::process] read 1600000 sequences (80000000 bp)...
+[M::mem_pestat] # candidate unique pairs for (FF, FR, RF, RR): (41213, 66467, 40105, 41358)
+[M::mem_pestat] analyzing insert size distribution for orientation FF...
+[M::mem_pestat] (25, 50, 75) percentile: (464, 1146, 2962)
+[M::mem_pestat] low and high boundaries for computing mean and std.dev: (1, 7958)
+[M::mem_pestat] mean and std.dev: (1837.31, 1897.14)
+...
 ```
 </details>
 <br />
 
 <a id="3-run-pairtools-parse"></a>
 ### 3. Run `pairtools parse`
-<a id="code-8"></a>
+<a id="code-7"></a>
 #### Code
 <details>
 <summary><i>Code: 3. Run pairtools parse</i></summary>
@@ -2725,36 +2917,109 @@ correct=TRUE
 
 #  Check the documentation ----------------------------------------------------
 pairtools parse --help
+pairtools parse2 --help
 
 
 #  Do a trial run of pairtools parse ------------------------------------------
-echo """
-pairtools parse \\
-    -o \"${a_pairs}\" \\
-    -c \"${a_size}\" \\
-    --drop-sam \\
-    --drop-seq \\
-    --output-stats \"${a_stats}\" \\
-    --assembly \"${assembly}\" \\
-    --no-flip \\
-    --add-columns mapq \\
-    --walks-policy mask \\
-    \"${a_bam}\" \\
-        2> >(tee -a \"${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).stderr.txt\" >&2)
-"""
+test=TRUE
+[[ "${test}" == TRUE ]] &&
+    {
+        echo """
+        pairtools parse \\
+            -o \"${a_pairs}\" \\
+            -c \"${a_size}\" \\
+            --drop-sam \\
+            --drop-seq \\
+            --output-stats \"${a_stats}\" \\
+            --assembly \"${assembly}\" \\
+            --no-flip \\
+            --add-columns mapq \\
+            --walks-policy mask \\
+            \"${a_bam}\" \\
+                2> >(tee -a \"${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).stderr.txt\" >&2)
+        """
+    }
 
-pairtools parse \
-    -o "${a_pairs}" \
-    -c "${a_size}" \
-    --drop-sam \
-    --drop-seq \
-    --output-stats "${a_stats}" \
-    --assembly "${assembly}" \
-    --no-flip \
-    --add-columns mapq \
-    --walks-policy mask \
-    "${a_bam}" \
-        2> >(tee -a "${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).stderr.txt" >&2)
+test=TRUE
+[[ "${test}" == TRUE ]] &&
+    {
+        pairtools parse \
+            -o "${a_pairs}" \
+            -c "${a_size}" \
+            --drop-sam \
+            --drop-seq \
+            --output-stats "${a_stats}" \
+            --assembly "${assembly}" \
+            --no-flip \
+            --add-columns mapq \
+            --walks-policy mask \
+            "${a_bam}" \
+                2> >(tee -a "${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).stderr.txt" >&2)
+    }
+
+
+#  Do a trial run of pairtools parse2 -----------------------------------------
+#  Example call: github.com/open2c/pairtools/issues/159
+#+ See also github.com/open2c/pairtools/issues/176
+# pairtools parse2 \
+#     --min-mapq 30 \
+#     --report-position read \
+#     --report-orientation read \
+#     --add-pair-index \
+#     --add-columns pos5,pos3 \
+#     --max-inter-align-gap 30 \
+#     --nproc-in 16 \
+#     --nproc-out 16 \
+#     --chroms-path /data/kun/Align_Index/grch38_no_alt/hg38.genome test.sam \
+#         > test.pairsam
+
+test=TRUE
+[[ "${test}" == TRUE ]] &&
+    {
+        echo """
+        pairtools parse2 \\
+            -o \"${a_pairs%.txt.gz}.p2.txt.gz\" \\
+            -c \"${a_size}\" \\
+            --report-position outer \\
+            --report-orientation pair \\
+            --assembly \"${assembly}\" \\
+            --dedup-max-mismatch \"${max_mismatch}\" \\
+            --expand \\
+            --add-pair-index \\
+            --no-flip \\
+            --add-columns pos5,pos3,mapq,mismatches \\
+            --drop-seq \\
+            --drop-sam \\
+            --output-stats \"${a_stats%.txt}.p2.txt\" \\
+            --nproc-in \"${threads}\" \\
+            --nproc-out \"${threads}\" \\
+            \"${a_bam}\" \\
+                2> >(tee -a \"${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).p2.stderr.txt\" >&2)
+        """
+    }
+
+test=TRUE
+[[ "${test}" == TRUE ]] &&
+    {
+        pairtools parse2 \
+            -o "${a_pairs%.txt.gz}.p2.txt.gz" \
+            -c "${a_size}" \
+            --report-position outer \
+            --report-orientation pair \
+            --assembly "${assembly}" \
+            --dedup-max-mismatch "${max_mismatch}" \
+            --expand \
+            --add-pair-index \
+            --no-flip \
+            --add-columns pos5,pos3,mapq,mismatches \
+            --drop-seq \
+            --drop-sam \
+            --output-stats "${a_stats%.txt}.p2.txt" \
+            --nproc-in "${threads}" \
+            --nproc-out "${threads}" \
+            "${a_bam}" \
+                2> >(tee -a "${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).p2.stderr.txt" >&2)
+    }
 
 
 #  Examine the pairs outfile --------------------------------------------------
@@ -2794,8 +3059,10 @@ cat "${a_stats}"
 
 <a id="check-the-documentation"></a>
 ##### Check the documentation
+<a id="pairtools-parse"></a>
+###### `pairtools parse`
 <details>
-<summary><i>Printed: Check the documentation</i></summary>
+<summary><i>Printed: Check the documentation: pairtools parse</i></summary>
 
 ```txt
 ❯ pairtools parse --help
@@ -2907,10 +3174,193 @@ Options:
 </details>
 <br />
 
-<a id="pairtools-parse"></a>
-##### `pairtools parse`
+<a id="pairtools-parse2"></a>
+###### `pairtools parse2`
 <details>
-<summary><i>Printed: pairtools parse</i></summary>
+<summary><i>Printed: Check the documentation: pairtools parse2</i></summary>
+
+```
+❯ pairtools parse2 --help
+Usage: pairtools parse2 [OPTIONS] [SAM_PATH]
+
+  Extracts pairs from .sam/.bam data with complex walks, make .pairs. SAM_PATH
+  : an input .sam/.bam file with paired-end or single-end sequence alignments
+  of Hi-C (or Hi-C-like) molecules. If the path ends with .bam, the input is
+  decompressed from bam with samtools. By default, the input is read from
+  stdin.
+
+Options:
+  -c, --chroms-path TEXT          Chromosome order used to flip
+                                  interchromosomal mates: path to a
+                                  chromosomes file (e.g. UCSC chrom.sizes or
+                                  similar) whose first column lists scaffold
+                                  names. Any scaffolds not listed will be
+                                  ordered lexicographically following the
+                                  names provided.  [required]
+  -o, --output TEXT               output file with pairs.  If the path ends
+                                  with .gz or .lz4, the output is
+                                  bgzip-/lz4-compressed.By default, the output
+                                  is printed into stdout.
+  --report-position [junction|read|walk|outer]
+                                  Reported position of alignments in pairs of
+                                  complex walks (pos columns).  Each alignment
+                                  in .bam/.sam Hi-C-like data has two ends,
+                                  and you can report one or another depending
+                                  of the position of alignment on a read or in
+                                  a pair.
+
+                                  "junction" - inner ends of sequential
+                                  alignments in each pair, aka ligation
+                                  junctions (complex walks default), "read" -
+                                  5'-end of alignments relative to R1 or R2
+                                  read coordinate system (as in traditional
+                                  Hi-C), "walk" - 5'-end of alignments
+                                  relative to the whole walk coordinate
+                                  system, "outer" - outer ends of sequential
+                                  alignments in each pair.
+  --report-orientation [pair|read|walk|junction]
+                                  Reported orientataion of pairs in complex
+                                  walk (strand columns). Each alignment in
+                                  .bam/.sam Hi-C-like data has orientation,
+                                  and you can report it relative to the read,
+                                  pair or whole walk coordinate system.
+
+                                  "pair" - orientation as if each pair in
+                                  complex walk was sequenced independently
+                                  from the outer ends or molecule (as in
+                                  traditional Hi-C, also complex walks
+                                  default), "read" - orientation defined by
+                                  the read (R1 or R2 read coordinate system),
+                                  "walk" - orientation defined by the walk
+                                  coordinate system, "junction" - reversed
+                                  "pair" orientation, as if pair was sequenced
+                                  in both directions starting from the
+                                  junction
+  --assembly TEXT                 Name of genome assembly (e.g. hg19, mm10) to
+                                  store in the pairs header.
+  --min-mapq INTEGER              The minimal MAPQ score to consider a read as
+                                  uniquely mapped.  [default: 1]
+  --max-inter-align-gap INTEGER   Read segments that are not covered by any
+                                  alignment and longer than the specified
+                                  value are treated as "null" alignments.
+                                  These null alignments convert otherwise
+                                  linear alignments into walks, and affect how
+                                  they get reported as a Hi-C pair.  [default:
+                                  20]
+  --max-insert-size INTEGER       When searching for overlapping ends of left
+                                  and right read (R1 and R2), this sets the
+                                  minimal distance when two alignments on the
+                                  same strand and chromosome are considered
+                                  part of the same fragment (and thus reported
+                                  as the same alignment and not a pair). For
+                                  traditional Hi-C with long restriction
+                                  fragments and shorter molecules after
+                                  ligation+sonication, this can be the
+                                  expected molecule size. For complex walks
+                                  with short restriction fragments, this can
+                                  be the expected restriction fragment size.
+                                  Note that unsequenced insert is *terra
+                                  incognita* and might contain unsequenced DNA
+                                  (including ligations) in it. This parameter
+                                  is ignored in --single-end mode.   [default:
+                                  500]
+  --dedup-max-mismatch INTEGER    Allowed mismatch between intramolecular
+                                  alignments to detect readthrough duplicates.
+                                  Pairs with both sides mapped within this
+                                  distance (bp) from each other are considered
+                                  duplicates.   [default: 3]
+  --single-end                    If specified, the input is single-end. Never
+                                  use this for paired-end data, because R1
+                                  read will be omitted. If single-end data is
+                                  provided, but parameter is unset, the pairs
+                                  will be generated, but may contain
+                                  artificial UN pairs.
+  --expand / --no-expand          If specified, perform combinatorial
+                                  expansion on the pairs. Combinatorial
+                                  expansion is a way to increase the number of
+                                  contacts in you data, assuming that all DNA
+                                  fragments in the same molecule (read) are in
+                                  contact. Expanded pairs have modified pair
+                                  type, 'E{separation}_{pair type}'
+  --max-expansion-depth INTEGER   Works in combination with --expand. Maximum
+                                  number of segments separating pair. By
+                                  default, expanding all possible
+                                  pairs.Setting the number will limit the
+                                  expansion depth and enforce contacts from
+                                  the same side of the read.
+  --add-pair-index                If specified, parse2 will report pair index
+                                  in the walk as additional columns (R1, R2,
+                                  R1&R2 or R1-R2). See documentation: https://
+                                  pairtools.readthedocs.io/en/latest/parsing.h
+                                  tml#rescuing-complex-walks For combinatorial
+                                  expanded pairs, two numbers will be
+                                  reported: original pair index of the left
+                                  and right segments.
+  --flip / --no-flip              If specified, flip pairs in genomic order
+                                  and instead preserve the order in which they
+                                  were sequenced. Note that no flip is
+                                  recommended for analysis of walks because it
+                                  will override the order of alignments in
+                                  pairs. Flip is required for appropriate
+                                  deduplication of sorted pairs. Flip is not
+                                  required for cooler cload, which runs
+                                  flipping internally.
+  --add-columns TEXT              Report extra columns describing alignments
+                                  Possible values (can take multiple values as
+                                  a comma-separated list): a SAM tag (any pair
+                                  of uppercase letters) or mapq, pos5, pos3,
+                                  cigar, read_len, matched_bp, algn_ref_span,
+                                  algn_read_span, dist_to_5, dist_to_3, seq,
+                                  mismatches.
+  --drop-readid / --keep-readid   If specified, do not add read ids to the
+                                  output. By default, keep read ids. Useful
+                                  for long walks analysis.
+  --readid-transform TEXT         A Python expression to modify read IDs.
+                                  Useful when read IDs differ between the two
+                                  reads of a pair. Must be a valid Python
+                                  expression that uses variables called readID
+                                  and/or i (the 0-based index of the read pair
+                                  in the bam file) and returns a new value,
+                                  e.g. "readID[:-2]+'_'+str(i)". Make sure
+                                  that transformed readIDs remain unique!
+  --drop-seq / --keep-seq         Remove sequences and PHREDs from the sam
+                                  fields by default. Kept otherwise.
+  --drop-sam / --keep-sam         Do not add sams to the output by default.
+                                  Kept otherwise.
+  --output-parsed-alignments TEXT
+                                  output file with all parsed alignments (one
+                                  alignment per line). Useful for debugging
+                                  and analysis of walks. If file exists, it
+                                  will be open in the append mode. If the path
+                                  ends with .gz or .lz4, the output is
+                                  bgzip-/lz4-compressed. By default, not used.
+  --output-stats TEXT             output file for various statistics of pairs
+                                  file.  By default, statistics is not
+                                  generated.
+  --nproc-in INTEGER              Number of processes used by the auto-guessed
+                                  input decompressing command.  [default: 3]
+  --nproc-out INTEGER             Number of processes used by the auto-guessed
+                                  output compressing command.  [default: 8]
+  --cmd-in TEXT                   A command to decompress the input file. If
+                                  provided, fully overrides the auto-guessed
+                                  command. Does not work with stdin and
+                                  pairtools parse. Must read input from stdin
+                                  and print output into stdout. EXAMPLE:
+                                  pbgzip -dc -n 3
+  --cmd-out TEXT                  A command to compress the output file. If
+                                  provided, fully overrides the auto-guessed
+                                  command. Does not work with stdout. Must
+                                  read input from stdin and print output into
+                                  stdout. EXAMPLE: pbgzip -c -n 8
+  -h, --help                      Show this message and exit.
+```
+</details>
+<br />
+
+<a id="run-pairtools-parse"></a>
+##### Run `pairtools parse`
+<details>
+<summary><i>Printed: Run pairtools parse</i></summary>
 
 ```txt
 ❯ echo """
@@ -2942,19 +3392,100 @@ pairtools parse \
         2> >(tee -a "pairs/err_out/SRR7939018.stderr.txt" >&2)
 
 
-❯ pairtools parse \
->     -o "${a_pairs}" \
->     -c "${a_size}" \
->     --drop-sam \
->     --drop-seq \
->     --output-stats "${a_stats}" \
->     --assembly "${assembly}" \
->     --no-flip \
->     --add-columns mapq \
->     --walks-policy mask \
->     "${a_bam}" \
->         2> >(tee -a "${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).stderr.txt" >&2)
-[E::idx_find_and_load] Could not retrieve index file for 'bams/SRR7939018.bam'
+❯ [[ "${run}" == TRUE ]] &&
+>     {
+>         pairtools parse \
+>             -o "${a_pairs}" \
+>             -c "${a_size}" \
+>             --drop-sam \
+>             --drop-seq \
+>             --output-stats "${a_stats}" \
+>             --assembly "${assembly}" \
+>             --no-flip \
+>             --add-columns mapq \
+>             --walks-policy mask \
+>             "${a_bam}" \
+>                 2> >(tee -a "${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).stderr.txt" >&2)
+>     }
+[E::idx_find_and_load] Could not retrieve index file for '02_aln/SRR7939018.bam'
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/stats.py:888: RuntimeWarning: divide by zero encountered in double_scalars
+  complexity = float(nseq / seq_to_complexity)  # clean np.int64 data type
+```
+</details>
+<br />
+
+<a id="run-pairtools-parse2"></a>
+##### Run `pairtools parse2`
+<details>
+<summary><i>Printed: Run pairtools parse2</i></summary>
+
+```txt
+❯ [[ "${test}" == TRUE ]] &&
+>     {
+>         echo """
+>         pairtools parse2 \\
+>             -o \"${a_pairs%.txt.gz}.p2.txt.gz\" \\
+>             -c \"${a_size}\" \\
+>             --report-position outer \\
+>             --report-orientation pair \\
+>             --assembly \"${assembly}\" \\
+>             --dedup-max-mismatch \"${max_mismatch}\" \\
+>             --expand \\
+>             --add-pair-index \\
+>             --no-flip \\
+>             --add-columns pos5,pos3,mapq,mismatches \\
+>             --drop-seq \\
+>             --drop-sam \\
+>             --output-stats \"${a_stats%.txt}.p2.txt\" \\
+>             --nproc-in \"${threads}\" \\
+>             --nproc-out \"${threads}\" \\
+>             \"${a_bam}\" \\
+>                 2> >(tee -a \"${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).p2.stderr.txt\" >&2)
+>         """
+>     }
+
+        pairtools parse2 \
+            -o "03_parse/SRR7939018.p2.txt.gz" \
+            -c "/home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size" \
+            --report-position outer \
+            --report-orientation pair \
+            --assembly "S288C_R64-3-1" \
+            --dedup-max-mismatch "0" \
+            --expand \
+            --add-pair-index \
+            --no-flip \
+            --add-columns pos5,pos3,mapq,mismatches \
+            --drop-seq \
+            --drop-sam \
+            --output-stats "0X_stats/SRR7939018.stats.p2.txt" \
+            --nproc-in "8" \
+            --nproc-out "8" \
+            "02_aln/SRR7939018.bam" \
+                2> >(tee -a "03_parse/err_out/SRR7939018.p2.stderr.txt" >&2)
+
+
+❯ [[ "${test}" == TRUE ]] &&
+>     {
+>         pairtools parse2 \
+>             -o "${a_pairs%.txt.gz}.p2.txt.gz" \
+>             -c "${a_size}" \
+>             --report-position outer \
+>             --report-orientation pair \
+>             --assembly "${assembly}" \
+>             --dedup-max-mismatch "${max_mismatch}" \
+>             --expand \
+>             --add-pair-index \
+>             --no-flip \
+>             --add-columns pos5,pos3,mapq,mismatches \
+>             --drop-seq \
+>             --drop-sam \
+>             --output-stats "${a_stats%.txt}.p2.txt" \
+>             --nproc-in "${threads}" \
+>             --nproc-out "${threads}" \
+>             "${a_bam}" \
+>                 2> >(tee -a "${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).p2.stderr.txt" >&2)
+>     }
+[E::idx_find_and_load] Could not retrieve index file for '02_aln/SRR7939018.bam'
 WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/stats.py:888: RuntimeWarning: divide by zero encountered in double_scalars
   complexity = float(nseq / seq_to_complexity)  # clean np.int64 data type
 ```
@@ -2967,12 +3498,8 @@ WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/
 <summary><i>Printed: Examine the pairs outfile</i></summary>
 
 ```txt
-❯ ., "${a_pairs}"
--rw-rw---- 1 kalavatt 726M Jun 10 18:16 pairs/SRR7939018.txt.gz
-
-
 ❯ zcat "${a_pairs}" | wc -l
-66837113
+66838465
 
 
 ❯ samtools view -c "${a_bam}"
@@ -2980,23 +3507,23 @@ WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/
 
 
 ❯ samtools view "${a_bam}" | head
-SRR7939018.1    77      *       0       0       *       *       0       0       TNTTANNNNNNNNNNNNNNNNGCGAAGGTGANAGTTGGTTGATACTTTCA      G#<<G################<<<GGGIGGG#<<<GGGIIIIIIIIGIII     AS:i:0  XS:i:0
-SRR7939018.1    141     *       0       0       *       *       0       0       ACGAATCTTNCCNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN      GGGGGIGII#<G######################################     AS:i:0  XS:i:0
-SRR7939018.2    77      *       0       0       *       *       0       0       TCTTTNNNNNNNNNNNNNNNANNGNAACGTTNNNNNNNANNAGNNNGCGT      GGGGG#############################################     AS:i:0  XS:i:0
-SRR7939018.2    141     *       0       0       *       *       0       0       CGTAGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN      GGGGG#############################################     AS:i:0  XS:i:0
-SRR7939018.3    77      *       0       0       *       *       0       0       TGCAGGANNNNNNTNNTTNNGANTTTACGCANNNNCAGGGAAAAGTTGCT      GGGGGII######<##<<##<<#<<GGGIII####<<GGIIIIIIIIIGI     AS:i:0  XS:i:0
-SRR7939018.3    141     *       0       0       *       *       0       0       ACCACNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN      GGGGG#############################################     AS:i:0  XS:i:0
-SRR7939018.4    77      *       0       0       *       *       0       0       ACCCACTATCCTNGCCGGTTCGGTGGCCAGCNNAAACTTTCGATTCCCCT      GGGGGIIIIIII#<GGGIIIIIIIIIIIIII##<<GGIIIIIIIIIIIII     AS:i:0  XS:i:0
-SRR7939018.4    141     *       0       0       *       *       0       0       TCCTCTTCTNCGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN      GGGGGIIII#<G######################################     AS:i:0  XS:i:0
-SRR7939018.5    77      *       0       0       *       *       0       0       ANACANNNNNNNNNNNNNNNNNCGTTTTATANATGAGTTATGAATTCCTT      G#################################################     AS:i:0  XS:i:0
-SRR7939018.5    141     *       0       0       *       *       0       0       AAATTCGGTACCAANTCTGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN      A<A<AAGGGIA#######################################     AS:i:0  XS:i:0
+SRR7939018.1    77  *   0   0   *   *   0   0   TNTTANNNNNNNNNNNNNNNNGCGAAGGTGANAGTTGGTTGATACTTTCA  G#<<G################<<<GGGIGGG#<<<GGGIIIIIIIIGIII  AS:i:0  XS:i:0
+SRR7939018.1    141 *   0   0   *   *   0   0   ACGAATCTTNCCNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  GGGGGIGII#<G######################################  AS:i:0  XS:i:0
+SRR7939018.2    77  *   0   0   *   *   0   0   TCTTTNNNNNNNNNNNNNNNANNGNAACGTTNNNNNNNANNAGNNNGCGT  GGGGG#############################################  AS:i:0  XS:i:0
+SRR7939018.2    141 *   0   0   *   *   0   0   CGTAGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  GGGGG#############################################  AS:i:0  XS:i:0
+SRR7939018.3    77  *   0   0   *   *   0   0   TGCAGGANNNNNNTNNTTNNGANTTTACGCANNNNCAGGGAAAAGTTGCT  GGGGGII######<##<<##<<#<<GGGIII####<<GGIIIIIIIIIGI  AS:i:0  XS:i:0
+SRR7939018.3    141 *   0   0   *   *   0   0   ACCACNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  GGGGG#############################################  AS:i:0  XS:i:0
+SRR7939018.4    77  *   0   0   *   *   0   0   ACCCACTATCCTNGCCGGTTCGGTGGCCAGCNNAAACTTTCGATTCCCCT  GGGGGIIIIIII#<GGGIIIIIIIIIIIIII##<<GGIIIIIIIIIIIII  AS:i:0  XS:i:0
+SRR7939018.4    141 *   0   0   *   *   0   0   TCCTCTTCTNCGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  GGGGGIIII#<G######################################  AS:i:0  XS:i:0
+SRR7939018.5    77  *   0   0   *   *   0   0   ANACANNNNNNNNNNNNNNNNNCGTTTTATANATGAGTTATGAATTCCTT  G#################################################  AS:i:0  XS:i:0
+SRR7939018.5    141 *   0   0   *   *   0   0   AAATTCGGTACCAANTCTGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  A<A<AAGGGIA#######################################  AS:i:0  XS:i:0
 
 
 ❯ n_lines="$(zcat "${a_pairs}" | wc -l)"
 
 
 ❯ echo $(( n_lines - 41 ))  # Subtract header, column-name lines
-66837072
+66838424
 
 
 ❯ n_pairs="$(samtools view -c "${a_bam}")"
@@ -3007,7 +3534,7 @@ SRR7939018.5    141     *       0       0       *       *       0       0       
 
 
 ❯ echo $(( $(( n_pairs / 2 )) - n_lines ))  # Pairs missing from "${a_pairs}"?
-379
+-973
 
 
 ❯ zcat "${a_pairs}" | head -100
@@ -3048,162 +3575,172 @@ SRR7939018.5    141     *       0       0       *       *       0       0       
 #samheader: @SQ SN:XV   LN:1091291
 #samheader: @SQ SN:XVI  LN:948066
 #samheader: @SQ SN:Mito LN:85779
-#samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 16 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
-#samheader: @PG ID:samtools     PN:samtools     PP:bwa  VN:1.16.1       CL:samtools view -@ 16 -S -b
-#samheader: @PG ID:pairtools_parse      PN:pairtools_parse      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse -o pairs/SRR7939018.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --drop-sam --drop-seq --output-stats stats/SRR7939018.stats.txt --assembly S288C_R64-3-1 --no-flip --add-columns mapq --walks-policy mask bams/SRR7939018.bam  PP:samtools     VN:1.0.2
-#columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type mapq1 mapq2
-SRR7939018.1    !       0       !       0       -       -       NN      0       0
-SRR7939018.2    !       0       !       0       -       -       NN      0       0
-SRR7939018.3    !       0       !       0       -       -       NN      0       0
-SRR7939018.4    !       0       !       0       -       -       NN      0       0
-SRR7939018.5    !       0       !       0       -       -       NN      0       0
-SRR7939018.6    !       0       !       0       -       -       NM      0       0
-SRR7939018.7    !       0       !       0       -       -       NM      0       0
-SRR7939018.8    !       0       II      775703  -       +       NU      0       60
-SRR7939018.9    !       0       !       0       -       -       NN      0       0
-SRR7939018.10   !       0       II      10240   -       -       NU      0       60
-SRR7939018.11   !       0       !       0       -       -       NN      0       0
-SRR7939018.12   !       0       !       0       -       -       NN      0       0
-SRR7939018.13   !       0       !       0       -       -       NM      0       0
-SRR7939018.14   !       0       !       0       -       -       NM      0       0
-SRR7939018.15   II      734242  II      735917  +       +       UU      60      60
-SRR7939018.16   !       0       I       188959  -       -       MU      0       60
-SRR7939018.17   V       15051   !       0       -       -       UN      60      0
-SRR7939018.18   XIII    906996  XIII    904641  +       +       UU      60      60
-SRR7939018.19   !       0       !       0       -       -       NN      0       0
-SRR7939018.20   IV      801779  !       0       +       -       UN      60      0
-SRR7939018.21   !       0       !       0       -       -       MM      0       0
-SRR7939018.22   !       0       !       0       -       -       MM      0       0
-SRR7939018.23   XII     754749  IX      110448  -       -       UU      60      60
-SRR7939018.24   !       0       !       0       -       -       NM      0       0
-SRR7939018.25   !       0       !       0       -       -       NM      0       0
-SRR7939018.26   !       0       XII     460048  -       +       NU      0       60
-SRR7939018.27   !       0       !       0       -       -       NM      0       0
-SRR7939018.28   VII     890436  VII     882095  -       -       UU      60      60
-SRR7939018.29   !       0       !       0       -       -       NM      0       0
-SRR7939018.30   !       0       !       0       -       -       MM      0       0
-SRR7939018.31   V       41387   V       41544   -       +       UU      60      60
-SRR7939018.32   XIV     583189  III     105899  -       +       UU      60      60
-SRR7939018.33   V       375302  V       345311  +       +       UU      60      60
-SRR7939018.34   !       0       II      715798  -       -       MU      0       60
-SRR7939018.35   II      713403  XIII    881948  -       -       UU      60      60
-SRR7939018.36   !       0       IV      1042066 -       -       NU      0       60
-SRR7939018.37   XII     492804  XIII    479967  -       +       UU      60      60
-SRR7939018.38   V       143625  !       0       +       -       UM      60      0
-SRR7939018.39   !       0       XII     531643  -       +       NU      0       60
-SRR7939018.40   !       0       XIII    743635  -       +       NU      0       60
-SRR7939018.41   IV      424676  IV      424576  -       +       UU      60      60
-SRR7939018.42   !       0       !       0       -       -       NM      0       0
-SRR7939018.43   !       0       !       0       -       -       NM      0       0
-SRR7939018.44   XV      194630  XV      195049  -       -       UU      28      60
-SRR7939018.45   !       0       X       49753   -       -       MU      0       60
-SRR7939018.46   XIII    706297  XIII    705554  -       -       UU      34      60
-SRR7939018.47   XII     973906  XII     974873  -       -       UU      52      60
-SRR7939018.48   !       0       !       0       -       -       MM      0       0
-SRR7939018.49   !       0       !       0       -       -       MM      0       0
-SRR7939018.50   VII     466949  !       0       +       -       UN      60      0
-SRR7939018.51   VII     451782  V       204170  -       +       UU      60      60
-SRR7939018.52   XIII    86591   XIII    84823   -       -       UU      60      60
-SRR7939018.53   !       0       !       0       -       -       MM      0       0
-SRR7939018.54   IV      496721  IV      354274  +       -       UU      60      60
-SRR7939018.55   !       0       !       0       -       -       NN      0       0
-SRR7939018.56   !       0       II      58112   -       +       MU      0       60
-SRR7939018.57   !       0       !       0       -       -       MM      0       0
-SRR7939018.58   V       315210  IV      344786  -       +       UU      60      60
-SRR7939018.59   !       0       XII     460368  -       -       MU      0       60
+#samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 8 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
+#samheader: @PG ID:samtools PN:samtools PP:bwa  VN:1.16.1   CL:samtools view -@ 8 -S -b
+#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_aln/SRR7939018.bam  PP:samtools VN:1.0.2
+#columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type walk_pair_index walk_pair_type pos51 pos52 pos31 pos32 mapq1 mapq2 mismatches1 mismatches2
+SRR7939018.1    !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.2    !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.3    !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.4    !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.5    !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.6    !   0   !   0   -   -   NM  1   R1-2    0   0   0   0   0   0
+SRR7939018.7    !   0   !   0   -   -   NM  1   R1-2    0   0   0   0   0   0
+SRR7939018.8    !   0   II  775703  -   +   NU  1   R1-2    0   775703  0   775752  0   60
+SRR7939018.9    !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.10   !   0   II  10240   -   -   NU  1   R1-2    0   10240   0   10203   0   60      C:N:2:10208:18,G:N:2:10209:19
+SRR7939018.11   !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.12   !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.13   !   0   !   0   -   -   NM  1   R1-2    0   0   0   0   0   0
+SRR7939018.14   !   0   !   0   -   -   NM  1   R1-2    0   0   0   0   0   0
+SRR7939018.15   II  734242  II  735917  +   +   UU  1   R1-2    734242  735917  734291  735960  60  60
+SRR7939018.16   !   0   I   188959  -   -   MU  1   R1-2    0   188959  0   188921  0   60
+SRR7939018.17   V   15051   !   0   -   -   UN  1   R1-2    15051   0   15002   0   60  0   T:N:2:15019:18
+SRR7939018.18   XIII    906996  XIII    904641  +   +   UU  1   R1-2    906996  904641  907045  904684  60  60
+SRR7939018.19   !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.20   IV  801779  !   0   +   -   UN  1   R1-2    801779  0   801824  0   60  0   T:N:2:801809:31
+SRR7939018.21   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.22   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.23   XII 754749  IX  110448  -   -   UU  1   R1-2    754749  110448  754700  110399  60  60      A:N:2:110398:0,A:N:2:110399:1
+SRR7939018.24   !   0   !   0   -   -   NM  1   R1-2    0   0   0   0   0   0
+SRR7939018.25   !   0   !   0   -   -   NM  1   R1-2    0   0   0   0   0   0
+SRR7939018.26   !   0   XII 460048  -   +   NU  1   R1-2    0   460048  0   460097  0   60
+SRR7939018.27   !   0   !   0   -   -   NM  1   R1-2    0   0   0   0   0   0
+SRR7939018.28   VII 890436  VII 882095  -   -   UU  1   R1-2    890436  882095  890407  882046  60  60
+SRR7939018.29   !   0   !   0   -   -   NM  1   R1-2    0   0   0   0   0   0
+SRR7939018.30   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.31   V   41387   V   41544   -   +   UU  1   R1-2    41387   41544   41338   41593   60  60      C:G:13:41581:38
+SRR7939018.32   XIV 583189  III 105899  -   +   UU  1   R1-2    583189  105899  583140  105948  60  60
+SRR7939018.33   V   375302  V   345311  +   +   UU  1   R1-2    375302  345311  375351  345345  60  60
+SRR7939018.34   !   0   II  715798  -   -   MU  1   R1-2    0   715798  0   715749  0   60
+SRR7939018.35   II  713403  XIII    881948  -   -   UU  1   R1-2    713403  881948  713354  881899  60  60
+SRR7939018.36   !   0   IV  1042066 -   -   NU  1   R1-2    0   1042066 0   1042017 0   60
+SRR7939018.37   XII 492804  XIII    479967  -   +   UU  1   R1-2    492804  479967  492755  480016  60  60
+SRR7939018.38   V   143625  !   0   +   -   UM  1   R1-2    143625  0   143674  0   60  0
+SRR7939018.39   !   0   XII 531643  -   +   NU  1   R1-2    0   531643  0   531692  0   60
+SRR7939018.40   !   0   XIII    743635  -   +   NU  1   R1-2    0   743635  0   743684  0   60
+SRR7939018.41   IV  424676  IV  424576  -   +   UU  1   R1-2    424676  424576  424647  424610  60  60
+SRR7939018.42   !   0   !   0   -   -   NM  1   R1-2    0   0   0   0   0   0
+SRR7939018.43   !   0   !   0   -   -   NM  1   R1-2    0   0   0   0   0   0
+SRR7939018.44   XV  194630  XV  195049  -   -   UU  1   R1-2    194630  195049  194581  195000  28  60  T:N:2:194610:30,G:N:2:194611:31,G:N:2:194614:34,G:N:2:194615:35,G:N:2:194617:37,C:N:2:194618:38,A:N:2:194619:39,G:N:2:194620:40,A:N:2:194621:41,A:N:2:194622:42,C:N:2:194623:43,T:N:2:194624:44
+SRR7939018.45   !   0   X   49753   -   -   MU  1   R1-2    0   49753   0   49704   0   60
+SRR7939018.46   XIII    706297  XIII    705554  -   -   UU  1   R1-2    706297  705554  706248  705505  34  60  C:N:2:706277:30,A:N:2:706278:31,T:N:2:706282:35,A:N:2:706284:37,T:N:2:706285:38,T:N:2:706286:39,T:N:2:706287:40,C:N:2:706288:41,C:N:2:706289:42
+SRR7939018.47   XII 973906  XII 974873  -   -   UU  1   R1-2    973906  974873  973865  974824  52  60  G:N:2:973891:35,T:N:2:973893:37,A:N:2:973894:38,G:N:2:973895:39,C:N:2:973896:40,G:N:2:973898:42
+SRR7939018.48   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.49   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.50   VII 466949  !   0   +   -   UN  1   R1-2    466949  0   466998  0   60  0
+SRR7939018.51   VII 451782  V   204170  -   +   UU  1   R1-2    451782  204170  451733  204219  60  60
+SRR7939018.52   XIII    86591   XIII    84823   -   -   UU  1   R1-2    86591   84823   86542   84774   60  60
+SRR7939018.53   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.54   IV  496721  IV  354274  +   -   UU  1   R1-2    496721  354274  496770  354225  60  60  A:C:13:496733:13
+SRR7939018.55   !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.56   !   0   II  58112   -   +   MU  1   R1-2    0   58112   0   58161   0   60
+SRR7939018.57   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.58   V   315210  IV  344786  -   +   UU  1   R1-2    315210  344786  315161  344835  60  60
+SRR7939018.59   !   0   XII 460368  -   -   MU  1   R1-2    0   460368  0   460319  0   60
 
 
 ❯ zcat "${a_pairs}" | tail -100
-SRR7939018.66836973     !       0       !       0       -       -       MN      0       0
-SRR7939018.66836974     X       698537  !       0       -       -       UN      60      0
-SRR7939018.66836975     XII     459943  !       0       -       -       UN      60      0
-SRR7939018.66836976     IV      784040  !       0       -       -       UN      60      0
-SRR7939018.66836977     XII     416967  !       0       -       -       UN      60      0
-SRR7939018.66836978     XI      267795  !       0       -       -       UN      60      0
-SRR7939018.66836979     XII     299855  !       0       -       -       UN      60      0
-SRR7939018.66836980     !       0       !       0       -       -       NN      0       0
-SRR7939018.66836981     XI      488216  !       0       +       -       UN      60      0
-SRR7939018.66836982     XIV     81040   !       0       -       -       UN      60      0
-SRR7939018.66836983     VIII    78157   !       0       -       -       UN      60      0
-SRR7939018.66836984     XIII    59626   !       0       -       -       UN      60      0
-SRR7939018.66836985     XII     459804  XII     460129  -       +       UU      18      60
-SRR7939018.66836986     XII     788963  XII     831886  -       +       UU      60      60
-SRR7939018.66836987     !       0       !       0       -       -       MM      0       0
-SRR7939018.66836988     IV      117724  IV      120256  +       +       UU      60      60
-SRR7939018.66836989     VII     484733  VII     523183  -       +       UU      60      60
-SRR7939018.66836990     XII     771037  IV      50585   +       -       UU      60      60
-SRR7939018.66836991     II      447150  II      435629  +       +       UU      60      60
-SRR7939018.66836992     I       80736   !       0       +       -       UN      60      0
-SRR7939018.66836993     X       570149  II      619866  -       -       UU      60      60
-SRR7939018.66836994     IV      1249665 IV      1269898 -       +       UU      60      60
-SRR7939018.66836995     XIV     620123  !       0       -       -       UN      60      0
-SRR7939018.66836996     !       0       !       0       -       -       MM      0       0
-SRR7939018.66836997     XIV     551720  XIV     548489  -       -       UU      60      60
-SRR7939018.66836998     !       0       XV      719682  -       +       MU      0       60
-SRR7939018.66836999     !       0       !       0       -       -       MM      0       0
-SRR7939018.66837000     XII     106700  XII     106928  +       -       UU      60      60
-
-SRR7939018.66837012     XVI     372160  !       0       +       -       UN      60      0
-SRR7939018.66837013     !       0       !       0       -       -       MN      0       0
-SRR7939018.66837014     XIII    62745   !       0       -       -       UN      60      0
-SRR7939018.66837015     XIV     670465  !       0       -       -       UN      60      0
-SRR7939018.66837016     III     220877  !       0       +       -       UN      60      0
-SRR7939018.66837017     !       0       !       0       -       -       MN      0       0
-SRR7939018.66837018     !       0       !       0       -       -       NN      0       0
-SRR7939018.66837019     !       0       !       0       -       -       NN      0       0
-SRR7939018.66837020     XII     1056596 !       0       +       -       UN      60      0
-SRR7939018.66837021     !       0       !       0       -       -       NN      0       0
-SRR7939018.66837022     !       0       !       0       -       -       MN      0       0
-SRR7939018.66837023     !       0       !       0       -       -       MN      0       0
-SRR7939018.66837024     VII     445502  !       0       -       -       UN      44      0
-SRR7939018.66837025     !       0       !       0       -       -       NN      0       0
-SRR7939018.66837026     V       344269  !       0       -       -       UN      41      0
-SRR7939018.66837027     !       0       !       0       -       -       MM      0       0
-SRR7939018.66837028     XVI     860558  XIV     715069  -       -       UU      60      60
-SRR7939018.66837029     !       0       !       0       -       -       MM      0       0
-SRR7939018.66837030     XVI     614393  XIV     342834  -       +       UU      60      60
-SRR7939018.66837031     X       532857  X       532857  +       +       UU      60      60
-SRR7939018.66837032     !       0       XI      551230  -       +       MU      0       60
-SRR7939018.66837033     !       0       !       0       -       -       MM      0       0
-SRR7939018.66837034     VIII    480083  VIII    479866  -       -       UU      60      60
-SRR7939018.66837035     XI      206780  V       498989  +       -       UU      60      60
-SRR7939018.66837036     XII     459832  !       0       +       -       UM      60      0
-SRR7939018.66837037     !       0       !       0       -       -       MM      0       0
-SRR7939018.66837038     !       0       !       0       -       -       MM      0       0
-SRR7939018.66837039     XV      722564  VIII    365579  -       -       UU      60      60
-SRR7939018.66837040     VI      231378  VI      232979  +       -       UU      60      60
-SRR7939018.66837041     XII     699439  VII     20989   -       +       UU      60      60
-SRR7939018.66837042     !       0       !       0       -       -       MN      0       0
-SRR7939018.66837043     IX      72498   !       0       -       -       UN      60      0
-SRR7939018.66837044     !       0       !       0       -       -       MN      0       0
-SRR7939018.66837045     !       0       !       0       -       -       MN      0       0
-SRR7939018.66837046     !       0       !       0       -       -       NN      0       0
-SRR7939018.66837047     !       0       !       0       -       -       NN      0       0
-SRR7939018.66837048     IV      1138433 !       0       -       -       UN      60      0
-SRR7939018.66837049     XI      76783   !       0       +       -       UN      60      0
-SRR7939018.66837050     !       0       !       0       -       -       MN      0       0
-SRR7939018.66837051     XIII    805272  !       0       -       -       UN      60      0
-SRR7939018.66837052     XV      347294  !       0       -       -       UN      60      0
-SRR7939018.66837053     !       0       !       0       -       -       MN      0       0
-SRR7939018.66837054     !       0       !       0       -       -       NN      0       0
-SRR7939018.66837055     XIV     672789  !       0       -       -       UN      60      0
-SRR7939018.66837056     !       0       !       0       -       -       MN      0       0
-SRR7939018.66837057     X       505727  !       0       +       -       UN      51      0
-SRR7939018.66837058     XV      776053  !       0       -       -       UN      60      0
-SRR7939018.66837059     V       337272  !       0       +       -       UN      48      0
-SRR7939018.66837060     VI      245305  !       0       +       -       UN      48      0
-SRR7939018.66837061     XI      431995  !       0       -       -       UN      41      0
-SRR7939018.66837062     !       0       !       0       -       -       NM      0       0
-SRR7939018.66837063     XI      570081  XI      570724  -       +       UU      60      60
-SRR7939018.66837064     !       0       XIV     364616  -       +       NU      0       60
-SRR7939018.66837065     XIII    294265  XIII    119732  -       -       UU      60      60
-SRR7939018.66837066     X       61461   X       61292   -       -       UU      60      60
-SRR7939018.66837067     !       0       !       0       -       -       NN      0       0
-SRR7939018.66837068     !       0       !       0       -       -       NN      0       0
-SRR7939018.66837069     !       0       !       0       -       -       MN      0       0
-SRR7939018.66837070     !       0       !       0       -       -       NN      0       0
-SRR7939018.66837071     VII     391704  !       0       -       -       UN      60      0
-SRR7939018.66837072     IX      143298  !       0       +       -       UN      55      0
+SRR7939018.66836973 !   0   !   0   -   -   MN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66836974 X   698537  !   0   -   -   UN  1   R1-2    698537  0   698488  0   60  0
+SRR7939018.66836975 XII 459943  !   0   -   -   UN  1   R1-2    459943  0   459894  0   60  0
+SRR7939018.66836976 IV  784040  !   0   -   -   UN  1   R1-2    784040  0   784002  0   60  0
+SRR7939018.66836977 XII 416967  !   0   -   -   UN  1   R1-2    416967  0   416918  0   60  0
+SRR7939018.66836978 XI  267795  !   0   -   -   UN  1   R1-2    267795  0   267746  0   60  0
+SRR7939018.66836979 XII 299855  !   0   -   -   UN  1   R1-2    299855  0   299806  0   60  0
+SRR7939018.66836980 !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66836981 XI  488216  !   0   +   -   UN  1   R1-2    488216  0   488265  0   60  0   A:N:2:488241:26,A:N:2:488242:27,T:N:2:488243:28,A:N:2:488244:29,T:N:2:488245:30
+SRR7939018.66836982 XIV 81040   !   0   -   -   UN  1   R1-2    81040   0   80991   0   60  0   T:N:2:81009:19,G:N:2:81010:20,G:N:2:81011:21,T:N:2:81012:22,T:N:2:81013:23
+SRR7939018.66836983 VIII    78157   !   0   -   -   UN  1   R1-2    78157   0   78108   0   60  0   A:N:2:78126:19,A:N:2:78127:20,C:N:2:78128:21,A:N:2:78129:22,C:N:2:78130:23
+SRR7939018.66836984 XIII    59626   !   0   -   -   UN  1   R1-2    59626   0   59577   0   60  0   T:N:2:59595:19,T:N:2:59596:20,C:N:2:59597:21,C:N:2:59598:22,T:N:2:59599:23
+SRR7939018.66836985 XII 459804  XII 460129  -   +   UU  1   R1-2    459804  460129  459755  460159  18  60
+SRR7939018.66836986 XII 788963  XII 831886  -   +   UU  1   R1-2    788963  831886  788914  831935  60  60
+SRR7939018.66836987 !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.66836988 IV  117724  IV  120256  +   +   UU  1   R1-2    117724  120256  117773  120305  60  60
+SRR7939018.66836989 VII 484733  VII 523183  -   +   UU  1   R1-2    484733  523183  484684  523232  60  60
+SRR7939018.66836990 XII 771037  IV  50585   +   -   UU  1   R1-2    771037  50585   771078  50536   60  60
+SRR7939018.66836991 II  447150  II  435629  +   +   UU  1   R1-2    447150  435629  447199  435678  60  60      G:T:40:435671:43
+SRR7939018.66836992 I   80736   !   0   +   -   UN  1   R1-2    80736   0   80785   0   60  0
+SRR7939018.66836993 X   570149  II  619866  -   -   UU  1   R1-2    570149  619866  570100  619817  60  60
+SRR7939018.66836994 IV  1249665 IV  1269898 -   +   UU  1   R1-2    1249665 1269898 1249616 1269947 60  60      C:T:13:1269931:34
+SRR7939018.66836995 XIV 620123  !   0   -   -   UN  1   R1-2    620123  0   620074  0   60  0   C:A:13:620121:48
+SRR7939018.66836996 !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.66836997 XIV 551720  XIV 548489  -   -   UU  1   R1-2    551720  548489  551671  548440  60  60
+SRR7939018.66836998 !   0   XV  719682  -   +   MU  1   R1-2    0   719682  0   719731  0   60
+SRR7939018.66836999 !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837000 XII 106700  XII 106928  +   -   UU  1   R1-2    106700  106928  106749  106879  60  60
+SRR7939018.66837001 !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837002 XV  534163  X   560148  -   -   UU  1   R1-2    534163  560148  534129  560099  60  60
+SRR7939018.66837003 VI  180898  !   0   -   -   UN  1   R1-2    180898  0   180849  0   60  0
+SRR7939018.66837004 !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837005 VII 33694   !   0   -   -   UN  1   R1-2    33694   0   33645   0   60  0
+SRR7939018.66837006 !   0   !   0   -   -   MN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837007 IV  787343  !   0   -   -   UN  1   R1-2    787343  0   787294  0   60  0
+SRR7939018.66837008 XV  918029  !   0   +   -   UN  1   R1-2    918029  0   918078  0   60  0
+SRR7939018.66837009 VI  131646  !   0   -   -   UN  1   R1-2    131646  0   131597  0   60  0
+SRR7939018.66837010 !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837011 VII 798455  !   0   -   -   UN  1   R1-2    798455  0   798406  0   60  0
+SRR7939018.66837012 XVI 372160  !   0   +   -   UN  1   R1-2    372160  0   372209  0   60  0
+SRR7939018.66837013 !   0   !   0   -   -   MN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837014 XIII    62745   !   0   -   -   UN  1   R1-2    62745   0   62696   0   60  0
+SRR7939018.66837015 XIV 670465  !   0   -   -   UN  1   R1-2    670465  0   670416  0   60  0
+SRR7939018.66837016 III 220877  !   0   +   -   UN  1   R1-2    220877  0   220926  0   60  0
+SRR7939018.66837017 !   0   !   0   -   -   MN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837018 !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837019 !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837020 XII 1056596 !   0   +   -   UN  1   R1-2    1056596 0   1056645 0   60  0   A:N:2:1056621:26,A:N:2:1056622:27,C:N:2:1056623:28,G:N:2:1056624:29,C:N:2:1056625:30
+SRR7939018.66837021 !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837022 !   0   !   0   -   -   MN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837023 !   0   !   0   -   -   MN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837024 VII 445502  !   0   -   -   UN  1   R1-2    445502  0   445453  0   44  0   G:N:2:445452:0,A:N:2:445471:19,G:N:2:445472:20,A:N:2:445473:21,G:N:2:445474:22,C:N:2:445475:23,A:N:2:445476:24,G:N:2:445477:25
+SRR7939018.66837025 !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837026 V   344269  !   0   -   -   UN  1   R1-2    344269  0   344220  0   41  0   G:N:2:344219:0,T:N:2:344220:1,A:N:2:344238:19,T:N:2:344239:20,G:N:2:344240:21,A:N:2:344241:22,A:N:2:344242:23,A:N:2:344243:24,G:N:2:344244:25
+SRR7939018.66837027 !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837028 XVI 860558  XIV 715069  -   -   UU  1   R1-2    860558  715069  860509  715020  60  60
+SRR7939018.66837029 !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837030 XVI 614393  XIV 342834  -   +   UU  1   R1-2    614393  342834  614344  342880  60  60
+SRR7939018.66837031 X   532857  X   532857  +   +   UU  1   R1-2    532857  532857  532906  532906  60  60      G:T:40:532886:30
+SRR7939018.66837032 !   0   XI  551230  -   +   MU  1   R1-2    0   551230  0   551279  0   60
+SRR7939018.66837033 !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837034 VIII    480083  VIII    479866  -   -   UU  1   R1-2    480083  479866  480034  479829  60  60
+SRR7939018.66837035 XI  206780  V   498989  +   -   UU  1   R1-2    206780  498989  206829  498949  60  60
+SRR7939018.66837036 XII 459832  !   0   +   -   UM  1   R1-2    459832  0   459881  0   60  0
+SRR7939018.66837037 !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837038 !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837039 XV  722564  VIII    365579  -   -   UU  1   R1-2    722564  365579  722515  365530  60  60
+SRR7939018.66837040 VI  231378  VI  232979  +   -   UU  1   R1-2    231378  232979  231427  232930  60  60
+SRR7939018.66837041 XII 699439  VII 20989   -   +   UU  1   R1-2    699439  20989   699390  21038   60  60
+SRR7939018.66837042 !   0   !   0   -   -   MN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837043 IX  72498   !   0   -   -   UN  1   R1-2    72498   0   72449   0   60  0
+SRR7939018.66837044 !   0   !   0   -   -   MN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837045 !   0   !   0   -   -   MN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837046 !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837047 !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837048 IV  1138433 !   0   -   -   UN  1   R1-2    1138433 0   1138384 0   60  0
+SRR7939018.66837049 XI  76783   !   0   +   -   UN  1   R1-2    76783   0   76817   0   60  0
+SRR7939018.66837050 !   0   !   0   -   -   MN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837051 XIII    805272  !   0   -   -   UN  1   R1-2    805272  0   805223  0   60  0   T:G:27:805248:26
+SRR7939018.66837052 XV  347294  !   0   -   -   UN  1   R1-2    347294  0   347245  0   60  0   G:N:2:347263:19,C:N:2:347264:20
+SRR7939018.66837053 !   0   !   0   -   -   MN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837054 !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837055 XIV 672789  !   0   -   -   UN  1   R1-2    672789  0   672740  0   60  0   T:N:2:672758:19,A:N:2:672759:20,A:N:2:672760:21,T:N:2:672761:22,T:N:2:672762:23
+SRR7939018.66837056 !   0   !   0   -   -   MN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837057 X   505727  !   0   +   -   UN  1   R1-2    505727  0   505776  0   51  0   G:N:2:505752:26,T:N:2:505753:27,C:N:2:505754:28,T:N:2:505755:29,G:N:2:505756:30,T:C:2:505773:47
+SRR7939018.66837058 XV  776053  !   0   -   -   UN  1   R1-2    776053  0   776004  0   60  0   G:N:2:776022:19,T:N:2:776023:20,T:N:2:776024:21,A:N:2:776025:22,A:N:2:776026:23
+SRR7939018.66837059 V   337272  !   0   +   -   UN  1   R1-2    337272  0   337321  0   48  0   G:N:2:337295:24,T:N:2:337296:25,G:N:2:337297:26,G:N:2:337298:27,C:N:2:337299:28,T:N:2:337300:29,C:N:2:337301:30
+SRR7939018.66837060 VI  245305  !   0   +   -   UN  1   R1-2    245305  0   245354  0   48  0   A:N:2:245328:24,A:N:2:245329:25,A:N:2:245330:26,T:N:2:245331:27,A:N:2:245332:28,T:N:2:245333:29,C:N:2:245334:30
+SRR7939018.66837061 XI  431995  !   0   -   -   UN  1   R1-2    431995  0   431946  0   41  0   T:N:2:431945:0,A:N:2:431946:1,G:N:2:431964:19,G:N:2:431965:20,T:N:2:431966:21,T:N:2:431967:22,T:N:2:431968:23,T:N:2:431969:24,G:N:2:431970:25
+SRR7939018.66837062 !   0   !   0   -   -   NM  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837063 XI  570081  XI  570724  -   +   UU  1   R1-2    570081  570724  570032  570773  60  60  G:A:40:570048:17,G:N:2:570075:44
+SRR7939018.66837064 !   0   XIV 364616  -   +   NU  1   R1-2    0   364616  0   364665  0   60
+SRR7939018.66837065 XIII    294265  XIII    119732  -   -   UU  1   R1-2    294265  119732  294216  119683  60  60  T:N:2:294259:44
+SRR7939018.66837066 X   61461   X   61292   -   -   UU  1   R1-2    61461   61292   61412   61243   60  60  G:N:2:61455:44
+SRR7939018.66837067 !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837068 !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837069 !   0   !   0   -   -   MN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837070 !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
+SRR7939018.66837071 VII 391704  !   0   -   -   UN  1   R1-2    391704  0   391667  0   60  0   A:N:2:391698:44
+SRR7939018.66837072 IX  143298  !   0   +   -   UN  1   R1-2    143298  0   143347  0   55  0   T:N:2:143302:5,G:N:2:143323:26,A:N:2:143324:27,T:N:2:143325:28,A:N:2:143326:29,T:N:2:143327:30
 ```
 </details>
 <br />
@@ -3214,8 +3751,11 @@ SRR7939018.66837072     IX      143298  !       0       +       -       UN      
 <summary><i>Printed: Examine the stats outfile</i></summary>
 
 ```txt
+❯ #  Examine the stats outfile --------------------------------------------------
+
+
 ❯ ., "${a_stats}"
--rw-rw---- 1 kalavatt 13K Jun 10 18:16 stats/SRR7939018.stats.txt
+-rw-rw---- 1 kalavatt 13K Jul  6 09:47 0X_stats/SRR7939018.stats.txt
 
 
 ❯ cat "${a_stats}" | wc -l
@@ -3225,11 +3765,11 @@ SRR7939018.66837072     IX      143298  !       0       +       -       UN      
 ❯ cat "${a_stats}"
 total   66837072
 total_unmapped  16715069
-total_single_sided_mapped       12175353
+total_single_sided_mapped   12175353
 total_mapped    37946650
-total_dups      0
+total_dups  0
 total_nodups    37946650
-cis     21805569
+cis 21805569
 trans   16141081
 pair_types/NN   1415484
 pair_types/NM   558055
@@ -3245,346 +3785,346 @@ pair_types/RM   64
 pair_types/MR   20
 pair_types/RU   28
 pair_types/UR   18
-cis_1kb+        13696397
-cis_2kb+        11084751
-cis_4kb+        8867917
-cis_10kb+       6430276
-cis_20kb+       4893887
-cis_40kb+       3583599
-summary/frac_cis        0.574637523997507
+cis_1kb+    13696397
+cis_2kb+    11084751
+cis_4kb+    8867917
+cis_10kb+   6430276
+cis_20kb+   4893887
+cis_40kb+   3583599
+summary/frac_cis    0.574637523997507
 summary/frac_cis_1kb+   0.36093823828980953
 summary/frac_cis_2kb+   0.292114086487213
 summary/frac_cis_4kb+   0.23369433138366627
 summary/frac_cis_10kb+  0.16945569635264246
 summary/frac_cis_20kb+  0.12896756367162845
 summary/frac_cis_40kb+  0.09443782257458827
-summary/frac_dups       0.0
-summary/complexity_naive        inf
-chrom_freq/II/II        1465313
+summary/frac_dups   0.0
+summary/complexity_naive    inf
+chrom_freq/II/II    1465313
 chrom_freq/XIII/XIII    1664936
-chrom_freq/XII/IX       49624
-chrom_freq/VII/VII      1926887
+chrom_freq/XII/IX   49624
+chrom_freq/VII/VII  1926887
 chrom_freq/V/V  971439
-chrom_freq/XIV/III      35446
-chrom_freq/II/XIII      95218
-chrom_freq/XII/XIII     109260
-chrom_freq/IV/IV        2792457
-chrom_freq/XV/XV        1953665
-chrom_freq/XII/XII      2222339
-chrom_freq/VII/V        75601
+chrom_freq/XIV/III  35446
+chrom_freq/II/XIII  95218
+chrom_freq/XII/XIII 109260
+chrom_freq/IV/IV    2792457
+chrom_freq/XV/XV    1953665
+chrom_freq/XII/XII  2222339
+chrom_freq/VII/V    75601
 chrom_freq/V/IV 94311
-chrom_freq/VIII/XI      50059
-chrom_freq/III/III      553079
-chrom_freq/XVI/XIV      88260
-chrom_freq/XVI/XVI      1648978
-chrom_freq/XVI/IV       159162
-chrom_freq/II/XI        71532
-chrom_freq/XIV/XIV      1429089
-chrom_freq/IV/XI        109496
+chrom_freq/VIII/XI  50059
+chrom_freq/III/III  553079
+chrom_freq/XVI/XIV  88260
+chrom_freq/XVI/XVI  1648978
+chrom_freq/XVI/IV   159162
+chrom_freq/II/XI    71532
+chrom_freq/XIV/XIV  1429089
+chrom_freq/IV/XI    109496
 chrom_freq/X/XI 66947
-chrom_freq/IV/XIV       131765
-chrom_freq/XV/II        113349
-chrom_freq/XIII/VI      29220
+chrom_freq/IV/XIV   131765
+chrom_freq/XV/II    113349
+chrom_freq/XIII/VI  29220
 chrom_freq/XV/V 76513
-chrom_freq/IV/XV        196812
-chrom_freq/VII/III      34954
-chrom_freq/VI/IV        35190
-chrom_freq/XI/XI        1182238
+chrom_freq/IV/XV    196812
+chrom_freq/VII/III  34954
+chrom_freq/VI/IV    35190
+chrom_freq/XI/XI    1182238
 chrom_freq/VIII/VIII    959185
-chrom_freq/II/Mito      4316
-chrom_freq/IX/IX        774155
-chrom_freq/XI/VII       88922
-chrom_freq/XIV/XIII     87417
+chrom_freq/II/Mito  4316
+chrom_freq/IX/IX    774155
+chrom_freq/XI/VII   88922
+chrom_freq/XIV/XIII 87417
 chrom_freq/X/X  1332782
-chrom_freq/X/VIII       55679
+chrom_freq/X/VIII   55679
 chrom_freq/IV/V 93716
-chrom_freq/XVI/XV       125602
-chrom_freq/IV/VII       189626
-chrom_freq/II/VI        29454
-chrom_freq/VII/XV       145964
-chrom_freq/III/X        32997
-chrom_freq/V/VII        76216
-chrom_freq/VIII/XII     67252
+chrom_freq/XVI/XV   125602
+chrom_freq/IV/VII   189626
+chrom_freq/II/VI    29454
+chrom_freq/VII/XV   145964
+chrom_freq/III/X    32997
+chrom_freq/V/VII    76216
+chrom_freq/VIII/XII 67252
 chrom_freq/II/I 21417
-chrom_freq/XV/XIV       100492
+chrom_freq/XV/XIV   100492
 chrom_freq/X/IV 118057
-chrom_freq/VII/XIII     121086
-chrom_freq/XVI/V        69410
-chrom_freq/XII/XV       131879
-chrom_freq/III/XIII     35231
-chrom_freq/XI/XII       74098
-chrom_freq/VI/VI        476873
-chrom_freq/I/VII        22476
-chrom_freq/II/VII       112808
+chrom_freq/VII/XIII 121086
+chrom_freq/XVI/V    69410
+chrom_freq/XII/XV   131879
+chrom_freq/III/XIII 35231
+chrom_freq/XI/XII   74098
+chrom_freq/VI/VI    476873
+chrom_freq/I/VII    22476
+chrom_freq/II/VII   112808
 chrom_freq/V/X  55883
 chrom_freq/IX/I 23326
-chrom_freq/XI/IX        42366
+chrom_freq/XI/IX    42366
 chrom_freq/I/I  392321
 chrom_freq/V/XI 52244
-chrom_freq/XIII/XV      123556
-chrom_freq/XV/XII       133116
-chrom_freq/XIII/X       81456
-chrom_freq/II/XIV       80427
+chrom_freq/XIII/XV  123556
+chrom_freq/XV/XII   133116
+chrom_freq/XIII/X   81456
+chrom_freq/II/XIV   80427
 chrom_freq/XI/X 66961
 chrom_freq/XIII/VIII    64674
-chrom_freq/III/VII      35131
-chrom_freq/XIV/IV       131102
-chrom_freq/VII/I        22586
-chrom_freq/XI/IV        109273
+chrom_freq/III/VII  35131
+chrom_freq/XIV/IV   131102
+chrom_freq/VII/I    22586
+chrom_freq/XI/IV    109273
 chrom_freq/Mito/Mito    59833
 chrom_freq/I/XV 21358
-chrom_freq/II/XV        113441
-chrom_freq/IX/XIV       46561
-chrom_freq/XIII/II      95169
-chrom_freq/VII/X        95400
-chrom_freq/XII/XI       73981
-chrom_freq/XII/VIII     65531
-chrom_freq/XV/IV        198098
+chrom_freq/II/XV    113441
+chrom_freq/IX/XIV   46561
+chrom_freq/XIII/II  95169
+chrom_freq/VII/X    95400
+chrom_freq/XII/XI   73981
+chrom_freq/XII/VIII 65531
+chrom_freq/XV/IV    198098
 chrom_freq/X/V  56153
-chrom_freq/XI/III       30034
-chrom_freq/XIV/VI       28126
-chrom_freq/XVI/XIII     105458
-chrom_freq/VIII/XVI     64386
-chrom_freq/XI/XV        86634
-chrom_freq/XV/IX        56832
-chrom_freq/VII/IV       189354
-chrom_freq/XIII/I       20851
-chrom_freq/XIII/VII     120575
-chrom_freq/V/XII        68441
-chrom_freq/IV/VI        34487
+chrom_freq/XI/III   30034
+chrom_freq/XIV/VI   28126
+chrom_freq/XVI/XIII 105458
+chrom_freq/VIII/XVI 64386
+chrom_freq/XI/XV    86634
+chrom_freq/XV/IX    56832
+chrom_freq/VII/IV   189354
+chrom_freq/XIII/I   20851
+chrom_freq/XIII/VII 120575
+chrom_freq/V/XII    68441
+chrom_freq/IV/VI    34487
 chrom_freq/XI/V 51953
-chrom_freq/X/VII        95235
+chrom_freq/X/VII    95235
 chrom_freq/IV/X 117621
-chrom_freq/VII/XII      129336
-chrom_freq/XIII/IV      158196
-chrom_freq/VI/VIII      25400
-chrom_freq/XVI/VIII     64628
+chrom_freq/VII/XII  129336
+chrom_freq/XIII/IV  158196
+chrom_freq/VI/VIII  25400
+chrom_freq/XVI/VIII 64628
 chrom_freq/X/XV 90816
-chrom_freq/VIII/IX      37342
-chrom_freq/XIII/XIV     86943
+chrom_freq/VIII/IX  37342
+chrom_freq/XIII/XIV 86943
 chrom_freq/V/XV 77356
-chrom_freq/I/VIII       21631
-chrom_freq/XVI/VII      123818
-chrom_freq/XII/VII      129706
-chrom_freq/XVI/XI       77962
+chrom_freq/I/VIII   21631
+chrom_freq/XVI/VII  123818
+chrom_freq/XII/VII  129706
+chrom_freq/XVI/XI   77962
 chrom_freq/II/X 78451
-chrom_freq/IV/XVI       158690
-chrom_freq/XIII/XII     108932
-chrom_freq/VII/IX       57350
-chrom_freq/VII/II       112148
-chrom_freq/IV/IX        69480
-chrom_freq/V/VIII       44465
-chrom_freq/XIV/XV       100728
-chrom_freq/V/III        30431
+chrom_freq/IV/XVI   158690
+chrom_freq/XIII/XII 108932
+chrom_freq/VII/IX   57350
+chrom_freq/VII/II   112148
+chrom_freq/IV/IX    69480
+chrom_freq/V/VIII   44465
+chrom_freq/XIV/XV   100728
+chrom_freq/V/III    30431
 chrom_freq/X/I  23979
-chrom_freq/III/V        30262
-chrom_freq/XIV/II       81437
-chrom_freq/IV/II        143736
-chrom_freq/XV/VIII      73415
-chrom_freq/IV/XII       174675
-chrom_freq/XII/XVI      109312
-chrom_freq/VIII/V       44900
-chrom_freq/X/XII        80691
+chrom_freq/III/V    30262
+chrom_freq/XIV/II   81437
+chrom_freq/IV/II    143736
+chrom_freq/XV/VIII  73415
+chrom_freq/IV/XII   174675
+chrom_freq/XII/XVI  109312
+chrom_freq/VIII/V   44900
+chrom_freq/X/XII    80691
 chrom_freq/X/IX 47382
-chrom_freq/XI/Mito      3564
-chrom_freq/IX/II        49604
-chrom_freq/XV/XIII      123134
-chrom_freq/XV/VII       146251
+chrom_freq/XI/Mito  3564
+chrom_freq/IX/II    49604
+chrom_freq/XV/XIII  123134
+chrom_freq/XV/VII   146251
 chrom_freq/VIII/XIII    64069
-chrom_freq/VIII/VII     74460
-chrom_freq/XV/XVI       124960
-chrom_freq/V/XVI        69695
-chrom_freq/VIII/II      62368
-chrom_freq/XV/XI        87107
-chrom_freq/VIII/XV      72816
+chrom_freq/VIII/VII 74460
+chrom_freq/XV/XVI   124960
+chrom_freq/V/XVI    69695
+chrom_freq/VIII/II  62368
+chrom_freq/XV/XI    87107
+chrom_freq/VIII/XV  72816
 chrom_freq/XV/I 21026
-chrom_freq/VIII/XIV     56602
-chrom_freq/XIII/IX      50686
-chrom_freq/XVI/II       98177
-chrom_freq/II/IV        143442
+chrom_freq/VIII/XIV 56602
+chrom_freq/XIII/IX  50686
+chrom_freq/XVI/II   98177
+chrom_freq/II/IV    143442
 chrom_freq/IX/V 38066
-chrom_freq/VIII/VI      25651
-chrom_freq/VI/IX        26532
-chrom_freq/XII/IV       173816
-chrom_freq/V/XIII       66696
-chrom_freq/II/IX        49202
-chrom_freq/XIII/XI      76390
-chrom_freq/II/III       33941
-chrom_freq/I/III        21249
-chrom_freq/XII/II       98557
+chrom_freq/VIII/VI  25651
+chrom_freq/VI/IX    26532
+chrom_freq/XII/IV   173816
+chrom_freq/V/XIII   66696
+chrom_freq/II/IX    49202
+chrom_freq/XIII/XI  76390
+chrom_freq/II/III   33941
+chrom_freq/I/III    21249
+chrom_freq/XII/II   98557
 chrom_freq/V/I  18278
-chrom_freq/XVI/X        83888
-chrom_freq/XIII/XVI     106160
-chrom_freq/I/XIII       20588
-chrom_freq/VII/XIV      100959
-chrom_freq/IX/VI        26582
-chrom_freq/X/XIV        71847
-chrom_freq/II/XVI       98131
+chrom_freq/XVI/X    83888
+chrom_freq/XIII/XVI 106160
+chrom_freq/I/XIII   20588
+chrom_freq/VII/XIV  100959
+chrom_freq/IX/VI    26582
+chrom_freq/X/XIV    71847
+chrom_freq/II/XVI   98131
 chrom_freq/VI/X 31224
-chrom_freq/III/XVI      35118
-chrom_freq/IV/VIII      94548
-chrom_freq/XI/XVI       77782
-chrom_freq/III/XII      32911
-chrom_freq/VII/XI       88660
+chrom_freq/III/XVI  35118
+chrom_freq/IV/VIII  94548
+chrom_freq/XI/XVI   77782
+chrom_freq/III/XII  32911
+chrom_freq/VII/XI   88660
 chrom_freq/X/VI 31002
-chrom_freq/VII/XVI      124431
-chrom_freq/III/IX       27788
-chrom_freq/XII/V        67869
-chrom_freq/XIV/VIII     57121
-chrom_freq/XIV/VII      101263
-chrom_freq/XII/XIV      90368
-chrom_freq/II/VIII      62247
-chrom_freq/XI/XIV       67003
-chrom_freq/XIV/X        72729
-chrom_freq/VII/VIII     74212
-chrom_freq/VIII/IV      94409
-chrom_freq/X/XIII       81432
-chrom_freq/IX/VII       58437
-chrom_freq/III/XI       30616
-chrom_freq/XIV/V        57490
+chrom_freq/VII/XVI  124431
+chrom_freq/III/IX   27788
+chrom_freq/XII/V    67869
+chrom_freq/XIV/VIII 57121
+chrom_freq/XIV/VII  101263
+chrom_freq/XII/XIV  90368
+chrom_freq/II/VIII  62247
+chrom_freq/XI/XIV   67003
+chrom_freq/XIV/X    72729
+chrom_freq/VII/VIII 74212
+chrom_freq/VIII/IV  94409
+chrom_freq/X/XIII   81432
+chrom_freq/IX/VII   58437
+chrom_freq/III/XI   30616
+chrom_freq/XIV/V    57490
 chrom_freq/XV/X 90912
-chrom_freq/III/VIII     30053
-chrom_freq/III/XIV      35551
-chrom_freq/XI/II        71608
-chrom_freq/IX/XVI       51320
-chrom_freq/VI/II        29502
+chrom_freq/III/VIII 30053
+chrom_freq/III/XIV  35551
+chrom_freq/XI/II    71608
+chrom_freq/IX/XVI   51320
+chrom_freq/VI/II    29502
 chrom_freq/IV/I 23395
 chrom_freq/V/II 63119
-chrom_freq/VIII/I       21145
-chrom_freq/VII/VI       32097
-chrom_freq/IX/III       28277
-chrom_freq/XI/VIII      50068
+chrom_freq/VIII/I   21145
+chrom_freq/VII/VI   32097
+chrom_freq/IX/III   28277
+chrom_freq/XI/VIII  50068
 chrom_freq/V/IX 38121
 chrom_freq/II/V 62746
-chrom_freq/XIV/XI       67420
-chrom_freq/I/XIV        21734
-chrom_freq/XIII/V       66069
-chrom_freq/XVI/III      35195
-chrom_freq/XVI/IX       51931
-chrom_freq/X/XVI        83079
-chrom_freq/V/XIV        56969
-chrom_freq/VI/XII       29236
-chrom_freq/IX/IV        69460
-chrom_freq/IX/XI        42068
-chrom_freq/XIV/XII      90908
-chrom_freq/III/VI       25421
-chrom_freq/XVI/XII      110512
-chrom_freq/XI/VI        28582
-chrom_freq/XII/X        79339
+chrom_freq/XIV/XI   67420
+chrom_freq/I/XIV    21734
+chrom_freq/XIII/V   66069
+chrom_freq/XVI/III  35195
+chrom_freq/XVI/IX   51931
+chrom_freq/X/XVI    83079
+chrom_freq/V/XIV    56969
+chrom_freq/VI/XII   29236
+chrom_freq/IX/IV    69460
+chrom_freq/IX/XI    42068
+chrom_freq/XIV/XII  90908
+chrom_freq/III/VI   25421
+chrom_freq/XVI/XII  110512
+chrom_freq/XI/VI    28582
+chrom_freq/XII/X    79339
 chrom_freq/I/II 21678
-chrom_freq/VI/XV        31012
-chrom_freq/IV/XIII      157821
+chrom_freq/VI/XV    31012
+chrom_freq/IV/XIII  157821
 chrom_freq/IX/X 47445
-chrom_freq/XIII/III     35332
+chrom_freq/XIII/III 35332
 chrom_freq/X/II 78771
-chrom_freq/Mito/VII     4641
-chrom_freq/IX/XII       50706
+chrom_freq/Mito/VII 4641
+chrom_freq/IX/XII   50706
 chrom_freq/VI/I 21371
-chrom_freq/III/XV       34268
-chrom_freq/IX/Mito      2360
+chrom_freq/III/XV   34268
+chrom_freq/IX/Mito  2360
 chrom_freq/I/VI 21537
-chrom_freq/VI/VII       32215
-chrom_freq/XII/I        22097
-chrom_freq/IX/XV        57317
+chrom_freq/VI/VII   32215
+chrom_freq/XII/I    22097
+chrom_freq/IX/XV    57317
 chrom_freq/VI/V 24849
-chrom_freq/XV/III       34514
-chrom_freq/XII/VI       28460
-chrom_freq/VI/XIV       28802
-chrom_freq/XV/VI        31115
-chrom_freq/III/II       33581
-chrom_freq/II/XII       98113
-chrom_freq/IX/XIII      50698
-chrom_freq/VI/III       25080
-chrom_freq/XIV/I        21835
+chrom_freq/XV/III   34514
+chrom_freq/XII/VI   28460
+chrom_freq/VI/XIV   28802
+chrom_freq/XV/VI    31115
+chrom_freq/III/II   33581
+chrom_freq/II/XII   98113
+chrom_freq/IX/XIII  50698
+chrom_freq/VI/III   25080
+chrom_freq/XIV/I    21835
 chrom_freq/I/IV 23672
-chrom_freq/IX/VIII      37577
-chrom_freq/IV/III       39415
-chrom_freq/VIII/X       55936
-chrom_freq/X/III        33104
+chrom_freq/IX/VIII  37577
+chrom_freq/IV/III   39415
+chrom_freq/VIII/X   55936
+chrom_freq/X/III    33104
 chrom_freq/I/X  23940
 chrom_freq/V/VI 24717
-chrom_freq/III/IV       39289
-chrom_freq/I/XII        22277
-chrom_freq/XVI/VI       28674
-chrom_freq/XIV/XVI      87797
-chrom_freq/XIV/IX       46127
-chrom_freq/VI/XI        28741
-chrom_freq/VI/XIII      29116
-chrom_freq/XI/XIII      76312
+chrom_freq/III/IV   39289
+chrom_freq/I/XII    22277
+chrom_freq/XVI/VI   28674
+chrom_freq/XIV/XVI  87797
+chrom_freq/XIV/IX   46127
+chrom_freq/VI/XI    28741
+chrom_freq/VI/XIII  29116
+chrom_freq/XI/XIII  76312
 chrom_freq/XI/I 21108
-chrom_freq/Mito/X       3261
-chrom_freq/VII/Mito     5624
-chrom_freq/VI/XVI       28615
-chrom_freq/X/Mito       4013
-chrom_freq/XIV/Mito     4074
+chrom_freq/Mito/X   3261
+chrom_freq/VII/Mito 5624
+chrom_freq/VI/XVI   28615
+chrom_freq/X/Mito   4013
+chrom_freq/XIV/Mito 4074
 chrom_freq/Mito/VIII    2567
 chrom_freq/I/IX 23221
-chrom_freq/III/I        20939
+chrom_freq/III/I    20939
 chrom_freq/I/V  18448
-chrom_freq/VI/Mito      1508
-chrom_freq/VIII/III     30229
-chrom_freq/IV/Mito      7912
-chrom_freq/Mito/IV      6422
-chrom_freq/XVI/I        20656
-chrom_freq/Mito/XII     6351
+chrom_freq/VI/Mito  1508
+chrom_freq/VIII/III 30229
+chrom_freq/IV/Mito  7912
+chrom_freq/Mito/IV  6422
+chrom_freq/XVI/I    20656
+chrom_freq/Mito/XII 6351
 chrom_freq/I/XI 20830
-chrom_freq/III/Mito     1644
-chrom_freq/I/XVI        20520
-chrom_freq/Mito/XI      2942
+chrom_freq/III/Mito 1644
+chrom_freq/I/XVI    20520
+chrom_freq/Mito/XI  2942
 chrom_freq/Mito/XIII    4068
-chrom_freq/Mito/XV      4564
-chrom_freq/XII/III      32702
-chrom_freq/XVI/Mito     4962
-chrom_freq/V/Mito       3082
-chrom_freq/XV/Mito      5701
-chrom_freq/Mito/II      3521
+chrom_freq/Mito/XV  4564
+chrom_freq/XII/III  32702
+chrom_freq/XVI/Mito 4962
+chrom_freq/V/Mito   3082
+chrom_freq/XV/Mito  5701
+chrom_freq/Mito/II  3521
 chrom_freq/XIII/Mito    4860
-chrom_freq/Mito/I       1003
-chrom_freq/Mito/XIV     3339
-chrom_freq/Mito/IX      1924
+chrom_freq/Mito/I   1003
+chrom_freq/Mito/XIV 3339
+chrom_freq/Mito/IX  1924
 chrom_freq/VIII/Mito    3016
-chrom_freq/XII/Mito     7670
-chrom_freq/Mito/XVI     3989
-chrom_freq/Mito/III     1421
-chrom_freq/Mito/VI      1237
-chrom_freq/Mito/V       2434
-chrom_freq/I/Mito       1189
-dist_freq/0-1/+-        370
-dist_freq/0-1/-+        381
-dist_freq/0-1/--        130066
-dist_freq/0-1/++        130074
-dist_freq/1-2/+-        942
-dist_freq/1-2/-+        882
-dist_freq/1-2/--        353
-dist_freq/1-2/++        373
-dist_freq/2-3/+-        767
-dist_freq/2-3/-+        717
-dist_freq/2-3/--        59
-dist_freq/2-3/++        85
-dist_freq/3-6/+-        3057
-dist_freq/3-6/-+        2984
-dist_freq/3-6/--        177
-dist_freq/3-6/++        232
-dist_freq/6-10/+-       4287
-dist_freq/6-10/-+       4411
-dist_freq/6-10/--       97
-dist_freq/6-10/++       154
-dist_freq/10-18/+-      7906
-dist_freq/10-18/-+      8229
-dist_freq/10-18/--      263
-dist_freq/10-18/++      332
-dist_freq/18-32/+-      15653
-dist_freq/18-32/-+      15581
-dist_freq/18-32/--      461
-dist_freq/18-32/++      658
-dist_freq/32-56/+-      34043
-dist_freq/32-56/-+      33666
-dist_freq/32-56/--      6743
-dist_freq/32-56/++      6964
-dist_freq/56-100/+-     100061
-dist_freq/56-100/-+     99290
-dist_freq/56-100/--     42826
-dist_freq/56-100/++     43818
+chrom_freq/XII/Mito 7670
+chrom_freq/Mito/XVI 3989
+chrom_freq/Mito/III 1421
+chrom_freq/Mito/VI  1237
+chrom_freq/Mito/V   2434
+chrom_freq/I/Mito   1189
+dist_freq/0-1/+-    370
+dist_freq/0-1/-+    381
+dist_freq/0-1/--    130066
+dist_freq/0-1/++    130074
+dist_freq/1-2/+-    942
+dist_freq/1-2/-+    882
+dist_freq/1-2/--    353
+dist_freq/1-2/++    373
+dist_freq/2-3/+-    767
+dist_freq/2-3/-+    717
+dist_freq/2-3/--    59
+dist_freq/2-3/++    85
+dist_freq/3-6/+-    3057
+dist_freq/3-6/-+    2984
+dist_freq/3-6/--    177
+dist_freq/3-6/++    232
+dist_freq/6-10/+-   4287
+dist_freq/6-10/-+   4411
+dist_freq/6-10/--   97
+dist_freq/6-10/++   154
+dist_freq/10-18/+-  7906
+dist_freq/10-18/-+  8229
+dist_freq/10-18/--  263
+dist_freq/10-18/++  332
+dist_freq/18-32/+-  15653
+dist_freq/18-32/-+  15581
+dist_freq/18-32/--  461
+dist_freq/18-32/++  658
+dist_freq/32-56/+-  34043
+dist_freq/32-56/-+  33666
+dist_freq/32-56/--  6743
+dist_freq/32-56/++  6964
+dist_freq/56-100/+- 100061
+dist_freq/56-100/-+ 99290
+dist_freq/56-100/-- 42826
+dist_freq/56-100/++ 43818
 dist_freq/100-178/+-    478398
 dist_freq/100-178/-+    474140
 dist_freq/100-178/--    191214
@@ -3617,38 +4157,38 @@ dist_freq/5623-10000/+- 367883
 dist_freq/5623-10000/-+ 367368
 dist_freq/5623-10000/-- 368506
 dist_freq/5623-10000/++ 367514
-dist_freq/10000-17783/+-        323321
-dist_freq/10000-17783/-+        322248
-dist_freq/10000-17783/--        323182
-dist_freq/10000-17783/++        323371
-dist_freq/17783-31623/+-        283955
-dist_freq/17783-31623/-+        282811
-dist_freq/17783-31623/--        283803
-dist_freq/17783-31623/++        282692
-dist_freq/31623-56234/+-        248193
-dist_freq/31623-56234/-+        247435
-dist_freq/31623-56234/--        247400
-dist_freq/31623-56234/++        247332
-dist_freq/56234-100000/+-       215392
-dist_freq/56234-100000/-+       215323
-dist_freq/56234-100000/--       215836
-dist_freq/56234-100000/++       214441
-dist_freq/100000-177828/+-      186292
-dist_freq/100000-177828/-+      187082
-dist_freq/100000-177828/--      186890
-dist_freq/100000-177828/++      186702
-dist_freq/177828-316228/+-      156160
-dist_freq/177828-316228/-+      156239
-dist_freq/177828-316228/--      156601
-dist_freq/177828-316228/++      156465
-dist_freq/316228-562341/+-      117611
-dist_freq/316228-562341/-+      118332
-dist_freq/316228-562341/--      117318
-dist_freq/316228-562341/++      116868
-dist_freq/562341-1000000/+-     66659
-dist_freq/562341-1000000/-+     66844
-dist_freq/562341-1000000/--     66949
-dist_freq/562341-1000000/++     66604
+dist_freq/10000-17783/+-    323321
+dist_freq/10000-17783/-+    322248
+dist_freq/10000-17783/--    323182
+dist_freq/10000-17783/++    323371
+dist_freq/17783-31623/+-    283955
+dist_freq/17783-31623/-+    282811
+dist_freq/17783-31623/--    283803
+dist_freq/17783-31623/++    282692
+dist_freq/31623-56234/+-    248193
+dist_freq/31623-56234/-+    247435
+dist_freq/31623-56234/--    247400
+dist_freq/31623-56234/++    247332
+dist_freq/56234-100000/+-   215392
+dist_freq/56234-100000/-+   215323
+dist_freq/56234-100000/--   215836
+dist_freq/56234-100000/++   214441
+dist_freq/100000-177828/+-  186292
+dist_freq/100000-177828/-+  187082
+dist_freq/100000-177828/--  186890
+dist_freq/100000-177828/++  186702
+dist_freq/177828-316228/+-  156160
+dist_freq/177828-316228/-+  156239
+dist_freq/177828-316228/--  156601
+dist_freq/177828-316228/++  156465
+dist_freq/316228-562341/+-  117611
+dist_freq/316228-562341/-+  118332
+dist_freq/316228-562341/--  117318
+dist_freq/316228-562341/++  116868
+dist_freq/562341-1000000/+- 66659
+dist_freq/562341-1000000/-+ 66844
+dist_freq/562341-1000000/-- 66949
+dist_freq/562341-1000000/++ 66604
 dist_freq/1000000-1778279/+-    11043
 dist_freq/1000000-1778279/-+    10881
 dist_freq/1000000-1778279/--    11022
@@ -3681,22 +4221,22 @@ dist_freq/56234133-100000000/+- 0
 dist_freq/56234133-100000000/-+ 0
 dist_freq/56234133-100000000/-- 0
 dist_freq/56234133-100000000/++ 0
-dist_freq/100000000-177827941/+-        0
-dist_freq/100000000-177827941/-+        0
-dist_freq/100000000-177827941/--        0
-dist_freq/100000000-177827941/++        0
-dist_freq/177827941-316227766/+-        0
-dist_freq/177827941-316227766/-+        0
-dist_freq/177827941-316227766/--        0
-dist_freq/177827941-316227766/++        0
-dist_freq/316227766-562341325/+-        0
-dist_freq/316227766-562341325/-+        0
-dist_freq/316227766-562341325/--        0
-dist_freq/316227766-562341325/++        0
-dist_freq/562341325-1000000000/+-       0
-dist_freq/562341325-1000000000/-+       0
-dist_freq/562341325-1000000000/--       0
-dist_freq/562341325-1000000000/++       0
+dist_freq/100000000-177827941/+-    0
+dist_freq/100000000-177827941/-+    0
+dist_freq/100000000-177827941/--    0
+dist_freq/100000000-177827941/++    0
+dist_freq/177827941-316227766/+-    0
+dist_freq/177827941-316227766/-+    0
+dist_freq/177827941-316227766/--    0
+dist_freq/177827941-316227766/++    0
+dist_freq/316227766-562341325/+-    0
+dist_freq/316227766-562341325/-+    0
+dist_freq/316227766-562341325/--    0
+dist_freq/316227766-562341325/++    0
+dist_freq/562341325-1000000000/+-   0
+dist_freq/562341325-1000000000/-+   0
+dist_freq/562341325-1000000000/--   0
+dist_freq/562341325-1000000000/++   0
 dist_freq/562341325+/+- 0
 dist_freq/562341325+/-+ 0
 dist_freq/562341325+/-- 0
@@ -3709,7 +4249,7 @@ dist_freq/562341325+/++ 0
 
 <a id="4-run-pairtools-sort"></a>
 ### 4. Run `pairtools sort`
-<a id="code-9"></a>
+<a id="code-8"></a>
 #### Code
 <details>
 <summary><i>Code: 4. Run pairtools sort</i></summary>
@@ -3722,21 +4262,28 @@ pairtools sort --help
 
 
 #  Do a trial run of pairtools parse ------------------------------------------
-echo """
-pairtools sort \\
-    --nproc \"${threads}\" \\
-    --tmpdir \"${scratch}\" \\
-    --output \"${a_sort}\" \\
-    \"${a_pairs}\" \\
-        2> >(tee -a \"${d_pairs}/err_out/$(basename ${a_sort} .txt.gz).stderr.txt\" >&2)
-"""
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        echo """
+            pairtools sort \\
+                --nproc \"${threads}\" \\
+                --tmpdir \"${scratch}\" \\
+                --output \"${a_sort}\" \\
+                \"${a_pairs}\" \\
+                    2> >(tee -a \"${d_pairs}/err_out/$(basename ${a_sort} .txt.gz).stderr.txt\" >&2)
+            """
+    }
 
-pairtools sort \
-    --nproc "${threads}" \
-    --tmpdir "${scratch}" \
-    --output "${a_sort}" \
-    "${a_pairs}" \
-        2> >(tee -a "${d_pairs}/err_out/$(basename ${a_sort} .txt.gz).stderr.txt" >&2)
+[[ "${run}" == TRUE ]] &&
+    {
+        pairtools sort \
+            --nproc "${threads}" \
+            --tmpdir "${scratch}" \
+            --output "${a_sort}" \
+            "${a_pairs}" \
+                2> >(tee -a "${d_pairs}/err_out/$(basename ${a_sort} .txt.gz).stderr.txt" >&2)
+    }
 
 
 #  Examine the sorted pairs outfile -------------------------------------------
@@ -3809,20 +4356,30 @@ Options:
 </details>
 <br />
 
-<a id="pairtools-sort"></a>
-##### `pairtools sort`
+<a id="run-pairtools-sort"></a>
+##### Run `pairtools sort`
 <details>
-<summary><i>Printed: pairtools sort</i></summary>
+<summary><i>Printed: Run pairtools sort</i></summary>
 
 ```txt
-❯ echo """
-> pairtools sort \\
->     --nproc \"${threads}\" \\
->     --tmpdir \"${scratch}\" \\
->     --output \"${a_sort}\" \\
->     \"${a_pairs}\" \\
->         2> >(tee -a \"${d_pairs}/err_out/$(basename ${a_sort} .txt.gz).stderr.txt\" >&2)
-> """
+❯ [[ "${run}" == TRUE ]] &&
+>     {
+>         echo """
+>             pairtools sort \\
+>                 --nproc \"${threads}\" \\
+>                 --tmpdir \"${scratch}\" \\
+>                 --output \"${a_sort}\" \\
+>                 \"${a_pairs}\" \\
+>                     2> >(tee -a \"${d_pairs}/err_out/$(basename ${a_sort} .txt.gz).stderr.txt\" >&2)
+>             """
+>     }
+
+            pairtools sort \
+                --nproc "8" \
+                --tmpdir "/fh/scratch/delete30/tsukiyama_t" \
+                --output "04_sort/SRR7939018.sort.txt.gz" \
+                "03_parse/SRR7939018.p2.txt.gz" \
+                    2> >(tee -a "03_parse/err_out/SRR7939018.sort.stderr.txt" >&2)
 
 pairtools sort \
     --nproc "16" \
@@ -3849,18 +4406,18 @@ pairtools sort \
 
 ```txt
 ❯ ., "${a_sort}"
--rw-rw---- 1 kalavatt 591M Jun 11 08:50 pairs/SRR7939018.sort.txt.gz
+-rw-rw---- 1 kalavatt 1.1G Jul  6 12:22 04_sort/SRR7939018.sort.txt.gz
 
 
 ❯ n_lines="$(zcat "${a_sort}" | wc -l)"
 
 
 ❯ echo "${n_lines}"
-66837115
+66838467
 
 
 ❯ echo $(( n_lines - 43 ))  # Subtract header, column-name lines
-66837072
+66838424
 
 
 ❯ zcat "${a_sort}" | head -100
@@ -3902,171 +4459,171 @@ pairtools sort \
 #samheader: @SQ SN:XV   LN:1091291
 #samheader: @SQ SN:XVI  LN:948066
 #samheader: @SQ SN:Mito LN:85779
-#samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 16 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
-#samheader: @PG ID:samtools     PN:samtools     PP:bwa  VN:1.16.1       CL:samtools view -@ 16 -S -b
-#samheader: @PG ID:pairtools_parse      PN:pairtools_parse      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse -o pairs/SRR7939018.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --drop-sam --drop-seq --output-stats stats/SRR7939018.stats.txt --assembly S288C_R64-3-1 --no-flip --add-columns mapq --walks-policy mask bams/SRR7939018.bam  PP:samtools     VN:1.0.2
-#samheader: @PG ID:pairtools_sort       PN:pairtools_sort       CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 16 --tmpdir /fh/scratch/delete30/tsukiyama_t --output pairs/SRR7939018.sort.txt.gz pairs/SRR7939018.txt.gz  PP:pairtools_parse      VN:1.0.2
-#columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type mapq1 mapq2
-SRR7939018.21   !       0       !       0       -       -       MM      0       0
-SRR7939018.22   !       0       !       0       -       -       MM      0       0
-SRR7939018.30   !       0       !       0       -       -       MM      0       0
-SRR7939018.48   !       0       !       0       -       -       MM      0       0
-SRR7939018.49   !       0       !       0       -       -       MM      0       0
-SRR7939018.53   !       0       !       0       -       -       MM      0       0
-SRR7939018.57   !       0       !       0       -       -       MM      0       0
-SRR7939018.66   !       0       !       0       -       -       MM      0       0
-SRR7939018.69   !       0       !       0       -       -       MM      0       0
-SRR7939018.97   !       0       !       0       -       -       MM      0       0
-SRR7939018.102  !       0       !       0       -       -       MM      0       0
-SRR7939018.111  !       0       !       0       -       -       MM      0       0
-SRR7939018.113  !       0       !       0       -       -       MM      0       0
-SRR7939018.114  !       0       !       0       -       -       MM      0       0
-SRR7939018.118  !       0       !       0       -       -       MM      0       0
-SRR7939018.123  !       0       !       0       -       -       MM      0       0
-SRR7939018.145  !       0       !       0       -       -       MM      0       0
-SRR7939018.157  !       0       !       0       -       -       MM      0       0
-SRR7939018.163  !       0       !       0       -       -       MM      0       0
-SRR7939018.177  !       0       !       0       -       -       MM      0       0
-SRR7939018.180  !       0       !       0       -       -       MM      0       0
-SRR7939018.182  !       0       !       0       -       -       MM      0       0
-SRR7939018.189  !       0       !       0       -       -       MM      0       0
-SRR7939018.192  !       0       !       0       -       -       MM      0       0
-SRR7939018.194  !       0       !       0       -       -       MM      0       0
-SRR7939018.205  !       0       !       0       -       -       MM      0       0
-SRR7939018.209  !       0       !       0       -       -       MM      0       0
-SRR7939018.211  !       0       !       0       -       -       MM      0       0
-SRR7939018.213  !       0       !       0       -       -       MM      0       0
-SRR7939018.217  !       0       !       0       -       -       MM      0       0
-SRR7939018.222  !       0       !       0       -       -       MM      0       0
-SRR7939018.224  !       0       !       0       -       -       MM      0       0
-SRR7939018.226  !       0       !       0       -       -       MM      0       0
-SRR7939018.229  !       0       !       0       -       -       MM      0       0
-SRR7939018.244  !       0       !       0       -       -       MM      0       0
-SRR7939018.245  !       0       !       0       -       -       MM      0       0
-SRR7939018.246  !       0       !       0       -       -       MM      0       0
-SRR7939018.248  !       0       !       0       -       -       MM      0       0
-SRR7939018.249  !       0       !       0       -       -       MM      0       0
-SRR7939018.259  !       0       !       0       -       -       MM      0       0
-SRR7939018.265  !       0       !       0       -       -       MM      0       0
-SRR7939018.274  !       0       !       0       -       -       MM      0       0
-SRR7939018.282  !       0       !       0       -       -       MM      0       0
-SRR7939018.290  !       0       !       0       -       -       MM      0       0
-SRR7939018.300  !       0       !       0       -       -       MM      0       0
-SRR7939018.302  !       0       !       0       -       -       MM      0       0
-SRR7939018.305  !       0       !       0       -       -       MM      0       0
-SRR7939018.320  !       0       !       0       -       -       MM      0       0
-SRR7939018.324  !       0       !       0       -       -       MM      0       0
-SRR7939018.334  !       0       !       0       -       -       MM      0       0
-SRR7939018.335  !       0       !       0       -       -       MM      0       0
-SRR7939018.344  !       0       !       0       -       -       MM      0       0
-SRR7939018.352  !       0       !       0       -       -       MM      0       0
-SRR7939018.353  !       0       !       0       -       -       MM      0       0
-SRR7939018.357  !       0       !       0       -       -       MM      0       0
-SRR7939018.362  !       0       !       0       -       -       MM      0       0
-SRR7939018.363  !       0       !       0       -       -       MM      0       0
+#samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 8 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
+#samheader: @PG ID:samtools PN:samtools PP:bwa  VN:1.16.1   CL:samtools view -@ 8 -S -b
+#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_aln/SRR7939018.bam  PP:samtools VN:1.0.2
+#samheader: @PG ID:pairtools_sort   PN:pairtools_sort   CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 8 --tmpdir /fh/scratch/delete30/tsukiyama_t --output 04_sort/SRR7939018.sort.txt.gz 03_parse/SRR7939018.p2.txt.gz    PP:pairtools_parse2 VN:1.0.2
+#columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type walk_pair_index walk_pair_type pos51 pos52 pos31 pos32 mapq1 mapq2 mismatches1 mismatches2
+SRR7939018.21   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.22   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.30   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.48   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.49   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.53   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.57   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.66   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.69   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.97   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.102  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.111  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.113  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.114  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.118  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.123  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.145  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.157  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.163  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.177  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.180  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.182  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.189  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.192  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.194  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.205  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.209  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.211  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.213  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.217  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.222  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.224  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.226  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.229  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.244  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.245  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.246  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.248  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.249  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.259  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.265  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.274  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.282  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.290  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.300  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.302  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.305  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.320  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.324  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.334  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.335  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.344  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.352  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.353  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.357  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.362  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.363  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
 
 
 ❯ zcat "${a_sort}" | tail -100
-SRR7939018.12222092     XVI     943124  XVI     940121  +       -       UU      12      60
-SRR7939018.17730638     XVI     943124  XVI     943284  +       -       UU      12      8
-SRR7939018.28190237     XVI     943126  XVI     296448  +       +       UU      12      60
-SRR7939018.42388777     XVI     943126  XVI     930027  +       -       UU      12      60
-SRR7939018.11062244     XVI     943129  XVI     935399  +       -       UU      12      60
-SRR7939018.61202518     XVI     943130  XVI     144840  +       -       UU      12      60
-SRR7939018.48308777     XVI     943130  XVI     799410  +       -       UU      12      60
-SRR7939018.34327409     XVI     943130  XVI     881804  +       -       UU      13      60
-SRR7939018.20157644     XVI     943130  XVI     910666  +       -       UU      12      60
-SRR7939018.64721363     XVI     943130  XVI     910666  +       -       UU      12      60
-SRR7939018.40232783     XVI     943130  XVI     923663  +       -       UU      12      60
-SRR7939018.8345170      XVI     943130  XVI     941359  +       -       UU      12      60
-SRR7939018.38299718     XVI     943130  XVI     941359  +       -       UU      12      60
-SRR7939018.58639867     XVI     943132  XVI     799642  +       -       UU      12      60
-SRR7939018.11233681     XVI     943133  XVI     367084  +       -       UU      24      60
-SRR7939018.28316258     XVI     943133  XVI     367084  +       -       UU      24      60
-SRR7939018.43779838     XVI     943133  XVI     931562  +       -       UU      12      60
-SRR7939018.22958595     XVI     943134  XVI     331028  +       +       UU      5       60
-SRR7939018.64388114     XVI     943134  XVI     331028  +       +       UU      5       60
-SRR7939018.66226745     XVI     943138  XVI     927987  +       +       UU      12      60
-SRR7939018.17100354     XVI     943140  XVI     393603  +       -       UU      12      60
-SRR7939018.40115862     XVI     943140  XVI     942522  +       -       UU      12      24
-SRR7939018.374637       XVI     943144  XVI     28983   +       -       UU      12      60
-SRR7939018.34595812     XVI     943150  XVI     405335  +       -       UU      12      60
-SRR7939018.38203156     XVI     943150  XVI     405335  +       -       UU      12      60
-SRR7939018.43448376     XVI     943152  XVI     185898  +       +       UU      60      60
-SRR7939018.18440278     XVI     943156  XVI     733072  +       +       UU      12      60
-SRR7939018.48164343     XVI     943156  XVI     898872  +       -       UU      12      60
-SRR7939018.25351579     XVI     943157  XVI     721512  +       -       UU      12      60
-SRR7939018.39628631     XVI     943165  XVI     34242   +       +       UU      1       60
-SRR7939018.16423456     XVI     943165  XVI     458280  +       +       UU      1       60
-SRR7939018.13797015     XVI     943165  XVI     821885  +       -       UU      1       60
-SRR7939018.63594573     XVI     943169  XVI     672482  -       -       UU      3       60
-SRR7939018.23074715     XVI     943169  XVI     938317  -       +       UU      3       60
-SRR7939018.28098084     XVI     943169  XVI     940539  -       +       UU      3       60
-SRR7939018.55298794     XVI     943169  XVI     942626  -       +       UU      3       11
-SRR7939018.24350670     XVI     943170  XVI     935546  -       +       UU      7       60
-SRR7939018.57333295     XVI     943172  XVI     641892  -       +       UU      7       60
-SRR7939018.40032321     XVI     943172  XVI     941818  -       -       UU      7       60
-SRR7939018.10215472     XVI     943173  XVI     534074  -       -       UU      12      60
-SRR7939018.61020666     XVI     943173  XVI     913530  -       +       UU      12      60
-SRR7939018.29073419     XVI     943173  XVI     942843  -       -       UU      12      60
-SRR7939018.35378144     XVI     943178  XVI     105800  -       +       UU      12      60
-SRR7939018.5151187      XVI     943178  XVI     765972  -       +       UU      12      60
-SRR7939018.50299456     XVI     943178  XVI     899697  -       -       UU      12      60
-SRR7939018.19428870     XVI     943179  XVI     190396  -       -       UU      12      60
-SRR7939018.34211276     XVI     943180  XVI     943249  -       +       UU      12      6
-SRR7939018.3637158      XVI     943185  XVI     896258  -       -       UU      12      60
-SRR7939018.43194678     XVI     943185  XVI     896258  -       -       UU      12      60
-SRR7939018.17366006     XVI     943191  XVI     943191  -       -       UU      12      11
-SRR7939018.7106523      XVI     943193  XVI     929605  -       +       UU      12      60
-SRR7939018.27269317     XVI     943193  XVI     941934  -       +       UU      12      60
-SRR7939018.18682055     XVI     943201  XVI     925742  -       +       UU      12      60
-SRR7939018.44911277     XVI     943201  XVI     925742  -       +       UU      12      60
-SRR7939018.47303683     XVI     943207  XVI     940235  -       -       UU      12      60
-SRR7939018.44434948     XVI     943210  XVI     727879  -       -       UU      12      60
-SRR7939018.39129918     XVI     943213  XVI     85349   -       -       UU      5       60
-SRR7939018.1005707      XVI     943213  XVI     941254  -       +       UU      5       60
-SRR7939018.53338781     XVI     943213  XVI     942649  -       -       UU      5       10
-SRR7939018.26548532     XVI     943213  XVI     943123  -       +       UU      5       19
-SRR7939018.52983436     XVI     943214  XVI     938492  -       +       UU      1       60
-SRR7939018.24809697     XVI     943214  XVI     943244  -       +       UU      1       3
-SRR7939018.43321177     XVI     943240  XVI     940713  +       -       UU      6       60
-SRR7939018.63738901     XVI     943245  XVI     943245  +       +       UU      6       6
-SRR7939018.49365027     XVI     943251  XVI     942811  +       -       UU      6       1
-SRR7939018.3148879      XVI     943252  XVI     622916  +       +       UU      6       60
-SRR7939018.39477980     XVI     943254  XVI     915272  +       -       UU      6       60
-SRR7939018.49811209     XVI     943254  XVI     915272  +       -       UU      6       60
-SRR7939018.36545703     XVI     943256  XVI     901139  +       -       UU      12      60
-SRR7939018.34945858     XVI     943266  XVI     638344  -       +       UU      8       60
-SRR7939018.48274581     XVI     943266  XVI     900173  -       -       UU      8       60
-SRR7939018.62805509     XVI     943269  XVI     942325  -       -       UU      8       60
-SRR7939018.62823641     XVI     943269  XVI     942325  -       -       UU      8       60
-SRR7939018.31047266     XVI     943290  XVI     918029  -       -       UU      6       60
-SRR7939018.62262490     XVI     943291  XVI     931384  -       +       UU      5       60
-SRR7939018.27584084     XVI     946238  XVI     297878  +       +       UU      15      60
-SRR7939018.29255091     XVI     946238  XVI     297878  +       +       UU      15      60
-SRR7939018.7242477      XVI     946241  XVI     937840  +       -       UU      15      60
-SRR7939018.37241679     XVI     946241  XVI     937840  +       -       UU      15      60
-SRR7939018.38484100     XVI     946241  XVI     937840  +       -       UU      13      60
-SRR7939018.13124921     XVI     946242  XVI     730898  +       -       UU      15      60
-SRR7939018.48115804     XVI     946249  XVI     946249  +       +       UU      7       15
-SRR7939018.987072       XVI     946250  XVI     900167  +       +       UU      6       60
-SRR7939018.29612869     XVI     946250  XVI     900167  +       +       UU      6       60
-SRR7939018.4422013      XVI     946250  XVI     946250  +       +       UU      8       16
-SRR7939018.37280808     XVI     946253  XVI     937718  +       -       UU      2       60
-SRR7939018.50168664     XVI     946253  XVI     937718  +       -       UU      6       60
-SRR7939018.65747920     XVI     946253  XVI     937718  +       -       UU      6       60
-SRR7939018.39634147     XVI     946289  XVI     340211  -       -       UU      15      60
-SRR7939018.52212008     XVI     946289  XVI     340211  -       -       UU      15      60
-SRR7939018.61910153     XVI     946289  XVI     340211  -       -       UU      15      60
-SRR7939018.33097797     XVI     946290  XVI     47785   -       -       UU      15      60
-SRR7939018.20675152     XVI     946291  XVI     242176  -       -       UU      15      60
-SRR7939018.48906274     XVI     946291  XVI     906900  -       +       UU      15      60
-SRR7939018.36276575     XVI     946291  XVI     940004  -       +       UU      15      60
-SRR7939018.5626478      XVI     946293  XVI     908572  -       -       UU      8       60
-SRR7939018.65350763     XVI     946297  XVI     239919  -       -       UU      7       60
-SRR7939018.30035267     XVI     946297  XVI     939701  -       -       UU      7       60
-SRR7939018.55113867     XVI     946300  XVI     939782  -       +       UU      7       60
-SRR7939018.57420183     XVI     946300  XVI     939782  -       +       UU      7       60
+SRR7939018.12222092 XVI 943124  XVI 940121  +   -   UU  1   R1-2    943124  940121  943173  940072  12  60
+SRR7939018.17730638 XVI 943124  XVI 943284  +   -   UU  1   R1-2    943124  943284  943173  943235  12  8
+SRR7939018.28190237 XVI 943126  XVI 296448  +   +   UU  1   R1-2    943126  296448  943175  296497  12  60
+SRR7939018.42388777 XVI 943126  XVI 930027  +   -   UU  1   R1-2    943126  930027  943175  929978  12  60
+SRR7939018.11062244 XVI 943129  XVI 935399  +   -   UU  1   R1-2    943129  935399  943178  935350  12  60      A:G:32:935398:49
+SRR7939018.61202518 XVI 943130  XVI 144840  +   -   UU  1   R1-2    943130  144840  943179  144791  12  60
+SRR7939018.48308777 XVI 943130  XVI 799410  +   -   UU  1   R1-2    943130  799410  943179  799361  12  60
+SRR7939018.34327409 XVI 943130  XVI 881804  +   -   UU  1   R1-2    943130  881804  943169  881755  13  60
+SRR7939018.20157644 XVI 943130  XVI 910666  +   -   UU  1   R1-2    943130  910666  943179  910617  12  60
+SRR7939018.64721363 XVI 943130  XVI 910666  +   -   UU  1   R1-2    943130  910666  943179  910617  12  60
+SRR7939018.40232783 XVI 943130  XVI 923663  +   -   UU  1   R1-2    943130  923663  943179  923614  12  60
+SRR7939018.8345170  XVI 943130  XVI 941359  +   -   UU  1   R1-2    943130  941359  943179  941310  12  60
+SRR7939018.38299718 XVI 943130  XVI 941359  +   -   UU  1   R1-2    943130  941359  943179  941310  12  60
+SRR7939018.58639867 XVI 943132  XVI 799642  +   -   UU  1   R1-2    943132  799642  943181  799593  12  60
+SRR7939018.11233681 XVI 943133  XVI 367084  +   -   UU  1   R1-2    943133  367084  943174  367035  24  60
+SRR7939018.28316258 XVI 943133  XVI 367084  +   -   UU  1   R1-2    943133  367084  943174  367035  24  60
+SRR7939018.43779838 XVI 943133  XVI 931562  +   -   UU  1   R1-2    943133  931562  943182  931513  12  60
+SRR7939018.22958595 XVI 943134  XVI 331028  +   +   UU  1   R1-2    943134  331028  943169  331077  5   60  G:T:38:943133:0
+SRR7939018.64388114 XVI 943134  XVI 331028  +   +   UU  1   R1-2    943134  331028  943169  331077  5   60  G:T:38:943133:0
+SRR7939018.66226745 XVI 943138  XVI 927987  +   +   UU  1   R1-2    943138  927987  943187  928036  12  60
+SRR7939018.17100354 XVI 943140  XVI 393603  +   -   UU  1   R1-2    943140  393603  943189  393554  12  60      C:A:40:393571:18
+SRR7939018.40115862 XVI 943140  XVI 942522  +   -   UU  1   R1-2    943140  942522  943189  942483  12  24
+SRR7939018.374637   XVI 943144  XVI 28983   +   -   UU  1   R1-2    943144  28983   943193  28934   12  60
+SRR7939018.34595812 XVI 943150  XVI 405335  +   -   UU  1   R1-2    943150  405335  943199  405286  12  60
+SRR7939018.38203156 XVI 943150  XVI 405335  +   -   UU  1   R1-2    943150  405335  943199  405286  12  60
+SRR7939018.43448376 XVI 943152  XVI 185898  +   +   UU  1   R1-2    943152  185898  943201  185945  60  60  A:T:13:943162:11,C:A:2:943183:32
+SRR7939018.18440278 XVI 943156  XVI 733072  +   +   UU  1   R1-2    943156  733072  943205  733101  12  60
+SRR7939018.48164343 XVI 943156  XVI 898872  +   -   UU  1   R1-2    943156  898872  943205  898823  12  60
+SRR7939018.25351579 XVI 943157  XVI 721512  +   -   UU  1   R1-2    943157  721512  943206  721475  12  60
+SRR7939018.39628631 XVI 943165  XVI 34242   +   +   UU  1   R1-2    943165  34242   943214  34291   1   60  T:A:40:943213:49
+SRR7939018.16423456 XVI 943165  XVI 458280  +   +   UU  1   R1-2    943165  458280  943214  458310  1   60  T:A:38:943213:49
+SRR7939018.13797015 XVI 943165  XVI 821885  +   -   UU  1   R1-2    943165  821885  943214  821836  1   60
+SRR7939018.63594573 XVI 943169  XVI 672482  -   -   UU  1   R1-2    943169  672482  943120  672433  3   60
+SRR7939018.23074715 XVI 943169  XVI 938317  -   +   UU  1   R1-2    943169  938317  943120  938366  3   60
+SRR7939018.28098084 XVI 943169  XVI 940539  -   +   UU  1   R1-2    943169  940539  943120  940588  3   60      A:C:38:940538:0
+SRR7939018.55298794 XVI 943169  XVI 942626  -   +   UU  1   R1-2    943169  942626  943120  942675  3   11
+SRR7939018.24350670 XVI 943170  XVI 935546  -   +   UU  1   R1-2    943170  935546  943121  935595  7   60
+SRR7939018.57333295 XVI 943172  XVI 641892  -   +   UU  1   R1-2    943172  641892  943123  641941  7   60
+SRR7939018.40032321 XVI 943172  XVI 941818  -   -   UU  1   R1-2    943172  941818  943123  941769  7   60
+SRR7939018.10215472 XVI 943173  XVI 534074  -   -   UU  1   R1-2    943173  534074  943124  534025  12  60
+SRR7939018.61020666 XVI 943173  XVI 913530  -   +   UU  1   R1-2    943173  913530  943124  913579  12  60
+SRR7939018.29073419 XVI 943173  XVI 942843  -   -   UU  1   R1-2    943173  942843  943124  942794  12  60
+SRR7939018.35378144 XVI 943178  XVI 105800  -   +   UU  1   R1-2    943178  105800  943129  105849  12  60
+SRR7939018.5151187  XVI 943178  XVI 765972  -   +   UU  1   R1-2    943178  765972  943129  766021  12  60
+SRR7939018.50299456 XVI 943178  XVI 899697  -   -   UU  1   R1-2    943178  899697  943129  899648  12  60
+SRR7939018.19428870 XVI 943179  XVI 190396  -   -   UU  1   R1-2    943179  190396  943130  190347  12  60
+SRR7939018.34211276 XVI 943180  XVI 943249  -   +   UU  1   R1-2    943180  943249  943131  943298  12  6
+SRR7939018.3637158  XVI 943185  XVI 896258  -   -   UU  1   R1-2    943185  896258  943136  896209  12  60
+SRR7939018.43194678 XVI 943185  XVI 896258  -   -   UU  1   R1-2    943185  896258  943136  896209  12  60
+SRR7939018.17366006 XVI 943191  XVI 943191  -   -   UU  1   R1-2    943191  943191  943142  943142  12  11      G:T:38:943187:46
+SRR7939018.7106523  XVI 943193  XVI 929605  -   +   UU  1   R1-2    943193  929605  943144  929640  12  60
+SRR7939018.27269317 XVI 943193  XVI 941934  -   +   UU  1   R1-2    943193  941934  943144  941983  12  60
+SRR7939018.18682055 XVI 943201  XVI 925742  -   +   UU  1   R1-2    943201  925742  943152  925791  12  60
+SRR7939018.44911277 XVI 943201  XVI 925742  -   +   UU  1   R1-2    943201  925742  943152  925791  12  60
+SRR7939018.47303683 XVI 943207  XVI 940235  -   -   UU  1   R1-2    943207  940235  943158  940186  12  60
+SRR7939018.44434948 XVI 943210  XVI 727879  -   -   UU  1   R1-2    943210  727879  943161  727830  12  60
+SRR7939018.39129918 XVI 943213  XVI 85349   -   -   UU  1   R1-2    943213  85349   943164  85300   5   60
+SRR7939018.1005707  XVI 943213  XVI 941254  -   +   UU  1   R1-2    943213  941254  943164  941303  5   60
+SRR7939018.53338781 XVI 943213  XVI 942649  -   -   UU  1   R1-2    943213  942649  943164  942604  5   10
+SRR7939018.26548532 XVI 943213  XVI 943123  -   +   UU  1   R1-2    943213  943123  943164  943170  5   19
+SRR7939018.52983436 XVI 943214  XVI 938492  -   +   UU  1   R1-2    943214  938492  943165  938541  1   60
+SRR7939018.24809697 XVI 943214  XVI 943244  -   +   UU  1   R1-2    943214  943244  943165  943293  1   3   T:A:40:943189:25    C:A:40:943252:9,C:T:40:943256:13
+SRR7939018.43321177 XVI 943240  XVI 940713  +   -   UU  1   R1-2    943240  940713  943289  940664  6   60
+SRR7939018.63738901 XVI 943245  XVI 943245  +   +   UU  1   R1-2    943245  943245  943294  943294  6   6
+SRR7939018.49365027 XVI 943251  XVI 942811  +   -   UU  1   R1-2    943251  942811  943300  942762  6   1
+SRR7939018.3148879  XVI 943252  XVI 622916  +   +   UU  1   R1-2    943252  622916  943301  622965  6   60
+SRR7939018.39477980 XVI 943254  XVI 915272  +   -   UU  1   R1-2    943254  915272  943303  915223  6   60
+SRR7939018.49811209 XVI 943254  XVI 915272  +   -   UU  1   R1-2    943254  915272  943303  915223  6   60
+SRR7939018.36545703 XVI 943256  XVI 901139  +   -   UU  1   R1-2    943256  901139  943290  901090  12  60
+SRR7939018.34945858 XVI 943266  XVI 638344  -   +   UU  1   R1-2    943266  638344  943217  638393  8   60
+SRR7939018.48274581 XVI 943266  XVI 900173  -   -   UU  1   R1-2    943266  900173  943217  900143  8   60
+SRR7939018.62805509 XVI 943269  XVI 942325  -   -   UU  1   R1-2    943269  942325  943220  942276  8   60
+SRR7939018.62823641 XVI 943269  XVI 942325  -   -   UU  1   R1-2    943269  942325  943220  942276  8   60
+SRR7939018.31047266 XVI 943290  XVI 918029  -   -   UU  1   R1-2    943290  918029  943241  917980  6   60
+SRR7939018.62262490 XVI 943291  XVI 931384  -   +   UU  1   R1-2    943291  931384  943242  931433  5   60  T:A:13:943290:49    A:C:2:931430:47
+SRR7939018.27584084 XVI 946238  XVI 297878  +   +   UU  1   R1-2    946238  297878  946287  297927  15  60
+SRR7939018.29255091 XVI 946238  XVI 297878  +   +   UU  1   R1-2    946238  297878  946287  297927  15  60
+SRR7939018.7242477  XVI 946241  XVI 937840  +   -   UU  1   R1-2    946241  937840  946290  937791  15  60
+SRR7939018.37241679 XVI 946241  XVI 937840  +   -   UU  1   R1-2    946241  937840  946290  937791  15  60
+SRR7939018.38484100 XVI 946241  XVI 937840  +   -   UU  1   R1-2    946241  937840  946290  937791  13  60  A:G:13:946264:24
+SRR7939018.13124921 XVI 946242  XVI 730898  +   -   UU  1   R1-2    946242  730898  946291  730849  15  60
+SRR7939018.48115804 XVI 946249  XVI 946249  +   +   UU  1   R1-2    946249  946249  946298  946291  7   15
+SRR7939018.987072   XVI 946250  XVI 900167  +   +   UU  1   R1-2    946250  900167  946299  900216  6   60
+SRR7939018.29612869 XVI 946250  XVI 900167  +   +   UU  1   R1-2    946250  900167  946299  900216  6   60
+SRR7939018.4422013  XVI 946250  XVI 946250  +   +   UU  1   R1-2    946250  946250  946288  946286  8   16      A:C:38:946276:27
+SRR7939018.37280808 XVI 946253  XVI 937718  +   -   UU  1   R1-2    946253  937718  946302  937669  2   60  A:C:13:946280:28
+SRR7939018.50168664 XVI 946253  XVI 937718  +   -   UU  1   R1-2    946253  937718  946302  937669  6   60
+SRR7939018.65747920 XVI 946253  XVI 937718  +   -   UU  1   R1-2    946253  937718  946302  937669  6   60
+SRR7939018.39634147 XVI 946289  XVI 340211  -   -   UU  1   R1-2    946289  340211  946240  340162  15  60
+SRR7939018.52212008 XVI 946289  XVI 340211  -   -   UU  1   R1-2    946289  340211  946240  340162  15  60
+SRR7939018.61910153 XVI 946289  XVI 340211  -   -   UU  1   R1-2    946289  340211  946240  340162  15  60
+SRR7939018.33097797 XVI 946290  XVI 47785   -   -   UU  1   R1-2    946290  47785   946241  47736   15  60
+SRR7939018.20675152 XVI 946291  XVI 242176  -   -   UU  1   R1-2    946291  242176  946242  242127  15  60
+SRR7939018.48906274 XVI 946291  XVI 906900  -   +   UU  1   R1-2    946291  906900  946242  906949  15  60
+SRR7939018.36276575 XVI 946291  XVI 940004  -   +   UU  1   R1-2    946291  940004  946242  940053  15  60
+SRR7939018.5626478  XVI 946293  XVI 908572  -   -   UU  1   R1-2    946293  908572  946244  908523  8   60
+SRR7939018.65350763 XVI 946297  XVI 239919  -   -   UU  1   R1-2    946297  239919  946248  239870  7   60
+SRR7939018.30035267 XVI 946297  XVI 939701  -   -   UU  1   R1-2    946297  939701  946248  939652  7   60
+SRR7939018.55113867 XVI 946300  XVI 939782  -   +   UU  1   R1-2    946300  939782  946251  939827  7   60
+SRR7939018.57420183 XVI 946300  XVI 939782  -   +   UU  1   R1-2    946300  939782  946251  939827  7   60
 ```
 </details>
 <br />
@@ -4075,7 +4632,7 @@ SRR7939018.57420183     XVI     946300  XVI     939782  -       +       UU      
 
 <a id="5-run-pairtools-dedup-and-pairtools-split"></a>
 ### 5. Run `pairtools dedup` and `pairtools split`
-<a id="code-10"></a>
+<a id="code-9"></a>
 #### Code
 <details>
 <summary><i>Code: 5. Run pairtools dedup</i></summary>
@@ -4089,59 +4646,58 @@ pairtools split --help
 
 
 #  Do a trial run of pairtools dedup ------------------------------------------
-echo """
-pairtools dedup \\
-    --n-proc \"${threads}\" \\
-    --max-mismatch \"${max_mismatch}\" \\
-    --mark-dups \\
-    --output \\
-        >(
-            pairtools split \\
-                --output-pairs \"${a_dedup_pre_pairs}\" \\
-                --output-sam \"${a_dedup_pre_bam}\" \\
-        ) \\
-    --output-unmapped \\
-        >(
-            pairtools split \\
-                --output-pairs \"${a_dup_pre_pairs}\" \\
-                --output-sam \"${a_dup_pre_bam}\" \\
-        ) \\
-    --output-dups \\
-        >(
-            pairtools split \\
-                --output-pairs \"${a_unmap_pre_pairs}\" \\
-                --output-sam \"${a_unmap_pre_bam}\" \\
-        ) \\
-    --output-stats \"${a_dedup_stats}\" \\
-    \"${a_sort}\" \\
-        2> >(tee -a \"${d_dedup}/err_out/${f_pre}.dedup.stderr.txt\" >&2)
-"""
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        echo """
+        pairtools dedup \\
+            --n-proc \"${threads}\" \\
+            --max-mismatch \"${max_mismatch}\" \\
+            --mark-dups \\
+            --output \\
+                >(
+                    pairtools split \\
+                        --output-pairs \"${a_dedup_pre_pairs}\"
+                ) \\
+            --output-unmapped \\
+                >(
+                    pairtools split \\
+                        --output-pairs \"${a_dup_pre_pairs}\"
+                ) \\
+            --output-dups \\
+                >(
+                    pairtools split \\
+                        --output-pairs \"${a_unmap_pre_pairs}\"
+                ) \\
+            --output-stats \"${a_dedup_stats}\" \\
+            \"${a_sort}\" \\
+                2> >(tee -a \"${d_dedup}/err_out/${f_pre}.dedup.stderr.txt\" >&2)
+        """
+    }
 
-pairtools dedup \
-    --n-proc "${threads}" \
-    --max-mismatch "${max_mismatch}" \
-    --mark-dups \
-    --output \
-        >(
-            pairtools split \
-                --output-pairs "${a_dedup_pre_pairs}" \
-                --output-sam "${a_dedup_pre_bam}" \
-        ) \
-    --output-unmapped \
-        >(
-            pairtools split \
-                --output-pairs "${a_dup_pre_pairs}" \
-                --output-sam "${a_dup_pre_bam}" \
-        ) \
-    --output-dups \
-        >(
-            pairtools split \
-                --output-pairs "${a_unmap_pre_pairs}" \
-                --output-sam "${a_unmap_pre_bam}" \
-        ) \
-    --output-stats "${a_dedup_stats}" \
-    "${a_sort}" \
-        2> >(tee -a "${d_dedup}/err_out/${f_pre}.dedup.stderr.txt" >&2)
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        pairtools dedup \
+            --n-proc "${threads}" \
+            --max-mismatch "${max_mismatch}" \
+            --mark-dups \
+            --output \
+                >(
+                    pairtools split --output-pairs "${a_dedup_pre_pairs}"
+                ) \
+            --output-unmapped \
+                >(
+                    pairtools split --output-pairs "${a_dup_pre_pairs}"
+                ) \
+            --output-dups \
+                >(
+                    pairtools split --output-pairs "${a_unmap_pre_pairs}"
+                ) \
+            --output-stats "${a_dedup_stats}" \
+            "${a_sort}" \
+                2> >(tee -a "${d_dedup}/err_out/${f_pre}.dedup.stderr.txt" >&2)
+    }
 
 
 #  Check the various outfiles -------------------------------------------------
@@ -4150,10 +4706,6 @@ pairtools dedup \
 ., "${a_dedup_pre_pairs}"
 ., "${a_dup_pre_pairs}"
 ., "${a_unmap_pre_pairs}"
-
-., "${a_dedup_pre_bam}"
-., "${a_dup_pre_bam}"
-., "${a_unmap_pre_bam}"
 
 zcat "${a_dedup_pre_pairs}" | head -100  # zcat "${a_dedup_pre_pairs}" | less
 zcat "${a_dup_pre_pairs}" | head -100
@@ -4177,16 +4729,6 @@ zcat "${a_dedup_pre_pairs}" | grep "RU\|UR"
 #  Check the stats outfile ----------------------------------------------------
 ., "${a_dedup_stats}"
 cat "${a_dedup_stats}"  # less "${a_dedup_stats}"
-
-
-#  Something is wrong with the bams (see sub-header "Notes" below) ------------
-samtools view "${a_dedup_pre_bam}"
-samtools view "${a_dup_pre_bam}"
-samtools view "${a_unmap_pre_bam}"
-
-zcat "${a_dedup_pre_bam}"
-zcat "${a_dup_pre_bam}"
-zcat "${a_unmap_pre_bam}"
 ```
 </details>
 <br />
@@ -4422,92 +4964,163 @@ Options:
 </details>
 <br />
 
-<a id="pairtools-dedup"></a>
-##### `pairtools dedup`
+<a id="run-pairtools-dedup"></a>
+##### Run `pairtools dedup`
 <details>
-<summary><i>Printed: pairtools dedup</i></summary>
+<summary><i>Printed: Run pairtools dedup</i></summary>
 
 ```txt
-❯ echo """
-> pairtools dedup \\
->     --n-proc \"${threads}\" \\
->     --max-mismatch \"${max_mismatch}\" \\
->     --mark-dups \\
->     --output \\
->         >(
->             pairtools split \\
->                 --output-pairs \"${a_dedup_pre_pairs}\" \\
->                 --output-sam \"${a_dedup_pre_bam}\" \\
->         ) \\
->     --output-unmapped \\
->         >(
->             pairtools split \\
->                 --output-pairs \"${a_dup_pre_pairs}\" \\
->                 --output-sam \"${a_dup_pre_bam}\" \\
->         ) \\
->     --output-dups \\
->         >(
->             pairtools split \\
->                 --output-pairs \"${a_unmap_pre_pairs}\" \\
->                 --output-sam \"${a_unmap_pre_bam}\" \\
->         ) \\
->     --output-stats \"${a_dedup_stats}\" \\
->     \"${a_sort}\" \\
->         2> >(tee -a \"${d_dedup}/err_out/${f_pre}.dedup.stderr.txt\" >&2)
-> """
+❯ [[ "${run}" == TRUE ]] &&
+>     {
+>         echo """
+>         pairtools dedup \\
+>             --n-proc \"${threads}\" \\
+>             --max-mismatch \"${max_mismatch}\" \\
+>             --mark-dups \\
+>             --output \\
+>                 >(
+>                     pairtools split \\
+>                         --output-pairs \"${a_dedup_pre_pairs}\"
+>                 ) \\
+>             --output-unmapped \\
+>                 >(
+>                     pairtools split \\
+>                         --output-pairs \"${a_dup_pre_pairs}\"
+>                 ) \\
+>             --output-dups \\
+>                 >(
+>                     pairtools split \\
+>                         --output-pairs \"${a_unmap_pre_pairs}\"
+>                 ) \\
+>             --output-stats \"${a_dedup_stats}\" \\
+>             \"${a_sort}\" \\
+>                 2> >(tee -a \"${d_dedup}/err_out/${f_pre}.dedup.stderr.txt\" >&2)
+>         """
+>     }
 
-pairtools dedup \
-    --n-proc "16" \
-    --max-mismatch "3" \
-    --mark-dups \
-    --output \
-        >(
-            pairtools split \
-                --output-pairs "dedup/pairs/SRR7939018.nodups.pairs.gz" \
-                --output-sam "dedup/bam/SRR7939018.nodups.bam" \
-        ) \
-    --output-unmapped \
-        >(
-            pairtools split \
-                --output-pairs "dedup/pairs/SRR7939018.dups.pairs.gz" \
-                --output-sam "dedup/bam/SRR7939018.dups.bam" \
-        ) \
-    --output-dups \
-        >(
-            pairtools split \
-                --output-pairs "dedup/pairs/SRR7939018.unmapped.pairs.gz" \
-                --output-sam "dedup/bam/SRR7939018.unmapped.bam" \
-        ) \
-    --output-stats "stats/SRR7939018.dedup.stats.txt" \
-    "pairs/SRR7939018.sort.txt.gz" \
-        2> >(tee -a "dedup/err_out/SRR7939018.dedup.stderr.txt" >&2)
+        pairtools dedup \
+            --n-proc "8" \
+            --max-mismatch "0" \
+            --mark-dups \
+            --output \
+                >(
+                    pairtools split \
+                        --output-pairs "05_dedup/pairs/SRR7939018.nodups.pairs.gz"
+                ) \
+            --output-unmapped \
+                >(
+                    pairtools split \
+                        --output-pairs "05_dedup/pairs/SRR7939018.dups.pairs.gz"
+                ) \
+            --output-dups \
+                >(
+                    pairtools split \
+                        --output-pairs "05_dedup/pairs/SRR7939018.unmapped.pairs.gz"
+                ) \
+            --output-stats "0X_stats/SRR7939018.dedup.stats.txt" \
+            "04_sort/SRR7939018.sort.txt.gz" \
+                2> >(tee -a "05_dedup/err_out/SRR7939018.dedup.stderr.txt" >&2)
 
 
-❯ pairtools dedup \
->     --n-proc "${threads}" \
->     --max-mismatch "${max_mismatch}" \
->     --mark-dups \
->     --output \
->         >(
->             pairtools split \
->                 --output-pairs "${a_dedup_pre_pairs}" \
->                 --output-sam "${a_dedup_pre_bam}" \
->         ) \
->     --output-unmapped \
->         >(
->             pairtools split \
->                 --output-pairs "${a_dup_pre_pairs}" \
->                 --output-sam "${a_dup_pre_bam}" \
->         ) \
->     --output-dups \
->         >(
->             pairtools split \
->                 --output-pairs "${a_unmap_pre_pairs}" \
->                 --output-sam "${a_unmap_pre_bam}" \
->         ) \
->     --output-stats "${a_dedup_stats}" \
->     "${a_sort}" \
->         2> >(tee -a "${d_dedup}/err_out/${f_pre}.dedup.stderr.txt" >&2)
+❯ [[ "${run}" == TRUE ]] &&
+>     {
+>         pairtools dedup \
+>             --n-proc "${threads}" \
+>             --max-mismatch "${max_mismatch}" \
+>             --mark-dups \
+>             --output \
+>                 >(
+>                     pairtools split --output-pairs "${a_dedup_pre_pairs}"
+>                 ) \
+>             --output-unmapped \
+>                 >(
+>                     pairtools split --output-pairs "${a_dup_pre_pairs}"
+>                 ) \
+>             --output-dups \
+>                 >(
+>                     pairtools split --output-pairs "${a_unmap_pre_pairs}"
+>                 ) \
+>             --output-stats "${a_dedup_stats}" \
+>             "${a_sort}" \
+>                 2> >(tee -a "${d_dedup}/err_out/${f_pre}.dedup.stderr.txt" >&2)
+>     }
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (16,17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/dedup.py:132: DtypeWarning: Columns (17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for df in dfs:
 ```
 </details>
 <br />
@@ -4518,35 +5131,26 @@ pairtools dedup \
 <summary><i>Printed: Check the various outfiles</i></summary>
 
 ```txt
+❯ #  Check the various outfiles -------------------------------------------------
+
+
 ❯ ., "${d_dedup}/err_out/${f_pre}.dedup.stderr.txt"
--rw-rw---- 1 kalavatt 0 Jun 11 10:37 dedup/err_out/SRR7939018.dedup.stderr.txt
+-rw-rw---- 1 kalavatt 6.2K Jul  6 12:41 05_dedup/err_out/SRR7939018.dedup.stderr.txt
 
 
 ❯ ., "${a_dedup_pre_pairs}"
--rw-rw---- 1 kalavatt 385M Jun 11 10:44 dedup/pairs/SRR7939018.nodups.pairs.gz
+-rw-rw---- 1 kalavatt 748M Jul  6 12:41 05_dedup/pairs/SRR7939018.nodups.pairs.gz
 
 
 ❯ ., "${a_dup_pre_pairs}"
--rw-rw---- 1 kalavatt 148M Jun 11 10:44 dedup/pairs/SRR7939018.dups.pairs.gz
+-rw-rw---- 1 kalavatt 213M Jul  6 12:41 05_dedup/pairs/SRR7939018.dups.pairs.gz
 
 
 ❯ ., "${a_unmap_pre_pairs}"
--rw-rw---- 1 kalavatt 86M Jun 11 10:44 dedup/pairs/SRR7939018.unmapped.pairs.gz
+-rw-rw---- 1 kalavatt 158M Jul  6 12:41 05_dedup/pairs/SRR7939018.unmapped.pairs.gz
 
 
-❯ ., "${a_dedup_pre_bam}"
--rw-rw---- 1 kalavatt 968 Jun 11 10:44 dedup/bam/SRR7939018.nodups.bam
-
-
-❯ ., "${a_dup_pre_bam}"
--rw-rw---- 1 kalavatt 966 Jun 11 10:44 dedup/bam/SRR7939018.dups.bam
-
-
-❯ ., "${a_unmap_pre_bam}"
--rw-rw---- 1 kalavatt 966 Jun 11 10:44 dedup/bam/SRR7939018.unmapped.bam
-
-
-❯ zcat "${a_dedup_pre_pairs}" | head -100
+❯ zcat "${a_dedup_pre_pairs}" | head -100  # zcat "${a_dedup_pre_pairs}" | less
 ## pairs format v1.0.0
 #sorted: chr1-chr2-pos1-pos2
 #shape: whole matrix
@@ -4585,68 +5189,68 @@ pairtools dedup \
 #samheader: @SQ SN:XV   LN:1091291
 #samheader: @SQ SN:XVI  LN:948066
 #samheader: @SQ SN:Mito LN:85779
-#samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 16 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
-#samheader: @PG ID:samtools     PN:samtools     PP:bwa  VN:1.16.1       CL:samtools view -@ 16 -S -b
-#samheader: @PG ID:pairtools_parse      PN:pairtools_parse      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse -o pairs/SRR7939018.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --drop-sam --drop-seq --output-stats stats/SRR7939018.stats.txt --assembly S288C_R64-3-1 --no-flip --add-columns mapq --walks-policy mask bams/SRR7939018.bam  PP:samtools     VN:1.0.2
-#samheader: @PG ID:pairtools_sort       PN:pairtools_sort       CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 16 --tmpdir /fh/scratch/delete30/tsukiyama_t --output pairs/SRR7939018.sort.txt.gz pairs/SRR7939018.txt.gz  PP:pairtools_parse      VN:1.0.2
-#samheader: @PG ID:pairtools_dedup      PN:pairtools_dedup      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 16 --max-mismatch 3 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats stats/SRR7939018.dedup.stats.txt pairs/SRR7939018.sort.txt.gz    PP:pairtools_sort     VN:1.0.2
-#samheader: @PG ID:pairtools_split      PN:pairtools_split      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs dedup/pairs/SRR7939018.nodups.pairs.gz --output-sam dedup/bam/SRR7939018.nodups.bam PP:pairtools_dedup      VN:1.0.2
-#columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type mapq1 mapq2
-SRR7939018.44042564     I       1       I       15064   +       -       UU      48      13
-SRR7939018.44810319     I       7       I       1001    +       +       UU      28      46
-SRR7939018.29094541     I       7       I       1292    +       -       UU      28      13
-SRR7939018.17270740     I       8       I       2024    +       +       UU      21      13
-SRR7939018.55685650     I       8       I       9446    +       -       UU      28      60
-SRR7939018.20572273     I       10      I       130     +       +       UU      35      53
-SRR7939018.14854904     I       10      I       318     +       -       UU      35      60
-SRR7939018.25573455     I       10      I       558     +       +       UU      35      11
-SRR7939018.34992310     I       10      I       887     +       +       UU      35      35
-SRR7939018.1104427      I       10      I       31959   +       -       UU      35      60
-SRR7939018.35158773     I       11      I       865     +       +       UU      39      35
-SRR7939018.22989844     I       12      I       219     +       -       UU      42      57
-SRR7939018.33126366     I       12      I       119112  +       -       UU      42      60
-SRR7939018.18616690     I       13      I       280     +       -       UU      42      20
-SRR7939018.50678971     I       29      I       407     +       -       UU      60      39
-SRR7939018.10119014     I       36      I       470     +       -       UU      60      6
-SRR7939018.9636000      I       38      I       194     +       -       UU      60      18
-SRR7939018.43976050     I       38      I       229129  -       -       UU      2       12
-SRR7939018.56159970     I       39      I       2441    +       -       UU      60      35
-SRR7939018.35458836     I       40      I       89      +       -       UU      60      60
-SRR7939018.54943727     I       41      I       178     +       +       UU      60      57
-SRR7939018.35434398     I       41      I       321     +       +       UU      60      60
-SRR7939018.19718640     I       41      I       395     +       +       UU      60      60
-SRR7939018.27890433     I       41      I       1731    +       +       UU      60      15
-SRR7939018.13293960     I       41      I       38151   -       +       UU      18      60
-SRR7939018.16006081     I       43      I       242     +       -       UU      60      60
-SRR7939018.50825843     I       52      I       336     -       +       UU      28      60
-SRR7939018.8625963      I       55      I       319     -       +       UU      28      60
-SRR7939018.18404752     I       56      I       479     -       +       UU      28      39
-SRR7939018.5344196      I       56      I       33715   -       -       UU      22      60
-SRR7939018.19358281     I       58      I       2936    -       -       UU      13      60
-SRR7939018.62948413     I       58      I       27756   -       +       UU      32      32
-SRR7939018.62698375     I       60      I       75259   -       +       UU      18      60
-SRR7939018.57525614     I       62      I       333     -       -       UU      39      25
-SRR7939018.63561884     I       62      I       9772    -       -       UU      39      60
-SRR7939018.54429866     I       62      I       228205  -       -       UU      42      55
-SRR7939018.11337172     I       63      I       3225    +       +       UU      60      60
-SRR7939018.32883053     I       64      I       4341    +       -       UU      60      60
-SRR7939018.41612980     I       66      I       289     -       -       UU      44      27
-SRR7939018.20486679     I       66      I       47606   -       +       UU      42      60
-SRR7939018.4271037      I       68      I       500     +       -       UU      60      60
-SRR7939018.13346597     I       72      I       4371    -       +       UU      53      60
-SRR7939018.24593858     I       72      I       7008    -       -       UU      37      60
-SRR7939018.41263687     I       73      I       49428   +       -       UU      60      60
-SRR7939018.34067598     I       77      I       298     +       -       UU      53      35
-SRR7939018.7777574      I       77      I       1223    -       -       UU      60      9
-SRR7939018.41918892     I       77      I       2410    -       -       UU      60      13
-SRR7939018.36976831     I       78      I       228     +       -       UU      60      60
-SRR7939018.11605183     I       78      I       1068    +       -       UU      60      9
-SRR7939018.61330774     I       78      I       4018    +       -       UU      60      60
-SRR7939018.58174255     I       79      I       1330    +       -       UU      60      20
-SRR7939018.54185633     I       79      I       1369    +       -       UU      60      35
-SRR7939018.32333692     I       79      I       207738  +       +       UU      60      39
-SRR7939018.30478651     I       81      I       95      -       +       UU      52      50
-SRR7939018.15936606     I       81      I       5173    -       +       UU      60      60
+#samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 8 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
+#samheader: @PG ID:samtools PN:samtools PP:bwa  VN:1.16.1   CL:samtools view -@ 8 -S -b
+#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_aln/SRR7939018.bam  PP:samtools VN:1.0.2
+#samheader: @PG ID:pairtools_sort   PN:pairtools_sort   CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 8 --tmpdir /fh/scratch/delete30/tsukiyama_t --output 04_sort/SRR7939018.sort.txt.gz 03_parse/SRR7939018.p2.txt.gz    PP:pairtools_parse2 VN:1.0.2
+#samheader: @PG ID:pairtools_dedup  PN:pairtools_dedup  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 8 --max-mismatch 0 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats 0X_stats/SRR7939018.dedup.stats.txt 04_sort/SRR7939018.sort.txt.gz PP:pairtools_sort   VN:1.0.2
+#samheader: @PG ID:pairtools_split  PN:pairtools_split  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs 05_dedup/pairs/SRR7939018.nodups.pairs.gz    PP:pairtools_dedup  VN:1.0.2
+#columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type walk_pair_index walk_pair_type pos51 pos52 pos31 pos32 mapq1 mapq2 mismatches1 mismatches2
+SRR7939018.44042564 I   1   I   15064   +   -   UU  1   R1-2    1   15064   48  15015   48  13
+SRR7939018.44810319 I   7   I   1001    +   +   UU  1   R1-2    7   1001    56  1050    28  46
+SRR7939018.29094541 I   7   I   1292    +   -   UU  1   R1-2    7   1292    56  1243    28  13
+SRR7939018.17270740 I   8   I   2024    +   +   UU  1   R1-2    8   2024    41  2073    21  13
+SRR7939018.55685650 I   8   I   9446    +   -   UU  1   R1-2    8   9446    57  9397    28  60
+SRR7939018.20572273 I   10  I   130 +   +   UU  1   R1-2    10  130 59  179 35  53
+SRR7939018.14854904 I   10  I   318 +   -   UU  1   R1-2    10  318 59  269 35  60
+SRR7939018.25573455 I   10  I   558 +   +   UU  1   R1-2    10  558 59  607 35  11
+SRR7939018.34992310 I   10  I   887 +   +   UU  1   R1-2    10  887 59  936 35  35
+SRR7939018.1104427  I   10  I   31959   +   -   UU  1   R1-2    10  31959   59  31910   35  60
+SRR7939018.35158773 I   11  I   865 +   +   UU  1   R1-2    11  865 60  914 39  35
+SRR7939018.22989844 I   12  I   219 +   -   UU  1   R1-2    12  219 61  170 42  57
+SRR7939018.33126366 I   12  I   119112  +   -   UU  1   R1-2    12  119112  61  119063  42  60
+SRR7939018.18616690 I   13  I   280 +   -   UU  1   R1-2    13  280 62  231 42  20      C:A:40:274:44
+SRR7939018.50678971 I   29  I   407 +   -   UU  1   R1-2    29  407 78  358 60  39
+SRR7939018.10119014 I   36  I   470 +   -   UU  1   R1-2    36  470 78  421 60  6
+SRR7939018.9636000  I   38  I   194 +   -   UU  1   R1-2    38  194 87  145 60  18
+SRR7939018.43976050 I   38  I   229129  -   -   UU  1   R1-2    38  229129  1   229080  2   12  A:C:13:9:21 C:T:38:229097:18,C:A:13:229103:24
+SRR7939018.56159970 I   39  I   2441    +   -   UU  1   R1-2    39  2441    88  2392    60  35  C:A:38:38:0
+SRR7939018.35458836 I   40  I   89  +   -   UU  1   R1-2    40  89  89  40  60  60
+SRR7939018.54943727 I   41  I   178 +   +   UU  1   R1-2    41  178 90  227 60  57
+SRR7939018.35434398 I   41  I   321 +   +   UU  1   R1-2    41  321 90  370 60  60
+SRR7939018.19718640 I   41  I   395 +   +   UU  1   R1-2    41  395 90  444 60  60
+SRR7939018.27890433 I   41  I   1731    +   +   UU  1   R1-2    41  1731    90  1780    60  15
+SRR7939018.13293960 I   41  I   38151   -   +   UU  1   R1-2    41  38151   1   38200   18  60
+SRR7939018.16006081 I   43  I   242 +   -   UU  1   R1-2    43  242 92  193 60  60
+SRR7939018.50825843 I   52  I   336 -   +   UU  1   R1-2    52  336 3   385 28  60
+SRR7939018.8625963  I   55  I   319 -   +   UU  1   R1-2    55  319 6   368 28  60
+SRR7939018.18404752 I   56  I   479 -   +   UU  1   R1-2    56  479 7   528 28  39
+SRR7939018.5344196  I   56  I   33715   -   -   UU  1   R1-2    56  33715   7   33666   22  60  A:C:13:17:11,A:C:13:25:19,A:C:13:30:24
+SRR7939018.19358281 I   58  I   2936    -   -   UU  1   R1-2    58  2936    9   2887    13  60  A:C:2:9:1,A:C:2:13:5,A:T:13:28:20
+SRR7939018.62948413 I   58  I   27756   -   +   UU  1   R1-2    58  27756   9   27805   32  32
+SRR7939018.62698375 I   60  I   75259   -   +   UU  1   R1-2    60  75259   11  75308   18  60  A:C:13:13:3,C:A:38:44:34
+SRR7939018.57525614 I   62  I   333 -   -   UU  1   R1-2    62  333 13  284 39  25  A:T:13:25:13    C:G:2:311:28,A:G:2:324:41,C:A:2:325:42
+SRR7939018.63561884 I   62  I   9772    -   -   UU  1   R1-2    62  9772    13  9723    39  60  A:C:13:25:13
+SRR7939018.54429866 I   62  I   228205  -   -   UU  1   R1-2    62  228205  13  228156  42  55      T:C:32:228172:17,C:A:32:228198:43,A:T:38:228199:44
+SRR7939018.11337172 I   63  I   3225    +   +   UU  1   R1-2    63  3225    112 3274    60  60
+SRR7939018.32883053 I   64  I   4341    +   -   UU  1   R1-2    64  4341    113 4306    60  60
+SRR7939018.41612980 I   66  I   289 -   -   UU  1   R1-2    66  289 18  247 44  27  A:C:2:30:14,C:G:2:43:27
+SRR7939018.20486679 I   66  I   47606   -   +   UU  1   R1-2    66  47606   17  47645   42  60
+SRR7939018.4271037  I   68  I   500 +   -   UU  1   R1-2    68  500 112 451 60  60      A:T:13:468:18
+SRR7939018.13346597 I   72  I   4371    -   +   UU  1   R1-2    72  4371    23  4416    53  60
+SRR7939018.24593858 I   72  I   7008    -   -   UU  1   R1-2    72  7008    23  6959    37  60  A:C:13:28:6,A:C:13:30:8 T:G:40:6958:0
+SRR7939018.41263687 I   73  I   49428   +   -   UU  1   R1-2    73  49428   122 49379   60  60  C:G:40:97:25    A:G:40:49411:33
+SRR7939018.34067598 I   77  I   298 +   -   UU  1   R1-2    77  298 131 249 53  35
+SRR7939018.7777574  I   77  I   1223    -   -   UU  1   R1-2    77  1223    32  1174    60  9       T:G:27:1174:1
+SRR7939018.41918892 I   77  I   2410    -   -   UU  1   R1-2    77  2410    28  2361    60  13  A:C:13:37:10
+SRR7939018.36976831 I   78  I   228 +   -   UU  1   R1-2    78  228 121 179 60  60
+SRR7939018.11605183 I   78  I   1068    +   -   UU  1   R1-2    78  1068    127 1019    60  9
+SRR7939018.61330774 I   78  I   4018    +   -   UU  1   R1-2    78  4018    127 3969    60  60
+SRR7939018.58174255 I   79  I   1330    +   -   UU  1   R1-2    79  1330    128 1281    60  20
+SRR7939018.54185633 I   79  I   1369    +   -   UU  1   R1-2    79  1369    128 1320    60  35
+SRR7939018.32333692 I   79  I   207738  +   +   UU  1   R1-2    79  207738  114 207787  60  39
+SRR7939018.30478651 I   81  I   95  -   +   UU  1   R1-2    81  95  32  144 52  50  A:C:2:35:4,A:C:2:40:9,A:C:2:42:11
+SRR7939018.15936606 I   81  I   5173    -   +   UU  1   R1-2    81  5173    32  5210    60  60  A:C:2:37:6
 
 
 ❯ zcat "${a_dup_pre_pairs}" | head -100
@@ -4688,68 +5292,68 @@ SRR7939018.15936606     I       81      I       5173    -       +       UU      
 #samheader: @SQ SN:XV   LN:1091291
 #samheader: @SQ SN:XVI  LN:948066
 #samheader: @SQ SN:Mito LN:85779
-#samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 16 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
-#samheader: @PG ID:samtools     PN:samtools     PP:bwa  VN:1.16.1       CL:samtools view -@ 16 -S -b
-#samheader: @PG ID:pairtools_parse      PN:pairtools_parse      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse -o pairs/SRR7939018.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --drop-sam --drop-seq --output-stats stats/SRR7939018.stats.txt --assembly S288C_R64-3-1 --no-flip --add-columns mapq --walks-policy mask bams/SRR7939018.bam  PP:samtools     VN:1.0.2
-#samheader: @PG ID:pairtools_sort       PN:pairtools_sort       CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 16 --tmpdir /fh/scratch/delete30/tsukiyama_t --output pairs/SRR7939018.sort.txt.gz pairs/SRR7939018.txt.gz  PP:pairtools_parse      VN:1.0.2
-#samheader: @PG ID:pairtools_dedup      PN:pairtools_dedup      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 16 --max-mismatch 3 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats stats/SRR7939018.dedup.stats.txt pairs/SRR7939018.sort.txt.gz    PP:pairtools_sort     VN:1.0.2
-#samheader: @PG ID:pairtools_split      PN:pairtools_split      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs dedup/pairs/SRR7939018.dups.pairs.gz --output-sam dedup/bam/SRR7939018.dups.bam     PP:pairtools_dedup      VN:1.0.2
-#columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type mapq1 mapq2
-SRR7939018.21   !       0       !       0       -       -       MM      0       0
-SRR7939018.22   !       0       !       0       -       -       MM      0       0
-SRR7939018.30   !       0       !       0       -       -       MM      0       0
-SRR7939018.48   !       0       !       0       -       -       MM      0       0
-SRR7939018.49   !       0       !       0       -       -       MM      0       0
-SRR7939018.53   !       0       !       0       -       -       MM      0       0
-SRR7939018.57   !       0       !       0       -       -       MM      0       0
-SRR7939018.66   !       0       !       0       -       -       MM      0       0
-SRR7939018.69   !       0       !       0       -       -       MM      0       0
-SRR7939018.97   !       0       !       0       -       -       MM      0       0
-SRR7939018.102  !       0       !       0       -       -       MM      0       0
-SRR7939018.111  !       0       !       0       -       -       MM      0       0
-SRR7939018.113  !       0       !       0       -       -       MM      0       0
-SRR7939018.114  !       0       !       0       -       -       MM      0       0
-SRR7939018.118  !       0       !       0       -       -       MM      0       0
-SRR7939018.123  !       0       !       0       -       -       MM      0       0
-SRR7939018.145  !       0       !       0       -       -       MM      0       0
-SRR7939018.157  !       0       !       0       -       -       MM      0       0
-SRR7939018.163  !       0       !       0       -       -       MM      0       0
-SRR7939018.177  !       0       !       0       -       -       MM      0       0
-SRR7939018.180  !       0       !       0       -       -       MM      0       0
-SRR7939018.182  !       0       !       0       -       -       MM      0       0
-SRR7939018.189  !       0       !       0       -       -       MM      0       0
-SRR7939018.192  !       0       !       0       -       -       MM      0       0
-SRR7939018.194  !       0       !       0       -       -       MM      0       0
-SRR7939018.205  !       0       !       0       -       -       MM      0       0
-SRR7939018.209  !       0       !       0       -       -       MM      0       0
-SRR7939018.211  !       0       !       0       -       -       MM      0       0
-SRR7939018.213  !       0       !       0       -       -       MM      0       0
-SRR7939018.217  !       0       !       0       -       -       MM      0       0
-SRR7939018.222  !       0       !       0       -       -       MM      0       0
-SRR7939018.224  !       0       !       0       -       -       MM      0       0
-SRR7939018.226  !       0       !       0       -       -       MM      0       0
-SRR7939018.229  !       0       !       0       -       -       MM      0       0
-SRR7939018.244  !       0       !       0       -       -       MM      0       0
-SRR7939018.245  !       0       !       0       -       -       MM      0       0
-SRR7939018.246  !       0       !       0       -       -       MM      0       0
-SRR7939018.248  !       0       !       0       -       -       MM      0       0
-SRR7939018.249  !       0       !       0       -       -       MM      0       0
-SRR7939018.259  !       0       !       0       -       -       MM      0       0
-SRR7939018.265  !       0       !       0       -       -       MM      0       0
-SRR7939018.274  !       0       !       0       -       -       MM      0       0
-SRR7939018.282  !       0       !       0       -       -       MM      0       0
-SRR7939018.290  !       0       !       0       -       -       MM      0       0
-SRR7939018.300  !       0       !       0       -       -       MM      0       0
-SRR7939018.302  !       0       !       0       -       -       MM      0       0
-SRR7939018.305  !       0       !       0       -       -       MM      0       0
-SRR7939018.320  !       0       !       0       -       -       MM      0       0
-SRR7939018.324  !       0       !       0       -       -       MM      0       0
-SRR7939018.334  !       0       !       0       -       -       MM      0       0
-SRR7939018.335  !       0       !       0       -       -       MM      0       0
-SRR7939018.344  !       0       !       0       -       -       MM      0       0
-SRR7939018.352  !       0       !       0       -       -       MM      0       0
-SRR7939018.353  !       0       !       0       -       -       MM      0       0
-SRR7939018.357  !       0       !       0       -       -       MM      0       0
+#samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 8 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
+#samheader: @PG ID:samtools PN:samtools PP:bwa  VN:1.16.1   CL:samtools view -@ 8 -S -b
+#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_aln/SRR7939018.bam  PP:samtools VN:1.0.2
+#samheader: @PG ID:pairtools_sort   PN:pairtools_sort   CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 8 --tmpdir /fh/scratch/delete30/tsukiyama_t --output 04_sort/SRR7939018.sort.txt.gz 03_parse/SRR7939018.p2.txt.gz    PP:pairtools_parse2 VN:1.0.2
+#samheader: @PG ID:pairtools_dedup  PN:pairtools_dedup  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 8 --max-mismatch 0 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats 0X_stats/SRR7939018.dedup.stats.txt 04_sort/SRR7939018.sort.txt.gz PP:pairtools_sort   VN:1.0.2
+#samheader: @PG ID:pairtools_split  PN:pairtools_split  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs 05_dedup/pairs/SRR7939018.dups.pairs.gz  PP:pairtools_dedup  VN:1.0.2
+#columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type walk_pair_index walk_pair_type pos51 pos52 pos31 pos32 mapq1 mapq2 mismatches1 mismatches2
+SRR7939018.21   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.22   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.30   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.48   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.49   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.53   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.57   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.66   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.69   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.97   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.102  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.111  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.113  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.114  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.118  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.123  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.145  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.157  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.163  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.177  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.180  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.182  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.189  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.192  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.194  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.205  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.209  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.211  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.213  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.217  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.222  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.224  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.226  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.229  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.244  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.245  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.246  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.248  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.249  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.259  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.265  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.274  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.282  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.290  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.300  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.302  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.305  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.320  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.324  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.334  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.335  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.344  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.352  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.353  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
+SRR7939018.357  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
 
 
 ❯ zcat "${a_unmap_pre_pairs}" | head -100
@@ -4791,68 +5395,68 @@ SRR7939018.357  !       0       !       0       -       -       MM      0       
 #samheader: @SQ SN:XV   LN:1091291
 #samheader: @SQ SN:XVI  LN:948066
 #samheader: @SQ SN:Mito LN:85779
-#samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 16 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
-#samheader: @PG ID:samtools     PN:samtools     PP:bwa  VN:1.16.1       CL:samtools view -@ 16 -S -b
-#samheader: @PG ID:pairtools_parse      PN:pairtools_parse      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse -o pairs/SRR7939018.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --drop-sam --drop-seq --output-stats stats/SRR7939018.stats.txt --assembly S288C_R64-3-1 --no-flip --add-columns mapq --walks-policy mask bams/SRR7939018.bam  PP:samtools     VN:1.0.2
-#samheader: @PG ID:pairtools_sort       PN:pairtools_sort       CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 16 --tmpdir /fh/scratch/delete30/tsukiyama_t --output pairs/SRR7939018.sort.txt.gz pairs/SRR7939018.txt.gz  PP:pairtools_parse      VN:1.0.2
-#samheader: @PG ID:pairtools_dedup      PN:pairtools_dedup      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 16 --max-mismatch 3 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats stats/SRR7939018.dedup.stats.txt pairs/SRR7939018.sort.txt.gz    PP:pairtools_sort     VN:1.0.2
-#samheader: @PG ID:pairtools_split      PN:pairtools_split      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs dedup/pairs/SRR7939018.unmapped.pairs.gz --output-sam dedup/bam/SRR7939018.unmapped.bam     PP:pairtools_dedup      VN:1.0.2
-#columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type mapq1 mapq2
-SRR7939018.52075119     I       7       I       1001    +       +       DD      28      46
-SRR7939018.38253176     I       10      I       887     +       +       DD      35      35
-SRR7939018.53629809     I       12      I       219     +       -       DD      42      57
-SRR7939018.10654261     I       36      I       470     +       -       DD      60      6
-SRR7939018.19343374     I       38      I       194     +       -       DD      60      18
-SRR7939018.36012536     I       43      I       242     +       -       DD      60      60
-SRR7939018.63614734     I       55      I       319     -       +       DD      28      60
-SRR7939018.36401061     I       56      I       479     -       +       DD      28      39
-SRR7939018.62429218     I       66      I       47606   -       +       DD      10      60
-SRR7939018.7898023      I       68      I       500     +       -       DD      60      39
-SRR7939018.53406646     I       77      I       298     +       -       DD      53      35
-SRR7939018.34162306     I       89      I       296     +       -       DD      53      35
-SRR7939018.59045054     I       94      I       314     +       -       DD      48      60
-SRR7939018.30154835     I       95      I       338     +       -       DD      39      35
-SRR7939018.20996579     I       95      I       499     +       -       DD      50      42
-SRR7939018.59592323     I       99      I       401     +       -       DD      50      21
-SRR7939018.35616453     I       105     I       83      +       -       DD      21      60
-SRR7939018.45451111     I       105     I       83      +       -       DD      21      60
-SRR7939018.17962042     I       114     I       321     -       -       DD      60      60
-SRR7939018.52299744     I       120     I       298     +       -       DD      60      35
-SRR7939018.31295356     I       120     I       370     +       -       DD      60      35
-SRR7939018.61236758     I       139     I       321     -       +       DD      60      60
-SRR7939018.56782141     I       142     I       674     -       -       DD      50      12
-SRR7939018.42393988     I       160     I       797     -       +       DD      60      15
-SRR7939018.55135043     I       160     I       797     -       +       DD      60      15
-SRR7939018.35839585     I       167     I       510     -       +       DD      32      6
-SRR7939018.57488794     I       167     I       510     -       +       DD      32      4
-SRR7939018.14394214     I       169     I       440     +       -       DD      60      60
-SRR7939018.58505042     I       169     I       445     +       -       DD      27      60
-SRR7939018.59485586     I       172     I       297     +       -       DD      27      35
-SRR7939018.27830998     I       172     I       445     +       -       DD      57      60
-SRR7939018.61245537     I       179     I       393     +       -       DD      60      60
-SRR7939018.11959452     I       180     I       320     +       -       DD      33      60
-SRR7939018.53570294     I       201     I       403     +       +       DD      60      60
-SRR7939018.56752385     I       209     I       458     -       -       DD      18      57
-SRR7939018.50029313     I       219     I       642     +       -       DD      22      39
-SRR7939018.60162163     I       221     I       482     -       -       DD      57      35
-SRR7939018.51488270     I       228     I       25      -       +       DD      60      14
-SRR7939018.30499851     I       228     I       375     -       +       DD      60      32
-SRR7939018.35864288     I       231     I       3183    +       +       DD      20      60
-SRR7939018.49506811     I       237     I       1575    -       -       DD      60      28
-SRR7939018.26816023     I       238     I       1306    +       +       DD      32      60
-SRR7939018.6589357      I       240     I       445     +       -       DD      32      60
-SRR7939018.63986761     I       243     I       52816   +       +       DD      32      60
-SRR7939018.56001168     I       256     I       475     +       -       DD      39      4
-SRR7939018.8788749      I       257     I       199     +       -       DD      42      15
-SRR7939018.65950633     I       261     I       98      -       +       DD      35      50
-SRR7939018.63890386     I       261     I       286     -       +       DD      35      42
-SRR7939018.40701191     I       262     I       548     -       -       DD      39      35
-SRR7939018.45983272     I       262     I       548     -       -       DD      39      35
-SRR7939018.42202510     I       267     I       448     +       -       DD      60      60
-SRR7939018.50009947     I       267     I       540     +       -       DD      60      35
-SRR7939018.55868442     I       267     I       540     +       -       DD      60      35
-SRR7939018.22092198     I       268     I       7631    -       +       DD      22      60
-SRR7939018.42055616     I       271     I       383     +       +       DD      60      50
+#samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 8 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
+#samheader: @PG ID:samtools PN:samtools PP:bwa  VN:1.16.1   CL:samtools view -@ 8 -S -b
+#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_aln/SRR7939018.bam  PP:samtools VN:1.0.2
+#samheader: @PG ID:pairtools_sort   PN:pairtools_sort   CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 8 --tmpdir /fh/scratch/delete30/tsukiyama_t --output 04_sort/SRR7939018.sort.txt.gz 03_parse/SRR7939018.p2.txt.gz    PP:pairtools_parse2 VN:1.0.2
+#samheader: @PG ID:pairtools_dedup  PN:pairtools_dedup  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 8 --max-mismatch 0 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats 0X_stats/SRR7939018.dedup.stats.txt 04_sort/SRR7939018.sort.txt.gz PP:pairtools_sort   VN:1.0.2
+#samheader: @PG ID:pairtools_split  PN:pairtools_split  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs 05_dedup/pairs/SRR7939018.unmapped.pairs.gz  PP:pairtools_dedup  VN:1.0.2
+#columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type walk_pair_index walk_pair_type pos51 pos52 pos31 pos32 mapq1 mapq2 mismatches1 mismatches2
+SRR7939018.52075119 I   7   I   1001    +   +   DD  1   R1-2    7   1001    56  1050    28  46
+SRR7939018.38253176 I   10  I   887 +   +   DD  1   R1-2    10  887 59  936 35  35
+SRR7939018.53629809 I   12  I   219 +   -   DD  1   R1-2    12  219 61  170 42  57
+SRR7939018.10654261 I   36  I   470 +   -   DD  1   R1-2    36  470 78  421 60  6
+SRR7939018.19343374 I   38  I   194 +   -   DD  1   R1-2    38  194 87  145 60  18
+SRR7939018.36012536 I   43  I   242 +   -   DD  1   R1-2    43  242 92  193 60  60
+SRR7939018.63614734 I   55  I   319 -   +   DD  1   R1-2    55  319 6   368 28  60
+SRR7939018.36401061 I   56  I   479 -   +   DD  1   R1-2    56  479 7   528 28  39
+SRR7939018.62429218 I   66  I   47606   -   +   DD  1   R1-2    66  47606   17  47645   10  60  A:C:2:25:9,A:C:2:30:14,A:C:2:35:19,A:C:2:37:21  C:G:13:47617:12
+SRR7939018.7898023  I   68  I   500 +   -   DD  1   R1-2    68  500 112 451 60  39
+SRR7939018.53406646 I   77  I   298 +   -   DD  1   R1-2    77  298 131 249 53  35
+SRR7939018.34162306 I   89  I   296 +   -   DD  1   R1-2    89  296 138 247 53  35
+SRR7939018.59045054 I   94  I   314 +   -   DD  1   R1-2    94  314 126 265 48  60
+SRR7939018.30154835 I   95  I   338 +   -   DD  1   R1-2    95  338 126 289 39  35
+SRR7939018.20996579 I   95  I   499 +   -   DD  1   R1-2    95  499 144 450 50  42
+SRR7939018.59592323 I   99  I   401 +   -   DD  1   R1-2    99  401 148 358 50  21
+SRR7939018.35616453 I   105 I   83  +   -   DD  1   R1-2    105 83  144 34  21  60      A:C:2:33:0
+SRR7939018.45451111 I   105 I   83  +   -   DD  1   R1-2    105 83  144 34  21  60      A:C:2:35:2
+SRR7939018.17962042 I   114 I   321 -   -   DD  1   R1-2    114 321 79  272 60  60
+SRR7939018.52299744 I   120 I   298 +   -   DD  1   R1-2    120 298 169 249 60  35
+SRR7939018.31295356 I   120 I   370 +   -   DD  1   R1-2    120 370 169 321 60  35
+SRR7939018.61236758 I   139 I   321 -   +   DD  1   R1-2    139 321 93  370 60  60
+SRR7939018.56782141 I   142 I   674 -   -   DD  1   R1-2    142 674 93  625 50  12
+SRR7939018.42393988 I   160 I   797 -   +   DD  1   R1-2    160 797 121 846 60  15
+SRR7939018.55135043 I   160 I   797 -   +   DD  1   R1-2    160 797 121 846 60  15
+SRR7939018.35839585 I   167 I   510 -   +   DD  1   R1-2    167 510 125 559 32  6   G:A:13:135:11,C:T:13:140:16 T:C:13:536:27
+SRR7939018.57488794 I   167 I   510 -   +   DD  1   R1-2    167 510 125 559 32  4   G:A:38:135:11,C:T:27:140:16 A:G:13:510:1,T:A:13:535:26,T:C:13:536:27
+SRR7939018.58505042 I   169 I   445 +   -   DD  1   R1-2    169 445 198 396 27  60
+SRR7939018.59485586 I   172 I   297 +   -   DD  1   R1-2    172 297 206 248 27  35
+SRR7939018.61245537 I   179 I   393 +   -   DD  1   R1-2    179 393 228 344 60  60
+SRR7939018.53570294 I   201 I   403 +   +   DD  1   R1-2    201 403 250 452 60  60
+SRR7939018.56752385 I   209 I   458 -   -   DD  1   R1-2    209 458 160 409 18  57
+SRR7939018.50029313 I   219 I   642 +   -   DD  1   R1-2    219 642 268 593 22  39
+SRR7939018.60162163 I   221 I   482 -   -   DD  1   R1-2    221 482 172 433 57  35
+SRR7939018.51488270 I   228 I   25  -   +   DD  1   R1-2    228 25  179 78  60  14
+SRR7939018.30499851 I   228 I   375 -   +   DD  1   R1-2    228 375 179 424 60  32
+SRR7939018.35864288 I   231 I   3183    +   +   DD  1   R1-2    231 3183    280 3232    20  60  G:T:40:249:19
+SRR7939018.49506811 I   237 I   1575    -   -   DD  1   R1-2    237 1575    188 1526    60  28
+SRR7939018.26816023 I   238 I   1306    +   +   DD  1   R1-2    238 1306    287 1355    32  60
+SRR7939018.63986761 I   243 I   52816   +   +   DD  1   R1-2    243 52816   292 52865   32  60
+SRR7939018.56001168 I   256 I   475 +   -   DD  1   R1-2    256 475 305 426 39  4
+SRR7939018.65950633 I   261 I   98  -   +   DD  1   R1-2    261 98  212 147 35  50
+SRR7939018.63890386 I   261 I   286 -   +   DD  1   R1-2    261 286 212 335 35  42
+SRR7939018.40701191 I   262 I   548 -   -   DD  1   R1-2    262 548 230 499 39  35
+SRR7939018.45983272 I   262 I   548 -   -   DD  1   R1-2    262 548 230 499 39  35
+SRR7939018.42202510 I   267 I   448 +   -   DD  1   R1-2    267 448 316 399 60  60
+SRR7939018.50009947 I   267 I   540 +   -   DD  1   R1-2    267 540 316 491 60  35
+SRR7939018.55868442 I   267 I   540 +   -   DD  1   R1-2    267 540 316 491 60  35
+SRR7939018.22092198 I   268 I   7631    -   +   DD  1   R1-2    268 7631    219 7669    22  60
+SRR7939018.42055616 I   271 I   383 +   +   DD  1   R1-2    271 383 320 432 60  50  T:A:38:319:49
+SRR7939018.61853730 I   271 I   383 +   +   DD  1   R1-2    271 383 320 432 60  50  T:A:40:319:49
+SRR7939018.60343297 I   272 I   448 +   -   DD  1   R1-2    272 448 317 399 60  60
+SRR7939018.19840110 I   276 I   388 +   -   DD  1   R1-2    276 388 325 350 60  60
+SRR7939018.22095365 I   276 I   388 +   -   DD  1   R1-2    276 388 325 350 60  60
+SRR7939018.51124012 I   281 I   9123    -   +   DD  1   R1-2    281 9123    232 9172    22  60
 ```
 </details>
 <br />
@@ -4863,808 +5467,771 @@ SRR7939018.42055616     I       271     I       383     +       +       DD      
 <summary><i>Printed: Examine the unique pairs</i></summary>
 
 ```txt
+❯ #  Examine the unique pairs ---------------------------------------------------
+
+
 ❯ zcat "${a_dedup_pre_pairs}" | grep -v "#" | head -300
-SRR7939018.44042564     I       1       I       15064   +       -       UU      48      13
-SRR7939018.44810319     I       7       I       1001    +       +       UU      28      46
-SRR7939018.29094541     I       7       I       1292    +       -       UU      28      13
-SRR7939018.17270740     I       8       I       2024    +       +       UU      21      13
-SRR7939018.55685650     I       8       I       9446    +       -       UU      28      60
-SRR7939018.20572273     I       10      I       130     +       +       UU      35      53
-SRR7939018.14854904     I       10      I       318     +       -       UU      35      60
-SRR7939018.25573455     I       10      I       558     +       +       UU      35      11
-SRR7939018.34992310     I       10      I       887     +       +       UU      35      35
-SRR7939018.1104427      I       10      I       31959   +       -       UU      35      60
-SRR7939018.35158773     I       11      I       865     +       +       UU      39      35
-SRR7939018.22989844     I       12      I       219     +       -       UU      42      57
-SRR7939018.33126366     I       12      I       119112  +       -       UU      42      60
-SRR7939018.18616690     I       13      I       280     +       -       UU      42      20
-SRR7939018.50678971     I       29      I       407     +       -       UU      60      39
-SRR7939018.10119014     I       36      I       470     +       -       UU      60      6
-SRR7939018.9636000      I       38      I       194     +       -       UU      60      18
-SRR7939018.43976050     I       38      I       229129  -       -       UU      2       12
-SRR7939018.56159970     I       39      I       2441    +       -       UU      60      35
-SRR7939018.35458836     I       40      I       89      +       -       UU      60      60
-SRR7939018.54943727     I       41      I       178     +       +       UU      60      57
-SRR7939018.35434398     I       41      I       321     +       +       UU      60      60
-SRR7939018.19718640     I       41      I       395     +       +       UU      60      60
-SRR7939018.27890433     I       41      I       1731    +       +       UU      60      15
-SRR7939018.13293960     I       41      I       38151   -       +       UU      18      60
-SRR7939018.16006081     I       43      I       242     +       -       UU      60      60
-SRR7939018.50825843     I       52      I       336     -       +       UU      28      60
-SRR7939018.8625963      I       55      I       319     -       +       UU      28      60
-SRR7939018.18404752     I       56      I       479     -       +       UU      28      39
-SRR7939018.5344196      I       56      I       33715   -       -       UU      22      60
-SRR7939018.19358281     I       58      I       2936    -       -       UU      13      60
-SRR7939018.62948413     I       58      I       27756   -       +       UU      32      32
-SRR7939018.62698375     I       60      I       75259   -       +       UU      18      60
-SRR7939018.57525614     I       62      I       333     -       -       UU      39      25
-SRR7939018.63561884     I       62      I       9772    -       -       UU      39      60
-SRR7939018.54429866     I       62      I       228205  -       -       UU      42      55
-SRR7939018.11337172     I       63      I       3225    +       +       UU      60      60
-SRR7939018.32883053     I       64      I       4341    +       -       UU      60      60
-SRR7939018.41612980     I       66      I       289     -       -       UU      44      27
-SRR7939018.20486679     I       66      I       47606   -       +       UU      42      60
-SRR7939018.4271037      I       68      I       500     +       -       UU      60      60
-SRR7939018.13346597     I       72      I       4371    -       +       UU      53      60
-SRR7939018.24593858     I       72      I       7008    -       -       UU      37      60
-SRR7939018.41263687     I       73      I       49428   +       -       UU      60      60
-SRR7939018.34067598     I       77      I       298     +       -       UU      53      35
-SRR7939018.7777574      I       77      I       1223    -       -       UU      60      9
-SRR7939018.41918892     I       77      I       2410    -       -       UU      60      13
-SRR7939018.36976831     I       78      I       228     +       -       UU      60      60
-SRR7939018.11605183     I       78      I       1068    +       -       UU      60      9
-SRR7939018.61330774     I       78      I       4018    +       -       UU      60      60
-SRR7939018.58174255     I       79      I       1330    +       -       UU      60      20
-SRR7939018.54185633     I       79      I       1369    +       -       UU      60      35
-SRR7939018.32333692     I       79      I       207738  +       +       UU      60      39
-SRR7939018.30478651     I       81      I       95      -       +       UU      52      50
-SRR7939018.15936606     I       81      I       5173    -       +       UU      60      60
-SRR7939018.39027485     I       88      I       56075   -       +       UU      60      60
-SRR7939018.31861861     I       88      I       107563  -       +       UU      60      60
-SRR7939018.26002914     I       89      I       296     +       -       UU      53      35
-SRR7939018.46658462     I       89      I       318     +       -       UU      60      28
-SRR7939018.24703715     I       89      I       964     -       +       UU      60      39
-SRR7939018.34060015     I       93      I       194     +       -       UU      54      18
-SRR7939018.4599895      I       94      I       314     +       -       UU      48      60
-SRR7939018.22066078     I       94      I       996     +       -       UU      48      8
-SRR7939018.3480101      I       95      I       338     +       -       UU      39      33
-SRR7939018.29817538     I       95      I       411     +       +       UU      2       50
-SRR7939018.12120171     I       95      I       499     +       -       UU      50      60
-SRR7939018.56703503     I       96      I       463     +       +       UU      50      60
-SRR7939018.2893773      I       99      I       401     +       -       UU      50      21
-SRR7939018.50311998     I       104     I       4760    -       +       UU      60      60
-SRR7939018.8198197      I       105     I       83      +       -       UU      21      60
-SRR7939018.46628911     I       108     I       238     +       +       UU      39      32
-SRR7939018.54704375     I       108     I       256     +       -       UU      39      60
-SRR7939018.31780843     I       108     I       411     +       +       UU      39      50
-SRR7939018.45965058     I       112     I       10      -       +       UU      60      35
-SRR7939018.15594546     I       112     I       261     +       -       UU      53      35
-SRR7939018.33827262     I       112     I       407     +       -       UU      53      39
-SRR7939018.88645        I       112     I       230127  +       +       UU      15      2
-SRR7939018.2342447      I       114     I       321     -       -       UU      60      60
-SRR7939018.33953        I       114     I       1052    +       -       UU      60      39
-SRR7939018.16129580     I       116     I       10      -       +       UU      60      35
-SRR7939018.6945655      I       116     I       62      -       -       UU      60      39
-SRR7939018.18958897     I       116     I       6531    -       +       UU      60      60
-SRR7939018.36806590     I       117     I       66815   -       +       UU      60      60
-SRR7939018.56325226     I       120     I       67      +       -       UU      60      42
-SRR7939018.48930140     I       120     I       298     +       -       UU      60      35
-SRR7939018.10294309     I       120     I       370     +       -       UU      60      35
-SRR7939018.149574       I       122     I       329     +       -       UU      60      53
-SRR7939018.30608017     I       122     I       440     +       -       UU      60      60
-SRR7939018.42054658     I       128     I       556     -       +       UU      39      11
-SRR7939018.18870615     I       129     I       77      -       -       UU      60      60
-SRR7939018.63830453     I       130     I       306     +       -       UU      53      60
-SRR7939018.27872423     I       130     I       318     +       -       UU      53      60
-SRR7939018.64264442     I       130     I       361     +       -       UU      53      42
-SRR7939018.46489678     I       130     I       499     +       -       UU      53      42
-SRR7939018.38483937     I       130     I       598     +       -       UU      53      11
-SRR7939018.44672941     I       130     I       4231    +       -       UU      53      60
-SRR7939018.8174511      I       131     I       266     +       -       UU      53      22
-SRR7939018.63069824     I       131     I       270     +       -       UU      48      59
-SRR7939018.63360991     I       131     I       408     +       -       UU      53      1
-SRR7939018.35055818     I       131     I       516     +       -       UU      53      53
-SRR7939018.41132537     I       131     I       2363    +       -       UU      53      60
-SRR7939018.53010615     I       132     I       964     +       +       UU      39      39
-SRR7939018.50255224     I       135     I       8633    +       +       UU      46      60
-SRR7939018.34795673     I       139     I       321     -       +       UU      60      60
-SRR7939018.41341751     I       142     I       318     +       -       UU      32      60
-SRR7939018.55317485     I       142     I       408     -       -       UU      50      35
-SRR7939018.45767801     I       142     I       674     -       -       UU      50      12
-SRR7939018.44856945     I       144     I       1       -       +       UU      15      21
-SRR7939018.57480364     I       144     I       372     +       -       UU      24      35
-SRR7939018.60244328     I       148     I       8314    -       +       UU      50      60
-SRR7939018.62030183     I       149     I       340     +       +       UU      15      60
-SRR7939018.50687203     I       149     I       58674   +       +       UU      15      60
-SRR7939018.14735998     I       153     I       9       -       +       UU      35      13
-SRR7939018.10348915     I       153     I       38      +       +       UU      15      60
-SRR7939018.11559411     I       153     I       67      +       -       UU      15      60
-SRR7939018.57507662     I       153     I       314     +       -       UU      27      60
-SRR7939018.51634879     I       153     I       484     +       -       UU      15      35
-SRR7939018.20823598     I       159     I       5       -       +       UU      46      48
-SRR7939018.49019958     I       159     I       1065    -       -       UU      46      9
-SRR7939018.7089964      I       160     I       797     -       +       UU      60      15
-SRR7939018.49430764     I       161     I       393     +       -       UU      22      60
-SRR7939018.32117170     I       163     I       342     +       -       UU      32      32
-SRR7939018.44825194     I       164     I       144     +       -       UU      27      50
-SRR7939018.9190308      I       167     I       510     -       +       UU      32      6
-SRR7939018.41564659     I       168     I       306     +       -       UU      60      42
-SRR7939018.38567586     I       168     I       440     +       -       UU      50      60
-SRR7939018.58143382     I       169     I       445     +       -       UU      27      60
-SRR7939018.1218818      I       172     I       297     +       -       UU      27      35
-SRR7939018.37292189     I       174     I       360     +       -       UU      57      39
-SRR7939018.62262963     I       178     I       965     +       +       UU      57      25
-SRR7939018.40100680     I       179     I       179     +       +       UU      42      53
-SRR7939018.18013213     I       179     I       393     +       -       UU      60      60
-SRR7939018.40530226     I       179     I       997     +       -       UU      60      60
-SRR7939018.17438715     I       179     I       1519    +       +       UU      60      52
-SRR7939018.2072227      I       180     I       318     +       -       UU      60      46
-SRR7939018.64470435     I       182     I       159     +       -       UU      60      60
-SRR7939018.43306138     I       185     I       347     -       +       UU      42      60
-SRR7939018.636925       I       186     I       22109   +       -       UU      60      35
-SRR7939018.18893333     I       187     I       448     +       +       UU      60      50
-SRR7939018.33701049     I       190     I       4166    +       +       UU      60      60
-SRR7939018.32232023     I       190     I       70094   +       +       UU      60      60
-SRR7939018.53297799     I       191     I       46260   +       +       UU      60      60
-SRR7939018.40600493     I       194     I       702     -       -       UU      18      22
-SRR7939018.54428661     I       196     I       1872    -       +       UU      15      4
-SRR7939018.24526425     I       197     I       499     +       -       UU      60      42
-SRR7939018.29763149     I       199     I       1423    -       -       UU      27      12
-SRR7939018.40043700     I       199     I       3516    +       +       UU      60      60
-SRR7939018.14444090     I       201     I       403     +       +       UU      60      60
-SRR7939018.60875057     I       201     I       456     +       +       UU      60      35
-SRR7939018.35249835     I       203     I       1396    +       -       UU      60      32
-SRR7939018.15001816     I       203     I       6184    +       -       UU      60      60
-SRR7939018.34494724     I       204     I       482     +       -       UU      60      35
-SRR7939018.22859704     I       209     I       458     -       -       UU      18      57
-SRR7939018.47000044     I       209     I       34714   -       -       UU      33      60
-SRR7939018.63597093     I       211     I       393     +       -       UU      39      60
-SRR7939018.1622372      I       211     I       997     +       -       UU      39      60
-SRR7939018.474429       I       213     I       499     -       +       UU      35      48
-SRR7939018.20506996     I       219     I       642     +       -       UU      22      39
-SRR7939018.53054840     I       221     I       482     -       -       UU      57      35
-SRR7939018.5192888      I       228     I       25      -       +       UU      60      14
-SRR7939018.54103083     I       228     I       67      -       +       UU      60      60
-SRR7939018.58302728     I       228     I       112     -       +       UU      60      53
-SRR7939018.11802973     I       228     I       375     -       +       UU      60      32
-SRR7939018.13131256     I       228     I       1317    -       +       UU      60      42
-SRR7939018.61381899     I       229     I       61832   -       -       UU      60      60
-SRR7939018.43463684     I       230     I       66      -       -       UU      60      42
-SRR7939018.37234934     I       231     I       1       -       +       UU      60      48
-SRR7939018.57215855     I       231     I       1507    +       -       UU      22      28
-SRR7939018.21538317     I       231     I       3183    +       +       UU      20      60
-SRR7939018.27062170     I       231     I       5328    -       -       UU      60      60
-SRR7939018.30514503     I       232     I       516     +       -       UU      22      53
-SRR7939018.25735139     I       237     I       304     -       +       UU      60      22
-SRR7939018.16656470     I       237     I       1268    +       -       UU      32      9
-SRR7939018.35412212     I       237     I       1575    -       -       UU      60      28
-SRR7939018.45068006     I       237     I       14967   -       +       UU      60      35
-SRR7939018.57443737     I       238     I       196     +       -       UU      32      27
-SRR7939018.35540452     I       238     I       388     +       -       UU      33      60
-SRR7939018.738378       I       238     I       413     +       +       UU      32      42
-SRR7939018.49658035     I       238     I       1013    +       +       UU      32      13
-SRR7939018.18455078     I       238     I       1306    +       +       UU      32      60
-SRR7939018.25425454     I       239     I       447     +       -       UU      32      60
-SRR7939018.50160736     I       239     I       1145    +       -       UU      32      60
-SRR7939018.29347329     I       240     I       58204   +       +       UU      32      60
-SRR7939018.47720593     I       241     I       412     +       -       UU      15      50
-SRR7939018.27920289     I       242     I       657     -       -       UU      60      28
-SRR7939018.28354716     I       243     I       52816   +       +       UU      32      60
-SRR7939018.46556463     I       247     I       624     +       -       UU      35      35
-SRR7939018.30258755     I       247     I       1070    -       -       UU      60      9
-SRR7939018.31082534     I       249     I       5864    -       +       UU      60      60
-SRR7939018.27987036     I       255     I       112     -       +       UU      57      27
-SRR7939018.50639585     I       256     I       196     +       -       UU      39      15
-SRR7939018.25112590     I       256     I       475     +       -       UU      39      4
-SRR7939018.37697195     I       256     I       561     +       -       UU      39      7
-SRR7939018.18628405     I       256     I       4844    -       +       UU      60      60
-SRR7939018.64068573     I       260     I       9673    -       +       UU      60      60
-SRR7939018.36512445     I       261     I       98      -       +       UU      35      50
-SRR7939018.53763682     I       261     I       130     -       +       UU      35      54
-SRR7939018.11082149     I       261     I       286     -       +       UU      35      42
-SRR7939018.395757       I       261     I       1300    -       +       UU      35      60
-SRR7939018.36878402     I       261     I       1503    +       -       UU      53      8
-SRR7939018.58859396     I       261     I       151795  -       +       UU      35      60
-SRR7939018.9188285      I       262     I       548     -       -       UU      39      35
-SRR7939018.54906449     I       264     I       565     +       +       UU      57      30
-SRR7939018.6384391      I       264     I       1119    -       -       UU      22      42
-SRR7939018.22854810     I       265     I       1030    -       +       UU      22      8
-SRR7939018.12209119     I       265     I       30528   -       -       UU      22      60
-SRR7939018.24964457     I       267     I       267     +       +       UU      60      60
-SRR7939018.7234736      I       267     I       448     +       -       UU      60      60
-SRR7939018.19510743     I       267     I       540     +       -       UU      60      35
-SRR7939018.13899556     I       267     I       17657   +       +       UU      60      13
-SRR7939018.38503770     I       268     I       877     +       +       UU      60      18
-SRR7939018.474499       I       268     I       7631    -       +       UU      22      60
-SRR7939018.55837536     I       269     I       462     -       -       UU      22      42
-SRR7939018.21073549     I       269     I       1068    +       -       UU      60      9
-SRR7939018.22540568     I       270     I       17997   +       +       UU      60      15
-SRR7939018.19685544     I       271     I       383     +       +       UU      60      50
-SRR7939018.50078671     I       272     I       149     -       +       UU      22      15
-SRR7939018.25382176     I       272     I       448     +       -       UU      60      48
-SRR7939018.33536302     I       272     I       511     +       -       UU      60      46
-SRR7939018.4328848      I       276     I       388     +       -       UU      60      60
-SRR7939018.11189274     I       279     I       964     +       +       UU      53      39
-SRR7939018.15295337     I       280     I       618     -       +       UU      39      12
-SRR7939018.9615117      I       281     I       9123    -       +       UU      22      60
-SRR7939018.9583435      I       283     I       500     -       +       UU      22      35
-SRR7939018.46278305     I       284     I       1096    -       +       UU      4       60
-SRR7939018.41995560     I       284     I       3837    +       +       UU      50      60
-SRR7939018.42126681     I       284     I       40796   +       -       UU      50      60
-SRR7939018.60069005     I       286     I       646     -       -       UU      32      35
-SRR7939018.2693106      I       286     I       1556    +       +       UU      42      19
-SRR7939018.16225453     I       287     I       508     +       -       UU      39      35
-SRR7939018.22091177     I       289     I       554     +       -       UU      35      6
-SRR7939018.27010956     I       289     I       2411    -       -       UU      39      13
-SRR7939018.28786476     I       290     I       636     +       -       UU      35      39
-SRR7939018.33956231     I       292     I       203     +       -       UU      35      13
-SRR7939018.15585603     I       292     I       450     +       +       UU      35      42
-SRR7939018.64208972     I       294     I       350     -       +       UU      35      50
-SRR7939018.8013045      I       297     I       298     -       +       UU      35      15
-SRR7939018.58440622     I       297     I       566     -       +       UU      35      35
-SRR7939018.37769305     I       298     I       121     -       +       UU      35      60
-SRR7939018.56583569     I       301     I       221     +       -       UU      27      57
-SRR7939018.16125087     I       302     I       453     -       -       UU      35      60
-SRR7939018.62353867     I       304     I       620     +       -       UU      22      26
-SRR7939018.18152373     I       304     I       2170    -       +       UU      35      6
-SRR7939018.66151970     I       306     I       118     -       +       UU      42      60
-SRR7939018.4371675      I       307     I       8       -       +       UU      46      28
-SRR7939018.17515347     I       309     I       1942    -       -       UU      53      27
-SRR7939018.7312079      I       309     I       33506   -       +       UU      53      60
-SRR7939018.19509623     I       309     I       187437  -       -       UU      53      4
-SRR7939018.17206555     I       310     I       506     +       -       UU      35      35
-SRR7939018.21284547     I       310     I       33072   -       -       UU      53      60
-SRR7939018.5039839      I       314     I       389     -       +       UU      60      60
-SRR7939018.58846147     I       314     I       1395    -       -       UU      60      32
-SRR7939018.39041406     I       316     I       2677    +       +       UU      57      46
-SRR7939018.59515106     I       317     I       377     -       +       UU      60      32
-SRR7939018.53267260     I       317     I       437     -       +       UU      60      42
-SRR7939018.63746396     I       317     I       479     -       +       UU      60      60
-SRR7939018.12127032     I       317     I       598     -       -       UU      60      11
-SRR7939018.48867141     I       317     I       1105    -       -       UU      60      9
-SRR7939018.41904466     I       317     I       27906   -       -       UU      60      60
-SRR7939018.28431320     I       318     I       147     -       +       UU      60      27
-SRR7939018.27754454     I       318     I       154     -       +       UU      60      19
-SRR7939018.44608924     I       318     I       169     -       +       UU      60      53
-SRR7939018.25325734     I       318     I       410     -       -       UU      60      7
-SRR7939018.34611243     I       318     I       493     -       +       UU      60      35
-SRR7939018.48190964     I       318     I       550     -       -       UU      60      35
-SRR7939018.42699900     I       318     I       2076    -       +       UU      60      8
-SRR7939018.62489139     I       318     I       7046    -       -       UU      60      60
-SRR7939018.5634300      I       319     I       504     -       -       UU      60      60
-SRR7939018.5582342      I       319     I       2367    +       -       UU      60      60
-SRR7939018.50433185     I       319     I       4632    +       +       UU      60      60
-SRR7939018.13165688     I       321     I       172     +       +       UU      60      57
-SRR7939018.31301430     I       321     I       492     +       -       UU      60      53
-SRR7939018.26911284     I       321     I       4041    +       +       UU      60      60
-SRR7939018.16104906     I       321     I       8763    +       +       UU      60      60
-SRR7939018.17597296     I       322     I       119     -       -       UU      60      60
-SRR7939018.52698739     I       322     I       110955  +       -       UU      39      60
-SRR7939018.5236090      I       323     I       5908    -       +       UU      60      60
-SRR7939018.54645427     I       324     I       579     -       +       UU      60      32
-SRR7939018.171339       I       324     I       671     +       -       UU      60      12
-SRR7939018.55582591     I       324     I       2797    -       -       UU      60      60
-SRR7939018.15787174     I       329     I       149     -       +       UU      53      15
-SRR7939018.25588817     I       329     I       3194    +       +       UU      38      60
-SRR7939018.44478098     I       329     I       4012    -       -       UU      39      60
-SRR7939018.20785039     I       330     I       512     +       +       UU      42      7
-SRR7939018.36435828     I       330     I       637     -       -       UU      53      39
-SRR7939018.3993763      I       330     I       1306    -       +       UU      53      60
-SRR7939018.62229931     I       330     I       2414    -       -       UU      53      13
-SRR7939018.36302256     I       331     I       610     -       -       UU      53      16
-SRR7939018.22970716     I       331     I       6442    -       +       UU      53      60
-SRR7939018.20883050     I       333     I       455     -       +       UU      50      35
-SRR7939018.8896863      I       333     I       1608    -       +       UU      50      2
-SRR7939018.30464575     I       333     I       22903   -       +       UU      50      4
-SRR7939018.57984848     I       335     I       27366   +       +       UU      60      53
-SRR7939018.57772590     I       336     I       914     +       +       UU      60      60
-SRR7939018.46639408     I       338     I       12630   +       -       UU      60      11
-SRR7939018.52855934     I       342     I       207     -       +       UU      32      48
-SRR7939018.55843917     I       342     I       220     -       +       UU      32      22
-SRR7939018.43567249     I       342     I       237     -       -       UU      32      60
-SRR7939018.25152659     I       342     I       30346   -       -       UU      32      60
-SRR7939018.65852975     I       343     I       117     -       +       UU      28      60
+SRR7939018.44042564 I   1   I   15064   +   -   UU  1   R1-2    1   15064   48  15015   48  13
+SRR7939018.44810319 I   7   I   1001    +   +   UU  1   R1-2    7   1001    56  1050    28  46
+SRR7939018.29094541 I   7   I   1292    +   -   UU  1   R1-2    7   1292    56  1243    28  13
+SRR7939018.17270740 I   8   I   2024    +   +   UU  1   R1-2    8   2024    41  2073    21  13
+SRR7939018.55685650 I   8   I   9446    +   -   UU  1   R1-2    8   9446    57  9397    28  60
+SRR7939018.20572273 I   10  I   130 +   +   UU  1   R1-2    10  130 59  179 35  53
+SRR7939018.14854904 I   10  I   318 +   -   UU  1   R1-2    10  318 59  269 35  60
+SRR7939018.25573455 I   10  I   558 +   +   UU  1   R1-2    10  558 59  607 35  11
+SRR7939018.34992310 I   10  I   887 +   +   UU  1   R1-2    10  887 59  936 35  35
+SRR7939018.1104427  I   10  I   31959   +   -   UU  1   R1-2    10  31959   59  31910   35  60
+SRR7939018.35158773 I   11  I   865 +   +   UU  1   R1-2    11  865 60  914 39  35
+SRR7939018.22989844 I   12  I   219 +   -   UU  1   R1-2    12  219 61  170 42  57
+SRR7939018.33126366 I   12  I   119112  +   -   UU  1   R1-2    12  119112  61  119063  42  60
+SRR7939018.18616690 I   13  I   280 +   -   UU  1   R1-2    13  280 62  231 42  20      C:A:40:274:44
+SRR7939018.50678971 I   29  I   407 +   -   UU  1   R1-2    29  407 78  358 60  39
+SRR7939018.10119014 I   36  I   470 +   -   UU  1   R1-2    36  470 78  421 60  6
+SRR7939018.9636000  I   38  I   194 +   -   UU  1   R1-2    38  194 87  145 60  18
+SRR7939018.43976050 I   38  I   229129  -   -   UU  1   R1-2    38  229129  1   229080  2   12  A:C:13:9:21 C:T:38:229097:18,C:A:13:229103:24
+SRR7939018.56159970 I   39  I   2441    +   -   UU  1   R1-2    39  2441    88  2392    60  35  C:A:38:38:0
+SRR7939018.35458836 I   40  I   89  +   -   UU  1   R1-2    40  89  89  40  60  60
+SRR7939018.54943727 I   41  I   178 +   +   UU  1   R1-2    41  178 90  227 60  57
+SRR7939018.35434398 I   41  I   321 +   +   UU  1   R1-2    41  321 90  370 60  60
+SRR7939018.19718640 I   41  I   395 +   +   UU  1   R1-2    41  395 90  444 60  60
+SRR7939018.27890433 I   41  I   1731    +   +   UU  1   R1-2    41  1731    90  1780    60  15
+SRR7939018.13293960 I   41  I   38151   -   +   UU  1   R1-2    41  38151   1   38200   18  60
+SRR7939018.16006081 I   43  I   242 +   -   UU  1   R1-2    43  242 92  193 60  60
+SRR7939018.50825843 I   52  I   336 -   +   UU  1   R1-2    52  336 3   385 28  60
+SRR7939018.8625963  I   55  I   319 -   +   UU  1   R1-2    55  319 6   368 28  60
+SRR7939018.18404752 I   56  I   479 -   +   UU  1   R1-2    56  479 7   528 28  39
+SRR7939018.5344196  I   56  I   33715   -   -   UU  1   R1-2    56  33715   7   33666   22  60  A:C:13:17:11,A:C:13:25:19,A:C:13:30:24
+SRR7939018.19358281 I   58  I   2936    -   -   UU  1   R1-2    58  2936    9   2887    13  60  A:C:2:9:1,A:C:2:13:5,A:T:13:28:20
+SRR7939018.62948413 I   58  I   27756   -   +   UU  1   R1-2    58  27756   9   27805   32  32
+SRR7939018.62698375 I   60  I   75259   -   +   UU  1   R1-2    60  75259   11  75308   18  60  A:C:13:13:3,C:A:38:44:34
+SRR7939018.57525614 I   62  I   333 -   -   UU  1   R1-2    62  333 13  284 39  25  A:T:13:25:13    C:G:2:311:28,A:G:2:324:41,C:A:2:325:42
+SRR7939018.63561884 I   62  I   9772    -   -   UU  1   R1-2    62  9772    13  9723    39  60  A:C:13:25:13
+SRR7939018.54429866 I   62  I   228205  -   -   UU  1   R1-2    62  228205  13  228156  42  55      T:C:32:228172:17,C:A:32:228198:43,A:T:38:228199:44
+SRR7939018.11337172 I   63  I   3225    +   +   UU  1   R1-2    63  3225    112 3274    60  60
+SRR7939018.32883053 I   64  I   4341    +   -   UU  1   R1-2    64  4341    113 4306    60  60
+SRR7939018.41612980 I   66  I   289 -   -   UU  1   R1-2    66  289 18  247 44  27  A:C:2:30:14,C:G:2:43:27
+SRR7939018.20486679 I   66  I   47606   -   +   UU  1   R1-2    66  47606   17  47645   42  60
+SRR7939018.4271037  I   68  I   500 +   -   UU  1   R1-2    68  500 112 451 60  60      A:T:13:468:18
+SRR7939018.13346597 I   72  I   4371    -   +   UU  1   R1-2    72  4371    23  4416    53  60
+SRR7939018.24593858 I   72  I   7008    -   -   UU  1   R1-2    72  7008    23  6959    37  60  A:C:13:28:6,A:C:13:30:8 T:G:40:6958:0
+SRR7939018.41263687 I   73  I   49428   +   -   UU  1   R1-2    73  49428   122 49379   60  60  C:G:40:97:25    A:G:40:49411:33
+SRR7939018.34067598 I   77  I   298 +   -   UU  1   R1-2    77  298 131 249 53  35
+SRR7939018.7777574  I   77  I   1223    -   -   UU  1   R1-2    77  1223    32  1174    60  9       T:G:27:1174:1
+SRR7939018.41918892 I   77  I   2410    -   -   UU  1   R1-2    77  2410    28  2361    60  13  A:C:13:37:10
+SRR7939018.36976831 I   78  I   228 +   -   UU  1   R1-2    78  228 121 179 60  60
+SRR7939018.11605183 I   78  I   1068    +   -   UU  1   R1-2    78  1068    127 1019    60  9
+SRR7939018.61330774 I   78  I   4018    +   -   UU  1   R1-2    78  4018    127 3969    60  60
+SRR7939018.58174255 I   79  I   1330    +   -   UU  1   R1-2    79  1330    128 1281    60  20
+SRR7939018.54185633 I   79  I   1369    +   -   UU  1   R1-2    79  1369    128 1320    60  35
+SRR7939018.32333692 I   79  I   207738  +   +   UU  1   R1-2    79  207738  114 207787  60  39
+SRR7939018.30478651 I   81  I   95  -   +   UU  1   R1-2    81  95  32  144 52  50  A:C:2:35:4,A:C:2:40:9,A:C:2:42:11
+SRR7939018.15936606 I   81  I   5173    -   +   UU  1   R1-2    81  5173    32  5210    60  60  A:C:2:37:6
+SRR7939018.39027485 I   88  I   56075   -   +   UU  1   R1-2    88  56075   39  56124   60  60      G:A:13:56083:9
+SRR7939018.31861861 I   88  I   107563  -   +   UU  1   R1-2    88  107563  39  107612  60  60
+SRR7939018.26002914 I   89  I   296 +   -   UU  1   R1-2    89  296 138 247 53  35
+SRR7939018.46658462 I   89  I   318 +   -   UU  1   R1-2    89  318 131 269 60  28      A:C:2:272:4,A:C:2:279:11,A:T:2:282:14,T:G:13:308:40
+SRR7939018.24703715 I   89  I   964 -   +   UU  1   R1-2    89  964 40  1013    60  39
+SRR7939018.34060015 I   93  I   194 +   -   UU  1   R1-2    93  194 126 145 54  18
+SRR7939018.4599895  I   94  I   314 +   -   UU  1   R1-2    94  314 126 265 48  60
+SRR7939018.22066078 I   94  I   996 +   -   UU  1   R1-2    94  996 125 947 48  8       T:C:40:947:1,C:T:38:967:21,T:C:38:970:24,G:C:38:989:43
+SRR7939018.3480101  I   95  I   338 +   -   UU  1   R1-2    95  338 126 289 39  33      A:T:13:298:10
+SRR7939018.29817538 I   95  I   411 +   +   UU  1   R1-2    95  411 144 460 2   50  G:A:40:135:41,C:T:40:140:46
+SRR7939018.12120171 I   95  I   499 +   -   UU  1   R1-2    95  499 144 450 50  60      T:G:2:472:23
+SRR7939018.56703503 I   96  I   463 +   +   UU  1   R1-2    96  463 145 504 50  60
+SRR7939018.2893773  I   99  I   401 +   -   UU  1   R1-2    99  401 148 358 50  21
+SRR7939018.50311998 I   104 I   4760    -   +   UU  1   R1-2    104 4760    70  4809    60  60
+SRR7939018.8198197  I   105 I   83  +   -   UU  1   R1-2    105 83  144 44  21  60
+SRR7939018.46628911 I   108 I   238 +   +   UU  1   R1-2    108 238 157 287 39  32
+SRR7939018.54704375 I   108 I   256 +   -   UU  1   R1-2    108 256 157 212 39  60
+SRR7939018.31780843 I   108 I   411 +   +   UU  1   R1-2    108 411 157 460 39  50
+SRR7939018.45965058 I   112 I   10  -   +   UU  1   R1-2    112 10  75  59  60  35
+SRR7939018.15594546 I   112 I   261 +   -   UU  1   R1-2    112 261 161 212 53  35
+SRR7939018.33827262 I   112 I   407 +   -   UU  1   R1-2    112 407 161 358 53  39
+SRR7939018.88645    I   112 I   230127  +   +   UU  1   R1-2    112 230127  144 230168  15  2       G:T:27:230160:38
+SRR7939018.2342447  I   114 I   321 -   -   UU  1   R1-2    114 321 79  272 60  60
+SRR7939018.33953    I   114 I   1052    +   -   UU  1   R1-2    114 1052    163 1003    60  39
+SRR7939018.16129580 I   116 I   10  -   +   UU  1   R1-2    116 10  67  59  60  35
+SRR7939018.6945655  I   116 I   62  -   -   UU  1   R1-2    116 62  80  13  60  39      A:C:13:25:13
+SRR7939018.18958897 I   116 I   6531    -   +   UU  1   R1-2    116 6531    73  6580    60  60
+SRR7939018.36806590 I   117 I   66815   -   +   UU  1   R1-2    117 66815   68  66864   60  60
+SRR7939018.56325226 I   120 I   67  +   -   UU  1   R1-2    120 67  169 18  60  42
+SRR7939018.48930140 I   120 I   298 +   -   UU  1   R1-2    120 298 169 249 60  35
+SRR7939018.10294309 I   120 I   370 +   -   UU  1   R1-2    120 370 169 321 60  35
+SRR7939018.149574   I   122 I   329 +   -   UU  1   R1-2    122 329 171 280 60  53
+SRR7939018.30608017 I   122 I   440 +   -   UU  1   R1-2    122 440 171 391 60  60
+SRR7939018.42054658 I   128 I   556 -   +   UU  1   R1-2    128 556 91  605 39  11
+SRR7939018.18870615 I   129 I   77  -   -   UU  1   R1-2    129 77  93  28  60  60
+SRR7939018.63830453 I   130 I   306 +   -   UU  1   R1-2    130 306 179 272 53  60
+SRR7939018.27872423 I   130 I   318 +   -   UU  1   R1-2    130 318 179 282 53  60
+SRR7939018.64264442 I   130 I   361 +   -   UU  1   R1-2    130 361 179 312 53  42
+SRR7939018.46489678 I   130 I   499 +   -   UU  1   R1-2    130 499 179 450 53  42
+SRR7939018.38483937 I   130 I   598 +   -   UU  1   R1-2    130 598 179 549 53  11
+SRR7939018.44672941 I   130 I   4231    +   -   UU  1   R1-2    130 4231    179 4182    53  60      G:A:2:4195:14,G:A:2:4224:43
+SRR7939018.8174511  I   131 I   266 +   -   UU  1   R1-2    131 266 180 217 53  22
+SRR7939018.63069824 I   131 I   270 +   -   UU  1   R1-2    131 270 160 221 48  59      A:C:2:220:0,T:A:13:248:28,T:A:13:254:34
+SRR7939018.63360991 I   131 I   408 +   -   UU  1   R1-2    131 408 180 377 53  1
+SRR7939018.35055818 I   131 I   516 +   -   UU  1   R1-2    131 516 180 467 53  53
+SRR7939018.41132537 I   131 I   2363    +   -   UU  1   R1-2    131 2363    180 2314    53  60
+SRR7939018.53010615 I   132 I   964 +   +   UU  1   R1-2    132 964 167 1013    39  39
+SRR7939018.50255224 I   135 I   8633    +   +   UU  1   R1-2    135 8633    184 8682    46  60
+SRR7939018.34795673 I   139 I   321 -   +   UU  1   R1-2    139 321 93  370 60  60
+SRR7939018.41341751 I   142 I   318 +   -   UU  1   R1-2    142 318 191 269 32  60
+SRR7939018.55317485 I   142 I   408 -   -   UU  1   R1-2    142 408 93  359 50  35
+SRR7939018.45767801 I   142 I   674 -   -   UU  1   R1-2    142 674 93  625 50  12
+SRR7939018.44856945 I   144 I   1   -   +   UU  1   R1-2    144 1   112 41  15  21
+SRR7939018.57480364 I   144 I   372 +   -   UU  1   R1-2    144 372 179 323 24  35
+SRR7939018.60244328 I   148 I   8314    -   +   UU  1   R1-2    148 8314    99  8363    50  60
+SRR7939018.62030183 I   149 I   340 +   +   UU  1   R1-2    149 340 198 389 15  60
+SRR7939018.50687203 I   149 I   58674   +   +   UU  1   R1-2    149 58674   198 58723   15  60
+SRR7939018.14735998 I   153 I   9   -   +   UU  1   R1-2    153 9   104 40  35  13
+SRR7939018.10348915 I   153 I   38  +   +   UU  1   R1-2    153 38  202 87  15  60
+SRR7939018.11559411 I   153 I   67  +   -   UU  1   R1-2    153 67  202 27  15  60
+SRR7939018.57507662 I   153 I   314 +   -   UU  1   R1-2    153 314 198 265 27  60
+SRR7939018.51634879 I   153 I   484 +   -   UU  1   R1-2    153 484 202 435 15  35
+SRR7939018.20823598 I   159 I   5   -   +   UU  1   R1-2    159 5   110 50  46  48
+SRR7939018.49019958 I   159 I   1065    -   -   UU  1   R1-2    159 1065    110 1016    46  9
+SRR7939018.7089964  I   160 I   797 -   +   UU  1   R1-2    160 797 121 846 60  15
+SRR7939018.49430764 I   161 I   393 +   -   UU  1   R1-2    161 393 210 344 22  60
+SRR7939018.32117170 I   163 I   342 +   -   UU  1   R1-2    163 342 212 293 32  32
+SRR7939018.44825194 I   164 I   144 +   -   UU  1   R1-2    164 144 207 95  27  50
+SRR7939018.9190308  I   167 I   510 -   +   UU  1   R1-2    167 510 125 559 32  6   G:A:38:135:11,C:T:38:140:16 T:C:40:536:27
+SRR7939018.41564659 I   168 I   306 +   -   UU  1   R1-2    168 306 213 257 60  42
+SRR7939018.38567586 I   168 I   440 +   -   UU  1   R1-2    168 440 217 391 50  60
+SRR7939018.14394214 I   169 I   440 +   -   UU  1   R1-2    169 440 215 391 60  60
+SRR7939018.58143382 I   169 I   445 +   -   UU  1   R1-2    169 445 198 396 27  60
+SRR7939018.1218818  I   172 I   297 +   -   UU  1   R1-2    172 297 206 248 27  35
+SRR7939018.27830998 I   172 I   445 +   -   UU  1   R1-2    172 445 221 396 57  60
+SRR7939018.37292189 I   174 I   360 +   -   UU  1   R1-2    174 360 223 311 57  39
+SRR7939018.62262963 I   178 I   965 +   +   UU  1   R1-2    178 965 227 1002    57  25
+SRR7939018.40100680 I   179 I   179 +   +   UU  1   R1-2    179 179 228 228 42  53  C:G:13:215:37   C:A:38:180:2,A:T:40:196:18
+SRR7939018.18013213 I   179 I   393 +   -   UU  1   R1-2    179 393 228 344 60  60
+SRR7939018.40530226 I   179 I   997 +   -   UU  1   R1-2    179 997 228 954 60  60
+SRR7939018.17438715 I   179 I   1519    +   +   UU  1   R1-2    179 1519    228 1568    60  52      G:T:40:1567:49
+SRR7939018.2072227  I   180 I   318 +   -   UU  1   R1-2    180 318 229 269 60  46      C:G:38:304:36
+SRR7939018.11959452 I   180 I   320 +   -   UU  1   R1-2    180 320 217 271 33  60
+SRR7939018.64470435 I   182 I   159 +   -   UU  1   R1-2    182 159 231 116 60  60
+SRR7939018.43306138 I   185 I   347 -   +   UU  1   R1-2    185 347 136 396 42  60
+SRR7939018.636925   I   186 I   22109   +   -   UU  1   R1-2    186 22109   235 22060   60  35
+SRR7939018.18893333 I   187 I   448 +   +   UU  1   R1-2    187 448 236 497 60  50
+SRR7939018.33701049 I   190 I   4166    +   +   UU  1   R1-2    190 4166    239 4215    60  60
+SRR7939018.32232023 I   190 I   70094   +   +   UU  1   R1-2    190 70094   239 70143   60  60
+SRR7939018.53297799 I   191 I   46260   +   +   UU  1   R1-2    191 46260   240 46309   60  60
+SRR7939018.40600493 I   194 I   702 -   -   UU  1   R1-2    194 702 145 653 18  22
+SRR7939018.54428661 I   196 I   1872    -   +   UU  1   R1-2    196 1872    147 1921    15  4
+SRR7939018.24526425 I   197 I   499 +   -   UU  1   R1-2    197 499 246 450 60  42
+SRR7939018.29763149 I   199 I   1423    -   -   UU  1   R1-2    199 1423    161 1374    27  12
+SRR7939018.40043700 I   199 I   3516    +   +   UU  1   R1-2    199 3516    248 3565    60  60
+SRR7939018.14444090 I   201 I   403 +   +   UU  1   R1-2    201 403 250 452 60  60
+SRR7939018.60875057 I   201 I   456 +   +   UU  1   R1-2    201 456 250 505 60  35
+SRR7939018.35249835 I   203 I   1396    +   -   UU  1   R1-2    203 1396    252 1347    60  32
+SRR7939018.15001816 I   203 I   6184    +   -   UU  1   R1-2    203 6184    252 6135    60  60
+SRR7939018.34494724 I   204 I   482 +   -   UU  1   R1-2    204 482 253 433 60  35
+SRR7939018.22859704 I   209 I   458 -   -   UU  1   R1-2    209 458 160 409 18  57
+SRR7939018.47000044 I   209 I   34714   -   -   UU  1   R1-2    209 34714   168 34665   33  60
+SRR7939018.63597093 I   211 I   393 +   -   UU  1   R1-2    211 393 260 350 39  60
+SRR7939018.1622372  I   211 I   997 +   -   UU  1   R1-2    211 997 260 951 39  60
+SRR7939018.474429   I   213 I   499 -   +   UU  1   R1-2    213 499 164 537 35  48
+SRR7939018.20506996 I   219 I   642 +   -   UU  1   R1-2    219 642 268 593 22  39
+SRR7939018.53054840 I   221 I   482 -   -   UU  1   R1-2    221 482 172 433 57  35
+SRR7939018.5192888  I   228 I   25  -   +   UU  1   R1-2    228 25  179 78  60  14
+SRR7939018.54103083 I   228 I   67  -   +   UU  1   R1-2    228 67  179 114 60  60
+SRR7939018.58302728 I   228 I   112 -   +   UU  1   R1-2    228 112 179 161 60  53
+SRR7939018.11802973 I   228 I   375 -   +   UU  1   R1-2    228 375 179 424 60  32
+SRR7939018.13131256 I   228 I   1317    -   +   UU  1   R1-2    228 1317    179 1366    60  42
+SRR7939018.61381899 I   229 I   61832   -   -   UU  1   R1-2    229 61832   180 61783   60  60      A:T:32:61808:26
+SRR7939018.43463684 I   230 I   66  -   -   UU  1   R1-2    230 66  181 17  60  42
+SRR7939018.37234934 I   231 I   1   -   +   UU  1   R1-2    231 1   182 45  60  48
+SRR7939018.57215855 I   231 I   1507    +   -   UU  1   R1-2    231 1507    280 1458    22  28
+SRR7939018.21538317 I   231 I   3183    +   +   UU  1   R1-2    231 3183    280 3232    20  60  G:T:38:249:19
+SRR7939018.27062170 I   231 I   5328    -   -   UU  1   R1-2    231 5328    182 5279    60  60
+SRR7939018.30514503 I   232 I   516 +   -   UU  1   R1-2    232 516 281 467 22  53
+SRR7939018.25735139 I   237 I   304 -   +   UU  1   R1-2    237 304 188 353 60  22  A:T:13:206:19
+SRR7939018.16656470 I   237 I   1268    +   -   UU  1   R1-2    237 1268    286 1219    32  9
+SRR7939018.35412212 I   237 I   1575    -   -   UU  1   R1-2    237 1575    188 1526    60  28
+SRR7939018.45068006 I   237 I   14967   -   +   UU  1   R1-2    237 14967   188 15016   60  35
+SRR7939018.57443737 I   238 I   196 +   -   UU  1   R1-2    238 196 287 153 32  27
+SRR7939018.35540452 I   238 I   388 +   -   UU  1   R1-2    238 388 269 339 33  60
+SRR7939018.738378   I   238 I   413 +   +   UU  1   R1-2    238 413 287 462 32  42
+SRR7939018.49658035 I   238 I   1013    +   +   UU  1   R1-2    238 1013    287 1062    32  13
+SRR7939018.18455078 I   238 I   1306    +   +   UU  1   R1-2    238 1306    287 1355    32  60
+SRR7939018.25425454 I   239 I   447 +   -   UU  1   R1-2    239 447 288 398 32  60
+SRR7939018.50160736 I   239 I   1145    +   -   UU  1   R1-2    239 1145    288 1096    32  60
+SRR7939018.6589357  I   240 I   445 +   -   UU  1   R1-2    240 445 289 396 32  60
+SRR7939018.29347329 I   240 I   58204   +   +   UU  1   R1-2    240 58204   289 58253   32  60
+SRR7939018.47720593 I   241 I   412 +   -   UU  1   R1-2    241 412 272 363 15  50
+SRR7939018.27920289 I   242 I   657 -   -   UU  1   R1-2    242 657 193 608 60  28
+SRR7939018.28354716 I   243 I   52816   +   +   UU  1   R1-2    243 52816   292 52865   32  60
+SRR7939018.46556463 I   247 I   624 +   -   UU  1   R1-2    247 624 296 575 35  35
+SRR7939018.30258755 I   247 I   1070    -   -   UU  1   R1-2    247 1070    198 1021    60  9
+SRR7939018.31082534 I   249 I   5864    -   +   UU  1   R1-2    249 5864    200 5913    60  60
+SRR7939018.27987036 I   255 I   112 -   +   UU  1   R1-2    255 112 206 146 57  27
+SRR7939018.50639585 I   256 I   196 +   -   UU  1   R1-2    256 196 305 147 39  15
+SRR7939018.25112590 I   256 I   475 +   -   UU  1   R1-2    256 475 305 426 39  4
+SRR7939018.37697195 I   256 I   561 +   -   UU  1   R1-2    256 561 305 512 39  7
+SRR7939018.18628405 I   256 I   4844    -   +   UU  1   R1-2    256 4844    207 4893    60  60  T:C:13:230:24   T:G:13:4875:32
+SRR7939018.8788749  I   257 I   199 +   -   UU  1   R1-2    257 199 306 150 42  15
+SRR7939018.64068573 I   260 I   9673    -   +   UU  1   R1-2    260 9673    231 9722    60  60
+SRR7939018.36512445 I   261 I   98  -   +   UU  1   R1-2    261 98  212 147 35  50
+SRR7939018.53763682 I   261 I   130 -   +   UU  1   R1-2    261 130 212 170 35  54
+SRR7939018.11082149 I   261 I   286 -   +   UU  1   R1-2    261 286 212 335 35  42
+SRR7939018.395757   I   261 I   1300    -   +   UU  1   R1-2    261 1300    212 1344    35  60      G:T:38:1302:3
+SRR7939018.36878402 I   261 I   1503    +   -   UU  1   R1-2    261 1503    310 1454    53  8
+SRR7939018.58859396 I   261 I   151795  -   +   UU  1   R1-2    261 151795  212 151844  35  60
+SRR7939018.9188285  I   262 I   548 -   -   UU  1   R1-2    262 548 230 499 39  35
+SRR7939018.54906449 I   264 I   565 +   +   UU  1   R1-2    264 565 313 614 57  30      T:G:27:569:5,C:T:40:580:16
+SRR7939018.6384391  I   264 I   1119    -   -   UU  1   R1-2    264 1119    215 1070    22  42
+SRR7939018.22854810 I   265 I   1030    -   +   UU  1   R1-2    265 1030    216 1079    22  8
+SRR7939018.12209119 I   265 I   30528   -   -   UU  1   R1-2    265 30528   216 30479   22  60
+SRR7939018.24964457 I   267 I   267 +   +   UU  1   R1-2    267 267 316 300 60  60  C:A:2:311:45
+SRR7939018.7234736  I   267 I   448 +   -   UU  1   R1-2    267 448 316 399 60  60      G:A:13:427:29
+SRR7939018.19510743 I   267 I   540 +   -   UU  1   R1-2    267 540 316 491 60  35
+SRR7939018.13899556 I   267 I   17657   +   +   UU  1   R1-2    267 17657   316 17706   60  13
+SRR7939018.38503770 I   268 I   877 +   +   UU  1   R1-2    268 877 317 907 60  18
+SRR7939018.474499   I   268 I   7631    -   +   UU  1   R1-2    268 7631    219 7669    22  60
+SRR7939018.55837536 I   269 I   462 -   -   UU  1   R1-2    269 462 220 413 22  42
+SRR7939018.21073549 I   269 I   1068    +   -   UU  1   R1-2    269 1068    318 1019    60  9       A:T:38:1064:46
+SRR7939018.22540568 I   270 I   17997   +   +   UU  1   R1-2    270 17997   319 18046   60  15
+SRR7939018.19685544 I   271 I   383 +   +   UU  1   R1-2    271 383 320 432 60  50  T:A:40:319:49
+SRR7939018.50078671 I   272 I   149 -   +   UU  1   R1-2    272 149 223 198 22  15
+SRR7939018.25382176 I   272 I   448 +   -   UU  1   R1-2    272 448 317 399 60  48      A:T:2:404:6,T:G:2:406:8,C:A:13:438:40
+SRR7939018.33536302 I   272 I   511 +   -   UU  1   R1-2    272 511 321 462 60  46
+SRR7939018.4328848  I   276 I   388 +   -   UU  1   R1-2    276 388 325 350 60  60
+SRR7939018.11189274 I   279 I   964 +   +   UU  1   R1-2    279 964 328 1013    53  39
+SRR7939018.15295337 I   280 I   618 -   +   UU  1   R1-2    280 618 234 667 39  12
+SRR7939018.9615117  I   281 I   9123    -   +   UU  1   R1-2    281 9123    232 9172    22  60
+SRR7939018.9583435  I   283 I   500 -   +   UU  1   R1-2    283 500 234 549 22  35
+SRR7939018.46278305 I   284 I   1096    -   +   UU  1   R1-2    284 1096    235 1145    4   60  A:C:13:242:8
+SRR7939018.41995560 I   284 I   3837    +   +   UU  1   R1-2    284 3837    333 3886    50  60
+SRR7939018.42126681 I   284 I   40796   +   -   UU  1   R1-2    284 40796   333 40755   50  60
+SRR7939018.60069005 I   286 I   646 -   -   UU  1   R1-2    286 646 237 597 32  35
+SRR7939018.2693106  I   286 I   1556    +   +   UU  1   R1-2    286 1556    335 1594    42  19
+SRR7939018.16225453 I   287 I   508 +   -   UU  1   R1-2    287 508 336 459 39  35
+SRR7939018.22091177 I   289 I   554 +   -   UU  1   R1-2    289 554 338 505 35  6       G:T:2:508:4
+SRR7939018.27010956 I   289 I   2411    -   -   UU  1   R1-2    289 2411    242 2362    39  13
+SRR7939018.28786476 I   290 I   636 +   -   UU  1   R1-2    290 636 339 587 35  39
+SRR7939018.33956231 I   292 I   203 +   -   UU  1   R1-2    292 203 341 154 35  13      T:C:13:198:45
+SRR7939018.15585603 I   292 I   450 +   +   UU  1   R1-2    292 450 341 499 35  42
+SRR7939018.64208972 I   294 I   350 -   +   UU  1   R1-2    294 350 245 399 35  50
+SRR7939018.8013045  I   297 I   298 -   +   UU  1   R1-2    297 298 248 347 35  15
+SRR7939018.58440622 I   297 I   566 -   +   UU  1   R1-2    297 566 248 615 35  35
+SRR7939018.37769305 I   298 I   121 -   +   UU  1   R1-2    298 121 249 170 35  60
+SRR7939018.56583569 I   301 I   221 +   -   UU  1   R1-2    301 221 344 172 27  57
+SRR7939018.16125087 I   302 I   453 -   -   UU  1   R1-2    302 453 253 404 35  60
+SRR7939018.62353867 I   304 I   620 +   -   UU  1   R1-2    304 620 353 584 22  26      A:G:40:583:0
+SRR7939018.18152373 I   304 I   2170    -   +   UU  1   R1-2    304 2170    255 2219    35  6
+SRR7939018.66151970 I   306 I   118 -   +   UU  1   R1-2    306 118 257 157 42  60
+SRR7939018.4371675  I   307 I   8   -   +   UU  1   R1-2    307 8   258 57  46  28
+SRR7939018.17515347 I   309 I   1942    -   -   UU  1   R1-2    309 1942    260 1911    53  27
+SRR7939018.7312079  I   309 I   33506   -   +   UU  1   R1-2    309 33506   260 33555   53  60
+SRR7939018.19509623 I   309 I   187437  -   -   UU  1   R1-2    309 187437  260 187388  53  4
+SRR7939018.17206555 I   310 I   506 +   -   UU  1   R1-2    310 506 359 457 35  35
+SRR7939018.21284547 I   310 I   33072   -   -   UU  1   R1-2    310 33072   261 33023   53  60
+SRR7939018.5039839  I   314 I   389 -   +   UU  1   R1-2    314 389 265 438 60  60
+SRR7939018.58846147 I   314 I   1395    -   -   UU  1   R1-2    314 1395    265 1346    60  32
+SRR7939018.39041406 I   316 I   2677    +   +   UU  1   R1-2    316 2677    365 2726    57  46
+SRR7939018.59515106 I   317 I   377 -   +   UU  1   R1-2    317 377 268 426 60  32
+SRR7939018.53267260 I   317 I   437 -   +   UU  1   R1-2    317 437 268 486 60  42
+SRR7939018.63746396 I   317 I   479 -   +   UU  1   R1-2    317 479 268 522 60  60
+SRR7939018.12127032 I   317 I   598 -   -   UU  1   R1-2    317 598 268 549 60  11
+SRR7939018.48867141 I   317 I   1105    -   -   UU  1   R1-2    317 1105    268 1056    60  9
+SRR7939018.41904466 I   317 I   27906   -   -   UU  1   R1-2    317 27906   268 27857   60  60
+SRR7939018.28431320 I   318 I   147 -   +   UU  1   R1-2    318 147 269 191 60  27
+SRR7939018.27754454 I   318 I   154 -   +   UU  1   R1-2    318 154 269 184 60  19
+SRR7939018.44608924 I   318 I   169 -   +   UU  1   R1-2    318 169 269 218 60  53
+SRR7939018.25325734 I   318 I   410 -   -   UU  1   R1-2    318 410 269 376 60  7
+SRR7939018.34611243 I   318 I   493 -   +   UU  1   R1-2    318 493 269 542 60  35
+SRR7939018.48190964 I   318 I   550 -   -   UU  1   R1-2    318 550 269 501 60  35
+SRR7939018.42699900 I   318 I   2076    -   +   UU  1   R1-2    318 2076    269 2125    60  8
+SRR7939018.62489139 I   318 I   7046    -   -   UU  1   R1-2    318 7046    273 6997    60  60
+SRR7939018.5634300  I   319 I   504 -   -   UU  1   R1-2    319 504 270 455 60  60
+SRR7939018.5582342  I   319 I   2367    +   -   UU  1   R1-2    319 2367    368 2318    60  60
+SRR7939018.50433185 I   319 I   4632    +   +   UU  1   R1-2    319 4632    368 4681    60  60
+SRR7939018.13165688 I   321 I   172 +   +   UU  1   R1-2    321 172 370 221 60  57
+SRR7939018.31301430 I   321 I   492 +   -   UU  1   R1-2    321 492 370 443 60  53
+SRR7939018.26911284 I   321 I   4041    +   +   UU  1   R1-2    321 4041    370 4090    60  60
+SRR7939018.16104906 I   321 I   8763    +   +   UU  1   R1-2    321 8763    370 8812    60  60
+SRR7939018.17597296 I   322 I   119 -   -   UU  1   R1-2    322 119 273 77  60  60
+SRR7939018.52698739 I   322 I   110955  +   -   UU  1   R1-2    322 110955  357 110909  39  60
+SRR7939018.5236090  I   323 I   5908    -   +   UU  1   R1-2    323 5908    274 5957    60  60
+SRR7939018.54645427 I   324 I   579 -   +   UU  1   R1-2    324 579 275 628 60  32
+SRR7939018.171339   I   324 I   671 +   -   UU  1   R1-2    324 671 373 622 60  12
+SRR7939018.55582591 I   324 I   2797    -   -   UU  1   R1-2    324 2797    275 2748    60  60
+SRR7939018.15787174 I   329 I   149 -   +   UU  1   R1-2    329 149 280 198 53  15
+SRR7939018.25588817 I   329 I   3194    +   +   UU  1   R1-2    329 3194    378 3243    38  60  A:G:13:329:1
+SRR7939018.44478098 I   329 I   4012    -   -   UU  1   R1-2    329 4012    291 3963    39  60
+SRR7939018.20785039 I   330 I   512 +   +   UU  1   R1-2    330 512 379 561 42  7
+SRR7939018.36435828 I   330 I   637 -   -   UU  1   R1-2    330 637 281 588 53  39
+SRR7939018.3993763  I   330 I   1306    -   +   UU  1   R1-2    330 1306    281 1355    53  60
+SRR7939018.62229931 I   330 I   2414    -   -   UU  1   R1-2    330 2414    281 2365    53  13
+SRR7939018.36302256 I   331 I   610 -   -   UU  1   R1-2    331 610 282 561 53  16
+SRR7939018.22970716 I   331 I   6442    -   +   UU  1   R1-2    331 6442    282 6491    53  60
+SRR7939018.20883050 I   333 I   455 -   +   UU  1   R1-2    333 455 284 504 50  35
+SRR7939018.8896863  I   333 I   1608    -   +   UU  1   R1-2    333 1608    284 1657    50  2
+SRR7939018.30464575 I   333 I   22903   -   +   UU  1   R1-2    333 22903   284 22952   50  4
+SRR7939018.57984848 I   335 I   27366   +   +   UU  1   R1-2    335 27366   384 27415   60  53
+SRR7939018.57772590 I   336 I   914 +   +   UU  1   R1-2    336 914 385 963 60  60
+SRR7939018.46639408 I   338 I   12630   +   -   UU  1   R1-2    338 12630   387 12581   60  11
 
 
 ❯ #  Count number of unique pairs type in "${a_dedup_pre_pairs}"
+
+
 ❯ zcat "${a_dedup_pre_pairs}" \
 >     | grep -v "^#" \
 >     | cut -f 8 \
 >     | sort \
 >     | uniq -c
-      22 RU
-      16 UR
-30984355 UU
+31204815 UU
 
 
 ❯ #  What are the RU and UR pair types?
+
+
 ❯ zcat "${a_dedup_pre_pairs}" | grep "RU\|UR"
-SRR7939018.16158752     II      72123   II      72123   +       +       RU      60      60
-SRR7939018.40527682     II      406931  XII     460098  -       -       UR      60      60
-SRR7939018.29449561     IV      54363   IV      54363   -       -       RU      59      60
-SRR7939018.52130110     IV      244807  IV      1082239 -       -       RU      60      60
-SRR7939018.33602764     IV      585500  IV      585685  +       +       RU      60      60
-SRR7939018.54938585     IV      1339408 IV      1339408 +       +       RU      60      60
-SRR7939018.32721452     IV      521979  XI      633439  -       +       RU      60      60
-SRR7939018.16406425     IX      75357   VII     720586  -       -       RU      60      60
-SRR7939018.59846141     Mito    5261    Mito    5261    -       -       UR      60      60
-SRR7939018.46681173     Mito    30009   Mito    24889   +       -       RU      60      39
-SRR7939018.44962128     Mito    37916   Mito    37916   +       +       RU      60      60
-SRR7939018.5497732      Mito    65713   Mito    65962   -       -       UR      48      60
-SRR7939018.60807036     Mito    71798   Mito    71798   -       -       RU      60      60
-SRR7939018.54748364     V       45827   I       4913    +       -       RU      60      60
-SRR7939018.52165771     V       508957  V       508411  -       -       RU      60      60
-SRR7939018.19656596     V       513648  XV      491777  +       +       UR      60      60
-SRR7939018.26325668     VII     753242  VII     753343  +       -       UR      60      32
-SRR7939018.25575558     VII     753242  VII     753361  +       -       UR      60      60
-SRR7939018.13637676     VII     753242  VII     753368  +       -       UR      60      60
-SRR7939018.62500214     VII     753242  VII     753377  +       -       UR      60      60
-SRR7939018.37662090     VII     753242  VII     753388  +       -       UR      60      60
-SRR7939018.58241551     VII     753242  VII     753593  +       -       UR      60      60
-SRR7939018.32226842     VII     753246  VII     753328  +       -       UR      60      60
-SRR7939018.43412802     VII     753344  VII     753246  -       +       RU      35      60
-SRR7939018.29130431     VII     753352  VII     753227  -       +       UR      60      60
-SRR7939018.19039978     VII     753368  VII     753246  -       +       RU      60      60
-SRR7939018.37537334     VII     753690  VII     753246  -       +       RU      60      60
-SRR7939018.51422729     VIII    319445  XVI     562547  +       +       RU      60      60
-SRR7939018.23912930     XI      449843  XI      446776  +       -       RU      60      60
-SRR7939018.12206387     XI      474554  XIV     496800  +       -       UR      60      60
-SRR7939018.24847876     XII     203285  IV      443010  +       -       UR      60      60
-SRR7939018.17080411     XII     89681   XII     89884   +       -       RU      60      60
-SRR7939018.15206540     XII     155687  XII     155668  +       +       RU      60      60
-SRR7939018.2094756      XII     566825  XII     575243  -       +       RU      60      60
-SRR7939018.35947817     XII     949457  XII     955731  -       +       RU      60      60
-SRR7939018.13294734     XIII    414344  XIII    366009  +       +       UR      60      60
-SRR7939018.43331180     XIV     363194  XIV     363194  -       -       RU      60      60
-SRR7939018.39649628     XV      130908  XV      131076  +       -       UR      60      60
 ```
 </details>
 <br />
 
 <a id="check-the-stats-outfile"></a>
 ##### Check the stats outfile
-`#TODO` `#QUESTION` Is this [`pairtools dedup`](#code-7) stats outfile different from the [`pairtools parse`](#code-5) stats outfile?
-
 <details>
 <summary><i>Printed: Check the stats outfile</i></summary>
 
 ```txt
-❯ ., "${a_dedup_stats}"
--rw-rw---- 1 kalavatt 13K Jun 11 10:44 stats/SRR7939018.dedup.stats.txt
+ 1 ❯ #  Check the stats outfile ----------------------------------------------------
 
 
-❯ cat "${a_dedup_stats}"
-total   66144150
-total_unmapped  16715069
-total_single_sided_mapped       11476331
-total_mapped    37952750
-total_dups      6968357
-total_nodups    30984393
-cis     17685258
-trans   13299135
-pair_types/MM   14039715
+ 1 ❯ ., "${a_dedup_stats}"
+-rw-rw---- 1 kalavatt 13K Jul  6 12:41 0X_stats/SRR7939018.dedup.stats.txt
+
+
+❯ cat "${a_dedup_stats}"  # less "${a_dedup_stats}"
+total   66153900
+total_unmapped  16714538
+total_single_sided_mapped   11485160
+total_mapped    37954202
+total_dups  6749387
+total_nodups    31204815
+cis 17902137
+trans   13302678
+pair_types/MM   14039891
 pair_types/MN   701106
-pair_types/NM   558055
+pair_types/NM   558057
 pair_types/NN   1415484
-pair_types/MU   3912017
-pair_types/NU   2065026
-pair_types/WW   709
-pair_types/MR   20
-pair_types/UM   3497691
-pair_types/UN   2001525
-pair_types/RM   52
-pair_types/UU   30984355
-pair_types/DD   6968357
-pair_types/RU   22
-pair_types/UR   16
-cis_1kb+        11262647
-cis_2kb+        9121879
-cis_4kb+        7300383
-cis_10kb+       5295025
-cis_20kb+       4029888
-cis_40kb+       2951120
-summary/frac_cis        0.5707795534351762
-summary/frac_cis_1kb+   0.36349419528728544
-summary/frac_cis_2kb+   0.2944023786426928
-summary/frac_cis_4kb+   0.2356148464809364
-summary/frac_cis_10kb+  0.17089329456930138
-summary/frac_cis_20kb+  0.13006186695346914
-summary/frac_cis_40kb+  0.0952453707903847
-summary/frac_dups       0.1836061154988769
-summary/complexity_naive        90272388.0382411
-chrom_freq/I/I  318963
-chrom_freq/I/IV 19383
-chrom_freq/I/II 17780
-chrom_freq/I/III        17461
-chrom_freq/I/IX 19093
-chrom_freq/I/VII        18502
-chrom_freq/I/VIII       17824
-chrom_freq/I/VI 17799
+pair_types/MU   3912147
+pair_types/NU   2065238
+pair_types/UM   3502692
+pair_types/UN   2005083
+pair_types/UU   31204815
+pair_types/DD   6749387
+cis_1kb+    11274151
+cis_2kb+    9127240
+cis_4kb+    7303262
+cis_10kb+   5296553
+cis_20kb+   4030921
+cis_40kb+   2951873
+summary/frac_cis    0.5736979052751955
+summary/frac_cis_1kb+   0.3612952360076482
+summary/frac_cis_2kb+   0.2924946037975229
+summary/frac_cis_4kb+   0.23404279115258333
+summary/frac_cis_10kb+  0.16973511940384842
+summary/frac_cis_20kb+  0.1291762505241579
+summary/frac_cis_40kb+  0.09459671528256136
+summary/frac_dups   0.17782976967873018
+summary/complexity_naive    93648195.31794095
+chrom_freq/I/I  322211
+chrom_freq/I/IV 19390
+chrom_freq/I/II 17785
+chrom_freq/I/III    17465
+chrom_freq/I/IX 19095
+chrom_freq/I/VII    18507
+chrom_freq/I/VIII   17846
+chrom_freq/I/VI 17802
 chrom_freq/I/V  15176
-chrom_freq/I/X  19734
-chrom_freq/I/Mito       1037
-chrom_freq/I/XII        18380
-chrom_freq/I/XIV        17980
-chrom_freq/I/XI 17268
-chrom_freq/I/XIII       16901
-chrom_freq/I/XV 17555
-chrom_freq/I/XVI        17229
-chrom_freq/II/I 17623
-chrom_freq/II/II        1198104
-chrom_freq/II/III       28042
-chrom_freq/II/IV        118339
-chrom_freq/II/IX        40377
-chrom_freq/II/Mito      3699
-chrom_freq/II/V 51581
-chrom_freq/II/VI        24327
-chrom_freq/II/VII       92801
-chrom_freq/II/VIII      51201
-chrom_freq/II/X 64545
-chrom_freq/II/XI        58780
-chrom_freq/II/XII       80855
-chrom_freq/II/XIII      78424
-chrom_freq/II/XIV       66134
-chrom_freq/II/XV        93316
-chrom_freq/II/XVI       80956
-chrom_freq/III/III      450121
-chrom_freq/III/II       27745
-chrom_freq/III/I        17292
-chrom_freq/III/IV       32362
-chrom_freq/III/IX       22967
-chrom_freq/III/V        24892
-chrom_freq/III/Mito     1416
-chrom_freq/III/VII      28915
-chrom_freq/III/VIII     24810
-chrom_freq/III/VI       20896
-chrom_freq/III/X        27246
-chrom_freq/III/XII      27144
-chrom_freq/III/XI       25118
-chrom_freq/III/XIII     29115
-chrom_freq/III/XIV      29294
-chrom_freq/III/XV       28288
-chrom_freq/III/XVI      29497
-chrom_freq/IV/II        118325
-chrom_freq/IV/I 19242
-chrom_freq/IV/IV        2283259
-chrom_freq/IV/III       32579
-chrom_freq/IV/IX        57191
-chrom_freq/IV/V 77125
-chrom_freq/IV/Mito      6729
-chrom_freq/IV/VII       156371
-chrom_freq/IV/VI        28431
-chrom_freq/IV/VIII      77696
-chrom_freq/IV/X 96722
-chrom_freq/IV/XI        90170
-chrom_freq/IV/XII       143936
-chrom_freq/IV/XIII      129857
-chrom_freq/IV/XIV       108306
-chrom_freq/IV/XV        162056
-chrom_freq/IV/XVI       130769
-chrom_freq/IX/I 19156
-chrom_freq/IX/II        40720
-chrom_freq/IX/III       23348
-chrom_freq/IX/IV        57284
-chrom_freq/IX/IX        631695
-chrom_freq/IX/V 31300
-chrom_freq/IX/VI        21848
-chrom_freq/IX/VII       48028
-chrom_freq/IX/Mito      2025
-chrom_freq/IX/VIII      30875
-chrom_freq/IX/X 38993
-chrom_freq/IX/XI        34711
-chrom_freq/IX/XII       41627
-chrom_freq/IX/XIII      41653
-chrom_freq/IX/XIV       38289
-chrom_freq/IX/XV        47050
-chrom_freq/IX/XVI       42299
-chrom_freq/Mito/Mito    47042
-chrom_freq/Mito/IV      5408
-chrom_freq/Mito/II      3010
-chrom_freq/Mito/IX      1623
-chrom_freq/Mito/III     1184
-chrom_freq/Mito/I       846
-chrom_freq/Mito/XII     5442
-chrom_freq/Mito/VII     3909
-chrom_freq/Mito/XV      3898
-chrom_freq/Mito/XIII    3432
-chrom_freq/Mito/XVI     3694
-chrom_freq/Mito/XIV     2829
-chrom_freq/Mito/X       2719
-chrom_freq/Mito/XI      2458
-chrom_freq/Mito/VIII    2144
-chrom_freq/Mito/V       2013
-chrom_freq/Mito/VI      1069
-chrom_freq/V/II 51974
-chrom_freq/V/I  15090
-chrom_freq/V/IV 77418
-chrom_freq/V/III        25105
-chrom_freq/V/IX 31481
-chrom_freq/V/V  793146
-chrom_freq/V/Mito       2631
+chrom_freq/I/X  19740
+chrom_freq/I/Mito   1037
+chrom_freq/I/XII    18388
+chrom_freq/I/XIV    17983
+chrom_freq/I/XI 17270
+chrom_freq/I/XIII   16902
+chrom_freq/I/XV 17562
+chrom_freq/I/XVI    17233
+chrom_freq/II/I 17628
+chrom_freq/II/II    1206575
+chrom_freq/II/III   28049
+chrom_freq/II/IV    118361
+chrom_freq/II/IX    40389
+chrom_freq/II/Mito  3702
+chrom_freq/II/V 51593
+chrom_freq/II/VI    24332
+chrom_freq/II/VII   92821
+chrom_freq/II/VIII  51243
+chrom_freq/II/X 64562
+chrom_freq/II/XI    58809
+chrom_freq/II/XII   80877
+chrom_freq/II/XIII  78441
+chrom_freq/II/XIV   66147
+chrom_freq/II/XV    93348
+chrom_freq/II/XVI   80970
+chrom_freq/III/III  454659
+chrom_freq/III/II   27751
+chrom_freq/III/I    17295
+chrom_freq/III/IV   32368
+chrom_freq/III/IX   22976
+chrom_freq/III/V    24893
+chrom_freq/III/Mito 1418
+chrom_freq/III/VII  28922
+chrom_freq/III/VIII 24822
+chrom_freq/III/VI   20912
+chrom_freq/III/X    27255
+chrom_freq/III/XII  27164
+chrom_freq/III/XI   25129
+chrom_freq/III/XIII 29121
+chrom_freq/III/XIV  29307
+chrom_freq/III/XV   28298
+chrom_freq/III/XVI  29504
+chrom_freq/IV/II    118351
+chrom_freq/IV/I 19245
+chrom_freq/IV/IV    2297835
+chrom_freq/IV/III   32588
+chrom_freq/IV/IX    57208
+chrom_freq/IV/V 77142
+chrom_freq/IV/Mito  6732
+chrom_freq/IV/VII   156405
+chrom_freq/IV/VI    28436
+chrom_freq/IV/VIII  77720
+chrom_freq/IV/X 96750
+chrom_freq/IV/XI    90197
+chrom_freq/IV/XII   143992
+chrom_freq/IV/XIII  129879
+chrom_freq/IV/XIV   108334
+chrom_freq/IV/XV    162096
+chrom_freq/IV/XVI   130799
+chrom_freq/IX/I 19160
+chrom_freq/IX/II    40729
+chrom_freq/IX/III   23349
+chrom_freq/IX/IV    57296
+chrom_freq/IX/IX    637035
+chrom_freq/IX/V 31304
+chrom_freq/IX/VI    21853
+chrom_freq/IX/VII   48039
+chrom_freq/IX/Mito  2027
+chrom_freq/IX/VIII  30881
+chrom_freq/IX/X 39000
+chrom_freq/IX/XI    34719
+chrom_freq/IX/XII   41642
+chrom_freq/IX/XIII  41660
+chrom_freq/IX/XIV   38295
+chrom_freq/IX/XV    47062
+chrom_freq/IX/XVI   42312
+chrom_freq/Mito/Mito    50999
+chrom_freq/Mito/IV  5410
+chrom_freq/Mito/II  3011
+chrom_freq/Mito/IX  1627
+chrom_freq/Mito/III 1185
+chrom_freq/Mito/I   848
+chrom_freq/Mito/XII 5443
+chrom_freq/Mito/VII 3911
+chrom_freq/Mito/XV  3902
+chrom_freq/Mito/XIII    3433
+chrom_freq/Mito/XVI 3694
+chrom_freq/Mito/XIV 2829
+chrom_freq/Mito/X   2719
+chrom_freq/Mito/XI  2460
+chrom_freq/Mito/VIII    2146
+chrom_freq/Mito/V   2013
+chrom_freq/Mito/VI  1070
+chrom_freq/V/II 51986
+chrom_freq/V/I  15094
+chrom_freq/V/IV 77432
+chrom_freq/V/III    25110
+chrom_freq/V/IX 31489
+chrom_freq/V/V  799457
+chrom_freq/V/Mito   2632
 chrom_freq/V/VI 20287
-chrom_freq/V/VII        62889
-chrom_freq/V/VIII       36424
-chrom_freq/V/X  45999
-chrom_freq/V/XI 43054
-chrom_freq/V/XII        56358
-chrom_freq/V/XIII       54881
-chrom_freq/V/XIV        47032
-chrom_freq/V/XV 63491
-chrom_freq/V/XVI        57574
-chrom_freq/VI/I 17593
-chrom_freq/VI/IV        29055
-chrom_freq/VI/II        24246
-chrom_freq/VI/III       20613
-chrom_freq/VI/VI        388984
-chrom_freq/VI/IX        21874
-chrom_freq/VI/V 20409
-chrom_freq/VI/Mito      1271
-chrom_freq/VI/VII       26438
-chrom_freq/VI/VIII      20939
-chrom_freq/VI/X 25727
-chrom_freq/VI/XII       24041
-chrom_freq/VI/XI        23663
-chrom_freq/VI/XIII      23948
-chrom_freq/VI/XV        25603
-chrom_freq/VI/XIV       23703
-chrom_freq/VI/XVI       24016
-chrom_freq/VII/II       92545
-chrom_freq/VII/I        18570
-chrom_freq/VII/III      28925
-chrom_freq/VII/IV       156092
-chrom_freq/VII/IX       47353
-chrom_freq/VII/V        62314
-chrom_freq/VII/Mito     4807
-chrom_freq/VII/VII      1575331
-chrom_freq/VII/VI       26395
-chrom_freq/VII/VIII     61139
-chrom_freq/VII/X        78244
-chrom_freq/VII/XI       72809
-chrom_freq/VII/XII      106604
-chrom_freq/VII/XIII     99757
-chrom_freq/VII/XIV      82910
-chrom_freq/VII/XV       120348
-chrom_freq/VII/XVI      102465
-chrom_freq/VIII/II      51300
-chrom_freq/VIII/I       17523
-chrom_freq/VIII/IV      77708
-chrom_freq/VIII/III     24926
-chrom_freq/VIII/IX      30868
-chrom_freq/VIII/V       36948
+chrom_freq/V/VII    62898
+chrom_freq/V/VIII   36432
+chrom_freq/V/X  46009
+chrom_freq/V/XI 43060
+chrom_freq/V/XII    56383
+chrom_freq/V/XIII   54902
+chrom_freq/V/XIV    47039
+chrom_freq/V/XV 63505
+chrom_freq/V/XVI    57583
+chrom_freq/VI/I 17599
+chrom_freq/VI/IV    29066
+chrom_freq/VI/II    24255
+chrom_freq/VI/III   20622
+chrom_freq/VI/VI    392432
+chrom_freq/VI/IX    21886
+chrom_freq/VI/V 20413
+chrom_freq/VI/Mito  1271
+chrom_freq/VI/VII   26444
+chrom_freq/VI/VIII  20948
+chrom_freq/VI/X 25734
+chrom_freq/VI/XII   24046
+chrom_freq/VI/XI    23670
+chrom_freq/VI/XIII  23957
+chrom_freq/VI/XV    25609
+chrom_freq/VI/XIV   23707
+chrom_freq/VI/XVI   24023
+chrom_freq/VII/II   92565
+chrom_freq/VII/I    18574
+chrom_freq/VII/III  28928
+chrom_freq/VII/IV   156141
+chrom_freq/VII/IX   47365
+chrom_freq/VII/V    62328
+chrom_freq/VII/Mito 4807
+chrom_freq/VII/VII  1586259
+chrom_freq/VII/VI   26399
+chrom_freq/VII/VIII 61158
+chrom_freq/VII/X    78267
+chrom_freq/VII/XI   72825
+chrom_freq/VII/XII  106633
+chrom_freq/VII/XIII 99777
+chrom_freq/VII/XIV  82929
+chrom_freq/VII/XV   120378
+chrom_freq/VII/XVI  102489
+chrom_freq/VIII/II  51322
+chrom_freq/VIII/I   17545
+chrom_freq/VIII/IV  77723
+chrom_freq/VIII/III 24933
+chrom_freq/VIII/IX  30875
+chrom_freq/VIII/V   36951
 chrom_freq/VIII/Mito    2556
-chrom_freq/VIII/VII     61322
-chrom_freq/VIII/VI      21097
-chrom_freq/VIII/VIII    783493
-chrom_freq/VIII/X       46110
-chrom_freq/VIII/XI      41362
-chrom_freq/VIII/XII     55110
-chrom_freq/VIII/XIII    52688
-chrom_freq/VIII/XIV     46605
-chrom_freq/VIII/XV      59915
-chrom_freq/VIII/XVI     53370
-chrom_freq/X/II 64911
-chrom_freq/X/I  19825
-chrom_freq/X/IV 97202
-chrom_freq/X/III        27243
-chrom_freq/X/IX 39003
-chrom_freq/X/V  46186
-chrom_freq/X/VI 25561
-chrom_freq/X/Mito       3426
-chrom_freq/X/VII        78285
-chrom_freq/X/VIII       45948
-chrom_freq/X/X  1088728
-chrom_freq/X/XI 55049
-chrom_freq/X/XII        66527
-chrom_freq/X/XIII       67205
-chrom_freq/X/XIV        59266
-chrom_freq/X/XV 75011
-chrom_freq/X/XVI        68679
-chrom_freq/XI/I 17357
-chrom_freq/XI/II        59247
-chrom_freq/XI/III       24724
-chrom_freq/XI/IV        90081
-chrom_freq/XI/IX        34927
-chrom_freq/XI/V 42758
-chrom_freq/XI/Mito      3022
-chrom_freq/XI/VI        23570
-chrom_freq/XI/VII       73211
-chrom_freq/XI/VIII      41219
-chrom_freq/XI/X 55201
-chrom_freq/XI/XI        966888
-chrom_freq/XI/XII       61071
-chrom_freq/XI/XIII      62707
-chrom_freq/XI/XIV       55319
-chrom_freq/XI/XV        71360
-chrom_freq/XI/XVI       65554
-chrom_freq/XII/II       81136
-chrom_freq/XII/I        18160
-chrom_freq/XII/III      26894
-chrom_freq/XII/IV       143059
-chrom_freq/XII/IX       40865
-chrom_freq/XII/V        55828
-chrom_freq/XII/Mito     6569
-chrom_freq/XII/VII      106714
-chrom_freq/XII/VI       23474
-chrom_freq/XII/VIII     54024
-chrom_freq/XII/X        65408
-chrom_freq/XII/XI       61005
-chrom_freq/XII/XII      1684921
-chrom_freq/XII/XIII     89952
-chrom_freq/XII/XIV      74333
-chrom_freq/XII/XV       108611
-chrom_freq/XII/XVI      90371
-chrom_freq/XIII/II      78244
-chrom_freq/XIII/I       17201
-chrom_freq/XIII/III     28972
-chrom_freq/XIII/IV      130420
-chrom_freq/XIII/IX      41593
-chrom_freq/XIII/V       54413
-chrom_freq/XIII/Mito    4145
-chrom_freq/XIII/VI      23984
-chrom_freq/XIII/VII     99222
-chrom_freq/XIII/VIII    53299
-chrom_freq/XIII/X       66980
-chrom_freq/XIII/XI      62898
-chrom_freq/XIII/XII     89599
-chrom_freq/XIII/XIII    1360931
-chrom_freq/XIII/XIV     71472
-chrom_freq/XIII/XV      101567
-chrom_freq/XIII/XVI     87623
-chrom_freq/XIV/I        17948
-chrom_freq/XIV/II       67088
-chrom_freq/XIV/III      29211
-chrom_freq/XIV/IV       107717
-chrom_freq/XIV/IX       37879
-chrom_freq/XIV/V        47418
-chrom_freq/XIV/Mito     3498
-chrom_freq/XIV/VII      83421
-chrom_freq/XIV/VI       23216
-chrom_freq/XIV/VIII     46955
-chrom_freq/XIV/X        59860
-chrom_freq/XIV/XI       55571
-chrom_freq/XIV/XII      74659
-chrom_freq/XIV/XIII     72036
-chrom_freq/XIV/XIV      1167659
-chrom_freq/XIV/XV       82867
-chrom_freq/XIV/XVI      72815
-chrom_freq/XV/I 17219
-chrom_freq/XV/II        93454
-chrom_freq/XV/III       28431
-chrom_freq/XV/IV        163073
-chrom_freq/XV/IX        46643
-chrom_freq/XV/V 63107
-chrom_freq/XV/Mito      4873
-chrom_freq/XV/VII       120436
-chrom_freq/XV/VI        25605
-chrom_freq/XV/VIII      60278
-chrom_freq/XV/X 74970
-chrom_freq/XV/XI        71660
-chrom_freq/XV/XII       109632
-chrom_freq/XV/XIII      101387
-chrom_freq/XV/XIV       82656
-chrom_freq/XV/XV        1597401
-chrom_freq/XV/XVI       103083
-chrom_freq/XVI/II       80955
-chrom_freq/XVI/I        17004
-chrom_freq/XVI/III      28926
-chrom_freq/XVI/IV       131060
-chrom_freq/XVI/IX       42860
-chrom_freq/XVI/V        57334
-chrom_freq/XVI/VI       23632
-chrom_freq/XVI/Mito     4245
-chrom_freq/XVI/VII      102042
-chrom_freq/XVI/VIII     53168
-chrom_freq/XVI/X        69056
-chrom_freq/XVI/XI       64341
-chrom_freq/XVI/XII      90951
-chrom_freq/XVI/XIII     86979
-chrom_freq/XVI/XIV      72701
-chrom_freq/XVI/XV       103525
-chrom_freq/XVI/XVI      1348592
-dist_freq/0-1/+-        290
-dist_freq/0-1/-+        298
-dist_freq/0-1/--        110893
-dist_freq/0-1/++        110723
-dist_freq/1-2/+-        762
-dist_freq/1-2/-+        712
-dist_freq/1-2/--        302
-dist_freq/1-2/++        270
-dist_freq/2-3/+-        604
-dist_freq/2-3/-+        566
-dist_freq/2-3/--        50
-dist_freq/2-3/++        51
-dist_freq/3-6/+-        2414
-dist_freq/3-6/-+        2428
-dist_freq/3-6/--        147
-dist_freq/3-6/++        153
-dist_freq/6-10/+-       3332
-dist_freq/6-10/-+       3542
-dist_freq/6-10/--       83
-dist_freq/6-10/++       82
-dist_freq/10-18/+-      6285
-dist_freq/10-18/-+      6632
-dist_freq/10-18/--      199
-dist_freq/10-18/++      199
-dist_freq/18-32/+-      12309
-dist_freq/18-32/-+      12425
-dist_freq/18-32/--      325
-dist_freq/18-32/++      398
-dist_freq/32-56/+-      26508
-dist_freq/32-56/-+      26459
-dist_freq/32-56/--      5348
-dist_freq/32-56/++      5295
-dist_freq/56-100/+-     76773
-dist_freq/56-100/-+     76851
-dist_freq/56-100/--     34249
-dist_freq/56-100/++     34143
-dist_freq/100-178/+-    353988
-dist_freq/100-178/-+    354702
-dist_freq/100-178/--    151883
-dist_freq/100-178/++    150834
-dist_freq/178-316/+-    555295
-dist_freq/178-316/-+    556061
-dist_freq/178-316/--    243876
-dist_freq/178-316/++    244187
-dist_freq/316-562/+-    368178
-dist_freq/316-562/-+    368509
-dist_freq/316-562/--    361037
-dist_freq/316-562/++    359370
-dist_freq/562-1000/+-   449605
-dist_freq/562-1000/-+   451846
-dist_freq/562-1000/--   446420
-dist_freq/562-1000/++   444720
-dist_freq/1000-1778/+-  451299
-dist_freq/1000-1778/-+  449793
-dist_freq/1000-1778/--  449526
-dist_freq/1000-1778/++  448115
-dist_freq/1778-3162/+-  395193
-dist_freq/1778-3162/-+  395463
-dist_freq/1778-3162/--  395437
-dist_freq/1778-3162/++  394405
-dist_freq/3162-5623/+-  343779
-dist_freq/3162-5623/-+  344673
-dist_freq/3162-5623/--  345025
-dist_freq/3162-5623/++  344432
-dist_freq/5623-10000/+- 302576
-dist_freq/5623-10000/-+ 302200
-dist_freq/5623-10000/-- 303150
-dist_freq/5623-10000/++ 302556
-dist_freq/10000-17783/+-        266511
-dist_freq/10000-17783/-+        265251
-dist_freq/10000-17783/--        266163
-dist_freq/10000-17783/++        266272
-dist_freq/17783-31623/+-        233493
-dist_freq/17783-31623/-+        232919
-dist_freq/17783-31623/--        233564
-dist_freq/17783-31623/++        232944
-dist_freq/31623-56234/+-        204497
-dist_freq/31623-56234/-+        203860
-dist_freq/31623-56234/--        203660
-dist_freq/31623-56234/++        203787
-dist_freq/56234-100000/+-       177379
-dist_freq/56234-100000/-+       177301
-dist_freq/56234-100000/--       177454
-dist_freq/56234-100000/++       176451
-dist_freq/100000-177828/+-      153308
-dist_freq/100000-177828/-+      154001
-dist_freq/100000-177828/--      154101
-dist_freq/100000-177828/++      153892
-dist_freq/177828-316228/+-      128702
-dist_freq/177828-316228/-+      128470
-dist_freq/177828-316228/--      128946
-dist_freq/177828-316228/++      128938
-dist_freq/316228-562341/+-      96693
-dist_freq/316228-562341/-+      97272
-dist_freq/316228-562341/--      96583
-dist_freq/316228-562341/++      96314
-dist_freq/562341-1000000/+-     54855
-dist_freq/562341-1000000/-+     55048
-dist_freq/562341-1000000/--     55289
-dist_freq/562341-1000000/++     54993
-dist_freq/1000000-1778279/+-    9108
-dist_freq/1000000-1778279/-+    8969
-dist_freq/1000000-1778279/--    9047
-dist_freq/1000000-1778279/++    8990
+chrom_freq/VIII/VII 61332
+chrom_freq/VIII/VI  21102
+chrom_freq/VIII/VIII    789740
+chrom_freq/VIII/X   46124
+chrom_freq/VIII/XI  41375
+chrom_freq/VIII/XII 55138
+chrom_freq/VIII/XIII    52698
+chrom_freq/VIII/XIV 46612
+chrom_freq/VIII/XV  59935
+chrom_freq/VIII/XVI 53382
+chrom_freq/X/II 64925
+chrom_freq/X/I  19830
+chrom_freq/X/IV 97221
+chrom_freq/X/III    27248
+chrom_freq/X/IX 39013
+chrom_freq/X/V  46195
+chrom_freq/X/VI 25569
+chrom_freq/X/Mito   3428
+chrom_freq/X/VII    78303
+chrom_freq/X/VIII   45957
+chrom_freq/X/X  1096596
+chrom_freq/X/XI 55064
+chrom_freq/X/XII    66547
+chrom_freq/X/XIII   67216
+chrom_freq/X/XIV    59277
+chrom_freq/X/XV 75031
+chrom_freq/X/XVI    68696
+chrom_freq/XI/I 17360
+chrom_freq/XI/II    59265
+chrom_freq/XI/III   24731
+chrom_freq/XI/IV    90094
+chrom_freq/XI/V 42762
+chrom_freq/XI/IX    34936
+chrom_freq/XI/Mito  3023
+chrom_freq/XI/VI    23573
+chrom_freq/XI/VII   73219
+chrom_freq/XI/VIII  41235
+chrom_freq/XI/X 55210
+chrom_freq/XI/XI    973785
+chrom_freq/XI/XII   61108
+chrom_freq/XI/XIII  62720
+chrom_freq/XI/XIV   55339
+chrom_freq/XI/XV    71383
+chrom_freq/XI/XVI   65565
+chrom_freq/XII/I    18165
+chrom_freq/XII/II   81152
+chrom_freq/XII/III  26902
+chrom_freq/XII/IV   143092
+chrom_freq/XII/IX   40869
+chrom_freq/XII/V    55840
+chrom_freq/XII/Mito 6573
+chrom_freq/XII/VII  106748
+chrom_freq/XII/VI   23483
+chrom_freq/XII/VIII 54066
+chrom_freq/XII/X    65426
+chrom_freq/XII/XI   61021
+chrom_freq/XII/XII  1781301
+chrom_freq/XII/XIII 89981
+chrom_freq/XII/XIV  74420
+chrom_freq/XII/XV   108640
+chrom_freq/XII/XVI  90395
+chrom_freq/XIII/II  78257
+chrom_freq/XIII/I   17207
+chrom_freq/XIII/III 28973
+chrom_freq/XIII/IV  130454
+chrom_freq/XIII/IX  41602
+chrom_freq/XIII/Mito    4146
+chrom_freq/XIII/V   54422
+chrom_freq/XIII/VI  23995
+chrom_freq/XIII/VII 99239
+chrom_freq/XIII/VIII    53306
+chrom_freq/XIII/X   66994
+chrom_freq/XIII/XI  62907
+chrom_freq/XIII/XII 89633
+chrom_freq/XIII/XIII    1370587
+chrom_freq/XIII/XIV 71487
+chrom_freq/XIII/XV  101585
+chrom_freq/XIII/XVI 87644
+chrom_freq/XIV/I    17954
+chrom_freq/XIV/II   67097
+chrom_freq/XIV/III  29218
+chrom_freq/XIV/IV   107740
+chrom_freq/XIV/IX   37888
+chrom_freq/XIV/V    47427
+chrom_freq/XIV/Mito 3500
+chrom_freq/XIV/VII  83439
+chrom_freq/XIV/VI   23225
+chrom_freq/XIV/VIII 46973
+chrom_freq/XIV/X    59871
+chrom_freq/XIV/XI   55585
+chrom_freq/XIV/XII  74811
+chrom_freq/XIV/XIII 72049
+chrom_freq/XIV/XIV  1176394
+chrom_freq/XIV/XV   82896
+chrom_freq/XIV/XVI  72822
+chrom_freq/XV/I 17221
+chrom_freq/XV/II    93471
+chrom_freq/XV/III   28439
+chrom_freq/XV/IV    163112
+chrom_freq/XV/IX    46658
+chrom_freq/XV/V 63121
+chrom_freq/XV/Mito  4875
+chrom_freq/XV/VII   120463
+chrom_freq/XV/VI    25611
+chrom_freq/XV/VIII  60289
+chrom_freq/XV/X 74982
+chrom_freq/XV/XI    71675
+chrom_freq/XV/XII   109660
+chrom_freq/XV/XIII  101406
+chrom_freq/XV/XIV   82668
+chrom_freq/XV/XV    1608272
+chrom_freq/XV/XVI   103107
+chrom_freq/XVI/II   80977
+chrom_freq/XVI/I    17009
+chrom_freq/XVI/III  28934
+chrom_freq/XVI/IV   131083
+chrom_freq/XVI/IX   42872
+chrom_freq/XVI/V    57346
+chrom_freq/XVI/VI   23644
+chrom_freq/XVI/Mito 4245
+chrom_freq/XVI/VII  102063
+chrom_freq/XVI/VIII 53178
+chrom_freq/XVI/X    69068
+chrom_freq/XVI/XI   64352
+chrom_freq/XVI/XII  90977
+chrom_freq/XVI/XIII 86999
+chrom_freq/XVI/XIV  72714
+chrom_freq/XVI/XV   103549
+chrom_freq/XVI/XVI  1358000
+dist_freq/0-1/+-    306
+dist_freq/0-1/-+    303
+dist_freq/0-1/--    121908
+dist_freq/0-1/++    121805
+dist_freq/1-2/+-    789
+dist_freq/1-2/-+    724
+dist_freq/1-2/--    341
+dist_freq/1-2/++    349
+dist_freq/2-3/+-    629
+dist_freq/2-3/-+    584
+dist_freq/2-3/--    67
+dist_freq/2-3/++    90
+dist_freq/3-6/+-    2499
+dist_freq/3-6/-+    2485
+dist_freq/3-6/--    172
+dist_freq/3-6/++    205
+dist_freq/6-10/+-   3463
+dist_freq/6-10/-+   3617
+dist_freq/6-10/--   87
+dist_freq/6-10/++   124
+dist_freq/10-18/+-  6515
+dist_freq/10-18/-+  6803
+dist_freq/10-18/--  224
+dist_freq/10-18/++  272
+dist_freq/18-32/+-  12840
+dist_freq/18-32/-+  12847
+dist_freq/18-32/--  393
+dist_freq/18-32/++  539
+dist_freq/32-56/+-  27913
+dist_freq/32-56/-+  27592
+dist_freq/32-56/--  5507
+dist_freq/32-56/++  5623
+dist_freq/56-100/+- 80632
+dist_freq/56-100/-+ 80145
+dist_freq/56-100/-- 34958
+dist_freq/56-100/++ 35484
+dist_freq/100-178/+-    377481
+dist_freq/100-178/-+    376362
+dist_freq/100-178/--    156042
+dist_freq/100-178/++    156813
+dist_freq/178-316/+-    585339
+dist_freq/178-316/-+    583952
+dist_freq/178-316/--    249257
+dist_freq/178-316/++    252721
+dist_freq/316-562/+-    376230
+dist_freq/316-562/-+    374972
+dist_freq/316-562/--    366408
+dist_freq/316-562/++    367726
+dist_freq/562-1000/+-   453001
+dist_freq/562-1000/-+   455004
+dist_freq/562-1000/--   449222
+dist_freq/562-1000/++   448622
+dist_freq/1000-1778/+-  452678
+dist_freq/1000-1778/-+  451196
+dist_freq/1000-1778/--  450868
+dist_freq/1000-1778/++  449458
+dist_freq/1778-3162/+-  395815
+dist_freq/1778-3162/-+  396130
+dist_freq/1778-3162/--  396093
+dist_freq/1778-3162/++  395042
+dist_freq/3162-5623/+-  344055
+dist_freq/3162-5623/-+  345000
+dist_freq/3162-5623/--  345333
+dist_freq/3162-5623/++  344737
+dist_freq/5623-10000/+- 302765
+dist_freq/5623-10000/-+ 302363
+dist_freq/5623-10000/-- 303335
+dist_freq/5623-10000/++ 302730
+dist_freq/10000-17783/+-    266612
+dist_freq/10000-17783/-+    265367
+dist_freq/10000-17783/--    266269
+dist_freq/10000-17783/++    266375
+dist_freq/17783-31623/+-    233566
+dist_freq/17783-31623/-+    232976
+dist_freq/17783-31623/--    233617
+dist_freq/17783-31623/++    233027
+dist_freq/31623-56234/+-    204543
+dist_freq/31623-56234/-+    203916
+dist_freq/31623-56234/--    203725
+dist_freq/31623-56234/++    203834
+dist_freq/56234-100000/+-   177434
+dist_freq/56234-100000/-+   177333
+dist_freq/56234-100000/--   177497
+dist_freq/56234-100000/++   176513
+dist_freq/100000-177828/+-  153339
+dist_freq/100000-177828/-+  154025
+dist_freq/100000-177828/--  154132
+dist_freq/100000-177828/++  153925
+dist_freq/177828-316228/+-  128734
+dist_freq/177828-316228/-+  128503
+dist_freq/177828-316228/--  128973
+dist_freq/177828-316228/++  128971
+dist_freq/316228-562341/+-  96722
+dist_freq/316228-562341/-+  97294
+dist_freq/316228-562341/--  96601
+dist_freq/316228-562341/++  96339
+dist_freq/562341-1000000/+- 54869
+dist_freq/562341-1000000/-+ 55066
+dist_freq/562341-1000000/-- 55326
+dist_freq/562341-1000000/++ 55003
+dist_freq/1000000-1778279/+-    9109
+dist_freq/1000000-1778279/-+    8970
+dist_freq/1000000-1778279/--    9050
+dist_freq/1000000-1778279/++    8998
 dist_freq/1778279-3162278/+-    0
 dist_freq/1778279-3162278/-+    0
 dist_freq/1778279-3162278/--    0
@@ -5693,22 +6260,22 @@ dist_freq/56234133-100000000/+- 0
 dist_freq/56234133-100000000/-+ 0
 dist_freq/56234133-100000000/-- 0
 dist_freq/56234133-100000000/++ 0
-dist_freq/100000000-177827941/+-        0
-dist_freq/100000000-177827941/-+        0
-dist_freq/100000000-177827941/--        0
-dist_freq/100000000-177827941/++        0
-dist_freq/177827941-316227766/+-        0
-dist_freq/177827941-316227766/-+        0
-dist_freq/177827941-316227766/--        0
-dist_freq/177827941-316227766/++        0
-dist_freq/316227766-562341325/+-        0
-dist_freq/316227766-562341325/-+        0
-dist_freq/316227766-562341325/--        0
-dist_freq/316227766-562341325/++        0
-dist_freq/562341325-1000000000/+-       0
-dist_freq/562341325-1000000000/-+       0
-dist_freq/562341325-1000000000/--       0
-dist_freq/562341325-1000000000/++       0
+dist_freq/100000000-177827941/+-    0
+dist_freq/100000000-177827941/-+    0
+dist_freq/100000000-177827941/--    0
+dist_freq/100000000-177827941/++    0
+dist_freq/177827941-316227766/+-    0
+dist_freq/177827941-316227766/-+    0
+dist_freq/177827941-316227766/--    0
+dist_freq/177827941-316227766/++    0
+dist_freq/316227766-562341325/+-    0
+dist_freq/316227766-562341325/-+    0
+dist_freq/316227766-562341325/--    0
+dist_freq/316227766-562341325/++    0
+dist_freq/562341325-1000000000/+-   0
+dist_freq/562341325-1000000000/-+   0
+dist_freq/562341325-1000000000/--   0
+dist_freq/562341325-1000000000/++   0
 dist_freq/562341325+/+- 0
 dist_freq/562341325+/-+ 0
 dist_freq/562341325+/-- 0
@@ -5719,122 +6286,9 @@ dist_freq/562341325+/++ 0
 </details>
 <br />
 
-<a id="notes"></a>
-#### Notes
-<details>
-<summary><i>Notes: Run pairtools dedup</i></summary>
-
-It appears that, in the calls to [`pairtools split`](#code-7), alignments/reads are not being written to bams. It appears that the bam header is written (see below), but the bam body is not (see below)&mdash;it seems a bit of compressed text is written to the body.
-```txt
-❯ samtools view "${a_dedup_pre_bam}"
-
-
-❯ samtools view "${a_dup_pre_bam}"
-
-
-❯ samtools view "${a_unmap_pre_bam}"
-
-
-❯ zcat "${a_dedup_pre_bam}"
-BAM@SQ  SN:I    LN:230218
-@SQ     SN:II   LN:813184
-@SQ     SN:III  LN:316620
-@SQ     SN:IV   LN:1531933
-@SQ     SN:V    LN:576874
-@SQ     SN:VI   LN:270161
-@SQ     SN:VII  LN:1090940
-@SQ     SN:VIII LN:562643
-@SQ     SN:IX   LN:439888
-@SQ     SN:X    LN:745751
-@SQ     SN:XI   LN:666816
-@SQ     SN:XII  LN:1078177
-@SQ     SN:XIII LN:924431
-@SQ     SN:XIV  LN:784333
-@SQ     SN:XV   LN:1091291
-@SQ     SN:XVI  LN:948066
-@SQ     SN:Mito LN:85779
-@PG     ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 16 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
-@PG     ID:samtools     PN:samtools     PP:bwa  VN:1.16.1       CL:samtools view -@ 16 -S -b
-@PG     ID:pairtools_parse      PN:pairtools_parse      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse -o pairs/SRR7939018.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --drop-sam --drop-seq --output-stats stats/SRR7939018.stats.txt --assembly S288C_R64-3-1 --no-flip --add-columns mapq --walks-policy mask bams/SRR7939018.bam  PP:samtools     VN:1.0.2
-@PG     ID:pairtools_sort       PN:pairtools_sort       CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 16 --tmpdir /fh/scratch/delete30/tsukiyama_t --output pairs/SRR7939018.sort.txt.gz pairs/SRR7939018.txt.gz  PP:pairtools_parse      VN:1.0.2
-@PG     ID:pairtools_dedup      PN:pairtools_dedup      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 16 --max-mismatch 3 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats stats/SRR7939018.dedup.stats.txt pairs/SRR7939018.sort.txt.gz    PP:pairtools_sort       VN:1.0.2
-@PG     ID:pairtools_split      PN:pairtools_split      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs dedup/pairs/SRR7939018.nodups.pairs.gz --output-sam dedup/bam/SRR7939018.nodups.bam PP:pairtools_dedup      VN:1.0.2
-@PG     ID:samtools.1   PN:samtools     PP:pairtools_split      VN:1.16.1       CL:samtools view -bS -@ 7 -
-IJIIh
-     IIIIV`VjVIQVII|VIIIIXPXa
-                             XI,
-XIIsXIII
-
-
-❯ zcat "${a_dup_pre_bam}"
-BAM@SQ  SN:I    LN:230218
-@SQ     SN:II   LN:813184
-@SQ     SN:III  LN:316620
-@SQ     SN:IV   LN:1531933
-@SQ     SN:V    LN:576874
-@SQ     SN:VI   LN:270161
-@SQ     SN:VII  LN:1090940
-@SQ     SN:VIII LN:562643
-@SQ     SN:IX   LN:439888
-@SQ     SN:X    LN:745751
-@SQ     SN:XI   LN:666816
-@SQ     SN:XII  LN:1078177
-@SQ     SN:XIII LN:924431
-@SQ     SN:XIV  LN:784333
-@SQ     SN:XV   LN:1091291
-@SQ     SN:XVI  LN:948066
-@SQ     SN:Mito LN:85779
-@PG     ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 16 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
-@PG     ID:samtools     PN:samtools     PP:bwa  VN:1.16.1       CL:samtools view -@ 16 -S -b
-@PG     ID:pairtools_parse      PN:pairtools_parse      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse -o pairs/SRR7939018.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --drop-sam --drop-seq --output-stats stats/SRR7939018.stats.txt --assembly S288C_R64-3-1 --no-flip --add-columns mapq --walks-policy mask bams/SRR7939018.bam  PP:samtools     VN:1.0.2
-@PG     ID:pairtools_sort       PN:pairtools_sort       CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 16 --tmpdir /fh/scratch/delete30/tsukiyama_t --output pairs/SRR7939018.sort.txt.gz pairs/SRR7939018.txt.gz  PP:pairtools_parse      VN:1.0.2
-@PG     ID:pairtools_dedup      PN:pairtools_dedup      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 16 --max-mismatch 3 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats stats/SRR7939018.dedup.stats.txt pairs/SRR7939018.sort.txt.gz    PP:pairtools_sort       VN:1.0.2
-@PG     ID:pairtools_split      PN:pairtools_split      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs dedup/pairs/SRR7939018.dups.pairs.gz --output-sam dedup/bam/SRR7939018.dups.bam     PP:pairtools_dedup      VN:1.0.2
-@PG     ID:samtools.1   PN:samtools     PP:pairtools_split      VN:1.16.1       CL:samtools view -bS -@ 7 -
-IJIIh
-     IIIIV`VjVIQVII|VIIIIXPXa
-                             XI,
-XIIsXIII
-
-
-❯ zcat "${a_unmap_pre_bam}"
-BAM@SQ  SN:I    LN:230218
-@SQ     SN:II   LN:813184
-@SQ     SN:III  LN:316620
-@SQ     SN:IV   LN:1531933
-@SQ     SN:V    LN:576874
-@SQ     SN:VI   LN:270161
-@SQ     SN:VII  LN:1090940
-@SQ     SN:VIII LN:562643
-@SQ     SN:IX   LN:439888
-@SQ     SN:X    LN:745751
-@SQ     SN:XI   LN:666816
-@SQ     SN:XII  LN:1078177
-@SQ     SN:XIII LN:924431
-@SQ     SN:XIV  LN:784333
-@SQ     SN:XV   LN:1091291
-@SQ     SN:XVI  LN:948066
-@SQ     SN:Mito LN:85779
-@PG     ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 16 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
-@PG     ID:samtools     PN:samtools     PP:bwa  VN:1.16.1       CL:samtools view -@ 16 -S -b
-@PG     ID:pairtools_parse      PN:pairtools_parse      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse -o pairs/SRR7939018.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --drop-sam --drop-seq --output-stats stats/SRR7939018.stats.txt --assembly S288C_R64-3-1 --no-flip --add-columns mapq --walks-policy mask bams/SRR7939018.bam  PP:samtools     VN:1.0.2
-@PG     ID:pairtools_sort       PN:pairtools_sort       CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 16 --tmpdir /fh/scratch/delete30/tsukiyama_t --output pairs/SRR7939018.sort.txt.gz pairs/SRR7939018.txt.gz  PP:pairtools_parse      VN:1.0.2
-@PG     ID:pairtools_dedup      PN:pairtools_dedup      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 16 --max-mismatch 3 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats stats/SRR7939018.dedup.stats.txt pairs/SRR7939018.sort.txt.gz    PP:pairtools_sort       VN:1.0.2
-@PG     ID:pairtools_split      PN:pairtools_split      CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs dedup/pairs/SRR7939018.unmapped.pairs.gz --output-sam dedup/bam/SRR7939018.unmapped.bam     PP:pairtools_dedup      VN:1.0.2
-@PG     ID:samtools.1   PN:samtools     PP:pairtools_split      VN:1.16.1       CL:samtools view -bS -@ 7 -
-IJIIh
-     IIIIV`VjVIQVII|VIIIIXPXa
-                             XI,
-XIIsXIII
-```
-
-`#TODO` Make a minimal example to reproduce the problem and [file an issue with the `pairtools` team](https://github.com/open2c/pairtools/issues).
-</details>
-<br />
-
 <a id="6-run-pairtools-select"></a>
 ### 6. Run `pairtools select`
-<a id="code-11"></a>
+<a id="code-10"></a>
 #### Code
 <details>
 <summary><i>Code: 6. Run pairtools select</i></summary>
@@ -5859,7 +6313,6 @@ XIIsXIII
 
 ```txt
 
-
 ```
 </details>
 <br />
@@ -5871,7 +6324,6 @@ XIIsXIII
 
 ```txt
 
-
 ```
 </details>
 <br />
@@ -5882,7 +6334,7 @@ XIIsXIII
 ### 7. Run `pairtools stats`
 Is this any different from collecting stats when running [`pairtools dedup`](#code-7) or [`pairtools parse`](#code-5)?
 
-<a id="code-12"></a>
+<a id="code-11"></a>
 #### Code
 <details>
 <summary><i>Code: 7. Run pairtools stats</i></summary>
@@ -5895,7 +6347,27 @@ pairtools stats --help
 
 
 #  Do a trial run of pairtools stats ------------------------------------------
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        pairtools stats \
+            -o "${a_dedup_pre_pairs_stats}" \
+            "${a_dedup_pre_pairs}"
+        
+        pairtools stats \
+            -o "${a_dup_pre_pairs_stats}" \
+            "${a_dup_pre_pairs}"
 
+        pairtools stats \
+            -o "${a_unmap_pre_pairs_stats}" \
+            "${a_unmap_pre_pairs}"
+    }
+
+
+#  Check the contents of the stats files --------------------------------------
+cat "${a_dedup_pre_pairs_stats}"
+cat "${a_dup_pre_pairs_stats}"
+cat "${a_unmap_pre_pairs_stats}"
 ```
 </details>
 <br />
@@ -5997,7 +6469,930 @@ Options:
                                   read input from stdin and print output into
                                   stdout. EXAMPLE: pbgzip -c -n 8
   -h, --help                      Show this message and exit.
+```
+</details>
+<br />
 
+<a id="do-a-trial-run-of-pairtools-stats"></a>
+##### Do a trial run of `pairtools stats`
+<details>
+<summary><i>Printed: Do a trial run of pairtools stats</i></summary>
+
+```txt
+❯ [[ "${run}" == TRUE ]] &&
+>     {
+>         pairtools stats \
+>             -o "${a_dedup_pre_pairs_stats}" \
+>             "${a_dedup_pre_pairs}"
+> 
+>         pairtools stats \
+>             -o "${a_dup_pre_pairs_stats}" \
+>             "${a_dup_pre_pairs}"
+> 
+>         pairtools stats \
+>             -o "${a_unmap_pre_pairs_stats}" \
+>             "${a_unmap_pre_pairs}"
+>     }
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/stats.py:888: RuntimeWarning: divide by zero encountered in double_scalars
+  complexity = float(nseq / seq_to_complexity)  # clean np.int64 data type
+
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/cli/stats.py:192: DtypeWarning: Columns (16,17) have mixed types. Specify dtype option on import or set low_memory=False.
+  for chunk in pd.read_table(body_stream, names=cols, chunksize=100_000):
+
+WARNING:pairtools:Empty of fully duplicated library, can't estimate complexity
+WARNING:pairtools:All the sequences are duplicates. Do you run complexity estimation on duplicates file?
+```
+</details>
+<br />
+
+<a id="check-the-contents-of-the-stats-files"></a>
+##### Check the contents of the stats files
+<details>
+<summary><i>Printed: Check the contents of the stats files</i></summary>
+
+```txt
+❯ cat "${a_dedup_pre_pairs_stats}"
+total   31204815
+total_unmapped  0
+total_single_sided_mapped   0
+total_mapped    31204815
+total_dups  0
+total_nodups    31204815
+cis 17902137
+trans   13302678
+pair_types/UU   31204815
+cis_1kb+    11274151
+cis_2kb+    9127240
+cis_4kb+    7303262
+cis_10kb+   5296553
+cis_20kb+   4030921
+cis_40kb+   2951873
+summary/frac_cis    0.5736979052751955
+summary/frac_cis_1kb+   0.3612952360076482
+summary/frac_cis_2kb+   0.2924946037975229
+summary/frac_cis_4kb+   0.23404279115258333
+summary/frac_cis_10kb+  0.16973511940384842
+summary/frac_cis_20kb+  0.1291762505241579
+summary/frac_cis_40kb+  0.09459671528256136
+summary/frac_dups   0.0
+summary/complexity_naive    inf
+chrom_freq/I/I  322211
+chrom_freq/I/IV 19390
+chrom_freq/I/IX 19095
+chrom_freq/I/II 17785
+chrom_freq/I/III    17465
+chrom_freq/I/V  15176
+chrom_freq/I/Mito   1037
+chrom_freq/I/X  19740
+chrom_freq/I/VII    18507
+chrom_freq/I/VIII   17846
+chrom_freq/I/VI 17802
+chrom_freq/I/XI 17270
+chrom_freq/I/XII    18388
+chrom_freq/I/XIV    17983
+chrom_freq/I/XV 17562
+chrom_freq/I/XVI    17233
+chrom_freq/I/XIII   16902
+chrom_freq/II/I 17628
+chrom_freq/II/II    1206575
+chrom_freq/II/IV    118361
+chrom_freq/II/III   28049
+chrom_freq/II/IX    40389
+chrom_freq/II/V 51593
+chrom_freq/II/VI    24332
+chrom_freq/II/VII   92821
+chrom_freq/II/Mito  3702
+chrom_freq/II/VIII  51243
+chrom_freq/II/X 64562
+chrom_freq/II/XI    58809
+chrom_freq/II/XII   80877
+chrom_freq/II/XIII  78441
+chrom_freq/II/XIV   66147
+chrom_freq/II/XV    93348
+chrom_freq/II/XVI   80970
+chrom_freq/III/II   27751
+chrom_freq/III/I    17295
+chrom_freq/III/III  454659
+chrom_freq/III/IV   32368
+chrom_freq/III/IX   22976
+chrom_freq/III/VII  28922
+chrom_freq/III/V    24893
+chrom_freq/III/VI   20912
+chrom_freq/III/VIII 24822
+chrom_freq/III/Mito 1418
+chrom_freq/III/X    27255
+chrom_freq/III/XII  27164
+chrom_freq/III/XI   25129
+chrom_freq/III/XIII 29121
+chrom_freq/III/XIV  29307
+chrom_freq/III/XVI  29504
+chrom_freq/III/XV   28298
+chrom_freq/IV/II    118351
+chrom_freq/IV/I 19245
+chrom_freq/IV/III   32588
+chrom_freq/IV/IV    2297835
+chrom_freq/IV/IX    57208
+chrom_freq/IV/V 77142
+chrom_freq/IV/Mito  6732
+chrom_freq/IV/VII   156405
+chrom_freq/IV/VI    28436
+chrom_freq/IV/VIII  77720
+chrom_freq/IV/X 96750
+chrom_freq/IV/XI    90197
+chrom_freq/IV/XII   143992
+chrom_freq/IV/XIII  129879
+chrom_freq/IV/XIV   108334
+chrom_freq/IV/XV    162096
+chrom_freq/IV/XVI   130799
+chrom_freq/IX/II    40729
+chrom_freq/IX/I 19160
+chrom_freq/IX/III   23349
+chrom_freq/IX/IV    57296
+chrom_freq/IX/IX    637035
+chrom_freq/IX/VII   48039
+chrom_freq/IX/V 31304
+chrom_freq/IX/VI    21853
+chrom_freq/IX/Mito  2027
+chrom_freq/IX/X 39000
+chrom_freq/IX/VIII  30881
+chrom_freq/IX/XI    34719
+chrom_freq/IX/XII   41642
+chrom_freq/IX/XIII  41660
+chrom_freq/IX/XV    47062
+chrom_freq/IX/XIV   38295
+chrom_freq/IX/XVI   42312
+chrom_freq/Mito/Mito    50999
+chrom_freq/Mito/IV  5410
+chrom_freq/Mito/II  3011
+chrom_freq/Mito/VII 3911
+chrom_freq/Mito/V   2013
+chrom_freq/Mito/IX  1627
+chrom_freq/Mito/III 1185
+chrom_freq/Mito/VI  1070
+chrom_freq/Mito/I   848
+chrom_freq/V/II 51986
+chrom_freq/V/I  15094
+chrom_freq/Mito/XII 5443
+chrom_freq/V/III    25110
+chrom_freq/Mito/XV  3902
+chrom_freq/Mito/XVI 3694
+chrom_freq/Mito/XIII    3433
+chrom_freq/Mito/XIV 2829
+chrom_freq/Mito/X   2719
+chrom_freq/Mito/XI  2460
+chrom_freq/Mito/VIII    2146
+chrom_freq/V/IV 77432
+chrom_freq/V/IX 31489
+chrom_freq/V/V  799457
+chrom_freq/V/Mito   2632
+chrom_freq/V/VII    62898
+chrom_freq/V/VI 20287
+chrom_freq/V/X  46009
+chrom_freq/V/VIII   36432
+chrom_freq/V/XI 43060
+chrom_freq/V/XII    56383
+chrom_freq/V/XIII   54902
+chrom_freq/V/XIV    47039
+chrom_freq/V/XV 63505
+chrom_freq/V/XVI    57583
+chrom_freq/VI/II    24255
+chrom_freq/VI/III   20622
+chrom_freq/VI/IV    29066
+chrom_freq/VI/I 17599
+chrom_freq/VI/VI    392432
+chrom_freq/VI/IX    21886
+chrom_freq/VI/V 20413
+chrom_freq/VI/Mito  1271
+chrom_freq/VI/VII   26444
+chrom_freq/VI/VIII  20948
+chrom_freq/VI/X 25734
+chrom_freq/VI/XII   24046
+chrom_freq/VI/XIII  23957
+chrom_freq/VI/XI    23670
+chrom_freq/VI/XIV   23707
+chrom_freq/VI/XV    25609
+chrom_freq/VI/XVI   24023
+chrom_freq/VII/I    18574
+chrom_freq/VII/II   92565
+chrom_freq/VII/III  28928
+chrom_freq/VII/IV   156141
+chrom_freq/VII/IX   47365
+chrom_freq/VII/V    62328
+chrom_freq/VII/VI   26399
+chrom_freq/VII/Mito 4807
+chrom_freq/VII/VII  1586259
+chrom_freq/VII/VIII 61158
+chrom_freq/VII/X    78267
+chrom_freq/VII/XI   72825
+chrom_freq/VII/XII  106633
+chrom_freq/VII/XIII 99777
+chrom_freq/VII/XIV  82929
+chrom_freq/VII/XV   120378
+chrom_freq/VII/XVI  102489
+chrom_freq/VIII/II  51322
+chrom_freq/VIII/III 24933
+chrom_freq/VIII/I   17545
+chrom_freq/VIII/IV  77723
+chrom_freq/VIII/IX  30875
+chrom_freq/VIII/V   36951
+chrom_freq/VIII/VII 61332
+chrom_freq/VIII/VI  21102
+chrom_freq/VIII/Mito    2556
+chrom_freq/VIII/VIII    789740
+chrom_freq/VIII/X   46124
+chrom_freq/VIII/XI  41375
+chrom_freq/VIII/XII 55138
+chrom_freq/VIII/XIII    52698
+chrom_freq/VIII/XIV 46612
+chrom_freq/VIII/XV  59935
+chrom_freq/VIII/XVI 53382
+chrom_freq/X/I  19830
+chrom_freq/X/II 64925
+chrom_freq/X/III    27248
+chrom_freq/X/IV 97221
+chrom_freq/X/IX 39013
+chrom_freq/X/V  46195
+chrom_freq/X/VI 25569
+chrom_freq/X/Mito   3428
+chrom_freq/X/VII    78303
+chrom_freq/X/VIII   45957
+chrom_freq/X/X  1096596
+chrom_freq/X/XI 55064
+chrom_freq/X/XII    66547
+chrom_freq/X/XIII   67216
+chrom_freq/X/XIV    59277
+chrom_freq/X/XV 75031
+chrom_freq/X/XVI    68696
+chrom_freq/XI/II    59265
+chrom_freq/XI/I 17360
+chrom_freq/XI/III   24731
+chrom_freq/XI/IV    90094
+chrom_freq/XI/V 42762
+chrom_freq/XI/IX    34936
+chrom_freq/XI/VI    23573
+chrom_freq/XI/Mito  3023
+chrom_freq/XI/VII   73219
+chrom_freq/XI/VIII  41235
+chrom_freq/XI/X 55210
+chrom_freq/XI/XI    973785
+chrom_freq/XI/XII   61108
+chrom_freq/XI/XIII  62720
+chrom_freq/XI/XIV   55339
+chrom_freq/XI/XV    71383
+chrom_freq/XI/XVI   65565
+chrom_freq/XII/I    18165
+chrom_freq/XII/II   81152
+chrom_freq/XII/III  26902
+chrom_freq/XII/IV   143092
+chrom_freq/XII/IX   40869
+chrom_freq/XII/V    55840
+chrom_freq/XII/Mito 6573
+chrom_freq/XII/VII  106748
+chrom_freq/XII/VI   23483
+chrom_freq/XII/VIII 54066
+chrom_freq/XII/X    65426
+chrom_freq/XII/XI   61021
+chrom_freq/XII/XII  1781301
+chrom_freq/XII/XIII 89981
+chrom_freq/XII/XIV  74420
+chrom_freq/XII/XV   108640
+chrom_freq/XII/XVI  90395
+chrom_freq/XIII/II  78257
+chrom_freq/XIII/I   17207
+chrom_freq/XIII/III 28973
+chrom_freq/XIII/IV  130454
+chrom_freq/XIII/IX  41602
+chrom_freq/XIII/Mito    4146
+chrom_freq/XIII/V   54422
+chrom_freq/XIII/VI  23995
+chrom_freq/XIII/VII 99239
+chrom_freq/XIII/VIII    53306
+chrom_freq/XIII/X   66994
+chrom_freq/XIII/XI  62907
+chrom_freq/XIII/XII 89633
+chrom_freq/XIII/XIII    1370587
+chrom_freq/XIII/XIV 71487
+chrom_freq/XIII/XV  101585
+chrom_freq/XIII/XVI 87644
+chrom_freq/XIV/I    17954
+chrom_freq/XIV/II   67097
+chrom_freq/XIV/III  29218
+chrom_freq/XIV/IV   107740
+chrom_freq/XIV/V    47427
+chrom_freq/XIV/IX   37888
+chrom_freq/XIV/VI   23225
+chrom_freq/XIV/Mito 3500
+chrom_freq/XIV/VII  83439
+chrom_freq/XIV/X    59871
+chrom_freq/XIV/VIII 46973
+chrom_freq/XIV/XI   55585
+chrom_freq/XIV/XII  74811
+chrom_freq/XIV/XIII 72049
+chrom_freq/XIV/XIV  1176394
+chrom_freq/XIV/XV   82896
+chrom_freq/XIV/XVI  72822
+chrom_freq/XV/II    93471
+chrom_freq/XV/I 17221
+chrom_freq/XV/III   28439
+chrom_freq/XV/IV    163112
+chrom_freq/XV/IX    46658
+chrom_freq/XV/Mito  4875
+chrom_freq/XV/V 63121
+chrom_freq/XV/VI    25611
+chrom_freq/XV/VII   120463
+chrom_freq/XV/VIII  60289
+chrom_freq/XV/X 74982
+chrom_freq/XV/XI    71675
+chrom_freq/XV/XII   109660
+chrom_freq/XV/XIII  101406
+chrom_freq/XV/XIV   82668
+chrom_freq/XV/XV    1608272
+chrom_freq/XV/XVI   103107
+chrom_freq/XVI/II   80977
+chrom_freq/XVI/I    17009
+chrom_freq/XVI/IV   131083
+chrom_freq/XVI/III  28934
+chrom_freq/XVI/IX   42872
+chrom_freq/XVI/V    57346
+chrom_freq/XVI/VI   23644
+chrom_freq/XVI/Mito 4245
+chrom_freq/XVI/VII  102063
+chrom_freq/XVI/VIII 53178
+chrom_freq/XVI/X    69068
+chrom_freq/XVI/XI   64352
+chrom_freq/XVI/XII  90977
+chrom_freq/XVI/XIII 86999
+chrom_freq/XVI/XIV  72714
+chrom_freq/XVI/XV   103549
+chrom_freq/XVI/XVI  1358000
+dist_freq/0-1/+-    306
+dist_freq/0-1/-+    303
+dist_freq/0-1/--    121908
+dist_freq/0-1/++    121805
+dist_freq/1-2/+-    789
+dist_freq/1-2/-+    724
+dist_freq/1-2/--    341
+dist_freq/1-2/++    349
+dist_freq/2-3/+-    629
+dist_freq/2-3/-+    584
+dist_freq/2-3/--    67
+dist_freq/2-3/++    90
+dist_freq/3-6/+-    2499
+dist_freq/3-6/-+    2485
+dist_freq/3-6/--    172
+dist_freq/3-6/++    205
+dist_freq/6-10/+-   3463
+dist_freq/6-10/-+   3617
+dist_freq/6-10/--   87
+dist_freq/6-10/++   124
+dist_freq/10-18/+-  6515
+dist_freq/10-18/-+  6803
+dist_freq/10-18/--  224
+dist_freq/10-18/++  272
+dist_freq/18-32/+-  12840
+dist_freq/18-32/-+  12847
+dist_freq/18-32/--  393
+dist_freq/18-32/++  539
+dist_freq/32-56/+-  27913
+dist_freq/32-56/-+  27592
+dist_freq/32-56/--  5507
+dist_freq/32-56/++  5623
+dist_freq/56-100/+- 80632
+dist_freq/56-100/-+ 80145
+dist_freq/56-100/-- 34958
+dist_freq/56-100/++ 35484
+dist_freq/100-178/+-    377481
+dist_freq/100-178/-+    376362
+dist_freq/100-178/--    156042
+dist_freq/100-178/++    156813
+dist_freq/178-316/+-    585339
+dist_freq/178-316/-+    583952
+dist_freq/178-316/--    249257
+dist_freq/178-316/++    252721
+dist_freq/316-562/+-    376230
+dist_freq/316-562/-+    374972
+dist_freq/316-562/--    366408
+dist_freq/316-562/++    367726
+dist_freq/562-1000/+-   453001
+dist_freq/562-1000/-+   455004
+dist_freq/562-1000/--   449222
+dist_freq/562-1000/++   448622
+dist_freq/1000-1778/+-  452678
+dist_freq/1000-1778/-+  451196
+dist_freq/1000-1778/--  450868
+dist_freq/1000-1778/++  449458
+dist_freq/1778-3162/+-  395815
+dist_freq/1778-3162/-+  396130
+dist_freq/1778-3162/--  396093
+dist_freq/1778-3162/++  395042
+dist_freq/3162-5623/+-  344055
+dist_freq/3162-5623/-+  345000
+dist_freq/3162-5623/--  345333
+dist_freq/3162-5623/++  344737
+dist_freq/5623-10000/+- 302765
+dist_freq/5623-10000/-+ 302363
+dist_freq/5623-10000/-- 303335
+dist_freq/5623-10000/++ 302730
+dist_freq/10000-17783/+-    266612
+dist_freq/10000-17783/-+    265367
+dist_freq/10000-17783/--    266269
+dist_freq/10000-17783/++    266375
+dist_freq/17783-31623/+-    233566
+dist_freq/17783-31623/-+    232976
+dist_freq/17783-31623/--    233617
+dist_freq/17783-31623/++    233027
+dist_freq/31623-56234/+-    204543
+dist_freq/31623-56234/-+    203916
+dist_freq/31623-56234/--    203725
+dist_freq/31623-56234/++    203834
+dist_freq/56234-100000/+-   177434
+dist_freq/56234-100000/-+   177333
+dist_freq/56234-100000/--   177497
+dist_freq/56234-100000/++   176513
+dist_freq/100000-177828/+-  153339
+dist_freq/100000-177828/-+  154025
+dist_freq/100000-177828/--  154132
+dist_freq/100000-177828/++  153925
+dist_freq/177828-316228/+-  128734
+dist_freq/177828-316228/-+  128503
+dist_freq/177828-316228/--  128973
+dist_freq/177828-316228/++  128971
+dist_freq/316228-562341/+-  96722
+dist_freq/316228-562341/-+  97294
+dist_freq/316228-562341/--  96601
+dist_freq/316228-562341/++  96339
+dist_freq/562341-1000000/+- 54869
+dist_freq/562341-1000000/-+ 55066
+dist_freq/562341-1000000/-- 55326
+dist_freq/562341-1000000/++ 55003
+dist_freq/1000000-1778279/+-    9109
+dist_freq/1000000-1778279/-+    8970
+dist_freq/1000000-1778279/--    9050
+dist_freq/1000000-1778279/++    8998
+dist_freq/1778279-3162278/+-    0
+dist_freq/1778279-3162278/-+    0
+dist_freq/1778279-3162278/--    0
+dist_freq/1778279-3162278/++    0
+dist_freq/3162278-5623413/+-    0
+dist_freq/3162278-5623413/-+    0
+dist_freq/3162278-5623413/--    0
+dist_freq/3162278-5623413/++    0
+dist_freq/5623413-10000000/+-   0
+dist_freq/5623413-10000000/-+   0
+dist_freq/5623413-10000000/--   0
+dist_freq/5623413-10000000/++   0
+dist_freq/10000000-17782794/+-  0
+dist_freq/10000000-17782794/-+  0
+dist_freq/10000000-17782794/--  0
+dist_freq/10000000-17782794/++  0
+dist_freq/17782794-31622777/+-  0
+dist_freq/17782794-31622777/-+  0
+dist_freq/17782794-31622777/--  0
+dist_freq/17782794-31622777/++  0
+dist_freq/31622777-56234133/+-  0
+dist_freq/31622777-56234133/-+  0
+dist_freq/31622777-56234133/--  0
+dist_freq/31622777-56234133/++  0
+dist_freq/56234133-100000000/+- 0
+dist_freq/56234133-100000000/-+ 0
+dist_freq/56234133-100000000/-- 0
+dist_freq/56234133-100000000/++ 0
+dist_freq/100000000-177827941/+-    0
+dist_freq/100000000-177827941/-+    0
+dist_freq/100000000-177827941/--    0
+dist_freq/100000000-177827941/++    0
+dist_freq/177827941-316227766/+-    0
+dist_freq/177827941-316227766/-+    0
+dist_freq/177827941-316227766/--    0
+dist_freq/177827941-316227766/++    0
+dist_freq/316227766-562341325/+-    0
+dist_freq/316227766-562341325/-+    0
+dist_freq/316227766-562341325/--    0
+dist_freq/316227766-562341325/++    0
+dist_freq/562341325-1000000000/+-   0
+dist_freq/562341325-1000000000/-+   0
+dist_freq/562341325-1000000000/--   0
+dist_freq/562341325-1000000000/++   0
+dist_freq/562341325+/+- 0
+dist_freq/562341325+/-+ 0
+dist_freq/562341325+/-- 0
+dist_freq/562341325+/++ 0
+chromsizes/I    230218
+chromsizes/II   813184
+chromsizes/III  316620
+chromsizes/IV   1531933
+chromsizes/V    576874
+chromsizes/VI   270161
+chromsizes/VII  1090940
+chromsizes/VIII 562643
+chromsizes/IX   439888
+chromsizes/X    745751
+chromsizes/XI   666816
+chromsizes/XII  1078177
+chromsizes/XIII 924431
+chromsizes/XIV  784333
+chromsizes/XV   1091291
+chromsizes/XVI  948066
+chromsizes/Mito 85779
+
+
+❯ cat "${a_dup_pre_pairs_stats}"
+total   28199698
+total_unmapped  16714538
+total_single_sided_mapped   11485160
+total_mapped    0
+total_dups  0
+total_nodups    0
+cis 0
+trans   0
+pair_types/MM   14039891
+pair_types/MN   701106
+pair_types/NM   558057
+pair_types/NN   1415484
+pair_types/MU   3912147
+pair_types/NU   2065238
+pair_types/UM   3502692
+pair_types/UN   2005083
+cis_1kb+    0
+cis_2kb+    0
+cis_4kb+    0
+cis_10kb+   0
+cis_20kb+   0
+cis_40kb+   0
+summary/frac_cis    0
+summary/frac_cis_1kb+   0
+summary/frac_cis_2kb+   0
+summary/frac_cis_4kb+   0
+summary/frac_cis_10kb+  0
+summary/frac_cis_20kb+  0
+summary/frac_cis_40kb+  0
+summary/frac_dups   0
+summary/complexity_naive    0
+dist_freq/0-1/+-    0
+dist_freq/0-1/-+    0
+dist_freq/0-1/--    0
+dist_freq/0-1/++    0
+dist_freq/1-2/+-    0
+dist_freq/1-2/-+    0
+dist_freq/1-2/--    0
+dist_freq/1-2/++    0
+dist_freq/2-3/+-    0
+dist_freq/2-3/-+    0
+dist_freq/2-3/--    0
+dist_freq/2-3/++    0
+dist_freq/3-6/+-    0
+dist_freq/3-6/-+    0
+dist_freq/3-6/--    0
+dist_freq/3-6/++    0
+dist_freq/6-10/+-   0
+dist_freq/6-10/-+   0
+dist_freq/6-10/--   0
+dist_freq/6-10/++   0
+dist_freq/10-18/+-  0
+dist_freq/10-18/-+  0
+dist_freq/10-18/--  0
+dist_freq/10-18/++  0
+dist_freq/18-32/+-  0
+dist_freq/18-32/-+  0
+dist_freq/18-32/--  0
+dist_freq/18-32/++  0
+dist_freq/32-56/+-  0
+dist_freq/32-56/-+  0
+dist_freq/32-56/--  0
+dist_freq/32-56/++  0
+dist_freq/56-100/+- 0
+dist_freq/56-100/-+ 0
+dist_freq/56-100/-- 0
+dist_freq/56-100/++ 0
+dist_freq/100-178/+-    0
+dist_freq/100-178/-+    0
+dist_freq/100-178/--    0
+dist_freq/100-178/++    0
+dist_freq/178-316/+-    0
+dist_freq/178-316/-+    0
+dist_freq/178-316/--    0
+dist_freq/178-316/++    0
+dist_freq/316-562/+-    0
+dist_freq/316-562/-+    0
+dist_freq/316-562/--    0
+dist_freq/316-562/++    0
+dist_freq/562-1000/+-   0
+dist_freq/562-1000/-+   0
+dist_freq/562-1000/--   0
+dist_freq/562-1000/++   0
+dist_freq/1000-1778/+-  0
+dist_freq/1000-1778/-+  0
+dist_freq/1000-1778/--  0
+dist_freq/1000-1778/++  0
+dist_freq/1778-3162/+-  0
+dist_freq/1778-3162/-+  0
+dist_freq/1778-3162/--  0
+dist_freq/1778-3162/++  0
+dist_freq/3162-5623/+-  0
+dist_freq/3162-5623/-+  0
+dist_freq/3162-5623/--  0
+dist_freq/3162-5623/++  0
+dist_freq/5623-10000/+- 0
+dist_freq/5623-10000/-+ 0
+dist_freq/5623-10000/-- 0
+dist_freq/5623-10000/++ 0
+dist_freq/10000-17783/+-    0
+dist_freq/10000-17783/-+    0
+dist_freq/10000-17783/--    0
+dist_freq/10000-17783/++    0
+dist_freq/17783-31623/+-    0
+dist_freq/17783-31623/-+    0
+dist_freq/17783-31623/--    0
+dist_freq/17783-31623/++    0
+dist_freq/31623-56234/+-    0
+dist_freq/31623-56234/-+    0
+dist_freq/31623-56234/--    0
+dist_freq/31623-56234/++    0
+dist_freq/56234-100000/+-   0
+dist_freq/56234-100000/-+   0
+dist_freq/56234-100000/--   0
+dist_freq/56234-100000/++   0
+dist_freq/100000-177828/+-  0
+dist_freq/100000-177828/-+  0
+dist_freq/100000-177828/--  0
+dist_freq/100000-177828/++  0
+dist_freq/177828-316228/+-  0
+dist_freq/177828-316228/-+  0
+dist_freq/177828-316228/--  0
+dist_freq/177828-316228/++  0
+dist_freq/316228-562341/+-  0
+dist_freq/316228-562341/-+  0
+dist_freq/316228-562341/--  0
+dist_freq/316228-562341/++  0
+dist_freq/562341-1000000/+- 0
+dist_freq/562341-1000000/-+ 0
+dist_freq/562341-1000000/-- 0
+dist_freq/562341-1000000/++ 0
+dist_freq/1000000-1778279/+-    0
+dist_freq/1000000-1778279/-+    0
+dist_freq/1000000-1778279/--    0
+dist_freq/1000000-1778279/++    0
+dist_freq/1778279-3162278/+-    0
+dist_freq/1778279-3162278/-+    0
+dist_freq/1778279-3162278/--    0
+dist_freq/1778279-3162278/++    0
+dist_freq/3162278-5623413/+-    0
+dist_freq/3162278-5623413/-+    0
+dist_freq/3162278-5623413/--    0
+dist_freq/3162278-5623413/++    0
+dist_freq/5623413-10000000/+-   0
+dist_freq/5623413-10000000/-+   0
+dist_freq/5623413-10000000/--   0
+dist_freq/5623413-10000000/++   0
+dist_freq/10000000-17782794/+-  0
+dist_freq/10000000-17782794/-+  0
+dist_freq/10000000-17782794/--  0
+dist_freq/10000000-17782794/++  0
+dist_freq/17782794-31622777/+-  0
+dist_freq/17782794-31622777/-+  0
+dist_freq/17782794-31622777/--  0
+dist_freq/17782794-31622777/++  0
+dist_freq/31622777-56234133/+-  0
+dist_freq/31622777-56234133/-+  0
+dist_freq/31622777-56234133/--  0
+dist_freq/31622777-56234133/++  0
+dist_freq/56234133-100000000/+- 0
+dist_freq/56234133-100000000/-+ 0
+dist_freq/56234133-100000000/-- 0
+dist_freq/56234133-100000000/++ 0
+dist_freq/100000000-177827941/+-    0
+dist_freq/100000000-177827941/-+    0
+dist_freq/100000000-177827941/--    0
+dist_freq/100000000-177827941/++    0
+dist_freq/177827941-316227766/+-    0
+dist_freq/177827941-316227766/-+    0
+dist_freq/177827941-316227766/--    0
+dist_freq/177827941-316227766/++    0
+dist_freq/316227766-562341325/+-    0
+dist_freq/316227766-562341325/-+    0
+dist_freq/316227766-562341325/--    0
+dist_freq/316227766-562341325/++    0
+dist_freq/562341325-1000000000/+-   0
+dist_freq/562341325-1000000000/-+   0
+dist_freq/562341325-1000000000/--   0
+dist_freq/562341325-1000000000/++   0
+dist_freq/562341325+/+- 0
+dist_freq/562341325+/-+ 0
+dist_freq/562341325+/-- 0
+dist_freq/562341325+/++ 0
+chromsizes/I    230218
+chromsizes/II   813184
+chromsizes/III  316620
+chromsizes/IV   1531933
+chromsizes/V    576874
+chromsizes/VI   270161
+chromsizes/VII  1090940
+chromsizes/VIII 562643
+chromsizes/IX   439888
+chromsizes/X    745751
+chromsizes/XI   666816
+chromsizes/XII  1078177
+chromsizes/XIII 924431
+chromsizes/XIV  784333
+chromsizes/XV   1091291
+chromsizes/XVI  948066
+chromsizes/Mito 85779
+
+
+❯ cat "${a_unmap_pre_pairs_stats}"
+total   6749387
+total_unmapped  0
+total_single_sided_mapped   0
+total_mapped    6749387
+total_dups  6749387
+total_nodups    0
+cis 0
+trans   0
+pair_types/DD   6749387
+cis_1kb+    0
+cis_2kb+    0
+cis_4kb+    0
+cis_10kb+   0
+cis_20kb+   0
+cis_40kb+   0
+summary/frac_cis    0
+summary/frac_cis_1kb+   0
+summary/frac_cis_2kb+   0
+summary/frac_cis_4kb+   0
+summary/frac_cis_10kb+  0
+summary/frac_cis_20kb+  0
+summary/frac_cis_40kb+  0
+summary/frac_dups   1.0
+summary/complexity_naive    0
+dist_freq/0-1/+-    0
+dist_freq/0-1/-+    0
+dist_freq/0-1/--    0
+dist_freq/0-1/++    0
+dist_freq/1-2/+-    0
+dist_freq/1-2/-+    0
+dist_freq/1-2/--    0
+dist_freq/1-2/++    0
+dist_freq/2-3/+-    0
+dist_freq/2-3/-+    0
+dist_freq/2-3/--    0
+dist_freq/2-3/++    0
+dist_freq/3-6/+-    0
+dist_freq/3-6/-+    0
+dist_freq/3-6/--    0
+dist_freq/3-6/++    0
+dist_freq/6-10/+-   0
+dist_freq/6-10/-+   0
+dist_freq/6-10/--   0
+dist_freq/6-10/++   0
+dist_freq/10-18/+-  0
+dist_freq/10-18/-+  0
+dist_freq/10-18/--  0
+dist_freq/10-18/++  0
+dist_freq/18-32/+-  0
+dist_freq/18-32/-+  0
+dist_freq/18-32/--  0
+dist_freq/18-32/++  0
+dist_freq/32-56/+-  0
+dist_freq/32-56/-+  0
+dist_freq/32-56/--  0
+dist_freq/32-56/++  0
+dist_freq/56-100/+- 0
+dist_freq/56-100/-+ 0
+dist_freq/56-100/-- 0
+dist_freq/56-100/++ 0
+dist_freq/100-178/+-    0
+dist_freq/100-178/-+    0
+dist_freq/100-178/--    0
+dist_freq/100-178/++    0
+dist_freq/178-316/+-    0
+dist_freq/178-316/-+    0
+dist_freq/178-316/--    0
+dist_freq/178-316/++    0
+dist_freq/316-562/+-    0
+dist_freq/316-562/-+    0
+dist_freq/316-562/--    0
+dist_freq/316-562/++    0
+dist_freq/562-1000/+-   0
+dist_freq/562-1000/-+   0
+dist_freq/562-1000/--   0
+dist_freq/562-1000/++   0
+dist_freq/1000-1778/+-  0
+dist_freq/1000-1778/-+  0
+dist_freq/1000-1778/--  0
+dist_freq/1000-1778/++  0
+dist_freq/1778-3162/+-  0
+dist_freq/1778-3162/-+  0
+dist_freq/1778-3162/--  0
+dist_freq/1778-3162/++  0
+dist_freq/3162-5623/+-  0
+dist_freq/3162-5623/-+  0
+dist_freq/3162-5623/--  0
+dist_freq/3162-5623/++  0
+dist_freq/5623-10000/+- 0
+dist_freq/5623-10000/-+ 0
+dist_freq/5623-10000/-- 0
+dist_freq/5623-10000/++ 0
+dist_freq/10000-17783/+-    0
+dist_freq/10000-17783/-+    0
+dist_freq/10000-17783/--    0
+dist_freq/10000-17783/++    0
+dist_freq/17783-31623/+-    0
+dist_freq/17783-31623/-+    0
+dist_freq/17783-31623/--    0
+dist_freq/17783-31623/++    0
+dist_freq/31623-56234/+-    0
+dist_freq/31623-56234/-+    0
+dist_freq/31623-56234/--    0
+dist_freq/31623-56234/++    0
+dist_freq/56234-100000/+-   0
+dist_freq/56234-100000/-+   0
+dist_freq/56234-100000/--   0
+dist_freq/56234-100000/++   0
+dist_freq/100000-177828/+-  0
+dist_freq/100000-177828/-+  0
+dist_freq/100000-177828/--  0
+dist_freq/100000-177828/++  0
+dist_freq/177828-316228/+-  0
+dist_freq/177828-316228/-+  0
+dist_freq/177828-316228/--  0
+dist_freq/177828-316228/++  0
+dist_freq/316228-562341/+-  0
+dist_freq/316228-562341/-+  0
+dist_freq/316228-562341/--  0
+dist_freq/316228-562341/++  0
+dist_freq/562341-1000000/+- 0
+dist_freq/562341-1000000/-+ 0
+dist_freq/562341-1000000/-- 0
+dist_freq/562341-1000000/++ 0
+dist_freq/1000000-1778279/+-    0
+dist_freq/1000000-1778279/-+    0
+dist_freq/1000000-1778279/--    0
+dist_freq/1000000-1778279/++    0
+dist_freq/1778279-3162278/+-    0
+dist_freq/1778279-3162278/-+    0
+dist_freq/1778279-3162278/--    0
+dist_freq/1778279-3162278/++    0
+dist_freq/3162278-5623413/+-    0
+dist_freq/3162278-5623413/-+    0
+dist_freq/3162278-5623413/--    0
+dist_freq/3162278-5623413/++    0
+dist_freq/5623413-10000000/+-   0
+dist_freq/5623413-10000000/-+   0
+dist_freq/5623413-10000000/--   0
+dist_freq/5623413-10000000/++   0
+dist_freq/10000000-17782794/+-  0
+dist_freq/10000000-17782794/-+  0
+dist_freq/10000000-17782794/--  0
+dist_freq/10000000-17782794/++  0
+dist_freq/17782794-31622777/+-  0
+dist_freq/17782794-31622777/-+  0
+dist_freq/17782794-31622777/--  0
+dist_freq/17782794-31622777/++  0
+dist_freq/31622777-56234133/+-  0
+dist_freq/31622777-56234133/-+  0
+dist_freq/31622777-56234133/--  0
+dist_freq/31622777-56234133/++  0
+dist_freq/56234133-100000000/+- 0
+dist_freq/56234133-100000000/-+ 0
+dist_freq/56234133-100000000/-- 0
+dist_freq/56234133-100000000/++ 0
+dist_freq/100000000-177827941/+-    0
+dist_freq/100000000-177827941/-+    0
+dist_freq/100000000-177827941/--    0
+dist_freq/100000000-177827941/++    0
+dist_freq/177827941-316227766/+-    0
+dist_freq/177827941-316227766/-+    0
+dist_freq/177827941-316227766/--    0
+dist_freq/177827941-316227766/++    0
+dist_freq/316227766-562341325/+-    0
+dist_freq/316227766-562341325/-+    0
+dist_freq/316227766-562341325/--    0
+dist_freq/316227766-562341325/++    0
+dist_freq/562341325-1000000000/+-   0
+dist_freq/562341325-1000000000/-+   0
+dist_freq/562341325-1000000000/--   0
+dist_freq/562341325-1000000000/++   0
+dist_freq/562341325+/+- 0
+dist_freq/562341325+/-+ 0
+dist_freq/562341325+/-- 0
+dist_freq/562341325+/++ 0
+chromsizes/I    230218
+chromsizes/II   813184
+chromsizes/III  316620
+chromsizes/IV   1531933
+chromsizes/V    576874
+chromsizes/VI   270161
+chromsizes/VII  1090940
+chromsizes/VIII 562643
+chromsizes/IX   439888
+chromsizes/X    745751
+chromsizes/XI   666816
+chromsizes/XII  1078177
+chromsizes/XIII 924431
+chromsizes/XIV  784333
+chromsizes/XV   1091291
+chromsizes/XVI  948066
+chromsizes/Mito 85779
 ```
 </details>
 <br />
@@ -6006,15 +7401,42 @@ Options:
 
 <a id="8-load-pairs-to-cooler"></a>
 ### 8. Load pairs to cooler
-<a id="code-13"></a>
+<a id="code-12"></a>
 #### Code
 <details>
-<summary><i>Code: 7. Load pairs to cooler</i></summary>
+<summary><i>Code: 8. Load pairs to cooler</i></summary>
 
 ```bash
 #!/bin/bash
 
+#  Check the documentation
+cooler cload pairs --help
 
+#  Echo test
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        echo """
+        cooler cload pairs \\
+            -c1 2 -p1 3 -c2 4 -p2 5 \\
+            --assembly \"${assembly}\" \\
+            \"${a_size}\":\"${bin_initial}\" \\
+            \"${a_dedup_pre_pairs}\" \\
+            \"${a_cload}\"
+        """
+    }
+
+#  Create a .cool from the processed, filtered pairs
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        cooler cload pairs \
+            -c1 2 -p1 3 -c2 4 -p2 5 \
+            --assembly "${assembly}" \
+            "${a_size}":"${bin_initial}" \
+            "${a_dedup_pre_pairs}" \
+            "${a_cload}"
+    }
 ```
 </details>
 <br />
@@ -6022,11 +7444,624 @@ Options:
 <a id="printed-11"></a>
 #### Printed
 <details>
-<summary><i>Printed: 7. Load pairs to cooler</i></summary>
+<summary><i>Printed: 8. Load pairs to cooler</i></summary>
 
 ```txt
+❯ #  Check the documentation
 
 
+❯ cooler cload pairs --help
+Usage: cooler cload pairs [OPTIONS] BINS PAIRS_PATH COOL_PATH
+
+  Bin any text file or stream of pairs.
+
+  Pairs data need not be sorted. Accepts compressed files. To pipe input from
+  stdin, set PAIRS_PATH to '-'.
+
+  BINS : One of the following
+
+      <TEXT:INTEGER> : 1. Path to a chromsizes file, 2. Bin size in bp
+
+      <TEXT> : Path to BED file defining the genomic bin segmentation.
+
+  PAIRS_PATH : Path to contacts (i.e. read pairs) file.
+
+  COOL_PATH : Output COOL file path or URI.
+
+Options:
+  --metadata TEXT                 Path to JSON file containing user metadata.
+  --assembly TEXT                 Name of genome assembly (e.g. hg19, mm10)
+  -c1, --chrom1 INTEGER           chrom1 field number (one-based)  [required]
+  -p1, --pos1 INTEGER             pos1 field number (one-based)  [required]
+  -c2, --chrom2 INTEGER           chrom2 field number (one-based)  [required]
+  -p2, --pos2 INTEGER             pos2 field number (one-based)  [required]
+  --chunksize INTEGER             Number of input lines to load at a time
+  -0, --zero-based                Positions are zero-based
+  --comment-char TEXT             Comment character that indicates lines to
+                                  ignore.  [default: #]
+  -N, --no-symmetric-upper        Create a complete square matrix without
+                                  implicit symmetry. This allows for distinct
+                                  upper- and lower-triangle values
+  --input-copy-status [unique|duplex]
+                                  Copy status of input data when using
+                                  symmetric-upper storage. | `unique`:
+                                  Incoming data comes from a unique half of a
+                                  symmetric map, regardless of how the
+                                  coordinates of a pair are ordered. `duplex`:
+                                  Incoming data contains upper- and lower-
+                                  triangle duplicates. All input records that
+                                  map to the lower triangle will be discarded!
+                                  | If you wish to treat lower- and upper-
+                                  triangle input data as distinct, use the
+                                  ``--no-symmetric-upper`` option.   [default:
+                                  unique]
+  --field TEXT                    Specify quantitative input fields to
+                                  aggregate into value columns using the
+                                  syntax ``--field <field-name>=<field-
+                                  number>``. Optionally, append ``:`` followed
+                                  by ``dtype=<dtype>`` to specify the data
+                                  type (e.g. float), and/or ``agg=<agg>`` to
+                                  specify an aggregation function different
+                                  from sum (e.g. mean). Field numbers are
+                                  1-based. Passing 'count' as the target name
+                                  will override the default behavior of
+                                  storing pair counts. Repeat the ``--field``
+                                  option for each additional field.
+  --temp-dir DIRECTORY            Create temporary files in a specified
+                                  directory. Pass ``-`` to use the platform
+                                  default temp dir.
+  --no-delete-temp                Do not delete temporary files when finished.
+  --max-merge INTEGER             Maximum number of chunks to merge before
+                                  invoking recursive merging  [default: 200]
+  --storage-options TEXT          Options to modify the data filter pipeline.
+                                  Provide as a comma-separated list of key-
+                                  value pairs of the form 'k1=v1,k2=v2,...'.
+                                  See http://docs.h5py.org/en/stable/high/data
+                                  set.html#filter-pipeline for more details.
+  -a, --append                    Pass this flag to append the output cooler
+                                  to an existing file instead of overwriting
+                                  the file.
+  -h, --help                      Show this message and exit.
+
+
+❯ #  Echo test
+
+
+❯ run=TRUE
+
+
+❯ [[ "${run}" == TRUE ]] &&
+>     {
+>         echo """
+>         cooler cload pairs \\
+>             -c1 2 -p1 3 -c2 4 -p2 5 \\
+>             --assembly \"${assembly}\" \\
+>             \"${a_size}\":\"${bin_initial}\" \\
+>             \"${a_dedup_pre_pairs}\" \\
+>             \"${a_cload}\"
+>         """
+>     }
+
+        cooler cload pairs \
+            -c1 2 -p1 3 -c2 4 -p2 5 \
+            --assembly "S288C_R64-3-1" \
+            "/home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size":"50" \
+            "05_dedup/SRR7939018.nodups.pairs.gz" \
+            "06_cload/SRR7939018.cload.cool"
+
+
+❯ #  Create a .cool from the processed, filtered pairs
+
+
+❯ run=TRUE
+
+
+❯ [[ "${run}" == TRUE ]] &&
+>     {
+>         cooler cload pairs \
+>             -c1 2 -p1 3 -c2 4 -p2 5 \
+>             --assembly "${assembly}" \
+>             "${a_size}":"${bin_initial}" \
+>             "${a_dedup_pre_pairs}" \
+>             "${a_cload}"
+>     }
+INFO:cooler.create:Writing chunk 0: /fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307/06_cload/tmp1llmtl8g.multi.cool::0
+INFO:cooler.create:Creating cooler at "/fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307/06_cload/tmp1llmtl8g.multi.cool::/0"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.create:Writing chunk 1: /fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307/06_cload/tmp1llmtl8g.multi.cool::1
+INFO:cooler.create:Creating cooler at "/fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307/06_cload/tmp1llmtl8g.multi.cool::/1"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.create:Writing chunk 2: /fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307/06_cload/tmp1llmtl8g.multi.cool::2
+INFO:cooler.create:Creating cooler at "/fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307/06_cload/tmp1llmtl8g.multi.cool::/2"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.create:Merging into 06_cload/SRR7939018.cload.cool
+INFO:cooler.create:Creating cooler at "06_cload/SRR7939018.cload.cool::/"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:nnzs: [12617896, 12714552, 886113]
+INFO:cooler.reduce:current: [11728302, 3271639, 0]
+INFO:cooler.reduce:current: [12617896, 12714552, 886113]
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
 ```
 </details>
 <br />
+
+<a id="9-generate-a-multi-resolution-cooler-by-coarsening"></a>
+### 9. Generate a multi-resolution cooler by coarsening
+<a id="code-13"></a>
+#### Code
+<details>
+<summary><i>Code: 9. Generate a multi-resolution cooler by coarsening</i></summary>
+
+```bash
+#!/bin/bash
+
+#  Check the documentation
+cooler zoomify --help
+
+#  Echo test
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        echo """
+        cooler zoomify \\
+            --out \"${a_zoom}\" \\
+            --nproc \"${threads}\" \\
+            --resolutions 100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \\
+            --balance \\
+            \"${a_cload}\"
+        """
+    }
+
+#  Run cooler zoomify (generate a multi-resolution cooler by coarsening)
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        cooler zoomify \
+            --out "${a_zoom}" \
+            --nproc "${threads}" \
+            --resolutions 100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \
+            --balance \
+            "${a_cload}"
+    }
+
+#TODO Add Balance arguments
+#TODO Go ahead and include resolution 50 in the mcool
+```
+</details>
+<br />
+
+<a id="printed-12"></a>
+#### Printed
+<details>
+<summary><i>Printed: 9. Generate a multi-resolution cooler by coarsening</i></summary>
+
+```txt
+❯ #  Check the documentation
+
+
+❯ cooler zoomify --help
+Usage: cooler zoomify [OPTIONS] COOL_PATH
+
+  Generate a multi-resolution cooler file by coarsening.
+
+  COOL_PATH : Path to a COOL file or Cooler URI.
+
+Options:
+  -n, -p, --nproc INTEGER  Number of processes to use for batch processing
+                           chunks of pixels [default: 1, i.e. no process pool]
+  -c, --chunksize INTEGER  Number of pixels allocated to each process
+                           [default: 10000000]
+  -r, --resolutions TEXT   Comma-separated list of target resolutions. Use
+                           suffixes B or N to specify a progression: B for
+                           binary (geometric steps of factor 2), N for nice
+                           (geometric steps of factor 10 interleaved with
+                           steps of 2 and 5). Examples:
+                           1000B=1000,2000,4000,8000,...
+                           1000N=1000,2000,5000,10000,...
+                           5000N=5000,10000,25000,50000,... 4DN is an alias
+                           for 1000,2000,5000N [default: B]
+  --balance                Apply balancing to each zoom level. Off by default.
+  --balance-args TEXT      Additional arguments to pass to cooler balance. To
+                           deal with space ambiguity, use quotes to pass
+                           multiple arguments, e.g. --balance-args '--nproc 8
+                           --ignore-diags 3' Note that nproc for balancing
+                           must be specified independently of zoomify
+                           arguments.
+  -i, --base-uri TEXT      One or more additional base coolers to aggregate
+                           from, if needed.
+  -o, --out TEXT           Output file or URI
+  --field TEXT             Specify the names of value columns to merge as
+                           '<name>'. Repeat the `--field` option for each one.
+                           Use '<name>:dtype=<dtype>' to specify the dtype.
+                           Include ',agg=<agg>' to specify an aggregation
+                           function different from 'sum'.
+  --legacy                 Use the legacy layout of integer-labeled zoom
+                           levels.
+  -h, --help               Show this message and exit.
+
+
+❯ #  Echo test
+
+
+❯ run=TRUE
+
+
+❯ [[ "${run}" == TRUE ]] &&
+>     {
+>         echo """
+>         cooler zoomify \\
+>             --out \"${a_zoom}\" \\
+>             --nproc \"${threads}\" \\
+>             --resolutions 100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \\
+>             --balance \\
+>             \"${a_cload}\"
+>         """
+>     }
+
+        cooler zoomify \
+            --out "07_zoom/SRR7939018.mcool" \
+            --nproc "8" \
+            --resolutions 100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \
+            --balance \
+            "06_cload/SRR7939018.cload.cool"
+
+
+❯ #  Run cooler zoomify (generate a multi-resolution cooler by coarsening)
+
+
+❯ run=TRUE
+
+
+❯ [[ "${run}" == TRUE ]] &&
+>     {
+>         cooler zoomify \
+>             --out "${a_zoom}" \
+>             --nproc "${threads}" \
+>             --resolutions 100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \
+>             --balance \
+>             "${a_cload}"
+>     }
+INFO:cooler.cli.zoomify:Recursively aggregating "06_cload/SRR7939018.cload.cool"
+INFO:cooler.cli.zoomify:Writing to "07_zoom/SRR7939018.mcool"
+INFO:cooler.reduce:Copying base matrices and producing 12 new zoom levels.
+INFO:cooler.reduce:Bin size: 50
+INFO:cooler.reduce:Aggregating from 50 to 100.
+INFO:cooler.create:Creating cooler at "07_zoom/SRR7939018.mcool::/resolutions/100"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:20000552 26179927
+INFO:cooler.reduce:10000199 20000552
+INFO:cooler.reduce:0 10000199
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 100 to 200.
+INFO:cooler.create:Creating cooler at "07_zoom/SRR7939018.mcool::/resolutions/200"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:20000254 22879752
+INFO:cooler.reduce:10000159 20000254
+INFO:cooler.reduce:0 10000159
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 200 to 400.
+INFO:cooler.create:Creating cooler at "07_zoom/SRR7939018.mcool::/resolutions/400"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:10000252 19877549
+INFO:cooler.reduce:0 10000252
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 400 to 800.
+INFO:cooler.create:Creating cooler at "07_zoom/SRR7939018.mcool::/resolutions/800"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:10000257 17302337
+INFO:cooler.reduce:0 10000257
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 800 to 1600.
+INFO:cooler.create:Creating cooler at "07_zoom/SRR7939018.mcool::/resolutions/1600"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:10000736 14633002
+INFO:cooler.reduce:0 10000736
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 1600 to 3200.
+INFO:cooler.create:Creating cooler at "07_zoom/SRR7939018.mcool::/resolutions/3200"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:10000354 10829820
+INFO:cooler.reduce:0 10000354
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 3200 to 6400.
+INFO:cooler.create:Creating cooler at "07_zoom/SRR7939018.mcool::/resolutions/6400"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:0 5514271
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 6400 to 12800.
+INFO:cooler.create:Creating cooler at "07_zoom/SRR7939018.mcool::/resolutions/12800"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:0 1716106
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 12800 to 25600.
+INFO:cooler.create:Creating cooler at "07_zoom/SRR7939018.mcool::/resolutions/25600"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:0 450934
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 25600 to 51200.
+INFO:cooler.create:Creating cooler at "07_zoom/SRR7939018.mcool::/resolutions/51200"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:0 115680
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 51200 to 102400.
+INFO:cooler.create:Creating cooler at "07_zoom/SRR7939018.mcool::/resolutions/102400"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:0 30332
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.cli.zoomify:Balancing zoom level with bin size 100
+INFO:cooler.cli.balance:Balancing "07_zoom/SRR7939018.mcool::resolutions/100"
+INFO:cooler.balance:variance is 127180.92382562772
+INFO:cooler.balance:variance is 1570.4632603578132
+INFO:cooler.balance:variance is 222.0469193288678
+INFO:cooler.balance:variance is 56.0952825145797
+INFO:cooler.balance:variance is 15.58389722832934
+INFO:cooler.balance:variance is 5.190378288288674
+INFO:cooler.balance:variance is 1.8333214895891816
+INFO:cooler.balance:variance is 0.7055856269198852
+INFO:cooler.balance:variance is 0.283648781689827
+INFO:cooler.balance:variance is 0.11873038753541966
+INFO:cooler.balance:variance is 0.0509740521710111
+INFO:cooler.balance:variance is 0.022293683253541013
+INFO:cooler.balance:variance is 0.009879415351741385
+INFO:cooler.balance:variance is 0.004416138057093295
+INFO:cooler.balance:variance is 0.0019872386912984
+INFO:cooler.balance:variance is 0.0008980587611972038
+INFO:cooler.balance:variance is 0.00040723964056634947
+INFO:cooler.balance:variance is 0.00018507791527671042
+INFO:cooler.balance:variance is 8.426577159504783e-05
+INFO:cooler.balance:variance is 3.8412459940675245e-05
+INFO:cooler.balance:variance is 1.7527878032098417e-05
+INFO:cooler.balance:variance is 8.003605530764791e-06
+INFO:cooler.cli.zoomify:Balancing zoom level with bin size 200
+INFO:cooler.cli.balance:Balancing "07_zoom/SRR7939018.mcool::resolutions/200"
+INFO:cooler.balance:variance is 290565.0133165984
+INFO:cooler.balance:variance is 3781.4156934949233
+INFO:cooler.balance:variance is 542.7652374623459
+INFO:cooler.balance:variance is 128.3418752063874
+INFO:cooler.balance:variance is 34.236185289073646
+INFO:cooler.balance:variance is 10.821745655174315
+INFO:cooler.balance:variance is 3.7208357985201603
+INFO:cooler.balance:variance is 1.3864499087721318
+INFO:cooler.balance:variance is 0.5410777334203107
+INFO:cooler.balance:variance is 0.21810390807093624
+INFO:cooler.balance:variance is 0.08976104441416445
+INFO:cooler.balance:variance is 0.0374107312366843
+INFO:cooler.balance:variance is 0.015734921240253833
+INFO:cooler.balance:variance is 0.00665344911923233
+INFO:cooler.balance:variance is 0.002825197213221015
+INFO:cooler.balance:variance is 0.0012026223079972848
+INFO:cooler.balance:variance is 0.0005129724869936561
+INFO:cooler.balance:variance is 0.00021908012576543748
+INFO:cooler.balance:variance is 9.366182180338215e-05
+INFO:cooler.balance:variance is 4.006927411591896e-05
+INFO:cooler.balance:variance is 1.7151360622947664e-05
+INFO:cooler.balance:variance is 7.344202300210572e-06
+INFO:cooler.cli.zoomify:Balancing zoom level with bin size 400
+INFO:cooler.cli.balance:Balancing "07_zoom/SRR7939018.mcool::resolutions/400"
+INFO:cooler.balance:variance is 616636.677977719
+INFO:cooler.balance:variance is 9911.094748324947
+INFO:cooler.balance:variance is 1373.587236934758
+INFO:cooler.balance:variance is 302.5881159055936
+INFO:cooler.balance:variance is 74.60923361175595
+INFO:cooler.balance:variance is 21.817181703785646
+INFO:cooler.balance:variance is 7.0487637054709715
+INFO:cooler.balance:variance is 2.468572512732758
+INFO:cooler.balance:variance is 0.9094459770837647
+INFO:cooler.balance:variance is 0.34526120583367154
+INFO:cooler.balance:variance is 0.13361254636297462
+INFO:cooler.balance:variance is 0.05223314194072075
+INFO:cooler.balance:variance is 0.02055897279297817
+INFO:cooler.balance:variance is 0.008120118846005232
+INFO:cooler.balance:variance is 0.0032151099966001816
+INFO:cooler.balance:variance is 0.001274597915005707
+INFO:cooler.balance:variance is 0.0005057748778323057
+INFO:cooler.balance:variance is 0.00020079373830566845
+INFO:cooler.balance:variance is 7.974519513229264e-05
+INFO:cooler.balance:variance is 3.1676979295530965e-05
+INFO:cooler.balance:variance is 1.2584901402776341e-05
+INFO:cooler.balance:variance is 5.0002542598783685e-06
+INFO:cooler.cli.zoomify:Balancing zoom level with bin size 800
+INFO:cooler.cli.balance:Balancing "07_zoom/SRR7939018.mcool::resolutions/800"
+INFO:cooler.balance:variance is 1532442.1687874554
+INFO:cooler.balance:variance is 23712.36335437967
+INFO:cooler.balance:variance is 3008.33551096279
+INFO:cooler.balance:variance is 606.7568076745856
+INFO:cooler.balance:variance is 137.81216620187058
+INFO:cooler.balance:variance is 37.29554611450914
+INFO:cooler.balance:variance is 11.197997647406224
+INFO:cooler.balance:variance is 3.617426639777768
+INFO:cooler.balance:variance is 1.2209181799920035
+INFO:cooler.balance:variance is 0.4217671764688839
+INFO:cooler.balance:variance is 0.14771852319840503
+INFO:cooler.balance:variance is 0.052080924297704084
+INFO:cooler.balance:variance is 0.018436768993256684
+INFO:cooler.balance:variance is 0.00653893064544714
+INFO:cooler.balance:variance is 0.0023219531645594055
+INFO:cooler.balance:variance is 0.000824967264988798
+INFO:cooler.balance:variance is 0.00029321131934666915
+INFO:cooler.balance:variance is 0.00010423071956969351
+INFO:cooler.balance:variance is 3.7056267078625084e-05
+INFO:cooler.balance:variance is 1.317497511065481e-05
+INFO:cooler.balance:variance is 4.68440760913799e-06
+INFO:cooler.cli.zoomify:Balancing zoom level with bin size 1600
+INFO:cooler.cli.balance:Balancing "07_zoom/SRR7939018.mcool::resolutions/1600"
+INFO:cooler.balance:variance is 4034930.011935843
+INFO:cooler.balance:variance is 57103.336167537986
+INFO:cooler.balance:variance is 6580.7479409935095
+INFO:cooler.balance:variance is 1262.33139164054
+INFO:cooler.balance:variance is 262.7394086293218
+INFO:cooler.balance:variance is 63.87964839591179
+INFO:cooler.balance:variance is 16.81308353638366
+INFO:cooler.balance:variance is 4.716026157287924
+INFO:cooler.balance:variance is 1.3770770777462584
+INFO:cooler.balance:variance is 0.41211215789903244
+INFO:cooler.balance:variance is 0.12523248384832839
+INFO:cooler.balance:variance is 0.03838429433195877
+INFO:cooler.balance:variance is 0.011826728927894095
+INFO:cooler.balance:variance is 0.0036544586496303575
+INFO:cooler.balance:variance is 0.0011311841100351712
+INFO:cooler.balance:variance is 0.00035047205641327255
+INFO:cooler.balance:variance is 0.00010864741511540032
+INFO:cooler.balance:variance is 3.369142884218921e-05
+INFO:cooler.balance:variance is 1.0449599738954318e-05
+INFO:cooler.balance:variance is 3.2413330747559173e-06
+INFO:cooler.cli.zoomify:Balancing zoom level with bin size 3200
+INFO:cooler.cli.balance:Balancing "07_zoom/SRR7939018.mcool::resolutions/3200"
+INFO:cooler.balance:variance is 8338515.26769532
+INFO:cooler.balance:variance is 123328.22535735284
+INFO:cooler.balance:variance is 12994.597453926657
+INFO:cooler.balance:variance is 2276.7728941486585
+INFO:cooler.balance:variance is 436.9332156687475
+INFO:cooler.balance:variance is 95.45403539557951
+INFO:cooler.balance:variance is 22.390461994630478
+INFO:cooler.balance:variance is 5.53473828888962
+INFO:cooler.balance:variance is 1.4143101550001844
+INFO:cooler.balance:variance is 0.3685961331737275
+INFO:cooler.balance:variance is 0.09721283320991284
+INFO:cooler.balance:variance is 0.02580891885330545
+INFO:cooler.balance:variance is 0.006878555050643267
+INFO:cooler.balance:variance is 0.00183714706207003
+INFO:cooler.balance:variance is 0.0004912709978854373
+INFO:cooler.balance:variance is 0.00013145824793440948
+INFO:cooler.balance:variance is 3.519010218154962e-05
+INFO:cooler.balance:variance is 9.422019407957079e-06
+INFO:cooler.cli.zoomify:Balancing zoom level with bin size 6400
+INFO:cooler.cli.balance:Balancing "07_zoom/SRR7939018.mcool::resolutions/6400"
+INFO:cooler.balance:variance is 17303489.481990542
+INFO:cooler.balance:variance is 277840.5812362575
+INFO:cooler.balance:variance is 25535.19296109765
+INFO:cooler.balance:variance is 3743.971860706267
+INFO:cooler.balance:variance is 620.9271497585978
+INFO:cooler.balance:variance is 116.96011808255899
+INFO:cooler.balance:variance is 23.782502033862137
+INFO:cooler.balance:variance is 5.064864752381864
+INFO:cooler.balance:variance is 1.1071121498558467
+INFO:cooler.balance:variance is 0.24525931833618525
+INFO:cooler.balance:variance is 0.05471787731162826
+INFO:cooler.balance:variance is 0.01225027977398924
+INFO:cooler.balance:variance is 0.0027475475853524813
+INFO:cooler.balance:variance is 0.0006167756226695096
+INFO:cooler.balance:variance is 0.00013851784953993344
+INFO:cooler.balance:variance is 3.1115766378279607e-05
+INFO:cooler.balance:variance is 6.990440251772195e-06
+INFO:cooler.cli.zoomify:Balancing zoom level with bin size 12800
+INFO:cooler.cli.balance:Balancing "07_zoom/SRR7939018.mcool::resolutions/12800"
+INFO:cooler.balance:variance is 36740827.454942636
+INFO:cooler.balance:variance is 700041.3399564008
+INFO:cooler.balance:variance is 57491.41283607183
+INFO:cooler.balance:variance is 7135.622649067127
+INFO:cooler.balance:variance is 1020.2307042926867
+INFO:cooler.balance:variance is 165.83584747973393
+INFO:cooler.balance:variance is 29.030179644431744
+INFO:cooler.balance:variance is 5.282488046093687
+INFO:cooler.balance:variance is 0.97986747199472
+INFO:cooler.balance:variance is 0.18336009370149525
+INFO:cooler.balance:variance is 0.03445326072512115
+INFO:cooler.balance:variance is 0.0064856104766000365
+INFO:cooler.balance:variance is 0.001221911527541545
+INFO:cooler.balance:variance is 0.00023029892190659646
+INFO:cooler.balance:variance is 4.341296231485567e-05
+INFO:cooler.balance:variance is 8.184278054426223e-06
+INFO:cooler.cli.zoomify:Balancing zoom level with bin size 25600
+INFO:cooler.cli.balance:Balancing "07_zoom/SRR7939018.mcool::resolutions/25600"
+INFO:cooler.balance:variance is 94609485.01304233
+INFO:cooler.balance:variance is 921757.0884558255
+INFO:cooler.balance:variance is 83745.10639761704
+INFO:cooler.balance:variance is 11955.084025144088
+INFO:cooler.balance:variance is 1854.9515587030073
+INFO:cooler.balance:variance is 291.49111977880955
+INFO:cooler.balance:variance is 45.98155073697826
+INFO:cooler.balance:variance is 7.254810346476389
+INFO:cooler.balance:variance is 1.1449680913656375
+INFO:cooler.balance:variance is 0.1806947287789455
+INFO:cooler.balance:variance is 0.02851751962268079
+INFO:cooler.balance:variance is 0.004500640878514389
+INFO:cooler.balance:variance is 0.0007102952895425516
+INFO:cooler.balance:variance is 0.00011209929052737464
+INFO:cooler.balance:variance is 1.769159896505778e-05
+INFO:cooler.balance:variance is 2.792101499082057e-06
+INFO:cooler.cli.zoomify:Balancing zoom level with bin size 51200
+INFO:cooler.cli.balance:Balancing "07_zoom/SRR7939018.mcool::resolutions/51200"
+INFO:cooler.balance:variance is 253594081.7205069
+INFO:cooler.balance:variance is 3243219.9050388713
+INFO:cooler.balance:variance is 352486.2537910153
+INFO:cooler.balance:variance is 43427.916469388845
+INFO:cooler.balance:variance is 5434.706846757823
+INFO:cooler.balance:variance is 679.2665917556232
+INFO:cooler.balance:variance is 84.98548787066287
+INFO:cooler.balance:variance is 10.62999624444899
+INFO:cooler.balance:variance is 1.3297508394854662
+INFO:cooler.balance:variance is 0.1663381386262242
+INFO:cooler.balance:variance is 0.02080747089858705
+INFO:cooler.balance:variance is 0.0026028237456325394
+INFO:cooler.balance:variance is 0.0003255899204095728
+INFO:cooler.balance:variance is 4.0728357020441145e-05
+INFO:cooler.balance:variance is 5.094750504532831e-06
+INFO:cooler.cli.zoomify:Balancing zoom level with bin size 102400
+INFO:cooler.cli.balance:Balancing "07_zoom/SRR7939018.mcool::resolutions/102400"
+INFO:cooler.balance:variance is 695339922.2610035
+INFO:cooler.balance:variance is 12966993.17173299
+INFO:cooler.balance:variance is 1180160.688543959
+INFO:cooler.balance:variance is 112862.9866549583
+INFO:cooler.balance:variance is 10879.176082680848
+INFO:cooler.balance:variance is 1047.0434692718302
+INFO:cooler.balance:variance is 100.82531951234009
+INFO:cooler.balance:variance is 9.707394888426977
+INFO:cooler.balance:variance is 0.9346698767461828
+INFO:cooler.balance:variance is 0.08999260901445384
+INFO:cooler.balance:variance is 0.00866478117905116
+INFO:cooler.balance:variance is 0.0008342720352318106
+INFO:cooler.balance:variance is 8.032634052476781e-05
+INFO:cooler.balance:variance is 7.734072057040814e-06
+```
+</details>
+<br />
+
