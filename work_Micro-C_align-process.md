@@ -7,55 +7,65 @@
 
 1. [Install packages necessary for processing Micro-C data](#install-packages-necessary-for-processing-micro-c-data)
     1. [Remote installation](#remote-installation)
-        1. [Code](#code)
-        1. [Printed](#printed)
+        1. [Install mamba packages](#install-mamba-packages)
+            1. [Code](#code)
+            1. [Printed](#printed)
+        1. [Install atria](#install-atria)
+            1. [Code](#code-1)
+            1. [Printed](#printed-1)
     1. [Local installation](#local-installation)
-        1. [Code](#code-1)
-        1. [Printed](#printed-1)
-1. [Work through the steps of \[pairtools\]\(\)](#work-through-the-steps-of-pairtools)
+        1. [Install mamba packages](#install-mamba-packages-1)
+            1. [Code](#code-2)
+            1. [Printed](#printed-2)
+        1. [Install atria](#install-atria-1)
+            1. [Code](#code-3)
+1. [Work through the steps of pairtools](#work-through-the-steps-of-pairtools)
     1. [0. Get situated](#0-get-situated)
         1. [Get to work directory, initialize environment](#get-to-work-directory-initialize-environment)
-            1. [Code](#code-2)
+            1. [Code](#code-4)
         1. [Initialize variables, create outdirectories](#initialize-variables-create-outdirectories)
-            1. [Code](#code-3)
-            1. [Printed](#printed-2)
-    1. [1. Align datasets](#1-align-datasets)
-        1. [Code](#code-4)
-        1. [Printed](#printed-3)
-    1. [2. Run `pairtools parse`](#2-run-pairtools-parse)
-        1. [Code](#code-5)
+            1. [Code](#code-5)
+            1. [Printed](#printed-3)
+    1. [1. Trim fastq files](#1-trim-fastq-files)
+        1. [Code](#code-6)
         1. [Printed](#printed-4)
+    1. [2. Align datasets](#2-align-datasets)
+        1. [Code](#code-7)
+        1. [Printed](#printed-5)
+    1. [3. Run `pairtools parse`](#3-run-pairtools-parse)
+        1. [Code](#code-8)
+        1. [Printed](#printed-6)
             1. [Check the documentation](#check-the-documentation)
             1. [`pairtools parse`](#pairtools-parse)
             1. [Examine the pairs outfile](#examine-the-pairs-outfile)
             1. [Examine the stats outfile](#examine-the-stats-outfile)
-    1. [3. Run `pairtools sort`](#3-run-pairtools-sort)
-        1. [Code](#code-6)
-        1. [Printed](#printed-5)
+    1. [4. Run `pairtools sort`](#4-run-pairtools-sort)
+        1. [Code](#code-9)
+        1. [Printed](#printed-7)
             1. [Check the documentation](#check-the-documentation-1)
             1. [`pairtools sort`](#pairtools-sort)
             1. [Examine the sorted pairs outfile](#examine-the-sorted-pairs-outfile)
-    1. [4. Run `pairtools dedup` and `pairtools split`](#4-run-pairtools-dedup-and-pairtools-split)
-        1. [Code](#code-7)
-        1. [Printed](#printed-6)
+    1. [5. Run `pairtools dedup` and `pairtools split`](#5-run-pairtools-dedup-and-pairtools-split)
+        1. [Code](#code-10)
+        1. [Printed](#printed-8)
             1. [Check the documentation](#check-the-documentation-2)
             1. [`pairtools dedup`](#pairtools-dedup)
             1. [Check the various outfiles](#check-the-various-outfiles)
             1. [Examine the unique pairs](#examine-the-unique-pairs)
             1. [Check the stats outfile](#check-the-stats-outfile)
         1. [Notes](#notes)
-    1. [5. Run `pairtools select`](#5-run-pairtools-select)
-        1. [Code](#code-8)
-        1. [Printed](#printed-7)
+    1. [6. Run `pairtools select`](#6-run-pairtools-select)
+        1. [Code](#code-11)
+        1. [Printed](#printed-9)
             1. [Check the documentation](#check-the-documentation-3)
             1. [`pairtools select`](#pairtools-select)
-    1. [6. Run `pairtools stats`](#6-run-pairtools-stats)
-        1. [Code](#code-9)
-        1. [Printed](#printed-8)
+    1. [7. Run `pairtools stats`](#7-run-pairtools-stats)
+        1. [Code](#code-12)
+        1. [Printed](#printed-10)
             1. [Check the documentation](#check-the-documentation-4)
-    1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
-        1. [Code](#code-10)
-        1. [Printed](#printed-9)
+    1. [8. Load pairs to cooler](#8-load-pairs-to-cooler)
+        1. [Code](#code-13)
+        1. [Printed](#printed-11)
 
 <!-- /MarkdownTOC -->
 <br />
@@ -65,31 +75,47 @@
 ## Install packages necessary for processing Micro-C data
 <a id="remote-installation"></a>
 ### Remote installation
+<a id="install-mamba-packages"></a>
+#### Install mamba packages
 <a id="code"></a>
-#### Code
+##### Code
 <details>
-<summary><i>Code: Remote installation</i></summary>
+<summary><i>Code: Install mamba packages</i></summary>
 
 ```bash
 #!/bin/bash
 
-mamba create \
-    -n pairtools_env \
-    -c conda-forge \
-        parallel
+run=FALSE
+if [[ "${run}" == TRUE ]]; then
+    mamba create \
+        -n pairtools_env \
+        -c conda-forge \
+            parallel
+    
+    source activate pairtools_env
+    
+    mamba install \
+        -c bioconda \
+            bioframe cooler coolpuppy cooltools pairtools rename
 
-source activate pairtools_env
-mamba install \
-    -c bioconda \
-        bioframe cooler coolpuppy cooltools pairtools rename
+    #  Packages needed for Atria, etc.
+    mamba install \
+        -c conda-forge \
+            pbzip2 \
+            pigz \
+            r-tidyverse \
+            r-argparse \
+            r-plotly \
+            r-ggsci
+fi
 ```
 </details>
 <br />
 
 <a id="printed"></a>
-#### Printed
+##### Printed
 <details>
-<summary><i>Printed: Remote installation</i></summary>
+<summary><i>Printed: Install mamba packages</i></summary>
 
 ```txt
 ❯ mamba create \
@@ -595,6 +621,1346 @@ Downloading and Extracting Packages
 Preparing transaction: done
 Verifying transaction: done
 Executing transaction: done
+
+
+❯ mamba install \
+>         -c conda-forge \
+>             pbzip2 \
+>             pigz \
+>             r-tidyverse \
+>             r-argparse \
+>             r-plotly \
+>             r-ggsci
+
+                  __    __    __    __
+                 /  \  /  \  /  \  /  \
+                /    \/    \/    \/    \
+███████████████/  /██/  /██/  /██/  /████████████████████████
+              /  / \   / \   / \   / \  \____
+             /  /   \_/   \_/   \_/   \    o \__,
+            / _/                       \_____/  `
+            |/
+        ███╗   ███╗ █████╗ ███╗   ███╗██████╗  █████╗
+        ████╗ ████║██╔══██╗████╗ ████║██╔══██╗██╔══██╗
+        ██╔████╔██║███████║██╔████╔██║██████╔╝███████║
+        ██║╚██╔╝██║██╔══██║██║╚██╔╝██║██╔══██╗██╔══██║
+        ██║ ╚═╝ ██║██║  ██║██║ ╚═╝ ██║██████╔╝██║  ██║
+        ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝
+
+        mamba (1.3.1) supported by @QuantStack
+
+        GitHub:  https://github.com/mamba-org/mamba
+        Twitter: https://twitter.com/QuantStack
+
+█████████████████████████████████████████████████████████████
+
+
+Looking for: ['pbzip2', 'pigz', 'r-tidyverse', 'r-argparse', 'r-plotly', 'r-ggsci']
+
+bioconda/noarch                                      4.3MB @   4.0MB/s  1.2s
+pkgs/main/linux-64                                   5.9MB @   4.5MB/s  1.6s
+bioconda/linux-64                                    5.0MB @   2.9MB/s  1.9s
+pkgs/main/noarch                                              No change
+pkgs/r/linux-64                                               No change
+pkgs/r/noarch                                                 No change
+conda-forge/noarch                                  13.2MB @   4.0MB/s  3.8s
+conda-forge/linux-64                                32.9MB @   4.4MB/s  8.7s
+
+Pinned packages:
+  - python 3.10.*
+
+
+Transaction
+
+  Prefix: /home/kalavatt/miniconda3/envs/pairtools_env
+
+  Updating specs:
+
+   - pbzip2
+   - pigz
+   - r-tidyverse
+   - r-argparse
+   - r-plotly
+   - r-ggsci
+   - ca-certificates
+   - certifi
+   - openssl
+
+
+  Package                      Version  Build             Channel                    Size
+───────────────────────────────────────────────────────────────────────────────────────────
+  Install:
+───────────────────────────────────────────────────────────────────────────────────────────
+
+  + _r-mutex                     1.0.1  anacondar_1       conda-forge/noarch       Cached
+  + binutils_impl_linux-64        2.40  hf600244_0        conda-forge/linux-64     Cached
+  + bwidget                     1.9.14  ha770c72_1        conda-forge/linux-64     Cached
+  + cairo                       1.16.0  hbbf8b49_1016     conda-forge/linux-64        1MB
+  + curl                         8.1.2  h409715c_0        conda-forge/linux-64       91kB
+  + expat                        2.5.0  hcb278e6_1        conda-forge/linux-64     Cached
+  + font-ttf-dejavu-sans-mono     2.37  hab24e00_0        conda-forge/noarch       Cached
+  + font-ttf-inconsolata         3.000  h77eed37_0        conda-forge/noarch       Cached
+  + font-ttf-source-code-pro     2.038  h77eed37_0        conda-forge/noarch       Cached
+  + font-ttf-ubuntu               0.83  hab24e00_0        conda-forge/noarch       Cached
+  + fontconfig                  2.14.2  h14ed4e7_0        conda-forge/linux-64     Cached
+  + fonts-conda-ecosystem            1  0                 conda-forge/noarch       Cached
+  + fonts-conda-forge                1  0                 conda-forge/noarch       Cached
+  + fribidi                     1.0.10  h36c2ea0_0        conda-forge/linux-64     Cached
+  + gcc_impl_linux-64           13.1.0  hc4be1a9_0        conda-forge/linux-64       54MB
+  + gettext                     0.21.1  h27087fc_0        conda-forge/linux-64     Cached
+  + gfortran_impl_linux-64      13.1.0  hd511a9b_0        conda-forge/linux-64       16MB
+  + graphite2                   1.3.13  h58526e2_1001     conda-forge/linux-64     Cached
+  + gsl                            2.7  he838d99_0        conda-forge/linux-64     Cached
+  + gxx_impl_linux-64           13.1.0  hc4be1a9_0        conda-forge/linux-64       13MB
+  + harfbuzz                     7.3.0  hdb3a94d_0        conda-forge/linux-64        1MB
+  + icu                           72.1  hcb278e6_0        conda-forge/linux-64     Cached
+  + kernel-headers_linux-64     2.6.32  he073ed8_15       conda-forge/noarch       Cached
+  + libexpat                     2.5.0  hcb278e6_1        conda-forge/linux-64     Cached
+  + libgcc-devel_linux-64       13.1.0  he3cc6c4_0        conda-forge/linux-64        2MB
+  + libglib                     2.76.3  hebfc3b9_0        conda-forge/linux-64        3MB
+  + libiconv                      1.17  h166bdaf_0        conda-forge/linux-64     Cached
+  + libsanitizer                13.1.0  hfd8a6a1_0        conda-forge/linux-64        4MB
+  + libstdcxx-devel_linux-64    13.1.0  he3cc6c4_0        conda-forge/linux-64        9MB
+  + libxml2                     2.11.4  h0d562d8_0        conda-forge/linux-64     Cached
+  + make                           4.3  hd18ef5c_1        conda-forge/linux-64     Cached
+  + pandoc                      2.19.2  h32600fe_2        conda-forge/linux-64       27MB
+  + pango                      1.50.14  heaa33ce_1        conda-forge/linux-64     Cached
+  + pbzip2                      1.1.13  0                 conda-forge/linux-64     Cached
+  + pcre2                        10.40  hc3806b6_0        conda-forge/linux-64     Cached
+  + pigz                           2.6  h27826a3_0        conda-forge/linux-64     Cached
+  + pixman                      0.40.0  h36c2ea0_0        conda-forge/linux-64     Cached
+  + r-argparse                   2.2.2  r43hc72bb7e_1     conda-forge/noarch        158kB
+  + r-askpass                      1.1  r43h57805ef_4     conda-forge/linux-64       30kB
+  + r-assertthat                 0.2.1  r43hc72bb7e_4     conda-forge/noarch         72kB
+  + r-backports                  1.4.1  r43h57805ef_2     conda-forge/linux-64      109kB
+  + r-base                       4.3.0  hfabd6f2_1        conda-forge/linux-64       26MB
+  + r-base64enc                  0.1_3  r43h57805ef_1006  conda-forge/linux-64       45kB
+  + r-bit                        4.0.5  r43h57805ef_1     conda-forge/linux-64        1MB
+  + r-bit64                      4.0.5  r43h57805ef_2     conda-forge/linux-64      486kB
+  + r-blob                       1.2.4  r43hc72bb7e_1     conda-forge/noarch         66kB
+  + r-broom                      1.0.5  r43hc72bb7e_1     conda-forge/noarch          2MB
+  + r-bslib                      0.5.0  r43hc72bb7e_1     conda-forge/noarch          4MB
+  + r-cachem                     1.0.8  r43h57805ef_1     conda-forge/linux-64       75kB
+  + r-callr                      3.7.3  r43hc72bb7e_1     conda-forge/noarch        417kB
+  + r-cellranger                 1.1.0  r43hc72bb7e_1006  conda-forge/noarch        108kB
+  + r-cli                        3.6.1  r43ha503ecb_1     conda-forge/linux-64        1MB
+  + r-clipr                      0.8.0  r43hc72bb7e_2     conda-forge/noarch         70kB
+  + r-colorspace                 2.1_0  r43h57805ef_1     conda-forge/linux-64        2MB
+  + r-conflicted                 1.2.0  r43h785f33e_1     conda-forge/noarch         63kB
+  + r-cpp11                      0.4.4  r43hc72bb7e_0     conda-forge/noarch        234kB
+  + r-crayon                     1.5.2  r43hc72bb7e_2     conda-forge/noarch        164kB
+  + r-crosstalk                  1.2.0  r43hc72bb7e_2     conda-forge/noarch        373kB
+  + r-curl                       5.0.1  r43hf9611b0_0     conda-forge/linux-64      451kB
+  + r-data.table                1.14.8  r43h029312a_2     conda-forge/linux-64        2MB
+  + r-dbi                        1.1.3  r43hc72bb7e_2     conda-forge/noarch        721kB
+  + r-dbplyr                     2.3.2  r43hc72bb7e_1     conda-forge/noarch          1MB
+  + r-digest                    0.6.31  r43ha503ecb_1     conda-forge/linux-64      192kB
+  + r-dplyr                      1.1.2  r43ha503ecb_1     conda-forge/linux-64        1MB
+  + r-dtplyr                     1.3.1  r43hc72bb7e_1     conda-forge/noarch        354kB
+  + r-ellipsis                   0.3.2  r43h57805ef_2     conda-forge/linux-64       43kB
+  + r-evaluate                    0.21  r43hc72bb7e_1     conda-forge/noarch         89kB
+  + r-fansi                      1.0.4  r43h57805ef_1     conda-forge/linux-64      315kB
+  + r-farver                     2.1.1  r43ha503ecb_2     conda-forge/linux-64        1MB
+  + r-fastmap                    1.1.1  r43ha503ecb_1     conda-forge/linux-64       72kB
+  + r-findpython                 1.0.8  r43hc72bb7e_1     conda-forge/noarch         29kB
+  + r-fontawesome                0.5.1  r43hc72bb7e_1     conda-forge/noarch          1MB
+  + r-forcats                    1.0.0  r43hc72bb7e_1     conda-forge/noarch        422kB
+  + r-fs                         1.6.2  r43ha503ecb_1     conda-forge/linux-64      495kB
+  + r-gargle                     1.5.1  r43h785f33e_0     conda-forge/noarch        707kB
+  + r-generics                   0.1.3  r43hc72bb7e_2     conda-forge/noarch         91kB
+  + r-ggplot2                    3.4.2  r43hc72bb7e_1     conda-forge/noarch          4MB
+  + r-ggsci                      3.0.0  r43hc72bb7e_1     conda-forge/noarch          2MB
+  + r-glue                       1.6.2  r43h57805ef_2     conda-forge/linux-64      151kB
+  + r-googledrive                2.1.1  r43hc72bb7e_1     conda-forge/noarch          1MB
+  + r-googlesheets4              1.1.1  r43h785f33e_1     conda-forge/noarch        513kB
+  + r-gtable                     0.3.3  r43hc72bb7e_1     conda-forge/noarch        222kB
+  + r-haven                      2.5.3  r43ha503ecb_0     conda-forge/linux-64      376kB
+  + r-hexbin                    1.28.3  r43h61816a4_1     conda-forge/linux-64        2MB
+  + r-highr                       0.10  r43hc72bb7e_1     conda-forge/noarch         58kB
+  + r-hms                        1.1.3  r43hc72bb7e_1     conda-forge/noarch        107kB
+  + r-htmltools                  0.5.5  r43ha503ecb_1     conda-forge/linux-64      355kB
+  + r-htmlwidgets                1.6.2  r43hc72bb7e_1     conda-forge/noarch        423kB
+  + r-httr                       1.4.6  r43hc72bb7e_1     conda-forge/noarch        483kB
+  + r-ids                        1.0.1  r43hc72bb7e_3     conda-forge/noarch        127kB
+  + r-isoband                    0.2.7  r43ha503ecb_2     conda-forge/linux-64        2MB
+  + r-jquerylib                  0.1.4  r43hc72bb7e_2     conda-forge/noarch        305kB
+  + r-jsonlite                   1.8.7  r43h57805ef_0     conda-forge/linux-64      634kB
+  + r-knitr                       1.43  r43hc72bb7e_1     conda-forge/noarch          1MB
+  + r-labeling                   0.4.2  r43hc72bb7e_3     conda-forge/noarch         69kB
+  + r-later                      1.3.1  r43ha503ecb_1     conda-forge/linux-64      131kB
+  + r-lattice                   0.21_8  r43h57805ef_1     conda-forge/linux-64        1MB
+  + r-lazyeval                   0.2.2  r43h57805ef_4     conda-forge/linux-64      159kB
+  + r-lifecycle                  1.0.3  r43hc72bb7e_2     conda-forge/noarch        122kB
+  + r-lubridate                  1.9.2  r43h57805ef_2     conda-forge/linux-64      982kB
+  + r-magrittr                   2.0.3  r43h57805ef_2     conda-forge/linux-64      209kB
+  + r-mass                      7.3_60  r43h57805ef_1     conda-forge/linux-64        1MB
+  + r-matrix                   1.5_4.1  r43h316c678_1     conda-forge/linux-64        4MB
+  + r-memoise                    2.0.1  r43hc72bb7e_2     conda-forge/noarch         56kB
+  + r-mgcv                      1.8_42  r43h316c678_2     conda-forge/linux-64        3MB
+  + r-mime                        0.12  r43h57805ef_2     conda-forge/linux-64       53kB
+  + r-modelr                    0.1.11  r43hc72bb7e_1     conda-forge/noarch        221kB
+  + r-munsell                    0.5.0  r43hc72bb7e_1006  conda-forge/noarch        244kB
+  + r-nlme                     3.1_162  r43h61816a4_1     conda-forge/linux-64        2MB
+  + r-openssl                    2.0.6  r43hb353fa6_1     conda-forge/linux-64      637kB
+  + r-pillar                     1.9.0  r43hc72bb7e_1     conda-forge/noarch        617kB
+  + r-pkgconfig                  2.0.3  r43hc72bb7e_3     conda-forge/noarch         26kB
+  + r-plotly                    4.10.2  r43hc72bb7e_1     conda-forge/noarch          3MB
+  + r-prettyunits                1.1.1  r43hc72bb7e_3     conda-forge/noarch         42kB
+  + r-processx                   3.8.2  r43h57805ef_0     conda-forge/linux-64      322kB
+  + r-progress                   1.2.2  r43hc72bb7e_4     conda-forge/noarch         92kB
+  + r-promises                 1.2.0.1  r43ha503ecb_2     conda-forge/linux-64        2MB
+  + r-ps                         1.7.5  r43h57805ef_1     conda-forge/linux-64      313kB
+  + r-purrr                      1.0.1  r43h57805ef_1     conda-forge/linux-64      483kB
+  + r-r6                         2.5.1  r43hc72bb7e_2     conda-forge/noarch         90kB
+  + r-ragg                       1.2.5  r43h85cdef0_2     conda-forge/linux-64      438kB
+  + r-rappdirs                   0.3.3  r43h57805ef_2     conda-forge/linux-64       52kB
+  + r-rcolorbrewer               1.1_3  r43h785f33e_2     conda-forge/noarch         68kB
+  + r-rcpp                      1.0.10  r43ha503ecb_1     conda-forge/linux-64        2MB
+  + r-readr                      2.1.4  r43ha503ecb_1     conda-forge/linux-64      820kB
+  + r-readxl                     1.4.2  r43ha5c9fba_1     conda-forge/linux-64      758kB
+  + r-rematch                    1.0.1  r43hc72bb7e_1006  conda-forge/noarch         21kB
+  + r-rematch2                   2.1.2  r43hc72bb7e_3     conda-forge/noarch         54kB
+  + r-reprex                     2.0.2  r43hc72bb7e_2     conda-forge/noarch        502kB
+  + r-rlang                      1.1.1  r43ha503ecb_1     conda-forge/linux-64        2MB
+  + r-rmarkdown                   2.23  r43hc72bb7e_0     conda-forge/noarch          2MB
+  + r-rstudioapi                  0.14  r43hc72bb7e_2     conda-forge/noarch        293kB
+  + r-rvest                      1.0.3  r43hc72bb7e_2     conda-forge/noarch        214kB
+  + r-sass                       0.4.6  r43ha503ecb_1     conda-forge/linux-64        2MB
+  + r-scales                     1.2.1  r43hc72bb7e_2     conda-forge/noarch        595kB
+  + r-selectr                    0.4_2  r43hc72bb7e_3     conda-forge/noarch        421kB
+  + r-stringi                   1.7.12  r43hc0c3e09_2     conda-forge/linux-64      898kB
+  + r-stringr                    1.5.0  r43h785f33e_1     conda-forge/noarch        296kB
+  + r-sys                        3.4.2  r43h57805ef_1     conda-forge/linux-64       49kB
+  + r-systemfonts                1.0.4  r43haf97adc_2     conda-forge/linux-64      255kB
+  + r-textshaping                0.3.6  r43h24cd192_6     conda-forge/linux-64      110kB
+  + r-tibble                     3.2.1  r43h57805ef_2     conda-forge/linux-64      612kB
+  + r-tidyr                      1.3.0  r43ha503ecb_1     conda-forge/linux-64        1MB
+  + r-tidyselect                 1.2.0  r43hc72bb7e_1     conda-forge/linux-64      215kB
+  + r-tidyverse                  2.0.0  r43h785f33e_1     conda-forge/noarch        425kB
+  + r-timechange                 0.2.0  r43ha503ecb_1     conda-forge/linux-64      201kB
+  + r-tinytex                     0.45  r43hc72bb7e_1     conda-forge/noarch        142kB
+  + r-tzdb                       0.4.0  r43ha503ecb_1     conda-forge/linux-64      537kB
+  + r-utf8                       1.2.3  r43h57805ef_1     conda-forge/linux-64      143kB
+  + r-uuid                       1.1_0  r43h57805ef_2     conda-forge/linux-64       52kB
+  + r-vctrs                      0.6.3  r43ha503ecb_0     conda-forge/linux-64        1MB
+  + r-viridislite                0.4.2  r43hc72bb7e_1     conda-forge/noarch          1MB
+  + r-vroom                      1.6.3  r43ha503ecb_1     conda-forge/linux-64      890kB
+  + r-withr                      2.5.0  r43hc72bb7e_2     conda-forge/noarch        239kB
+  + r-xfun                        0.39  r43ha503ecb_1     conda-forge/linux-64      424kB
+  + r-xml2                       1.3.4  r43h1ad5fc0_2     conda-forge/linux-64      302kB
+  + r-yaml                       2.3.7  r43h57805ef_1     conda-forge/linux-64      116kB
+  + sed                            4.8  he412f7d_0        conda-forge/linux-64     Cached
+  + sysroot_linux-64              2.12  he073ed8_15       conda-forge/noarch       Cached
+  + tktable                       2.10  hb7b940f_3        conda-forge/linux-64     Cached
+  + xorg-kbproto                 1.0.7  h7f98852_1002     conda-forge/linux-64     Cached
+  + xorg-libice                 1.0.10  h7f98852_0        conda-forge/linux-64     Cached
+  + xorg-libsm                   1.2.3  hd9c2040_1000     conda-forge/linux-64     Cached
+  + xorg-libx11                  1.8.6  h8ee46fc_0        conda-forge/linux-64      829kB
+  + xorg-libxext                 1.3.4  h0b41bf4_2        conda-forge/linux-64     Cached
+  + xorg-libxrender             0.9.11  hd590300_0        conda-forge/linux-64       38kB
+  + xorg-libxt                   1.3.0  hd590300_0        conda-forge/linux-64      380kB
+  + xorg-renderproto            0.11.1  h7f98852_1002     conda-forge/linux-64     Cached
+  + xorg-xextproto               7.3.0  h0b41bf4_1003     conda-forge/linux-64     Cached
+  + xorg-xproto                 7.0.31  h7f98852_1007     conda-forge/linux-64     Cached
+
+  Upgrade:
+───────────────────────────────────────────────────────────────────────────────────────────
+
+  - libtiff                      4.5.0  ha587672_6        conda-forge
+  + libtiff                      4.5.1  h8b53f26_0        conda-forge/linux-64      418kB
+
+  Summary:
+
+  Install: 170 packages
+  Upgrade: 1 packages
+
+  Total download: 242MB
+
+───────────────────────────────────────────────────────────────────────────────────────────
+
+
+Confirm changes: [Y/n] Y
+curl                                                90.7kB @ 931.5kB/s  0.1s
+libgcc-devel_linux-64                                2.4MB @  12.8MB/s  0.2s
+libsanitizer                                         4.1MB @  20.2MB/s  0.3s
+libtiff                                            418.2kB @   1.6MB/s  0.3s
+libstdcxx-devel_linux-64                             9.2MB @  35.5MB/s  0.3s
+r-jsonlite                                         634.1kB @   1.6MB/s  0.1s
+r-data.table                                         1.9MB @   4.1MB/s  0.2s
+r-xfun                                             424.5kB @ 921.6kB/s  0.1s
+cairo                                                1.1MB @   2.3MB/s  0.5s
+r-uuid                                              52.5kB @  93.9kB/s  0.1s
+r-rcpp                                               2.0MB @   3.1MB/s  0.2s
+r-fansi                                            314.8kB @ 475.7kB/s  0.1s
+r-fs                                               494.9kB @ 744.8kB/s  0.1s
+r-stringi                                          897.5kB @   1.1MB/s  0.1s
+r-glue                                             151.4kB @ 187.9kB/s  0.1s
+r-base64enc                                         45.4kB @  56.3kB/s  0.2s
+r-bit64                                            486.0kB @ 515.0kB/s  0.1s
+r-askpass                                           29.9kB @  31.6kB/s  0.2s
+r-nlme                                               2.3MB @   2.2MB/s  0.3s
+r-openssl                                          637.2kB @ 605.5kB/s  0.1s
+r-mgcv                                               3.2MB @   2.8MB/s  0.2s
+r-pkgconfig                                         26.4kB @  23.0kB/s  0.1s
+r-crayon                                           164.1kB @ 142.6kB/s  0.1s
+gfortran_impl_linux-64                              15.9MB @  12.4MB/s  1.1s
+r-withr                                            238.9kB @ 185.3kB/s  0.1s
+r-findpython                                        29.4kB @  22.8kB/s  0.1s
+r-r6                                                90.4kB @  70.0kB/s  0.1s
+r-munsell                                          244.1kB @ 174.0kB/s  0.1s
+r-lifecycle                                        121.6kB @  86.6kB/s  0.2s
+r-memoise                                           55.9kB @  39.7kB/s  0.2s
+r-ids                                              126.9kB @  90.2kB/s  0.2s
+r-gtable                                           222.2kB @ 138.7kB/s  0.2s
+r-scales                                           595.3kB @ 370.9kB/s  0.2s
+r-conflicted                                        63.2kB @  39.3kB/s  0.2s
+r-gargle                                           706.6kB @ 439.2kB/s  0.3s
+r-textshaping                                      109.9kB @  61.4kB/s  0.2s
+r-tidyselect                                       215.4kB @ 120.1kB/s  0.2s
+r-purrr                                            483.3kB @ 269.3kB/s  0.2s
+r-ragg                                             438.1kB @ 243.8kB/s  0.3s
+r-selectr                                          421.1kB @ 215.3kB/s  0.2s
+r-htmlwidgets                                      423.2kB @ 216.1kB/s  0.2s
+r-reprex                                           501.9kB @ 256.0kB/s  0.2s
+r-tibble                                           612.4kB @ 312.1kB/s  0.3s
+r-forcats                                          422.4kB @ 197.3kB/s  0.2s
+r-dtplyr                                           354.5kB @ 165.0kB/s  0.2s
+r-base                                              25.7MB @  11.4MB/s  2.1s
+r-dbplyr                                             1.1MB @ 484.4kB/s  0.3s
+xorg-libxt                                         380.1kB @ 167.9kB/s  0.1s
+r-ps                                               312.7kB @ 130.6kB/s  0.2s
+r-sys                                               49.0kB @  20.5kB/s  0.1s
+r-colorspace                                         2.5MB @   1.0MB/s  0.2s
+r-utf8                                             142.7kB @  57.1kB/s  0.1s
+r-farver                                             1.4MB @ 568.4kB/s  0.2s
+r-ggplot2                                            4.1MB @   1.7MB/s  0.6s
+r-digest                                           192.4kB @  73.9kB/s  0.2s
+r-lazyeval                                         158.6kB @  60.9kB/s  0.2s
+r-magrittr                                         208.9kB @  78.2kB/s  0.2s
+r-cachem                                            75.2kB @  26.9kB/s  0.1s
+r-later                                            131.2kB @  46.9kB/s  0.1s
+r-ellipsis                                          42.7kB @  15.3kB/s  0.2s
+r-htmltools                                        354.8kB @ 126.8kB/s  0.2s
+r-rcolorbrewer                                      68.3kB @  23.1kB/s  0.2s
+r-rstudioapi                                       293.1kB @  99.0kB/s  0.2s
+r-viridislite                                        1.3MB @ 439.6kB/s  0.2s
+r-tinytex                                          142.4kB @  48.0kB/s  0.2s
+r-knitr                                              1.3MB @ 415.3kB/s  0.2s
+r-timechange                                       200.7kB @  64.3kB/s  0.2s
+r-tzdb                                             537.1kB @ 171.9kB/s  0.2s
+r-systemfonts                                      254.7kB @  78.3kB/s  0.3s
+r-hms                                              107.2kB @  32.9kB/s  0.1s
+r-pillar                                           617.4kB @ 189.5kB/s  0.2s
+r-stringr                                          295.6kB @  90.7kB/s  0.2s
+r-cellranger                                       108.3kB @  31.7kB/s  0.2s
+r-googledrive                                        1.2MB @ 350.7kB/s  0.2s
+r-rvest                                            213.6kB @  62.3kB/s  0.2s
+r-googlesheets4                                    512.7kB @ 149.5kB/s  0.3s
+r-rappdirs                                          52.1kB @  14.5kB/s  0.0s
+r-rlang                                              1.5MB @ 415.9kB/s  0.0s
+harfbuzz                                             1.4MB @ 394.2kB/s  0.1s
+r-cpp11                                            233.8kB @  63.3kB/s  0.0s
+r-evaluate                                          89.3kB @  24.0kB/s  0.0s
+r-matrix                                             3.9MB @   1.1MB/s  0.1s
+r-fontawesome                                        1.3MB @ 343.9kB/s  0.1s
+r-curl                                             450.8kB @ 118.5kB/s  0.2s
+gxx_impl_linux-64                                   13.3MB @   3.5MB/s  0.3s
+r-httr                                             482.8kB @ 126.0kB/s  0.0s
+r-generics                                          90.7kB @  23.6kB/s  0.1s
+r-processx                                         322.5kB @  83.9kB/s  0.0s
+r-vctrs                                              1.2MB @ 318.6kB/s  0.1s
+r-vroom                                            889.8kB @ 228.5kB/s  0.1s
+r-rmarkdown                                          2.0MB @ 517.3kB/s  0.1s
+gcc_impl_linux-64                                   54.2MB @  13.8MB/s  1.9s
+r-readxl                                           757.8kB @ 187.2kB/s  0.2s
+r-tidyverse                                        425.2kB @ 105.0kB/s  0.2s
+xorg-libxrender                                     37.8kB @   9.3kB/s  0.0s
+r-ggsci                                              2.2MB @ 542.0kB/s  0.2s
+r-bslib                                              4.3MB @   1.0MB/s  0.3s
+r-fastmap                                           72.3kB @  17.6kB/s  0.1s
+r-yaml                                             116.0kB @  28.2kB/s  0.1s
+r-dbi                                              720.9kB @ 174.4kB/s  0.0s
+r-highr                                             57.5kB @  13.9kB/s  0.0s
+r-labeling                                          68.6kB @  16.6kB/s  0.0s
+r-callr                                            417.0kB @ 100.2kB/s  0.0s
+r-mime                                              52.9kB @  12.6kB/s  0.1s
+r-plotly                                             2.9MB @ 679.5kB/s  0.1s
+r-xml2                                             302.0kB @  71.2kB/s  0.2s
+r-mass                                               1.1MB @ 266.8kB/s  0.0s
+r-bit                                                1.1MB @ 254.1kB/s  0.1s
+r-lubridate                                        981.6kB @ 224.1kB/s  0.3s
+r-rematch                                           21.4kB @   4.9kB/s  0.1s
+pandoc                                              27.1MB @   6.2MB/s  0.2s
+r-progress                                          92.3kB @  20.7kB/s  0.1s
+r-dplyr                                              1.4MB @ 313.3kB/s  0.3s
+r-rematch2                                          54.2kB @  12.1kB/s  0.0s
+r-backports                                        109.2kB @  24.3kB/s  0.0s
+r-crosstalk                                        372.8kB @  82.7kB/s  0.1s
+r-argparse                                         158.4kB @  35.1kB/s  0.1s
+r-assertthat                                        71.6kB @  15.8kB/s  0.0s
+r-prettyunits                                       42.2kB @   9.3kB/s  0.0s
+r-blob                                              65.8kB @  14.5kB/s  0.0s
+r-modelr                                           220.6kB @  48.4kB/s  0.0s
+xorg-libx11                                        828.5kB @ 181.5kB/s  0.0s
+r-cli                                                1.3MB @ 273.1kB/s  0.0s
+r-hexbin                                             1.6MB @ 347.8kB/s  0.3s
+r-promises                                           1.5MB @ 334.4kB/s  0.0s
+r-lattice                                            1.3MB @ 290.4kB/s  0.1s
+r-jquerylib                                        305.5kB @  66.1kB/s  0.1s
+r-haven                                            376.3kB @  81.0kB/s  0.0s
+r-isoband                                            1.6MB @ 348.6kB/s  0.1s
+r-clipr                                             69.7kB @  14.7kB/s  0.1s
+r-readr                                            820.3kB @ 173.2kB/s  0.1s
+libglib                                              2.7MB @ 563.4kB/s  0.1s
+r-tidyr                                              1.1MB @ 241.0kB/s  0.0s
+r-broom                                              1.8MB @ 374.0kB/s  0.4s
+r-sass                                               2.3MB @ 472.5kB/s  0.3s
+
+Downloading and Extracting Packages
+
+Preparing transaction: done
+Verifying transaction: done
+Executing transaction: done
+```
+</details>
+<br />
+
+<a id="install-atria"></a>
+#### Install [atria](https://github.com/cihga39871/Atria)
+<a id="code-1"></a>
+##### Code
+<details>
+<summary><i>Code: Install atria</i></summary>
+
+```bash
+#!/bin/bash
+
+run=FALSE
+[[ "${run}" == TRUE ]] &&
+    {
+        #  cd into "${HOME}"
+        cd ~
+
+        #  Obtain tar for the language Julia
+        wget "https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.5-linux-x86_64.tar.gz"
+
+        #  Decompress tar
+        tar zxvf julia-1.8.5-linux-x86_64.tar.gz
+
+        #  Add Julia to path
+        vi ~/.bashrc
+        #  export PATH=$PATH:$HOME/julia-1.8.1/bin
+
+        which julia
+    }
+
+run=FALSE
+[[ "${run}" == TRUE ]] &&
+    {
+        cd "${HOME}/2023_rDNA" || echo "cd'ing failed; check on this..."
+
+        [[ -d software/ ]] || mkdir software/
+
+        cd software/ || echo "cd'ing failed; check on this..."
+        git clone "https://github.com/cihga39871/Atria.git"
+
+        cd Atria/
+
+        julia build_atria.jl
+    }
+
+run=FALSE  #IMPORTANT
+[[ "${run}" == TRUE ]] &&
+    {
+        alias atria="\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
+    }
+# atria
+```
+</details>
+<br />
+
+<a id="printed-1"></a>
+##### Printed
+<details>
+<summary><i>Printed: Install atria</i></summary>
+
+```txt
+❯ wget "https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.5-linux-x86_64.tar.gz"
+--2023-01-15 14:01:46--  https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.5-linux-x86_64.tar.gz
+Resolving julialang-s3.julialang.org (julialang-s3.julialang.org)... 151.101.42.49, 2a04:4e42:a::561
+Connecting to julialang-s3.julialang.org (julialang-s3.julialang.org)|151.101.42.49|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 130873886 (125M) [application/x-tar]
+Saving to: ‘julia-1.8.5-linux-x86_64.tar.gz’
+
+julia-1.8.5-linux-x86_64.tar.gz                                        100%[===========================================================================================================================================================================>] 124.81M  6.11MB/s    in 14s
+
+2023-01-15 14:02:00 (8.88 MB/s) - ‘julia-1.8.5-linux-x86_64.tar.gz’ saved [130873886/130873886]
+
+
+❯ tar zxvf julia-1.8.5-linux-x86_64.tar.gz
+...
+
+
+❯ vi ~/.bashrc
+
+
+❯ which julia
+/home/kalavatt/julia-1.8.5/bin/julia
+
+
+❯ cd "${HOME}/2023_rDNA" ||
+>     echo "cd'ing failed; check on this..."
+
+
+❯ [[ -d software/ ]] || mkdir software/
+
+
+❯ cd software/ || echo "cd'ing failed; check on this..."
+/home/kalavatt/2023_rDNA/software
+
+
+❯ git clone "https://github.com/cihga39871/Atria.git"
+Cloning into 'Atria'...
+remote: Enumerating objects: 960, done.
+remote: Counting objects: 100% (117/117), done.
+remote: Compressing objects: 100% (82/82), done.
+remote: Total 960 (delta 67), reused 64 (delta 35), pack-reused 843
+Receiving objects: 100% (960/960), 1.92 MiB | 20.53 MiB/s, done.
+Resolving deltas: 100% (651/651), done.
+
+
+❯ cd Atria/
+/home/kalavatt/2023_rDNA/software/Atria
+
+
+❯ julia build_atria.jl
+pigz 2.6
+  Activating project at `/fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/software/Atria`
+Precompiling project...
+  1 dependency successfully precompiled in 8 seconds. 28 already precompiled.
+    Updating registry at `~/.julia/registries/General.toml`
+   Resolving package versions...
+  No Changes to `/fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/Project.toml`
+  No Changes to `/fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/Manifest.toml`
+✔ [02m:42s] PackageCompiler: compiling base system image (incremental=false)
+Precompiling project...
+  29 dependencies successfully precompiled in 70 seconds
+[ Info: PackageCompiler: Executing /fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/test/runtests.jl => /tmp/jl_packagecompiler_j1Ljva/jl_JAU3KM
+@SRR7243169.1 1 length=301
+ACCCAAGGCGTGCTCGTAGGATTTGTCGACATAGTCGATCAGACCTTCGTCCAGCGGCCAGGCGTTAACCTGACCTTCCCAATCGTCGATGATGGTGTTGCCGAAGCGGAACACTTCACTTTGCAGGTACGGCACGCGCGCGGCGACCCAGGCAGCCTTGGCGGCTTTCAGGGTCTCGGCGTTCGGCCTGTCTCTTATACACATCTCCGAGCCCACGAGCCGTAGAGGAATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAAGACAAGCACTCTATACATCCGTCTCACCCGATACACTCC
++SRR7243169.1 1 length=301
+CCCCCGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGFGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGDGGGGGGDGGGGGGGGCGGGGGGGGGGGGGGGGFGGGGGGFGGGGGGGGGGGGGGFGGGEDGG>GFFGGGGDGGGDGFGG7;)9C>DF3B4)76676:@DF?F?>D@F3=FFFF?=<6*600)07).)0.)818)))**0=***))0((.**)0))0.7*/62(
+┌ Info: read simulation: output files
+│   r1 = "peReadSimulated.R1.fastq"
+└   r2 = "peReadSimulated.R2.fastq"
+┌ Info: read simulation: all done
+└   elapsed = 11.413524150848389
+usage: runtests.jl [-o PREF] [-x REPEAT] [-a SEQ] [-A SEQ]
+                   [-s SEQ-LENGTH]
+                   [-i INSERT-SIZE-RANGE [INSERT-SIZE-RANGE...]]
+                   [-S SUBSITUTION-RATE [SUBSITUTION-RATE...]]
+                   [-I INSERTION-RATE [INSERTION-RATE...]]
+                   [-D DELETION-RATE [DELETION-RATE...]] [-h]
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+output:
+  -o, --prefix PREF     prefix of output fastq files (default:
+                        "read_simulation")
+
+simulation:
+  -x, --repeat REPEAT   repeat times for each case (type: Int64,
+                        default: 30000)
+  -a, --adapter1 SEQ    read 1 adapter (default:
+                        "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA")
+  -A, --adapter2 SEQ    read 2 adapter (default:
+                        "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT")
+  -s, --seq-length SEQ-LENGTH
+                        a given sequence length; simulated sequence
+                        length might be 1 base more than the value
+                        because of simulated phasing error (type:
+                        Int64, default: 100)
+  -i, --insert-size-range INSERT-SIZE-RANGE [INSERT-SIZE-RANGE...]
+                        range of insert size (type: Int64, default:
+                        [80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100,
+                        102, 104, 106, 108, 110, 112, 114, 116, 118,
+                        120])
+  -S, --subsitution-rate SUBSITUTION-RATE [SUBSITUTION-RATE...]
+                        subsitution rate per base. it is random for
+                        each base. error type includs mismatch (type:
+                        Float64, default: [0.001, 0.002, 0.003, 0.004,
+                        0.005])
+  -I, --insertion-rate INSERTION-RATE [INSERTION-RATE...]
+                        insertion rate; number of arg should be the
+                        same as --subsitution-rate (type: Float64,
+                        default: [1.0e-5, 2.0e-5, 3.0e-5, 4.0e-5,
+                        5.0e-5])
+  -D, --deletion-rate DELETION-RATE [DELETION-RATE...]
+                        deletion rate; number of arg should be the
+                        same as --subsitution-rate (type: Float64,
+                        default: [1.0e-5, 2.0e-5, 3.0e-5, 4.0e-5,
+                        5.0e-5])
+
+┌ Info: read random trim: start
+│   file1 = "peReadSimulated.R1.fastq"
+└   file2 = "peReadSimulated.R2.fastq"
+┌ Info: read random trim: all done
+└   elapsed = 1.6224110126495361
+usage: atria randtrim [-h] R1_FASTQ R2_FASTQ
+
+positional arguments:
+  R?_FASTQ      input fastqs. caution: raw fastq has to be
+                generated by `atria simulate`.
+
+optional arguments:
+  -h, --help  show this help message and exit
+
+pigz 2.6
+┌ Info: ATRIA VERSIONS
+│   atria = "v3.2.2"
+└   julia = "v1.8.5"
+┌ Info: ATRIA ARGUMENTS
+└   command = `-r peReadSimulated.R1.randtrim.fastq.gz -R peReadSimulated.R2.randtrim.fastq.gz -c 8 --compress gz --check-identifier -f`
+┌ Info: ATRIA OUTPUT FILES
+│   read1 = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R1.randtrim.atria.fastq.gz"
+└   read2 = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R2.randtrim.atria.fastq.gz"
+┌ Info: ATRIA TRIMMERS AND FILTERS
+│   adapter_trimming = true
+│   consensus_calling = true
+│   hard_clip_3_end = false
+│   hard_clip_5_end = true
+│   quality_trimming = true
+│   tail_N_trimming = true
+│   max_N_filtering = true
+└   length_filtering = true
+[ Info: Cycle 1: read 210000/210000 pairs; wrote 89003/89003 pairs; (copied 0/0 reads)
+┌ Info: ATRIA COMPLETE
+│   read1 = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R1.randtrim.atria.fastq.gz"
+└   read2 = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R2.randtrim.atria.fastq.gz"
+pigz 2.6
+┌ Info: ATRIA VERSIONS
+│   atria = "v3.2.2"
+└   julia = "v1.8.5"
+┌ Info: ATRIA ARGUMENTS
+└   command = `-r peReadSimulated.R1.randtrim.fastq.gz -c 8 --compress gz -f`
+┌ Info: ATRIA OUTPUT FILES
+└   read = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R1.randtrim.atria.fastq.gz"
+┌ Info: ATRIA TRIMMERS AND FILTERS
+│   tail_polyG_trimming = false
+│   tail_polyT_trimming = false
+│   tail_polyA_trimming = false
+│   tail_polyC_trimming = false
+│   adapter_trimming = true
+│   consensus_calling = false
+│   hard_clip_3_end = false
+│   hard_clip_5_end = true
+│   quality_trimming = true
+│   tail_N_trimming = true
+│   max_N_filtering = true
+│   length_filtering = true
+└   complexity_filtering = false
+[ Info: Cycle 1: read 210000/210000 pairs; wrote 149161/149161; (copied 0/0)
+┌ Info: ATRIA COMPLETE
+└   read = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R1.randtrim.atria.fastq.gz"
+pigz 2.6
+┌ Info: peReadSimulated.R1.randtrim.fastq.gz:
+│  Top 5 adapters detected in the first 210000 reads:
+│ ┌──────────────────┬───────────┬──────────┐
+│ │          Adapter │ Occurance │ Identity │
+│ ├──────────────────┼───────────┼──────────┤
+│ │ AGATCGGAAGAGCACA │     15429 │ 0.995949 │
+│ │ AGATCGGAAGAGCTCG │     14727 │ 0.875106 │
+│ │ GATCGGAAGAGCACAC │     10149 │  0.93524 │
+│ │ AGATCGGAAGAGCGGT │        47 │    0.875 │
+│ │ AGATCGGAAGAGCGTC │        44 │  0.87642 │
+└ └──────────────────┴───────────┴──────────┘
+pigz 2.6
+┌ Info: ATRIA VERSIONS
+│   atria = "v3.2.2"
+└   julia = "v1.8.5"
+┌ Info: ATRIA ARGUMENTS
+└   command = `-r peReadSimulated.R1.randtrim.fastq.gz -R peReadSimulated.R2.randtrim.fastq.gz -c 8 --compress bz2 --check-identifier -f`
+┌ Info: ATRIA OUTPUT FILES
+│   read1 = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R1.randtrim.atria.fastq.bz2"
+└   read2 = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R2.randtrim.atria.fastq.bz2"
+┌ Info: ATRIA TRIMMERS AND FILTERS
+│   adapter_trimming = true
+│   consensus_calling = true
+│   hard_clip_3_end = false
+│   hard_clip_5_end = true
+│   quality_trimming = true
+│   tail_N_trimming = true
+│   max_N_filtering = true
+└   length_filtering = true
+[ Info: Cycle 1: read 210000/210000 pairs; wrote 89003/89003 pairs; (copied 0/0 reads)
+┌ Info: ATRIA COMPLETE
+│   read1 = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R1.randtrim.atria.fastq.bz2"
+└   read2 = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R2.randtrim.atria.fastq.bz2"
+pigz 2.6
+┌ Info: ATRIA VERSIONS
+│   atria = "v3.2.2"
+└   julia = "v1.8.5"
+┌ Info: ATRIA ARGUMENTS
+└   command = `-r peReadSimulated.R1.randtrim.fastq.gz -c 8 --compress bz2 -f`
+┌ Info: ATRIA OUTPUT FILES
+└   read = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R1.randtrim.atria.fastq.bz2"
+┌ Info: ATRIA TRIMMERS AND FILTERS
+│   tail_polyG_trimming = false
+│   tail_polyT_trimming = false
+│   tail_polyA_trimming = false
+│   tail_polyC_trimming = false
+│   adapter_trimming = true
+│   consensus_calling = false
+│   hard_clip_3_end = false
+│   hard_clip_5_end = true
+│   quality_trimming = true
+│   tail_N_trimming = true
+│   max_N_filtering = true
+│   length_filtering = true
+└   complexity_filtering = false
+[ Info: Cycle 1: read 210000/210000 pairs; wrote 149161/149161; (copied 0/0)
+┌ Info: ATRIA COMPLETE
+└   read = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R1.randtrim.atria.fastq.bz2"
+pigz 2.6
+┌ Info: ATRIA VERSIONS
+│   atria = "v3.2.2"
+└   julia = "v1.8.5"
+┌ Info: ATRIA ARGUMENTS
+└   command = `-r peReadSimulated.R1.fastq -R peReadSimulated.R2.fastq --polyG --enable-complexity-filtration -f`
+┌ Info: ATRIA OUTPUT FILES
+│   read1 = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R1.atria.fastq"
+└   read2 = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R2.atria.fastq"
+┌ Info: ATRIA TRIMMERS AND FILTERS
+│   adapter_trimming = true
+│   consensus_calling = true
+│   hard_clip_3_end = false
+│   hard_clip_5_end = false
+│   quality_trimming = true
+│   tail_N_trimming = true
+│   max_N_filtering = true
+└   length_filtering = true
+[ Info: Cycle 1: read 188282/188282 pairs; wrote 188281/188281 pairs; (copied 0/0 reads)
+[ Info: Cycle 2: read 21718/210000 pairs; wrote 21718/209999 pairs; (copied 0/0 reads)
+┌ Info: ATRIA COMPLETE
+│   read1 = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R1.atria.fastq"
+└   read2 = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R2.atria.fastq"
+pigz 2.6
+┌ Info: ATRIA VERSIONS
+│   atria = "v3.2.2"
+└   julia = "v1.8.5"
+┌ Info: ATRIA ARGUMENTS
+└   command = `-r peReadSimulated.R1.fastq --polyG --enable-complexity-filtration -f`
+┌ Info: ATRIA OUTPUT FILES
+└   read = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R1.atria.fastq"
+┌ Info: ATRIA TRIMMERS AND FILTERS
+│   tail_polyG_trimming = true
+│   tail_polyT_trimming = false
+│   tail_polyA_trimming = false
+│   tail_polyC_trimming = false
+│   adapter_trimming = true
+│   consensus_calling = false
+│   hard_clip_3_end = false
+│   hard_clip_5_end = false
+│   quality_trimming = true
+│   tail_N_trimming = true
+│   max_N_filtering = true
+│   length_filtering = true
+└   complexity_filtering = true
+[ Info: Cycle 1: read 188282/188282 pairs; wrote 188278/188278; (copied 0/0)
+[ Info: Cycle 2: read 21718/210000 pairs; wrote 21718/209996; (copied 0/0)
+┌ Info: ATRIA COMPLETE
+└   read = "/tmp/jl_R6JYTaVKJG/peReadSimulated.R1.atria.fastq"
+pigz 2.6
+[ Warning: Skip completed analysis: /tmp/jl_R6JYTaVKJG/peReadSimulated.R1.atria.log.json (use --force to disable the feature)
+pigz 2.6
+[ Warning: Skip completed analysis: /tmp/jl_R6JYTaVKJG/peReadSimulated.R1.atria.log.json (use --force to disable the feature)
+pigz 2.6
+┌ Info: peReadSimulated.R1.fastq:
+│  Top 5 adapters detected in the first 188282 reads:
+│ ┌──────────────────┬───────────┬──────────┐
+│ │          Adapter │ Occurance │ Identity │
+│ ├──────────────────┼───────────┼──────────┤
+│ │ AGATCGGAAGAGCACA │     29957 │ 0.996647 │
+│ │ AGATCGGAAGAGCTCG │     28595 │ 0.875146 │
+│ │ GATCGGAAGAGCACAC │     19997 │ 0.935128 │
+│ │ AGATCGGAAGAGCGGT │        96 │    0.875 │
+│ │ AGATCGGAAGAGCGTC │        92 │    0.875 │
+└ └──────────────────┴───────────┴──────────┘
+usage: atria [-t INT] [--log2-chunk-size INDEX] [-f]
+             -r R1-FASTQ [R1-FASTQ...] [-R [R2-FASTQ...]] [-o PATH]
+             [-g AUTO|NO|GZ|GZIP|BZ2|BZIP2] [--check-identifier]
+             [--detect-adapter] [--polyG] [--polyT] [--polyA]
+             [--polyC] [--poly-length POLY-LENGTH]
+             [--poly-mismatch-per-16mer INT] [--no-adapter-trim]
+             [-a SEQ] [-A SEQ] [-T INT] [-d INT] [-D INT] [-s INT]
+             [--trim-score-pe FLOAT] [--trim-score-se FLOAT] [-l INT]
+             [--stats] [--no-consensus]
+             [--kmer-tolerance-consensus INT]
+             [--min-ratio-mismatch FLOAT] [--overlap-score FLOAT]
+             [--prob-diff FLOAT] [-C INT] [-c INT] [--no-quality-trim]
+             [-q INT] [--quality-kmer INT] [--quality-format FORMAT]
+             [--no-tail-n-trim] [-n INT] [--no-length-filtration]
+             [--length-range INT:INT] [--enable-complexity-filtration]
+             [--min-complexity FLOAT] [-p INT] [--version] [-h]
+
+Atria v3.2.2
+
+optional arguments:
+  -t, --threads INT     use INT threads to process one sample
+                        (multi-threading parallel). (type: Int64,
+                        default: 1)
+  --log2-chunk-size INDEX
+                        read at most 2^INDEX bits each time. Suggest
+                        to process 200,000 reads each time. Reduce
+                        INDEX to lower the memory usage. (type: Int64,
+                        default: 26)
+  -f, --force           force to analyze all samples; not skip
+                        completed ones
+  --version             show version information and exit
+  -h, --help            show this help message and exit
+
+input/output: input read 1 and read 2 should be in the same order:
+  -r, --read1 R1-FASTQ [R1-FASTQ...]
+                        input read 1 fastq file(s), or single-end
+                        fastq files
+  -R, --read2 [R2-FASTQ...]
+                        input read 2 fastq file(s) (paired with
+                        R1-FASTQ)
+  -o, --output-dir PATH
+                        store output files and stats to PATH (default:
+                        "/tmp/jl_R6JYTaVKJG")
+  -g, --compress AUTO|NO|GZ|GZIP|BZ2|BZIP2
+                        compression methods for output files (AUTO:
+                        same as input, NO: no compression, GZ|GZIP:
+                        gzip with `pigz`, BZ2|BZIP2: bzip2 with
+                        `pbzip2`) (default: "AUTO")
+  --check-identifier    check whether the identifiers of r1 and r2 are
+                        the same
+  --detect-adapter      detect possible adapters for each sample only
+
+poly X tail trimming:
+  --polyG               enable trimming poly G tails
+  --polyT               enable trimming poly T tails
+  --polyA               enable trimming poly A tails
+  --polyC               enable trimming poly C tails
+  --poly-length POLY-LENGTH
+                        the minimum length of poly X (type: Int64,
+                        default: 10)
+  --poly-mismatch-per-16mer INT
+                        the number of mismatch allowed in 16 mer poly
+                        X (type: Int64, default: 2)
+
+adapter trimming (after polyX trimming):
+  --no-adapter-trim     disable adapter and pair-end trimming
+  -a, --adapter1 SEQ    read 1 adapter (default:
+                        "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA")
+  -A, --adapter2 SEQ    read 2 adapter (default:
+                        "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT")
+  -T, --kmer-tolerance INT
+                        # of mismatch allowed in 16-mers adapter and
+                        pair-end matching (type: Int64, default: 2)
+  -d, --pe-adapter-diff INT
+                        (FOR PAIRED END) number of bases allowed when
+                        disconcordance found between adapter and
+                        pair-end search (type: Int64, default: 0)
+  -D, --r1-r2-diff INT  (FOR PAIRED END) number of bases allowed when
+                        the insert sizes of r1 and r2 are different
+                        (type: Int64, default: 0)
+  -s, --kmer-n-match INT
+                        (FOR PAIRED END) if n base matched [0-16] is
+                        less than INT, loosen matches will be made
+                        based on the match with the highest n base
+                        match (type: Int64, default: 9)
+  --trim-score-pe FLOAT
+                        (FOR PAIRED END) if final score [0-32] of read
+                        pair is greater than FLOAT, the reads will be
+                        trimmed. (type: Float64, default: 10.0)
+  --trim-score-se FLOAT
+                        (FOR SINGLE END) if final score [0-16] of read
+                        is greater than FLOAT, the reads will be
+                        trimmed. (type: Float64, default: 10.0)
+  -l, --tail-length INT
+                        (FOR PAIRED END) if the adapter is in the tail
+                        region, and insert size of pe match is smaller
+                        than this region, do not trim the read. (type:
+                        Int64, default: 12)
+  --stats               (DEV ONLY) write stats to description lines of
+                        r2 reads.
+
+consensus/merging in adapter trimming (FOR PAIRED END):
+  --no-consensus        disable generating consensus paired reads. If
+                        adapter trimming is disabled, consensus
+                        calling is not performed even the flag is not
+                        set.
+  --kmer-tolerance-consensus INT
+                        # of mismatch allowed in 16-mers matching in
+                        consensus calling (type: Int64, default: 10)
+  --min-ratio-mismatch FLOAT
+                        if the ratio of mismatch of the overlapped
+                        region is less than FLOAT, skip consensus
+                        calling. (type: Float64, default: 0.28)
+  --overlap-score FLOAT
+                        if no adapter was found, scan the tails of the
+                        paired reads. Then, if the maximum score of
+                        the overlapped 16-mers are less than FLOAT,
+                        skip consensus calling for the read pair. If
+                        adapters were found, this step is ignored.
+                        (type: Float64, default: 0.0)
+  --prob-diff FLOAT     when doing consensus calling, if the bases
+                        were not complementary, the base with the
+                        higher quality probability is selected unless
+                        the quality probability difference are less
+                        than FLOAT (type: Float64, default: 0.0)
+
+hard clipping: trim a fixed length (after adapter trimming):
+  -C, --clip-after INT  hard clip the 3' tails to contain only INT
+                        bases. 0 to disable. (type: Int64, default: 0)
+  -c, --clip5 INT       remove the first INT bases from 5' end. (type:
+                        Int64, default: 0)
+
+quality trimming: trim the tail when the average quality of bases in
+a sliding window is low (after hard clipping):
+  --no-quality-trim     skip quality trimming
+  -q, --quality-score INT
+                        threshold of quality score; 0 means turn off
+                        quality trimming (type: Int64, default: 20)
+  --quality-kmer INT    trim the tail once found the average quality
+                        of bases in a sliding window is low (type:
+                        Int64, default: 5)
+  --quality-format FORMAT
+                        the format of the quality score (Illumina1.3,
+                        Illumina1.8, Sanger, Illumina1.5, Solexa); or
+                        the ASCII number when quality score == 0
+                        (default: "33")
+
+N trimming (after quality trimming):
+  --no-tail-n-trim      disable removing NNNNN tail.
+  -n, --max-n INT       # N allowed in each read; N tails not included
+                        if --no-tail-n-trim; INT<0 to disable (type:
+                        Int64, default: 15)
+
+length filtration (after N trimming):
+  --no-length-filtration
+                        disable length filtration
+  --length-range INT:INT
+                        length range of good reads; format is min:max
+                        (default: "50:500")
+
+read complexity filtration (after length filtration):
+  --enable-complexity-filtration
+                        enable complexity filtration
+  --min-complexity FLOAT
+                        complexity threshold (type: Float64, default:
+                        0.3)
+
+legacy arguments:
+  -p, --procs INT       ignored (multi-proc is disabled) (default:
+                        "1")
+
+Jiacheng Chuan, Aiguo Zhou, Lawrence Richard Hale, Miao He, Xiang Li,
+Atria: an ultra-fast and accurate trimmer for adapter and quality
+trimming, Gigabyte, 1, 2021 https://doi.org/10.46471/gigabyte.31
+
+usage: atria [-t INT] [--log2-chunk-size INDEX] [-f]
+             -r R1-FASTQ [R1-FASTQ...] [-R [R2-FASTQ...]] [-o PATH]
+             [-g AUTO|NO|GZ|GZIP|BZ2|BZIP2] [--check-identifier]
+             [--detect-adapter] [--polyG] [--polyT] [--polyA]
+             [--polyC] [--poly-length POLY-LENGTH]
+             [--poly-mismatch-per-16mer INT] [--no-adapter-trim]
+             [-a SEQ] [-A SEQ] [-T INT] [-d INT] [-D INT] [-s INT]
+             [--trim-score-pe FLOAT] [--trim-score-se FLOAT] [-l INT]
+             [--stats] [--no-consensus]
+             [--kmer-tolerance-consensus INT]
+             [--min-ratio-mismatch FLOAT] [--overlap-score FLOAT]
+             [--prob-diff FLOAT] [-C INT] [-c INT] [--no-quality-trim]
+             [-q INT] [--quality-kmer INT] [--quality-format FORMAT]
+             [--no-tail-n-trim] [-n INT] [--no-length-filtration]
+             [--length-range INT:INT] [--enable-complexity-filtration]
+             [--min-complexity FLOAT] [-p INT] [--version] [-h]
+
+Atria v3.2.2
+
+optional arguments:
+  -t, --threads INT     use INT threads to process one sample
+                        (multi-threading parallel). (type: Int64,
+                        default: 1)
+  --log2-chunk-size INDEX
+                        read at most 2^INDEX bits each time. Suggest
+                        to process 200,000 reads each time. Reduce
+                        INDEX to lower the memory usage. (type: Int64,
+                        default: 26)
+  -f, --force           force to analyze all samples; not skip
+                        completed ones
+  --version             show version information and exit
+  -h, --help            show this help message and exit
+
+input/output: input read 1 and read 2 should be in the same order:
+  -r, --read1 R1-FASTQ [R1-FASTQ...]
+                        input read 1 fastq file(s), or single-end
+                        fastq files
+  -R, --read2 [R2-FASTQ...]
+                        input read 2 fastq file(s) (paired with
+                        R1-FASTQ)
+  -o, --output-dir PATH
+                        store output files and stats to PATH (default:
+                        "/tmp/jl_R6JYTaVKJG")
+  -g, --compress AUTO|NO|GZ|GZIP|BZ2|BZIP2
+                        compression methods for output files (AUTO:
+                        same as input, NO: no compression, GZ|GZIP:
+                        gzip with `pigz`, BZ2|BZIP2: bzip2 with
+                        `pbzip2`) (default: "AUTO")
+  --check-identifier    check whether the identifiers of r1 and r2 are
+                        the same
+  --detect-adapter      detect possible adapters for each sample only
+
+poly X tail trimming:
+  --polyG               enable trimming poly G tails
+  --polyT               enable trimming poly T tails
+  --polyA               enable trimming poly A tails
+  --polyC               enable trimming poly C tails
+  --poly-length POLY-LENGTH
+                        the minimum length of poly X (type: Int64,
+                        default: 10)
+  --poly-mismatch-per-16mer INT
+                        the number of mismatch allowed in 16 mer poly
+                        X (type: Int64, default: 2)
+
+adapter trimming (after polyX trimming):
+  --no-adapter-trim     disable adapter and pair-end trimming
+  -a, --adapter1 SEQ    read 1 adapter (default:
+                        "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA")
+  -A, --adapter2 SEQ    read 2 adapter (default:
+                        "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT")
+  -T, --kmer-tolerance INT
+                        # of mismatch allowed in 16-mers adapter and
+                        pair-end matching (type: Int64, default: 2)
+  -d, --pe-adapter-diff INT
+                        (FOR PAIRED END) number of bases allowed when
+                        disconcordance found between adapter and
+                        pair-end search (type: Int64, default: 0)
+  -D, --r1-r2-diff INT  (FOR PAIRED END) number of bases allowed when
+                        the insert sizes of r1 and r2 are different
+                        (type: Int64, default: 0)
+  -s, --kmer-n-match INT
+                        (FOR PAIRED END) if n base matched [0-16] is
+                        less than INT, loosen matches will be made
+                        based on the match with the highest n base
+                        match (type: Int64, default: 9)
+  --trim-score-pe FLOAT
+                        (FOR PAIRED END) if final score [0-32] of read
+                        pair is greater than FLOAT, the reads will be
+                        trimmed. (type: Float64, default: 10.0)
+  --trim-score-se FLOAT
+                        (FOR SINGLE END) if final score [0-16] of read
+                        is greater than FLOAT, the reads will be
+                        trimmed. (type: Float64, default: 10.0)
+  -l, --tail-length INT
+                        (FOR PAIRED END) if the adapter is in the tail
+                        region, and insert size of pe match is smaller
+                        than this region, do not trim the read. (type:
+                        Int64, default: 12)
+  --stats               (DEV ONLY) write stats to description lines of
+                        r2 reads.
+
+consensus/merging in adapter trimming (FOR PAIRED END):
+  --no-consensus        disable generating consensus paired reads. If
+                        adapter trimming is disabled, consensus
+                        calling is not performed even the flag is not
+                        set.
+  --kmer-tolerance-consensus INT
+                        # of mismatch allowed in 16-mers matching in
+                        consensus calling (type: Int64, default: 10)
+  --min-ratio-mismatch FLOAT
+                        if the ratio of mismatch of the overlapped
+                        region is less than FLOAT, skip consensus
+                        calling. (type: Float64, default: 0.28)
+  --overlap-score FLOAT
+                        if no adapter was found, scan the tails of the
+                        paired reads. Then, if the maximum score of
+                        the overlapped 16-mers are less than FLOAT,
+                        skip consensus calling for the read pair. If
+                        adapters were found, this step is ignored.
+                        (type: Float64, default: 0.0)
+  --prob-diff FLOAT     when doing consensus calling, if the bases
+                        were not complementary, the base with the
+                        higher quality probability is selected unless
+                        the quality probability difference are less
+                        than FLOAT (type: Float64, default: 0.0)
+
+hard clipping: trim a fixed length (after adapter trimming):
+  -C, --clip-after INT  hard clip the 3' tails to contain only INT
+                        bases. 0 to disable. (type: Int64, default: 0)
+  -c, --clip5 INT       remove the first INT bases from 5' end. (type:
+                        Int64, default: 0)
+
+quality trimming: trim the tail when the average quality of bases in
+a sliding window is low (after hard clipping):
+  --no-quality-trim     skip quality trimming
+  -q, --quality-score INT
+                        threshold of quality score; 0 means turn off
+                        quality trimming (type: Int64, default: 20)
+  --quality-kmer INT    trim the tail once found the average quality
+                        of bases in a sliding window is low (type:
+                        Int64, default: 5)
+  --quality-format FORMAT
+                        the format of the quality score (Illumina1.3,
+                        Illumina1.8, Sanger, Illumina1.5, Solexa); or
+                        the ASCII number when quality score == 0
+                        (default: "33")
+
+N trimming (after quality trimming):
+  --no-tail-n-trim      disable removing NNNNN tail.
+  -n, --max-n INT       # N allowed in each read; N tails not included
+                        if --no-tail-n-trim; INT<0 to disable (type:
+                        Int64, default: 15)
+
+length filtration (after N trimming):
+  --no-length-filtration
+                        disable length filtration
+  --length-range INT:INT
+                        length range of good reads; format is min:max
+                        (default: "50:500")
+
+read complexity filtration (after length filtration):
+  --enable-complexity-filtration
+                        enable complexity filtration
+  --min-complexity FLOAT
+                        complexity threshold (type: Float64, default:
+                        0.3)
+
+legacy arguments:
+  -p, --procs INT       ignored (multi-proc is disabled) (default:
+                        "1")
+
+Jiacheng Chuan, Aiguo Zhou, Lawrence Richard Hale, Miao He, Xiang Li,
+Atria: an ultra-fast and accurate trimmer for adapter and quality
+trimming, Gigabyte, 1, 2021 https://doi.org/10.46471/gigabyte.31
+
+┌ Info: read simulation stats: start
+└   input = "peReadSimulated.R1.atria.fastq.r12"
+┌ Info: read simulation stats: output
+│   detail = "peReadSimulated.R1.atria.fastq.r12.stat-detail.tsv"
+└   summary = "peReadSimulated.R1.atria.fastq.r12.stat.tsv"
+┌ Info: read simulation stats: all done
+└   elapsed = 3.174762010574341
+usage: atria readstat [-h] FASTQS...
+
+positional arguments:
+  FASTQS      input trimmed fastqs. caution: raw fastq has to be
+              generated by `atria simulate`. If multiple, two by two are considered paired.
+
+optional arguments:
+  -h, --help  show this help message and exit
+
+Rscript (R) version 4.3.0 (2023-04-21)
+
+  Atria v3.2.2
+  ≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+
+  An ultra-fast and accurate adapter and quality trimming software designed for paired-end sequencing data.
+
+  If you use Atria, please cite
+
+  │  Jiacheng Chuan, Aiguo Zhou, Lawrence Richard Hale, Miao He, Xiang Li, Atria: an ultra-fast and accurate trimmer for adapter and quality trimming, Gigabyte, 1, 2021 https://doi.org/10.46471/gigabyte.31
+
+  Github: https://github.com/cihga39871/Atria
+
+  Usage
+  =======
+
+  Try atria -h or atria --help for more information.
+
+  Input and Output
+  ––––––––––––––––––
+
+  The input files should be paired-end FastQ(.gz|.bz2) files (in the same order), or single-end fastqs:
+
+    1. Read 1 files: -r X_R1.FQ Y_R1.FQ.GZ ...
+
+    2. Read 2 files (optional): -R X_R2.FQ Y_R2.FQ.GZ ...
+
+  Output all files to a directory: -o PATH or --output-dir PATH. Default is the current directory.
+
+  Atria skips completed analysis by default. Use -f or --force to disable the feature.
+
+  Trimming methods
+  ––––––––––––––––––
+
+  Atria integrated several trimming and read filtration methods. It does the following sequentially.
+
+    1. Poly X Tail Trimming: remove remove poly-X tails.
+       suggest to enable --polyG for Illumina NextSeq/NovaSeq data.
+       • enable: --polyG, --polyT, --polyA, and/or --polyC (default: disabled)
+       • trim poly X tail if length > INT: --poly-length 10
+
+    2. Adapter Trimming
+       • specify read 1 adapter: -a SEQ or --adapter1 SEQ (default: AGATCGGAAGAGCACACGTCTGAACTCCAGTCA)
+       • specify read 2 adapter: -A SEQ or --adapter2 SEQ (default: AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT) (if paired-end)
+       • disable: --no-adapter-trim
+       • if adapter is unknown, use --detect-adapter.
+
+    3. Paired-end Consensus Calling: the overlapped regions of read pairs are checked and corrected. It is available only when input files are paired-end and Adapter Trimming is on.
+       • disable: --no-consensus
+
+    4. Hard Clip 3' end: resize reads to a fixed length by discarding extra bases in 3' end.
+       • specify the number of bases to keep: -C INT or --clip-after INT (default: disabled)
+
+    5. Hard Clip 5' end: remove the first INT bases from 5' end.
+       • specify the number of bases to remove: -c INT or --clip5 INT (default: disabled)
+
+    6. Quality Trimming: trim low-quality tails. (Trimming read tails when the average quality of bases in a sliding window is low.)
+       • specify average quality threshold: -q 20 or --quality-score 20 (default: 20)
+       • specify sliding window length: --quality-kmer 5 (default: 5)
+       • specify FastQ quality format: --quality-format Illumina1.8, or --quality-format 33 (default: 33, ie. Illumina1.8)
+       • disable: --no-quality-trim
+
+    7. Tail N Trimming: trim N tails.
+       • disable: --no-tail-n-trim
+
+    8. N Filtration: discard a read pair if the number of N in one read is greater than a certain amount. N tails are ignored if Tail N Trimming is on.
+       • specify # N allowed in each read: -n 15 or --max-n 15 (default: 15)
+       • disable: -n -1 or --max-n -1
+
+    9. Read Length Filtration: filter read pair length in a range.
+       • specify read length range: --length-range 50:500 (default: 50:500)
+       • disable: --no-length-filtration
+
+    10. Read Complexity Filtration: filter reads with low complexity.
+       Complexity is the percentage of base that is different from its next base.
+       • enable: --enable-complexity-filtration (default: disabled)
+       • specify complexity threshold: --min-complexity 0.3 (default: 0.3)
+
+  Parallel (multi-threading) computing
+  ––––––––––––––––––––––––––––––––––––––
+
+    1. Specify number of threads to use: -t 8 or --threads 8. (Default: 8)
+
+    2. If memory is not sufficient, use --log2-chunk-size INT where INT is from 23 to 25. Memory usage reduces exponentially as it decreases.
+Available programs:
+    atria       Pair-end trimming software (default)
+    simulate    Generate artificial pair-end reads
+    randtrim    Randomly trim R1 or R2 at a random position
+    readstat    Collect trimming statistics
+                    (reads should be generated by `atria simulate`)
+    statplot    Plot trimming statistics
+                    (`Rscript` in PATH required)
+    test        Test Atria program
+    p | prog    Show this program list
+
+[ Info: Precompiling/test passed without errors.
+Test Summary: | Pass  Total     Time
+Atria         |   96     96  1m27.5s
+[ Info: PackageCompiler: Done
+✔ [05m:08s] PackageCompiler: compiling nonincremental system image
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libstdc++.so: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010001
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libstdc++.so: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010002
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010001
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010002
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010001
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010002
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010001
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010002
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010001
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010002
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libatomic.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010001
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libatomic.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010002
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libstdc++.so.6: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010001
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libstdc++.so.6: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010002
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010001
+/usr/bin/ld: warning: /home/kalavatt/julia-1.8.5/lib/julia/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010002
+[ Info: Success. Atria is installed at ./app-3.2.2/bin/atria
+pigz 2.6
+
+
+❯ alias atria="\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
+
+
+❯ atria
+
+  Atria v3.2.2
+  ≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+
+  An ultra-fast and accurate adapter and quality trimming software designed for paired-end sequencing data.
+
+  If you use Atria, please cite
+
+  │  Jiacheng Chuan, Aiguo Zhou, Lawrence Richard Hale, Miao He, Xiang Li, Atria: an ultra-fast and accurate trimmer for adapter and quality trimming, Gigabyte, 1, 2021 https://doi.org/10.46471/gigabyte.31
+
+  Github: https://github.com/cihga39871/Atria
+
+  Usage
+  =======
+
+  Try atria -h or atria --help for more information.
+
+  Input and Output
+  ––––––––––––––––––
+
+  The input files should be paired-end FastQ(.gz|.bz2) files (in the same order), or single-end fastqs:
+
+    1. Read 1 files: -r X_R1.FQ Y_R1.FQ.GZ ...
+
+    2. Read 2 files (optional): -R X_R2.FQ Y_R2.FQ.GZ ...
+
+  Output all files to a directory: -o PATH or --output-dir PATH. Default is the current directory.
+
+  Atria skips completed analysis by default. Use -f or --force to disable the feature.
+
+  Trimming methods
+  ––––––––––––––––––
+
+  Atria integrated several trimming and read filtration methods. It does the following sequentially.
+
+    1. Poly X Tail Trimming: remove remove poly-X tails.
+       suggest to enable --polyG for Illumina NextSeq/NovaSeq data.
+       • enable: --polyG, --polyT, --polyA, and/or --polyC (default: disabled)
+       • trim poly X tail if length > INT: --poly-length 10
+
+    2. Adapter Trimming
+       • specify read 1 adapter: -a SEQ or --adapter1 SEQ (default: AGATCGGAAGAGCACACGTCTGAACTCCAGTCA)
+       • specify read 2 adapter: -A SEQ or --adapter2 SEQ (default: AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT) (if paired-end)
+       • disable: --no-adapter-trim
+       • if adapter is unknown, use --detect-adapter.
+
+    3. Paired-end Consensus Calling: the overlapped regions of read pairs are checked and corrected. It is available only when input files are paired-end and Adapter Trimming is on.
+       • disable: --no-consensus
+
+    4. Hard Clip 3' end: resize reads to a fixed length by discarding extra bases in 3' end.
+       • specify the number of bases to keep: -C INT or --clip-after INT (default: disabled)
+
+    5. Hard Clip 5' end: remove the first INT bases from 5' end.
+       • specify the number of bases to remove: -c INT or --clip5 INT (default: disabled)
+
+    6. Quality Trimming: trim low-quality tails. (Trimming read tails when the average quality of bases in a sliding window is low.)
+       • specify average quality threshold: -q 20 or --quality-score 20 (default: 20)
+       • specify sliding window length: --quality-kmer 5 (default: 5)
+       • specify FastQ quality format: --quality-format Illumina1.8, or --quality-format 33 (default: 33, ie. Illumina1.8)
+       • disable: --no-quality-trim
+
+    7. Tail N Trimming: trim N tails.
+       • disable: --no-tail-n-trim
+
+    8. N Filtration: discard a read pair if the number of N in one read is greater than a certain amount. N tails are ignored if Tail N Trimming is on.
+       • specify # N allowed in each read: -n 15 or --max-n 15 (default: 15)
+       • disable: -n -1 or --max-n -1
+
+    9. Read Length Filtration: filter read pair length in a range.
+       • specify read length range: --length-range 50:500 (default: 50:500)
+       • disable: --no-length-filtration
+
+    10. Read Complexity Filtration: filter reads with low complexity.
+       Complexity is the percentage of base that is different from its next base.
+       • enable: --enable-complexity-filtration (default: disabled)
+       • specify complexity threshold: --min-complexity 0.3 (default: 0.3)
+
+  Parallel (multi-threading) computing
+  ––––––––––––––––––––––––––––––––––––––
+
+    1. Specify number of threads to use: -t 8 or --threads 8. (Default: 8)
+
+    2. If memory is not sufficient, use --log2-chunk-size INT where INT is from 23 to 25. Memory usage reduces exponentially as it decreases.
 ```
 </details>
 <br />
@@ -603,32 +1969,60 @@ Executing transaction: done
 ### Local installation
 *Bioconda installs not working when configuring conda environment for work with osx-64; `#TODO` `#IMPORTANT` [troubleshoot this later](https://www.google.com/search?q=how+to+use+bioconda+with+apple+m1&oq=how+to+use+bioconda+with+apple+m1&aqs=chrome..69i57j33i160l2.5494j1j4&sourceid=chrome&ie=UTF-8)*
 
-<a id="code-1"></a>
-#### Code
+<a id="install-mamba-packages-1"></a>
+#### Install mamba packages
+<a id="code-2"></a>
+##### Code
 <details>
 <summary><i>Code: Local installation</i></summary>
 
 ```bash
 #!/bin/bash
 
-create_x86_conda_environment pairtools_env
-conda activate pairtools_env
+run=FALSE
+if [[ "${run}" == TRUE ]]; then
+    create_x86_conda_environment pairtools_env
+    conda activate pairtools_env
 
-conda install \
-    -c conda-forge \
-    parallel mamba python==3.10.11
+    conda install \
+        -c conda-forge \
+        parallel mamba python==3.10.11
 
-mamba install \
-    -c bioconda \
-        bioframe cooler coolpuppy cooltools pairtools rename
+    mamba install \
+        -c bioconda \
+            bioframe cooler coolpuppy cooltools pairtools rename
+fi
 ```
 </details>
 <br />
 
-<a id="printed-1"></a>
-#### Printed
+<a id="printed-2"></a>
+##### Printed
 <details>
 <summary><i>Printed: Local installation</i></summary>
+
+```txt
+
+```
+</details>
+<br />
+
+<a id="install-atria-1"></a>
+#### Install atria
+<a id="code-3"></a>
+##### Code
+<details>
+<summary><i>Code: Install atria</i></summary>
+
+```bash
+#!/bin/bash
+
+```
+</details>
+<br />
+
+<details>
+<summary><i>Printed: Install atria</i></summary>
 
 ```txt
 
@@ -638,12 +2032,12 @@ mamba install \
 <br />
 
 <a id="work-through-the-steps-of-pairtools"></a>
-## Work through the steps of [pairtools]()
+## Work through the steps of [pairtools](https://pairtools.readthedocs.io/en/latest/)
 <a id="0-get-situated"></a>
 ### 0. Get situated
 <a id="get-to-work-directory-initialize-environment"></a>
 #### Get to work directory, initialize environment
-<a id="code-2"></a>
+<a id="code-4"></a>
 ##### Code
 <details>
 <summary><i>Code: Get to work directory, initialize environment</i></summary>
@@ -651,17 +2045,21 @@ mamba install \
 ```bash
 #!/bin/bash
 
+grabnode  # 8 cores, default settings
+
 cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307" ||
     echo "cd'ing failed; check on this..."
 
 source activate pairtools_env
+
+alias atria="\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
 ```
 </details>
 <br />
 
 <a id="initialize-variables-create-outdirectories"></a>
 #### Initialize variables, create outdirectories
-<a id="code-3"></a>
+<a id="code-5"></a>
 ##### Code
 <details>
 <summary><i>Code: Initialize variables, create outdirectories</i></summary>
@@ -674,11 +2072,13 @@ source activate pairtools_env
 threads="${SLURM_CPUS_ON_NODE}"  # echo "${threads}"
 scratch="/fh/scratch/delete30/tsukiyama_t"  # ., "${scratch}"
 
-#  For bwa mem
+#  For atria, bwa mem
 p_fq="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742"  # ., "${p_fq}"
 f_pre="SRR7939018"  # ., "${p_fq}/${f_pre}"*
 a_fq_1="${p_fq}/${f_pre}_1.fastq.gz"  # ., "${a_fq_1}"
 a_fq_2="${p_fq}/${f_pre}_2.fastq.gz"  # ., "${a_fq_2}"
+
+d_trim="01_trim"
 
 d_bam="bams"  # echo "${d_bam}"
 f_bam="${f_pre}.bam"  # echo "${f_bam}"
@@ -731,6 +2131,7 @@ max_mismatch=3  # echo "${max_mismatch}"
 
 
 #  Create outdirectories ------------------------------------------------------
+if [[ ! -d "${d_trim}" ]]; then mkdir -p "${d_trim}/err_out"; fi
 if [[ ! -d "${d_bam}" ]]; then mkdir -p "${d_bam}/err_out"; fi
 if [[ ! -d "${d_pairs}" ]]; then mkdir -p "${d_pairs}/err_out"; fi
 if [[ ! -d "${d_stats}" ]]; then mkdir -p "${d_stats}"; fi
@@ -739,10 +2140,18 @@ if [[ ! -d "${d_dedup}" ]]; then mkdir -p ${d_dedup}/{pairs,bam,err_out}; fi
 </details>
 <br />
 
-<a id="printed-2"></a>
+<a id="printed-3"></a>
 ##### Printed
 <details>
 <summary><i>Printed: Initialize variables, create outdirectories</i></summary>
+
+```txt
+❯ if [[ ! -d "${d_trim}" ]]; then mkdir -p "${d_trim}/err_out"; fi
+mkdir: created directory '01_trim'
+mkdir: created directory '01_trim/err_out'
+
+```
+
 
 ```txt
 ❯ if [[ ! -d "${d_bam}" ]]; then mkdir -p "${d_bam}/err_out"; fi
@@ -768,12 +2177,385 @@ mkdir: created directory 'dedup/err_out'
 </details>
 <br />
 
-<a id="1-align-datasets"></a>
-### 1. Align datasets
-<a id="code-4"></a>
+<a id="1-trim-fastq-files"></a>
+### 1. Trim fastq files
+<a id="code-6"></a>
 #### Code
 <details>
-<summary><i>Code: 1. Align datasets</i></summary>
+<summary><i>Code: 1. Trim fastq files</i></summary>
+
+```bash
+#!/bin/bash
+
+#  Echo test
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        echo """
+        atria \\
+            -t \"${threads}\" \\
+            -r \"${a_fq_1}\" \\
+            -R \"${a_fq_2}\" \\
+            -o \"${d_trim}\" \\
+            --no-length-filtration \\
+            --stats
+        """
+    }
+
+#  Perform atria adapter trimming of fastqs
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        #  Switch away from v3.2.2 (rDNA) to v3.2.1 (transcriptome-construction)
+        alias atria="\${HOME}/tsukiyamalab/kalavatt/2022_transcriptome-construction/software/Atria/app-3.2.1/bin/atria"
+        atria \
+            -t "${threads}" \
+            -r "${a_fq_1}" \
+            -R "${a_fq_2}" \
+            -o "${d_trim}" \
+            --no-length-filtration \
+            --stats
+    }
+
+alias atria="\${HOME}/tsukiyamalab/kalavatt/2022_transcriptome-construction/software/Atria/app-3.2.1/bin/atria"
+alias atria="\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
+atria \
+    -t "${threads}" \
+    -r "${a_fq_1}" \
+    -R "${a_fq_2}" \
+    -o "${d_trim}" \
+    --no-length-filtration  # It's the call to --stats that results in the nested task error!
+```
+</details>
+<br />
+
+<a id="printed-4"></a>
+#### Printed
+<details>
+<summary><i>Printed: 1. Trim fastq files</i></summary>
+
+```txt
+❯ [[ "${run}" == TRUE ]] &&
+>     {
+>         echo """
+>         atria \\
+>             -t \"${threads}\" \\
+>             -r \"${a_fq_1}\" \\
+>             -R \"${a_fq_2}\" \\
+>             -o \"${d_trim}\" \\
+>             --no-length-filtration \\
+>             --stats
+>         """
+>     }
+
+        atria \
+            -t "8" \
+            -r "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz" \
+            -R "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz" \
+            -o "01_trim" \
+            --no-length-filtration \
+            --stats
+
+
+❯ atria \
+>     -t "${threads}" \
+>     -r "${a_fq_1}" \
+>     -R "${a_fq_2}" \
+>     -o "${d_trim}" \
+>     --no-length-filtration \
+>     --stats
+pigz 2.6
+┌ Info: ATRIA VERSIONS
+│   atria = "v3.2.2"
+└   julia = "v1.8.5"
+┌ Info: ATRIA ARGUMENTS
+└   command = `-t 8 -r /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz -R /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz -o 01_trim --no-length-filtration --stats`
+┌ Info: ATRIA OUTPUT FILES
+│   read1 = "01_trim/SRR7939018_1.atria.fastq.gz"
+└   read2 = "01_trim/SRR7939018_2.atria.fastq.gz"
+┌ Info: ATRIA TRIMMERS AND FILTERS
+│   adapter_trimming = true
+│   consensus_calling = true
+│   hard_clip_3_end = false
+│   hard_clip_5_end = false
+│   quality_trimming = true
+│   tail_N_trimming = true
+│   max_N_filtering = true
+└   length_filtering = false
+TaskFailedException
+
+    nested task error: UndefVarError: is_concensused not defined
+    Stacktrace:
+     [1] macro expansion
+       @ /fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/src/Trimmer/wrapper.jl:435 [inlined]
+     [2] (::Atria.Trimmer.var"#2#threadsfor_fun#49"{Atria.Trimmer.var"#2#threadsfor_fun#48#50"{Vector{Atria.FqRecords.FqRecord}, Vector{Atria.FqRecords.FqRecord}, Vector{Bool}, Int64, StepRange{Int64, Int64}}})(tid::Int64; onethread::Bool)
+       @ Atria.Trimmer ./threadingconstructs.jl:84
+     [3] #2#threadsfor_fun
+       @ ./threadingconstructs.jl:51 [inlined]
+     [4] (::Base.Threads.var"#1#2"{Atria.Trimmer.var"#2#threadsfor_fun#49"{Atria.Trimmer.var"#2#threadsfor_fun#48#50"{Vector{Atria.FqRecords.FqRecord}, Vector{Atria.FqRecords.FqRecord}, Vector{Bool}, Int64, StepRange{Int64, Int64}}}, Int64})()
+       @ Base.Threads ./threadingconstructs.jl:30
+
+
+❯ alias atria="\${HOME}/tsukiyamalab/kalavatt/2022_transcriptome-construction/software/Atria/app-3.2.1/bin/atria"
+
+
+❯ atria \
+>     -t "${threads}" \
+>     -r "${a_fq_1}" \
+>     -R "${a_fq_2}" \
+>     -o "${d_trim}" \
+>     --no-length-filtration \
+>     --stats
+pigz 2.6
+┌ Info: ATRIA VERSIONS
+│   atria = "v3.2.1"
+└   julia = "v1.8.5"
+┌ Info: ATRIA ARGUMENTS
+└   command = `-t 8 -r /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz -R /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz -o 01_trim --no-length-filtration --stats`
+┌ Info: ATRIA OUTPUT FILES
+│   read1 = "01_trim/SRR7939018_1.atria.fastq.gz"
+└   read2 = "01_trim/SRR7939018_2.atria.fastq.gz"
+┌ Info: ATRIA TRIMMERS AND FILTERS
+│   adapter_trimming = true
+│   consensus_calling = true
+│   hard_clip_3_end = false
+│   hard_clip_5_end = false
+│   quality_trimming = true
+│   tail_N_trimming = true
+│   max_N_filtering = true
+└   length_filtering = false
+[ Info: Cycle 1: read 388237/388237 pairs; wrote 388237/388237 pairs; (copied 0/0 reads)
+[ Info: Cycle 2: read 385683/773920 pairs; wrote 385683/773920 pairs; (copied 0/0 reads)
+[ Info: Cycle 3: read 382096/1156016 pairs; wrote 382096/1156016 pairs; (copied 0/0 reads)
+[ Info: Cycle 4: read 377016/1533032 pairs; wrote 377016/1533032 pairs; (copied 0/0 reads)
+[ Info: Cycle 5: read 377016/1910048 pairs; wrote 377016/1910048 pairs; (copied 0/0 reads)
+[ Info: Cycle 6: read 377016/2287064 pairs; wrote 377016/2287064 pairs; (copied 0/0 reads)
+[ Info: Cycle 7: read 377016/2664080 pairs; wrote 377016/2664080 pairs; (copied 0/0 reads)
+[ Info: Cycle 8: read 377016/3041096 pairs; wrote 377016/3041096 pairs; (copied 0/0 reads)
+[ Info: Cycle 9: read 377016/3418112 pairs; wrote 377016/3418112 pairs; (copied 0/0 reads)
+[ Info: Cycle 10: read 377016/3795128 pairs; wrote 377016/3795128 pairs; (copied 0/0 reads)
+[ Info: Cycle 11: read 377016/4172144 pairs; wrote 377016/4172144 pairs; (copied 0/0 reads)
+[ Info: Cycle 12: read 377016/4549160 pairs; wrote 377016/4549160 pairs; (copied 0/0 reads)
+[ Info: Cycle 13: read 377016/4926176 pairs; wrote 377016/4926176 pairs; (copied 0/0 reads)
+[ Info: Cycle 14: read 377016/5303192 pairs; wrote 377016/5303192 pairs; (copied 0/0 reads)
+[ Info: Cycle 15: read 377016/5680208 pairs; wrote 377016/5680208 pairs; (copied 0/0 reads)
+[ Info: Cycle 16: read 377016/6057224 pairs; wrote 377016/6057224 pairs; (copied 0/0 reads)
+[ Info: Cycle 17: read 377016/6434240 pairs; wrote 377016/6434240 pairs; (copied 0/0 reads)
+[ Info: Cycle 18: read 377016/6811256 pairs; wrote 377016/6811256 pairs; (copied 0/0 reads)
+[ Info: Cycle 19: read 377016/7188272 pairs; wrote 377016/7188272 pairs; (copied 0/0 reads)
+[ Info: Cycle 20: read 377016/7565288 pairs; wrote 377016/7565288 pairs; (copied 0/0 reads)
+[ Info: Cycle 21: read 377016/7942304 pairs; wrote 377016/7942304 pairs; (copied 0/0 reads)
+[ Info: Cycle 22: read 377016/8319320 pairs; wrote 377016/8319320 pairs; (copied 0/0 reads)
+[ Info: Cycle 23: read 377016/8696336 pairs; wrote 377016/8696336 pairs; (copied 0/0 reads)
+[ Info: Cycle 24: read 377016/9073352 pairs; wrote 377016/9073352 pairs; (copied 0/0 reads)
+[ Info: Cycle 25: read 377016/9450368 pairs; wrote 377016/9450368 pairs; (copied 0/0 reads)
+[ Info: Cycle 26: read 377016/9827384 pairs; wrote 377016/9827384 pairs; (copied 0/0 reads)
+[ Info: Cycle 27: read 372523/10199907 pairs; wrote 372523/10199907 pairs; (copied 0/0 reads)
+[ Info: Cycle 28: read 368730/10568637 pairs; wrote 368730/10568637 pairs; (copied 0/0 reads)
+[ Info: Cycle 29: read 368730/10937367 pairs; wrote 368730/10937367 pairs; (copied 0/0 reads)
+[ Info: Cycle 30: read 368730/11306097 pairs; wrote 368730/11306097 pairs; (copied 0/0 reads)
+[ Info: Cycle 31: read 368730/11674827 pairs; wrote 368730/11674827 pairs; (copied 0/0 reads)
+[ Info: Cycle 32: read 368730/12043557 pairs; wrote 368730/12043557 pairs; (copied 0/0 reads)
+[ Info: Cycle 33: read 368730/12412287 pairs; wrote 368730/12412287 pairs; (copied 0/0 reads)
+[ Info: Cycle 34: read 368730/12781017 pairs; wrote 368730/12781017 pairs; (copied 0/0 reads)
+[ Info: Cycle 35: read 368730/13149747 pairs; wrote 368730/13149747 pairs; (copied 0/0 reads)
+[ Info: Cycle 36: read 368730/13518477 pairs; wrote 368730/13518477 pairs; (copied 0/0 reads)
+[ Info: Cycle 37: read 368730/13887207 pairs; wrote 368730/13887207 pairs; (copied 0/0 reads)
+[ Info: Cycle 38: read 368730/14255937 pairs; wrote 368730/14255937 pairs; (copied 0/0 reads)
+[ Info: Cycle 39: read 368730/14624667 pairs; wrote 368730/14624667 pairs; (copied 0/0 reads)
+[ Info: Cycle 40: read 368730/14993397 pairs; wrote 368730/14993397 pairs; (copied 0/0 reads)
+[ Info: Cycle 41: read 368730/15362127 pairs; wrote 368730/15362127 pairs; (copied 0/0 reads)
+[ Info: Cycle 42: read 368730/15730857 pairs; wrote 368730/15730857 pairs; (copied 0/0 reads)
+[ Info: Cycle 43: read 368730/16099587 pairs; wrote 368730/16099587 pairs; (copied 0/0 reads)
+[ Info: Cycle 44: read 368730/16468317 pairs; wrote 368730/16468317 pairs; (copied 0/0 reads)
+[ Info: Cycle 45: read 368730/16837047 pairs; wrote 368730/16837047 pairs; (copied 0/0 reads)
+[ Info: Cycle 46: read 368730/17205777 pairs; wrote 368730/17205777 pairs; (copied 0/0 reads)
+[ Info: Cycle 47: read 368730/17574507 pairs; wrote 368730/17574507 pairs; (copied 0/0 reads)
+[ Info: Cycle 48: read 368730/17943237 pairs; wrote 368730/17943237 pairs; (copied 0/0 reads)
+[ Info: Cycle 49: read 368730/18311967 pairs; wrote 368730/18311967 pairs; (copied 0/0 reads)
+[ Info: Cycle 50: read 368730/18680697 pairs; wrote 368730/18680697 pairs; (copied 0/0 reads)
+[ Info: Cycle 51: read 368730/19049427 pairs; wrote 368730/19049427 pairs; (copied 0/0 reads)
+[ Info: Cycle 52: read 368730/19418157 pairs; wrote 368730/19418157 pairs; (copied 0/0 reads)
+[ Info: Cycle 53: read 368730/19786887 pairs; wrote 368730/19786887 pairs; (copied 0/0 reads)
+[ Info: Cycle 54: read 368730/20155617 pairs; wrote 368730/20155617 pairs; (copied 0/0 reads)
+[ Info: Cycle 55: read 368730/20524347 pairs; wrote 368730/20524347 pairs; (copied 0/0 reads)
+[ Info: Cycle 56: read 368730/20893077 pairs; wrote 368730/20893077 pairs; (copied 0/0 reads)
+[ Info: Cycle 57: read 368730/21261807 pairs; wrote 368730/21261807 pairs; (copied 0/0 reads)
+[ Info: Cycle 58: read 368730/21630537 pairs; wrote 368730/21630537 pairs; (copied 0/0 reads)
+[ Info: Cycle 59: read 368730/21999267 pairs; wrote 368730/21999267 pairs; (copied 0/0 reads)
+[ Info: Cycle 60: read 368730/22367997 pairs; wrote 368730/22367997 pairs; (copied 0/0 reads)
+[ Info: Cycle 61: read 368730/22736727 pairs; wrote 368730/22736727 pairs; (copied 0/0 reads)
+[ Info: Cycle 62: read 368730/23105457 pairs; wrote 368730/23105457 pairs; (copied 0/0 reads)
+[ Info: Cycle 63: read 368730/23474187 pairs; wrote 368730/23474187 pairs; (copied 0/0 reads)
+[ Info: Cycle 64: read 368730/23842917 pairs; wrote 368730/23842917 pairs; (copied 0/0 reads)
+[ Info: Cycle 65: read 368730/24211647 pairs; wrote 368730/24211647 pairs; (copied 0/0 reads)
+[ Info: Cycle 66: read 368730/24580377 pairs; wrote 368730/24580377 pairs; (copied 0/0 reads)
+[ Info: Cycle 67: read 368730/24949107 pairs; wrote 368730/24949107 pairs; (copied 0/0 reads)
+[ Info: Cycle 68: read 368730/25317837 pairs; wrote 368730/25317837 pairs; (copied 0/0 reads)
+[ Info: Cycle 69: read 368730/25686567 pairs; wrote 368730/25686567 pairs; (copied 0/0 reads)
+[ Info: Cycle 70: read 368730/26055297 pairs; wrote 368730/26055297 pairs; (copied 0/0 reads)
+[ Info: Cycle 71: read 368730/26424027 pairs; wrote 368730/26424027 pairs; (copied 0/0 reads)
+[ Info: Cycle 72: read 368730/26792757 pairs; wrote 368730/26792757 pairs; (copied 0/0 reads)
+[ Info: Cycle 73: read 368730/27161487 pairs; wrote 368730/27161487 pairs; (copied 0/0 reads)
+[ Info: Cycle 74: read 368730/27530217 pairs; wrote 368730/27530217 pairs; (copied 0/0 reads)
+[ Info: Cycle 75: read 368730/27898947 pairs; wrote 368730/27898947 pairs; (copied 0/0 reads)
+[ Info: Cycle 76: read 368730/28267677 pairs; wrote 368730/28267677 pairs; (copied 0/0 reads)
+[ Info: Cycle 77: read 368730/28636407 pairs; wrote 368730/28636407 pairs; (copied 0/0 reads)
+[ Info: Cycle 78: read 368730/29005137 pairs; wrote 368730/29005137 pairs; (copied 0/0 reads)
+[ Info: Cycle 79: read 368730/29373867 pairs; wrote 368730/29373867 pairs; (copied 0/0 reads)
+[ Info: Cycle 80: read 368730/29742597 pairs; wrote 368730/29742597 pairs; (copied 0/0 reads)
+[ Info: Cycle 81: read 368730/30111327 pairs; wrote 368730/30111327 pairs; (copied 0/0 reads)
+[ Info: Cycle 82: read 368730/30480057 pairs; wrote 368730/30480057 pairs; (copied 0/0 reads)
+[ Info: Cycle 83: read 368730/30848787 pairs; wrote 368730/30848787 pairs; (copied 0/0 reads)
+[ Info: Cycle 84: read 368730/31217517 pairs; wrote 368730/31217517 pairs; (copied 0/0 reads)
+[ Info: Cycle 85: read 368730/31586247 pairs; wrote 368730/31586247 pairs; (copied 0/0 reads)
+[ Info: Cycle 86: read 368730/31954977 pairs; wrote 368730/31954977 pairs; (copied 0/0 reads)
+[ Info: Cycle 87: read 368730/32323707 pairs; wrote 368730/32323707 pairs; (copied 0/0 reads)
+[ Info: Cycle 88: read 368730/32692437 pairs; wrote 368730/32692437 pairs; (copied 0/0 reads)
+[ Info: Cycle 89: read 368730/33061167 pairs; wrote 368730/33061167 pairs; (copied 0/0 reads)
+[ Info: Cycle 90: read 368730/33429897 pairs; wrote 368730/33429897 pairs; (copied 0/0 reads)
+[ Info: Cycle 91: read 368730/33798627 pairs; wrote 368730/33798627 pairs; (copied 0/0 reads)
+[ Info: Cycle 92: read 368730/34167357 pairs; wrote 368730/34167357 pairs; (copied 0/0 reads)
+[ Info: Cycle 93: read 368730/34536087 pairs; wrote 368730/34536087 pairs; (copied 0/0 reads)
+[ Info: Cycle 94: read 368730/34904817 pairs; wrote 368730/34904817 pairs; (copied 0/0 reads)
+[ Info: Cycle 95: read 368730/35273547 pairs; wrote 368730/35273547 pairs; (copied 0/0 reads)
+[ Info: Cycle 96: read 368730/35642277 pairs; wrote 368730/35642277 pairs; (copied 0/0 reads)
+[ Info: Cycle 97: read 368730/36011007 pairs; wrote 368730/36011007 pairs; (copied 0/0 reads)
+[ Info: Cycle 98: read 368730/36379737 pairs; wrote 368730/36379737 pairs; (copied 0/0 reads)
+[ Info: Cycle 99: read 368730/36748467 pairs; wrote 368730/36748467 pairs; (copied 0/0 reads)
+[ Info: Cycle 100: read 368730/37117197 pairs; wrote 368730/37117197 pairs; (copied 0/0 reads)
+[ Info: Cycle 101: read 368730/37485927 pairs; wrote 368730/37485927 pairs; (copied 0/0 reads)
+[ Info: Cycle 102: read 368730/37854657 pairs; wrote 368730/37854657 pairs; (copied 0/0 reads)
+[ Info: Cycle 103: read 368730/38223387 pairs; wrote 368730/38223387 pairs; (copied 0/0 reads)
+[ Info: Cycle 104: read 368730/38592117 pairs; wrote 368730/38592117 pairs; (copied 0/0 reads)
+[ Info: Cycle 105: read 368730/38960847 pairs; wrote 368730/38960847 pairs; (copied 0/0 reads)
+[ Info: Cycle 106: read 368730/39329577 pairs; wrote 368730/39329577 pairs; (copied 0/0 reads)
+[ Info: Cycle 107: read 368730/39698307 pairs; wrote 368730/39698307 pairs; (copied 0/0 reads)
+[ Info: Cycle 108: read 368730/40067037 pairs; wrote 368730/40067037 pairs; (copied 0/0 reads)
+[ Info: Cycle 109: read 368730/40435767 pairs; wrote 368730/40435767 pairs; (copied 0/0 reads)
+[ Info: Cycle 110: read 368730/40804497 pairs; wrote 368730/40804497 pairs; (copied 0/0 reads)
+[ Info: Cycle 111: read 368730/41173227 pairs; wrote 368730/41173227 pairs; (copied 0/0 reads)
+[ Info: Cycle 112: read 368730/41541957 pairs; wrote 368730/41541957 pairs; (copied 0/0 reads)
+[ Info: Cycle 113: read 368730/41910687 pairs; wrote 368730/41910687 pairs; (copied 0/0 reads)
+[ Info: Cycle 114: read 368730/42279417 pairs; wrote 368730/42279417 pairs; (copied 0/0 reads)
+[ Info: Cycle 115: read 368730/42648147 pairs; wrote 368730/42648147 pairs; (copied 0/0 reads)
+[ Info: Cycle 116: read 368730/43016877 pairs; wrote 368730/43016877 pairs; (copied 0/0 reads)
+[ Info: Cycle 117: read 368730/43385607 pairs; wrote 368730/43385607 pairs; (copied 0/0 reads)
+[ Info: Cycle 118: read 368730/43754337 pairs; wrote 368730/43754337 pairs; (copied 0/0 reads)
+[ Info: Cycle 119: read 368730/44123067 pairs; wrote 368730/44123067 pairs; (copied 0/0 reads)
+[ Info: Cycle 120: read 368730/44491797 pairs; wrote 368730/44491797 pairs; (copied 0/0 reads)
+[ Info: Cycle 121: read 368730/44860527 pairs; wrote 368730/44860527 pairs; (copied 0/0 reads)
+[ Info: Cycle 122: read 368730/45229257 pairs; wrote 368730/45229257 pairs; (copied 0/0 reads)
+[ Info: Cycle 123: read 368730/45597987 pairs; wrote 368730/45597987 pairs; (copied 0/0 reads)
+[ Info: Cycle 124: read 368730/45966717 pairs; wrote 368730/45966717 pairs; (copied 0/0 reads)
+[ Info: Cycle 125: read 368730/46335447 pairs; wrote 368730/46335447 pairs; (copied 0/0 reads)
+[ Info: Cycle 126: read 368730/46704177 pairs; wrote 368730/46704177 pairs; (copied 0/0 reads)
+[ Info: Cycle 127: read 368730/47072907 pairs; wrote 368730/47072907 pairs; (copied 0/0 reads)
+[ Info: Cycle 128: read 368730/47441637 pairs; wrote 368730/47441637 pairs; (copied 0/0 reads)
+[ Info: Cycle 129: read 368730/47810367 pairs; wrote 368730/47810367 pairs; (copied 0/0 reads)
+[ Info: Cycle 130: read 368730/48179097 pairs; wrote 368730/48179097 pairs; (copied 0/0 reads)
+[ Info: Cycle 131: read 368730/48547827 pairs; wrote 368730/48547827 pairs; (copied 0/0 reads)
+[ Info: Cycle 132: read 368730/48916557 pairs; wrote 368730/48916557 pairs; (copied 0/0 reads)
+[ Info: Cycle 133: read 368730/49285287 pairs; wrote 368730/49285287 pairs; (copied 0/0 reads)
+[ Info: Cycle 134: read 368730/49654017 pairs; wrote 368730/49654017 pairs; (copied 0/0 reads)
+[ Info: Cycle 135: read 368730/50022747 pairs; wrote 368730/50022747 pairs; (copied 0/0 reads)
+[ Info: Cycle 136: read 368730/50391477 pairs; wrote 368730/50391477 pairs; (copied 0/0 reads)
+[ Info: Cycle 137: read 368730/50760207 pairs; wrote 368730/50760207 pairs; (copied 0/0 reads)
+[ Info: Cycle 138: read 368730/51128937 pairs; wrote 368730/51128937 pairs; (copied 0/0 reads)
+[ Info: Cycle 139: read 368730/51497667 pairs; wrote 368730/51497667 pairs; (copied 0/0 reads)
+[ Info: Cycle 140: read 368730/51866397 pairs; wrote 368730/51866397 pairs; (copied 0/0 reads)
+[ Info: Cycle 141: read 368730/52235127 pairs; wrote 368730/52235127 pairs; (copied 0/0 reads)
+[ Info: Cycle 142: read 368730/52603857 pairs; wrote 368730/52603857 pairs; (copied 0/0 reads)
+[ Info: Cycle 143: read 368730/52972587 pairs; wrote 368730/52972587 pairs; (copied 0/0 reads)
+[ Info: Cycle 144: read 368730/53341317 pairs; wrote 368730/53341317 pairs; (copied 0/0 reads)
+[ Info: Cycle 145: read 368730/53710047 pairs; wrote 368730/53710047 pairs; (copied 0/0 reads)
+[ Info: Cycle 146: read 368730/54078777 pairs; wrote 368730/54078777 pairs; (copied 0/0 reads)
+[ Info: Cycle 147: read 368730/54447507 pairs; wrote 368730/54447507 pairs; (copied 0/0 reads)
+[ Info: Cycle 148: read 368730/54816237 pairs; wrote 368730/54816237 pairs; (copied 0/0 reads)
+[ Info: Cycle 149: read 368730/55184967 pairs; wrote 368730/55184967 pairs; (copied 0/0 reads)
+[ Info: Cycle 150: read 368730/55553697 pairs; wrote 368730/55553697 pairs; (copied 0/0 reads)
+[ Info: Cycle 151: read 368730/55922427 pairs; wrote 368730/55922427 pairs; (copied 0/0 reads)
+[ Info: Cycle 152: read 368730/56291157 pairs; wrote 368730/56291157 pairs; (copied 0/0 reads)
+[ Info: Cycle 153: read 368730/56659887 pairs; wrote 368730/56659887 pairs; (copied 0/0 reads)
+[ Info: Cycle 154: read 368730/57028617 pairs; wrote 368730/57028617 pairs; (copied 0/0 reads)
+[ Info: Cycle 155: read 368730/57397347 pairs; wrote 368730/57397347 pairs; (copied 0/0 reads)
+[ Info: Cycle 156: read 368730/57766077 pairs; wrote 368730/57766077 pairs; (copied 0/0 reads)
+[ Info: Cycle 157: read 368730/58134807 pairs; wrote 368730/58134807 pairs; (copied 0/0 reads)
+[ Info: Cycle 158: read 368730/58503537 pairs; wrote 368730/58503537 pairs; (copied 0/0 reads)
+[ Info: Cycle 159: read 368730/58872267 pairs; wrote 368730/58872267 pairs; (copied 0/0 reads)
+[ Info: Cycle 160: read 368730/59240997 pairs; wrote 368730/59240997 pairs; (copied 0/0 reads)
+[ Info: Cycle 161: read 368730/59609727 pairs; wrote 368730/59609727 pairs; (copied 0/0 reads)
+[ Info: Cycle 162: read 368730/59978457 pairs; wrote 368730/59978457 pairs; (copied 0/0 reads)
+[ Info: Cycle 163: read 368730/60347187 pairs; wrote 368730/60347187 pairs; (copied 0/0 reads)
+[ Info: Cycle 164: read 368730/60715917 pairs; wrote 368730/60715917 pairs; (copied 0/0 reads)
+[ Info: Cycle 165: read 368730/61084647 pairs; wrote 368730/61084647 pairs; (copied 0/0 reads)
+[ Info: Cycle 166: read 368730/61453377 pairs; wrote 368730/61453377 pairs; (copied 0/0 reads)
+[ Info: Cycle 167: read 368730/61822107 pairs; wrote 368730/61822107 pairs; (copied 0/0 reads)
+[ Info: Cycle 168: read 368730/62190837 pairs; wrote 368730/62190837 pairs; (copied 0/0 reads)
+[ Info: Cycle 169: read 368730/62559567 pairs; wrote 368730/62559567 pairs; (copied 0/0 reads)
+[ Info: Cycle 170: read 368730/62928297 pairs; wrote 368730/62928297 pairs; (copied 0/0 reads)
+[ Info: Cycle 171: read 368730/63297027 pairs; wrote 368730/63297027 pairs; (copied 0/0 reads)
+[ Info: Cycle 172: read 368730/63665757 pairs; wrote 368730/63665757 pairs; (copied 0/0 reads)
+[ Info: Cycle 173: read 368730/64034487 pairs; wrote 368730/64034487 pairs; (copied 0/0 reads)
+[ Info: Cycle 174: read 368730/64403217 pairs; wrote 368730/64403217 pairs; (copied 0/0 reads)
+[ Info: Cycle 175: read 368730/64771947 pairs; wrote 368730/64771947 pairs; (copied 0/0 reads)
+[ Info: Cycle 176: read 368730/65140677 pairs; wrote 368730/65140677 pairs; (copied 0/0 reads)
+[ Info: Cycle 177: read 368730/65509407 pairs; wrote 368730/65509407 pairs; (copied 0/0 reads)
+[ Info: Cycle 178: read 368730/65878137 pairs; wrote 368730/65878137 pairs; (copied 0/0 reads)
+[ Info: Cycle 179: read 368730/66246867 pairs; wrote 368730/66246867 pairs; (copied 0/0 reads)
+[ Info: Cycle 180: read 368730/66615597 pairs; wrote 368730/66615597 pairs; (copied 0/0 reads)
+[ Info: Cycle 181: read 221475/66837072 pairs; wrote 221475/66837072 pairs; (copied 0/0 reads)
+┌ Info: ATRIA COMPLETE
+│   read1 = "01_trim/SRR7939018_1.atria.fastq.gz"
+└   read2 = "01_trim/SRR7939018_2.atria.fastq.gz"
+```
+Encounter error with version 3.2.2 but not version 3.2.1
+```txt
+#  Contents of 01_trim
+❯ .,s
+-rw-rw---- 1 kalavatt   20 Jul  5 19:12 ./SRR7939018_1.atria.fastq.gz
+-rw-rw---- 1 kalavatt 1.2K Jul  5 19:12 ./SRR7939018_1.atria.log
+-rw-rw---- 1 kalavatt   20 Jul  5 19:12 ./SRR7939018_2.atria.fastq.gz
+
+./01_trim:
+total 3.2G
+drwxrws--- 2 kalavatt  130 Jul  5 19:19 ./
+drwxrws--- 4 kalavatt  180 Jul  5 19:15 ../
+-rw-rw---- 1 kalavatt 927M Jul  5 19:24 SRR7939018_1.atria.fastq.gz
+-rw-rw---- 1 kalavatt    0 Jul  5 19:19 SRR7939018_1.atria.log
+-rw-rw---- 1 kalavatt 1.9G Jul  5 19:24 SRR7939018_2.atria.fastq.gz
+
+./err_out:
+total 64K
+drwxrws--- 2 kalavatt   0 Jul  5 19:08 ./
+drwxrws--- 4 kalavatt 180 Jul  5 19:15 ../
+
+
+❯ .,
+total 232K
+drwxrws--- 4 kalavatt  180 Jul  5 19:15 ./
+drwxrws--- 7 kalavatt  228 Jul  5 19:08 ../
+drwxrws--- 2 kalavatt  130 Jul  5 19:19 01_trim/
+drwxrws--- 2 kalavatt    0 Jul  5 19:08 err_out/
+-rw-rw---- 1 kalavatt   20 Jul  5 19:12 SRR7939018_1.atria.fastq.gz
+-rw-rw---- 1 kalavatt 1.2K Jul  5 19:12 SRR7939018_1.atria.log
+-rw-rw---- 1 kalavatt   20 Jul  5 19:12 SRR7939018_2.atria.fastq.gz
+```
+
+v3.2.1 created a new subdirectory called 01_trim/ within outdir 01_trim/&mdash;could this be the source of the issue?
+
+Also, `is_concensused` is part of src/Trimmer/wrapper.jl and seems to be associated with the `--stats` switch&mdash;could this be the source of the issue?
+`#TOBECONTINUED` `#TOMORROW`  
+`#TODO` Make a minimal example pair of fastq files for setting up and testing the pipeline
+</details>
+<br />
+
+<a id="2-align-datasets"></a>
+### 2. Align datasets
+<a id="code-7"></a>
+#### Code
+<details>
+<summary><i>Code: 2. Align datasets</i></summary>
 
 ```bash
 #!/bin/bash
@@ -781,10 +2563,11 @@ mkdir: created directory 'dedup/err_out'
 module purge
 ml BWA/0.7.17-GCCcore-11.2.0 SAMtools/1.16.1-GCC-11.2.0
 
-#  pairtools parse expects unsorted bams, so don't run this chunk:
+#  pairtools parse expects unsorted bams, so don't run the following chunk,
+#+ which sees the bwa mem outstream piped to samtools sort; more information:
 #+ github.com/open2c/pairtools/issues/178#issuecomment-1554866847
-run=FALSE
-[[ "${run}" == TRUE ]] &&
+problem=FALSE
+[[ "${problem}" == TRUE ]] &&
     {
         echo """
         {
@@ -823,8 +2606,9 @@ run=FALSE
             2> >(tee -a "${d_bam}/err_out/$(basename ${a_bam} .bam).stderr.txt" >&2)
     }
 
-run=TRUE
-[[ "${run}" == TRUE ]] &&
+#  This call to bwa mem is correct for subsequent use with pairtools parse
+correct=TRUE
+[[ "${correct}" == TRUE ]] &&
     {
         echo """
         {
@@ -854,10 +2638,10 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-3"></a>
+<a id="printed-5"></a>
 #### Printed
 <details>
-<summary><i>Printed: 1. Align datasets</i></summary>
+<summary><i>Printed: 2. Align datasets</i></summary>
 
 ```txt
 ❯ module purge
@@ -929,12 +2713,12 @@ run=TRUE
 </details>
 <br />
 
-<a id="2-run-pairtools-parse"></a>
-### 2. Run `pairtools parse`
-<a id="code-5"></a>
+<a id="3-run-pairtools-parse"></a>
+### 3. Run `pairtools parse`
+<a id="code-8"></a>
 #### Code
 <details>
-<summary><i>Code: 2. Run pairtools parse</i></summary>
+<summary><i>Code: 3. Run pairtools parse</i></summary>
 
 ```bash
 #!/bin/bash
@@ -1003,10 +2787,10 @@ cat "${a_stats}"
 </details>
 <br />
 
-<a id="printed-4"></a>
+<a id="printed-6"></a>
 #### Printed
 <details>
-<summary><i>Printed: 2. Run pairtools parse</i></summary>
+<summary><i>Printed: 3. Run pairtools parse</i></summary>
 
 <a id="check-the-documentation"></a>
 ##### Check the documentation
@@ -1923,12 +3707,12 @@ dist_freq/562341325+/++ 0
 </details>
 <br />
 
-<a id="3-run-pairtools-sort"></a>
-### 3. Run `pairtools sort`
-<a id="code-6"></a>
+<a id="4-run-pairtools-sort"></a>
+### 4. Run `pairtools sort`
+<a id="code-9"></a>
 #### Code
 <details>
-<summary><i>Code: 3. Run pairtools sort</i></summary>
+<summary><i>Code: 4. Run pairtools sort</i></summary>
 
 ```bash
 #!/bin/bash
@@ -1968,10 +3752,10 @@ zcat "${a_sort}" | tail -100
 </details>
 <br />
 
-<a id="printed-5"></a>
+<a id="printed-7"></a>
 #### Printed
 <details>
-<summary><i>Printed: 3. Run pairtools sort</i></summary>
+<summary><i>Printed: 4. Run pairtools sort</i></summary>
 
 <a id="check-the-documentation-1"></a>
 ##### Check the documentation
@@ -2289,12 +4073,12 @@ SRR7939018.57420183     XVI     946300  XVI     939782  -       +       UU      
 </details>
 <br />
 
-<a id="4-run-pairtools-dedup-and-pairtools-split"></a>
-### 4. Run `pairtools dedup` and `pairtools split`
-<a id="code-7"></a>
+<a id="5-run-pairtools-dedup-and-pairtools-split"></a>
+### 5. Run `pairtools dedup` and `pairtools split`
+<a id="code-10"></a>
 #### Code
 <details>
-<summary><i>Code: 4. Run pairtools dedup</i></summary>
+<summary><i>Code: 5. Run pairtools dedup</i></summary>
 
 ```bash
 #!/bin/bash
@@ -2407,10 +4191,10 @@ zcat "${a_unmap_pre_bam}"
 </details>
 <br />
 
-<a id="printed-6"></a>
+<a id="printed-8"></a>
 #### Printed
 <details>
-<summary><i>Printed: 4. Run pairtools dedup</i></summary>
+<summary><i>Printed: 5. Run pairtools dedup</i></summary>
 
 <a id="check-the-documentation-2"></a>
 ##### Check the documentation
@@ -4048,12 +5832,12 @@ XIIsXIII
 </details>
 <br />
 
-<a id="5-run-pairtools-select"></a>
-### 5. Run `pairtools select`
-<a id="code-8"></a>
+<a id="6-run-pairtools-select"></a>
+### 6. Run `pairtools select`
+<a id="code-11"></a>
 #### Code
 <details>
-<summary><i>Code: Run pairtools select</i></summary>
+<summary><i>Code: 6. Run pairtools select</i></summary>
 
 ```bash
 #!/bin/bash
@@ -4063,10 +5847,10 @@ XIIsXIII
 </details>
 <br />
 
-<a id="printed-7"></a>
+<a id="printed-9"></a>
 #### Printed
 <details>
-<summary><i>Printed: Run pairtools select</i></summary>
+<summary><i>Printed: 6. Run pairtools select</i></summary>
 
 <a id="check-the-documentation-3"></a>
 ##### Check the documentation
@@ -4094,14 +5878,14 @@ XIIsXIII
 </details>
 <br />
 
-<a id="6-run-pairtools-stats"></a>
-### 6. Run `pairtools stats`
+<a id="7-run-pairtools-stats"></a>
+### 7. Run `pairtools stats`
 Is this any different from collecting stats when running [`pairtools dedup`](#code-7) or [`pairtools parse`](#code-5)?
 
-<a id="code-9"></a>
+<a id="code-12"></a>
 #### Code
 <details>
-<summary><i>Code: 5. Run pairtools stats</i></summary>
+<summary><i>Code: 7. Run pairtools stats</i></summary>
 
 ```bash
 #!/bin/bash
@@ -4116,10 +5900,10 @@ pairtools stats --help
 </details>
 <br />
 
-<a id="printed-8"></a>
+<a id="printed-10"></a>
 #### Printed
 <details>
-<summary><i>Printed: 5. Run pairtools stats</i></summary>
+<summary><i>Printed: 7. Run pairtools stats</i></summary>
 
 <a id="check-the-documentation-4"></a>
 ##### Check the documentation
@@ -4220,12 +6004,12 @@ Options:
 </details>
 <br />
 
-<a id="7-load-pairs-to-cooler"></a>
-### 7. Load pairs to cooler
-<a id="code-10"></a>
+<a id="8-load-pairs-to-cooler"></a>
+### 8. Load pairs to cooler
+<a id="code-13"></a>
 #### Code
 <details>
-<summary><i>Code: 6. Load pairs to cooler</i></summary>
+<summary><i>Code: 7. Load pairs to cooler</i></summary>
 
 ```bash
 #!/bin/bash
@@ -4235,10 +6019,10 @@ Options:
 </details>
 <br />
 
-<a id="printed-9"></a>
+<a id="printed-11"></a>
 #### Printed
 <details>
-<summary><i>Printed: 6. Load pairs to cooler</i></summary>
+<summary><i>Printed: 7. Load pairs to cooler</i></summary>
 
 ```txt
 
