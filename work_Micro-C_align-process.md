@@ -70,6 +70,9 @@
     1. [9. Generate a multi-resolution cooler by coarsening](#9-generate-a-multi-resolution-cooler-by-coarsening)
         1. [Code](#code-13)
         1. [Printed](#printed-12)
+    1. [10. Ingest files for HiGlass](#10-ingest-files-for-higlass)
+        1. [Code](#code-14)
+        1. [Printed](#printed-13)
 
 <!-- /MarkdownTOC -->
 <br />
@@ -1979,37 +1982,25 @@ pigz 2.6
 ```bash
 #!/bin/bash
 
-docker pull higlass/higlass-docker
+run=FALSE
+[[ "${run}" == TRUE ]] &&
+    {        
+        docker pull higlass/higlass-docker
 
-p_proj="${HOME}/projects-etc/2023_rDNA"
-p_data="results/2023-0307_work_Micro-C_align-process/cool"
-docker run \
-    --detach \
-    --publish 8888:80 \
-    --volume "${p_proj}/${p_data}":/data \
-    --volume /tmp:/tmp \
-    --name higlass-container \
-    higlass/higlass-docker
+        p_proj="${HOME}/projects-etc/2023_rDNA"
+        p_data="results/2023-0307_work_Micro-C_align-process/cool"
+        docker run \
+            --detach \
+            --publish 8888:80 \
+            --volume "${p_proj}/${p_data}":/data \
+            --volume /tmp:/tmp \
+            --name higlass-container \
+            higlass/higlass-docker
 
-docker exec higlass-container ls /tmp
+        docker exec higlass-container ls /tmp
 
-docker exec higlass-container ls /data
-
-docker exec higlass-container python higlass-server/manage.py
-
-docker exec higlass-container \
-    python higlass-server/manage.py ingest_tileset \
-        --help
-
-docker exec higlass-container \
-    python higlass-server/manage.py ingest_tileset \
-        --filename /data/SRR7939018.mcool \
-        --filetype cooler \
-        --datatype matrix
-
-curl http://localhost:8888/api/v1/tilesets/
-
-#  OK, it works!
+        docker exec higlass-container ls /data
+    }
 ```
 </details>
 <br />
@@ -2120,118 +2111,6 @@ uwsgi-stdout---supervisor-yhwmdgo2.log
 SRR7939018.mcool
 db.sqlite3
 log
-
-
-❯ docker exec higlass-container python higlass-server/manage.py
-
-Type 'manage.py help <subcommand>' for help on a specific subcommand.
-
-Available subcommands:
-
-[auth]
-    changepassword
-    createsuperuser
-
-[contenttypes]
-    remove_stale_contenttypes
-
-[django]
-    check
-    compilemessages
-    createcachetable
-    dbshell
-    diffsettings
-    dumpdata
-    flush
-    inspectdb
-    loaddata
-    makemessages
-    makemigrations
-    migrate
-    sendtestemail
-    shell
-    showmigrations
-    sqlflush
-    sqlmigrate
-    sqlsequencereset
-    squashmigrations
-    startapp
-    startproject
-    test
-    testserver
-
-[guardian]
-    clean_orphan_obj_perms
-
-[rest_framework]
-    generateschema
-
-[sessions]
-    clearsessions
-
-[staticfiles]
-    collectstatic
-    findstatic
-    runserver
-
-[tilesets]
-    delete_tileset
-    ingest_tileset
-    list_tilesets
-    modify_tileset
-
-
-❯ docker exec higlass-container \
->     python higlass-server/manage.py ingest_tileset \
->         --help
-usage: manage.py ingest_tileset [-h] [--filename FILENAME]
-                                [--indexfile INDEXFILE] [--datatype DATATYPE]
-                                [--filetype FILETYPE]
-                                [--coordSystem COORDSYSTEM]
-                                [--coordSystem2 COORDSYSTEM2] [--uid UID]
-                                [--name NAME] [--project-name PROJECT_NAME]
-                                [--no-upload] [--version] [-v {0,1,2,3}]
-                                [--settings SETTINGS]
-                                [--pythonpath PYTHONPATH] [--traceback]
-                                [--no-color] [--force-color]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --filename FILENAME
-  --indexfile INDEXFILE
-  --datatype DATATYPE
-  --filetype FILETYPE
-  --coordSystem COORDSYSTEM
-  --coordSystem2 COORDSYSTEM2
-  --uid UID
-  --name NAME
-  --project-name PROJECT_NAME
-  --no-upload           Skip upload
-  --version             show program's version number and exit
-  -v {0,1,2,3}, --verbosity {0,1,2,3}
-                        Verbosity level; 0=minimal output, 1=normal output,
-                        2=verbose output, 3=very verbose output
-  --settings SETTINGS   The Python path to a settings module, e.g.
-                        "myproject.settings.main". If this isn't provided, the
-                        DJANGO_SETTINGS_MODULE environment variable will be
-                        used.
-  --pythonpath PYTHONPATH
-                        A directory to add to the Python path, e.g.
-                        "/home/djangoprojects/myproject".
-  --traceback           Raise on CommandError exceptions
-  --no-color            Don't colorize the command output.
-  --force-color         Force colorization of the command output.
-
-
-❯ docker exec higlass-container \
->     python higlass-server/manage.py ingest_tileset \
->         --filename /data/SRR7939018.mcool \
->         --filetype cooler \
->         --datatype matrix
-
-
-❯ curl http://localhost:8888/api/v1/tilesets/
-{"count":1,"next":null,"previous":null,"results":[{"uuid":"SSibmIFARuGpkcdcXMRi0w","datafile":"http://localhost:8888/api/v1/tilesets/media/uploads/SRR7939018.mcool","filetype":"cooler","datatype":"matrix","name":"SRR7939018.mcool","coordSystem":"","coordSystem2":"","created":"2023-07-06T22:36:07.679853Z","project":"SVNc_qSfRkGab57HGsyjvQ","project_name":"","description":"","private":false}]}%
 ```
 </details>
 <br />
@@ -2253,7 +2132,7 @@ optional arguments:
 
 grabnode  # 8 cores, default settings
 
-cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307" ||
+cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process" ||
     echo "cd'ing failed; check on this..."
 
 source activate pairtools_env
@@ -2273,20 +2152,41 @@ source activate pairtools_env
 
 #  Initialize variables -------------------------------------------------------
 #  General variables
-threads="${SLURM_CPUS_ON_NODE}"  # echo "${threads}"
-scratch="/fh/scratch/delete30/tsukiyama_t"  # ., "${scratch}"
+# analysis="Q"  #ARGUMENT
+analysis="G1"  #ARGUMENT
+# analysis="G2-M"  #ARGUMENT
+
+threads="${SLURM_CPUS_ON_NODE}"  #ARGUMENT  # echo "${threads}"
+scratch="/fh/scratch/delete30/tsukiyama_t"  #ARGUMENT  # ., "${scratch}"
+
+#  Specify samples to analyze
+if [[ "${analysis}" == "Q" ]]; then
+    p_fq="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742"  # ., "${p_fq}"
+    f_pre="SRR7939018"  # ., "${p_fq}/${f_pre}"*
+    
+    flag_merge=FALSE
+elif [[ "${analysis}" == "G1" ]]; then
+    p_fq="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA636358"  # ., "${p_fq}"
+    f_pre="SRR11893107"  # ., "${p_fq}/${f_pre}"*
+
+    flag_merge=FALSE
+elif [[ "${analysis}" == "G2-M" ]]; then
+    p_fq="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA636358"  # ., "${p_fq}"
+    f_pre="SRR11893084"  # ., "${p_fq}/${f_pre}"*
+    f_pre="SRR11893085"
+    
+    flag_merge=TRUE
+fi
 
 #  For atria, bwa mem
-p_fq="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742"  # ., "${p_fq}"
-f_pre="SRR7939018"  # ., "${p_fq}/${f_pre}"*
+d_trim="01_trim"  # ., "${d_trim}"
+
 a_fq_1="${p_fq}/${f_pre}_1.fastq.gz"  # ., "${a_fq_1}"
 a_fq_2="${p_fq}/${f_pre}_2.fastq.gz"  # ., "${a_fq_2}"
-
-d_trim="01_trim"  # ., "${d_trim}"
 a_afq_1="${d_trim}/${f_pre}_1.atria.fastq.gz"  # ., "${a_afq_1}"
 a_afq_2="${d_trim}/${f_pre}_2.atria.fastq.gz"  # ., "${a_afq_2}"
 
-d_bam="02_aln"  # echo "${d_bam}"
+d_bam="02_align"  # echo "${d_bam}"
 f_bam="${f_pre}.bam"  # echo "${f_bam}"
 a_bam="${d_bam}/${f_bam}"  # echo "${a_bam}"
 
@@ -2378,8 +2278,8 @@ mkdir: created directory '01_trim/err_out'
 
 
 ❯ if [[ ! -d "${d_bam}" ]]; then mkdir -p "${d_bam}/err_out"; fi
-mkdir: created directory '02_aln'
-mkdir: created directory '02_aln/err_out'
+mkdir: created directory '02_align'
+mkdir: created directory '02_align/err_out'
 
 
 ❯ if [[ ! -d "${d_pairs}" ]]; then mkdir -p "${d_pairs}/err_out"; fi
@@ -2388,7 +2288,7 @@ mkdir: created directory '03_parse/err_out'
 
 
 ❯ if [[ ! -d "${d_stats}" ]]; then mkdir -p "${d_stats}"; fi
-mkdir: created directory '0X_stats'
+mkdir: created directory '06_stats'
 
 
 ❯ if [[ ! -d "${d_sort}" ]]; then mkdir -p "${d_sort}/err_out"; fi
@@ -2404,13 +2304,13 @@ mkdir: created directory '05_dedup/err_out'
 
 
 ❯ if [[ ! -d "${d_cload}" ]]; then mkdir -p "${d_cload}/err_out"; fi
-mkdir: created directory '06_cload'
-mkdir: created directory '06_cload/err_out'
+mkdir: created directory '07_cload'
+mkdir: created directory '07_cload/err_out'
 
 
 ❯ if [[ ! -d "${d_zoom}" ]]; then mkdir -p "${d_zoom}/err_out"; fi
-mkdir: created directory '07_zoom'
-mkdir: created directory '07_zoom/err_out'
+mkdir: created directory '08_zoom'
+mkdir: created directory '08_zoom/err_out'
 ```
 </details>
 <br />
@@ -2430,8 +2330,7 @@ run=TRUE
 [[ "${run}" == TRUE ]] &&
     {
         echo """
-        alias atria=\"\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria\"
-        atria \\
+        \"\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria\" \\
             -t \"${threads}\" \\
             -r \"${a_fq_1}\" \\
             -R \"${a_fq_2}\" \\
@@ -2444,11 +2343,9 @@ run=TRUE
 run=TRUE
 [[ "${run}" == TRUE ]] &&
     {
-        #  See paths to two versions of atria: v3.2.2 (2023_rDNA) to v3.2.1 (2022_transcriptome-construction)
-        #+ (transcriptome-construction)
-        # alias atria="\${HOME}/tsukiyamalab/kalavatt/2022_transcriptome-construction/software/Atria/app-3.2.1/bin/atria"
-        alias atria="\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
-        atria \
+        #  Two versions of atria: v3.2.2 (2023_rDNA) to v3.2.1 (2022_transcriptome-construction)
+        # "\${HOME}/tsukiyamalab/kalavatt/2022_transcriptome-construction/software/Atria/app-3.2.1/bin/atria" \
+        "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria" \
             -t "${threads}" \
             -r "${a_fq_1}" \
             -R "${a_fq_2}" \
@@ -2470,34 +2367,37 @@ fi
 <summary><i>Printed: 1. Trim fastq files</i></summary>
 
 ```txt
-❯ echo """
-> alias atria=\"\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria\"
-> atria \\
->     -t \"${threads}\" \\
->     -r \"${a_fq_1}\" \\
->     -R \"${a_fq_2}\" \\
->     -o \"${d_trim}\" \\
->     --no-length-filtration
-> """
+❯ [[ "${run}" == TRUE ]] &&
+>     {
+>         echo """
+>         \"\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria\" \\
+>             -t \"${threads}\" \\
+>             -r \"${a_fq_1}\" \\
+>             -R \"${a_fq_2}\" \\
+>             -o \"${d_trim}\" \\
+>             --no-length-filtration
+>         """
+>     }
 
-alias atria="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
-atria \
-    -t "8" \
-    -r "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz" \
-    -R "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz" \
-    -o "01_trim" \
-    --no-length-filtration
-
-
-❯ alias atria="\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
+        "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria" \
+            -t "8" \
+            -r "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA636358/SRR11893107_1.fastq.gz" \
+            -R "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA636358/SRR11893107_2.fastq.gz" \
+            -o "01_trim" \
+            --no-length-filtration
 
 
-❯ atria \
->     -t "${threads}" \
->     -r "${a_fq_1}" \
->     -R "${a_fq_2}" \
->     -o "${d_trim}" \
->     --no-length-filtration
+❯ [[ "${run}" == TRUE ]] &&
+>     {
+>         #  Two versions of atria: v3.2.2 (2023_rDNA) to v3.2.1 (2022_transcriptome-construction)
+>         # "\${HOME}/tsukiyamalab/kalavatt/2022_transcriptome-construction/software/Atria/app-3.2.1/bin/atria" \
+>         "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria" \
+>             -t "${threads}" \
+>             -r "${a_fq_1}" \
+>             -R "${a_fq_2}" \
+>             -o "${d_trim}" \
+>             --no-length-filtration
+>     }
 pigz 2.6
 ┌ Info: ATRIA VERSIONS
 │   atria = "v3.2.2"
@@ -2849,9 +2749,9 @@ correct=TRUE
                 "/home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa" \
                 "01_trim/SRR7939018_1.atria.fastq.gz" \
                 "01_trim/SRR7939018_2.atria.fastq.gz" \
-                    | samtools view -@ 8 -S -b > "02_aln/SRR7939018.bam"
+                    | samtools view -@ 8 -S -b > "02_align/SRR7939018.bam"
         } \
-            2> >(tee "02_aln/err_out/SRR7939018.stderr.txt" >&2)
+            2> >(tee "02_align/err_out/SRR7939018.stderr.txt" >&2)
 
 
 ❯ [[ "${correct}" == TRUE ]] &&
@@ -2888,9 +2788,9 @@ correct=TRUE
                 "/home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa" \
                 "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz" \
                 "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz" \
-                    | samtools view -@ 8 -S -b > "02_aln/SRR7939018.bam"
+                    | samtools view -@ 8 -S -b > "02_align/SRR7939018.bam"
         } \
-            2> >(tee "02_aln/err_out/SRR7939018.stderr.txt" >&2)
+            2> >(tee "02_align/err_out/SRR7939018.stderr.txt" >&2)
 
 [M::bwa_idx_load_from_disk] read 0 ALT contigs
 [M::process] read 1600000 sequences (80000000 bp)...
@@ -2921,8 +2821,10 @@ pairtools parse2 --help
 
 
 #  Do a trial run of pairtools parse ------------------------------------------
-test=TRUE
-[[ "${test}" == TRUE ]] &&
+#MAYBE Delete this section on parse (but not the section on parse2)
+run=FALSE
+[[ "${run}" == TRUE ]] &&
+[[ -f "${a_bam}" ]] &&
     {
         echo """
         pairtools parse \\
@@ -2940,8 +2842,9 @@ test=TRUE
         """
     }
 
-test=TRUE
-[[ "${test}" == TRUE ]] &&
+run=FALSE
+[[ "${run}" == TRUE ]] &&
+[[ -f "${a_bam}" ]] &&
     {
         pairtools parse \
             -o "${a_pairs}" \
@@ -2973,12 +2876,13 @@ test=TRUE
 #     --chroms-path /data/kun/Align_Index/grch38_no_alt/hg38.genome test.sam \
 #         > test.pairsam
 
-test=TRUE
-[[ "${test}" == TRUE ]] &&
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+[[ -f "${a_bam}" ]] &&
     {
         echo """
         pairtools parse2 \\
-            -o \"${a_pairs%.txt.gz}.p2.txt.gz\" \\
+            -o \"${a_pairs}\" \\
             -c \"${a_size}\" \\
             --report-position outer \\
             --report-orientation pair \\
@@ -2990,7 +2894,7 @@ test=TRUE
             --add-columns pos5,pos3,mapq,mismatches \\
             --drop-seq \\
             --drop-sam \\
-            --output-stats \"${a_stats%.txt}.p2.txt\" \\
+            --output-stats \"${a_stats}\" \\
             --nproc-in \"${threads}\" \\
             --nproc-out \"${threads}\" \\
             \"${a_bam}\" \\
@@ -2998,11 +2902,12 @@ test=TRUE
         """
     }
 
-test=TRUE
-[[ "${test}" == TRUE ]] &&
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+[[ -f "${a_bam}" ]] &&
     {
         pairtools parse2 \
-            -o "${a_pairs%.txt.gz}.p2.txt.gz" \
+            -o "${a_pairs}" \
             -c "${a_size}" \
             --report-position outer \
             --report-orientation pair \
@@ -3014,7 +2919,7 @@ test=TRUE
             --add-columns pos5,pos3,mapq,mismatches \
             --drop-seq \
             --drop-sam \
-            --output-stats "${a_stats%.txt}.p2.txt" \
+            --output-stats "${a_stats}" \
             --nproc-in "${threads}" \
             --nproc-out "${threads}" \
             "${a_bam}" \
@@ -3407,7 +3312,7 @@ pairtools parse \
 >             "${a_bam}" \
 >                 2> >(tee -a "${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).stderr.txt" >&2)
 >     }
-[E::idx_find_and_load] Could not retrieve index file for '02_aln/SRR7939018.bam'
+[E::idx_find_and_load] Could not retrieve index file for '02_align/SRR7939018.bam'
 WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/stats.py:888: RuntimeWarning: divide by zero encountered in double_scalars
   complexity = float(nseq / seq_to_complexity)  # clean np.int64 data type
 ```
@@ -3460,7 +3365,7 @@ WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/
             --output-stats "0X_stats/SRR7939018.stats.p2.txt" \
             --nproc-in "8" \
             --nproc-out "8" \
-            "02_aln/SRR7939018.bam" \
+            "02_align/SRR7939018.bam" \
                 2> >(tee -a "03_parse/err_out/SRR7939018.p2.stderr.txt" >&2)
 
 
@@ -3485,7 +3390,7 @@ WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/
 >             "${a_bam}" \
 >                 2> >(tee -a "${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).p2.stderr.txt" >&2)
 >     }
-[E::idx_find_and_load] Could not retrieve index file for '02_aln/SRR7939018.bam'
+[E::idx_find_and_load] Could not retrieve index file for '02_align/SRR7939018.bam'
 WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/stats.py:888: RuntimeWarning: divide by zero encountered in double_scalars
   complexity = float(nseq / seq_to_complexity)  # clean np.int64 data type
 ```
@@ -3577,7 +3482,7 @@ SRR7939018.5    141 *   0   0   *   *   0   0   AAATTCGGTACCAANTCTGNNNNNNNNNNNNN
 #samheader: @SQ SN:Mito LN:85779
 #samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 8 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
 #samheader: @PG ID:samtools PN:samtools PP:bwa  VN:1.16.1   CL:samtools view -@ 8 -S -b
-#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_aln/SRR7939018.bam  PP:samtools VN:1.0.2
+#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_align/SRR7939018.bam  PP:samtools VN:1.0.2
 #columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type walk_pair_index walk_pair_type pos51 pos52 pos31 pos32 mapq1 mapq2 mismatches1 mismatches2
 SRR7939018.1    !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
 SRR7939018.2    !   0   !   0   -   -   NN  1   R1-2    0   0   0   0   0   0
@@ -4264,6 +4169,7 @@ pairtools sort --help
 #  Do a trial run of pairtools parse ------------------------------------------
 run=TRUE
 [[ "${run}" == TRUE ]] &&
+[[ -f "${a_pairs}" ]] &&
     {
         echo """
             pairtools sort \\
@@ -4276,6 +4182,7 @@ run=TRUE
     }
 
 [[ "${run}" == TRUE ]] &&
+[[ -f "${a_pairs}" ]] &&
     {
         pairtools sort \
             --nproc "${threads}" \
@@ -4461,7 +4368,7 @@ pairtools sort \
 #samheader: @SQ SN:Mito LN:85779
 #samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 8 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
 #samheader: @PG ID:samtools PN:samtools PP:bwa  VN:1.16.1   CL:samtools view -@ 8 -S -b
-#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_aln/SRR7939018.bam  PP:samtools VN:1.0.2
+#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_align/SRR7939018.bam  PP:samtools VN:1.0.2
 #samheader: @PG ID:pairtools_sort   PN:pairtools_sort   CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 8 --tmpdir /fh/scratch/delete30/tsukiyama_t --output 04_sort/SRR7939018.sort.txt.gz 03_parse/SRR7939018.p2.txt.gz    PP:pairtools_parse2 VN:1.0.2
 #columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type walk_pair_index walk_pair_type pos51 pos52 pos31 pos32 mapq1 mapq2 mismatches1 mismatches2
 SRR7939018.21   !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
@@ -4648,6 +4555,7 @@ pairtools split --help
 #  Do a trial run of pairtools dedup ------------------------------------------
 run=TRUE
 [[ "${run}" == TRUE ]] &&
+[[ -f "${a_sort}" ]] &&
     {
         echo """
         pairtools dedup \\
@@ -4677,6 +4585,7 @@ run=TRUE
 
 run=TRUE
 [[ "${run}" == TRUE ]] &&
+[[ -f "${a_sort}" ]] &&
     {
         pairtools dedup \
             --n-proc "${threads}" \
@@ -5191,7 +5100,7 @@ WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/
 #samheader: @SQ SN:Mito LN:85779
 #samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 8 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
 #samheader: @PG ID:samtools PN:samtools PP:bwa  VN:1.16.1   CL:samtools view -@ 8 -S -b
-#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_aln/SRR7939018.bam  PP:samtools VN:1.0.2
+#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_align/SRR7939018.bam  PP:samtools VN:1.0.2
 #samheader: @PG ID:pairtools_sort   PN:pairtools_sort   CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 8 --tmpdir /fh/scratch/delete30/tsukiyama_t --output 04_sort/SRR7939018.sort.txt.gz 03_parse/SRR7939018.p2.txt.gz    PP:pairtools_parse2 VN:1.0.2
 #samheader: @PG ID:pairtools_dedup  PN:pairtools_dedup  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 8 --max-mismatch 0 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats 0X_stats/SRR7939018.dedup.stats.txt 04_sort/SRR7939018.sort.txt.gz PP:pairtools_sort   VN:1.0.2
 #samheader: @PG ID:pairtools_split  PN:pairtools_split  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs 05_dedup/pairs/SRR7939018.nodups.pairs.gz    PP:pairtools_dedup  VN:1.0.2
@@ -5294,7 +5203,7 @@ SRR7939018.15936606 I   81  I   5173    -   +   UU  1   R1-2    81  5173    32  
 #samheader: @SQ SN:Mito LN:85779
 #samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 8 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
 #samheader: @PG ID:samtools PN:samtools PP:bwa  VN:1.16.1   CL:samtools view -@ 8 -S -b
-#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_aln/SRR7939018.bam  PP:samtools VN:1.0.2
+#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_align/SRR7939018.bam  PP:samtools VN:1.0.2
 #samheader: @PG ID:pairtools_sort   PN:pairtools_sort   CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 8 --tmpdir /fh/scratch/delete30/tsukiyama_t --output 04_sort/SRR7939018.sort.txt.gz 03_parse/SRR7939018.p2.txt.gz    PP:pairtools_parse2 VN:1.0.2
 #samheader: @PG ID:pairtools_dedup  PN:pairtools_dedup  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 8 --max-mismatch 0 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats 0X_stats/SRR7939018.dedup.stats.txt 04_sort/SRR7939018.sort.txt.gz PP:pairtools_sort   VN:1.0.2
 #samheader: @PG ID:pairtools_split  PN:pairtools_split  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs 05_dedup/pairs/SRR7939018.dups.pairs.gz  PP:pairtools_dedup  VN:1.0.2
@@ -5397,7 +5306,7 @@ SRR7939018.357  !   0   !   0   -   -   MM  1   R1-2    0   0   0   0   0   0
 #samheader: @SQ SN:Mito LN:85779
 #samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 8 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
 #samheader: @PG ID:samtools PN:samtools PP:bwa  VN:1.16.1   CL:samtools view -@ 8 -S -b
-#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_aln/SRR7939018.bam  PP:samtools VN:1.0.2
+#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_align/SRR7939018.bam  PP:samtools VN:1.0.2
 #samheader: @PG ID:pairtools_sort   PN:pairtools_sort   CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 8 --tmpdir /fh/scratch/delete30/tsukiyama_t --output 04_sort/SRR7939018.sort.txt.gz 03_parse/SRR7939018.p2.txt.gz    PP:pairtools_parse2 VN:1.0.2
 #samheader: @PG ID:pairtools_dedup  PN:pairtools_dedup  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 8 --max-mismatch 0 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats 0X_stats/SRR7939018.dedup.stats.txt 04_sort/SRR7939018.sort.txt.gz PP:pairtools_sort   VN:1.0.2
 #samheader: @PG ID:pairtools_split  PN:pairtools_split  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs 05_dedup/pairs/SRR7939018.unmapped.pairs.gz  PP:pairtools_dedup  VN:1.0.2
@@ -6349,6 +6258,9 @@ pairtools stats --help
 #  Do a trial run of pairtools stats ------------------------------------------
 run=TRUE
 [[ "${run}" == TRUE ]] &&
+[[ -f "${a_dedup_pre_pairs}" ]] &&
+[[ -f "${a_dup_pre_pairs}" ]] &&
+[[ -f "${a_unmap_pre_pairs}" ]] &&
     {
         pairtools stats \
             -o "${a_dedup_pre_pairs_stats}" \
@@ -7415,6 +7327,7 @@ cooler cload pairs --help
 #  Echo test
 run=TRUE
 [[ "${run}" == TRUE ]] &&
+[[ -f "${a_dedup_pre_pairs}" ]] &&
     {
         echo """
         cooler cload pairs \\
@@ -7429,6 +7342,7 @@ run=TRUE
 #  Create a .cool from the processed, filtered pairs
 run=TRUE
 [[ "${run}" == TRUE ]] &&
+[[ -f "${a_dedup_pre_pairs}" ]] &&
     {
         cooler cload pairs \
             -c1 2 -p1 3 -c2 4 -p2 5 \
@@ -7437,6 +7351,8 @@ run=TRUE
             "${a_dedup_pre_pairs}" \
             "${a_cload}"
     }
+
+#TODO Write standard error
 ```
 </details>
 <br />
@@ -7616,6 +7532,7 @@ cooler zoomify --help
 #  Echo test
 run=TRUE
 [[ "${run}" == TRUE ]] &&
+[[ -f "${a_cload}" ]] &&
     {
         echo """
         cooler zoomify \\
@@ -7623,24 +7540,29 @@ run=TRUE
             --nproc \"${threads}\" \\
             --resolutions 100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \\
             --balance \\
-            \"${a_cload}\"
+            \"${a_cload}\" \\
+                2> >(tee -a \"${d_zoom}/err_out/${f_pre}.stderr.txt\" >&2)
         """
     }
 
 #  Run cooler zoomify (generate a multi-resolution cooler by coarsening)
+if [[ -f "${a_zoom}" ]]; then rm "${a_zoom}"; fi
 run=TRUE
 [[ "${run}" == TRUE ]] &&
+[[ -f "${a_cload}" ]] &&
     {
         cooler zoomify \
             --out "${a_zoom}" \
             --nproc "${threads}" \
             --resolutions 100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \
             --balance \
-            "${a_cload}"
+            --balance-args '--max-iters 2000' \
+            "${a_cload}" \
+                2> >(tee -a "${d_zoom}/err_out/${f_pre}.stderr.txt" >&2)
     }
-
-#TODO Add Balance arguments
-#TODO Go ahead and include resolution 50 in the mcool
+#HERE
+#DONE Add Balance arguments (--nproc is eight by default)
+#NO Go ahead and include resolution 50 in the mcool
 ```
 </details>
 <br />
@@ -8065,3 +7987,209 @@ INFO:cooler.balance:variance is 7.734072057040814e-06
 </details>
 <br />
 
+<a id="10-ingest-files-for-higlass"></a>
+### 10. Ingest files for HiGlass
+<a id="code-14"></a>
+#### Code
+<details>
+<summary><i>Code: Ingest files for HiGlass</i></summary>
+
+```bash
+#!/bin/bash
+
+run_check=FALSE
+[[ "${run_check}" == TRUE ]] &&
+    {
+        docker exec higlass-container python higlass-server/manage.py
+
+        docker exec higlass-container \
+            python higlass-server/manage.py ingest_tileset \
+                --help
+    }
+
+#  Work for quick, rough-draft assessments
+rough_Q=FALSE
+[[ "${rough_Q}" == TRUE ]] &&
+    {
+        docker exec higlass-container \
+            python higlass-server/manage.py ingest_tileset \
+                --filename /data/SRR7939018.mcool \
+                --filetype cooler \
+                --datatype matrix
+
+        curl http://localhost:8888/api/v1/tilesets/
+        #  OK, it works!
+    }
+
+rough_G1=FALSE
+[[ "${rough_G1}" == TRUE ]] &&
+    {
+        docker exec higlass-container \
+            python higlass-server/manage.py ingest_tileset \
+                --filename /data/SRR11893107.mcool \
+                --filetype cooler \
+                --datatype matrix
+
+        curl http://localhost:8888/api/v1/tilesets/
+        #  OK, it works!
+    }
+
+rough_size=TRUE
+[[ "${rough_size}" == TRUE ]] &&
+    {
+        docker exec higlass-container \
+            python higlass-server/manage.py ingest_tileset \
+            --filename /data/S288C_reference_sequence_R64-3-1_20210421.size \
+            --filetype chromsizes-tsv \
+            --datatype chromsizes
+
+        curl http://localhost:8888/api/v1/tilesets/
+    }
+
+```
+</details>
+<br />
+
+<a id="printed-13"></a>
+#### Printed
+<details>
+<summary><i>Printed: Ingest files for HiGlass</i></summary>
+
+```txt
+❯ docker exec higlass-container python higlass-server/manage.py
+
+Type 'manage.py help <subcommand>' for help on a specific subcommand.
+
+Available subcommands:
+
+[auth]
+    changepassword
+    createsuperuser
+
+[contenttypes]
+    remove_stale_contenttypes
+
+[django]
+    check
+    compilemessages
+    createcachetable
+    dbshell
+    diffsettings
+    dumpdata
+    flush
+    inspectdb
+    loaddata
+    makemessages
+    makemigrations
+    migrate
+    sendtestemail
+    shell
+    showmigrations
+    sqlflush
+    sqlmigrate
+    sqlsequencereset
+    squashmigrations
+    startapp
+    startproject
+    test
+    testserver
+
+[guardian]
+    clean_orphan_obj_perms
+
+[rest_framework]
+    generateschema
+
+[sessions]
+    clearsessions
+
+[staticfiles]
+    collectstatic
+    findstatic
+    runserver
+
+[tilesets]
+    delete_tileset
+    ingest_tileset
+    list_tilesets
+    modify_tileset
+
+
+❯ docker exec higlass-container \
+>     python higlass-server/manage.py ingest_tileset \
+>         --help
+usage: manage.py ingest_tileset [-h] [--filename FILENAME]
+                                [--indexfile INDEXFILE] [--datatype DATATYPE]
+                                [--filetype FILETYPE]
+                                [--coordSystem COORDSYSTEM]
+                                [--coordSystem2 COORDSYSTEM2] [--uid UID]
+                                [--name NAME] [--project-name PROJECT_NAME]
+                                [--no-upload] [--version] [-v {0,1,2,3}]
+                                [--settings SETTINGS]
+                                [--pythonpath PYTHONPATH] [--traceback]
+                                [--no-color] [--force-color]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --filename FILENAME
+  --indexfile INDEXFILE
+  --datatype DATATYPE
+  --filetype FILETYPE
+  --coordSystem COORDSYSTEM
+  --coordSystem2 COORDSYSTEM2
+  --uid UID
+  --name NAME
+  --project-name PROJECT_NAME
+  --no-upload           Skip upload
+  --version             show program's version number and exit
+  -v {0,1,2,3}, --verbosity {0,1,2,3}
+                        Verbosity level; 0=minimal output, 1=normal output,
+                        2=verbose output, 3=very verbose output
+  --settings SETTINGS   The Python path to a settings module, e.g.
+                        "myproject.settings.main". If this isn't provided, the
+                        DJANGO_SETTINGS_MODULE environment variable will be
+                        used.
+  --pythonpath PYTHONPATH
+                        A directory to add to the Python path, e.g.
+                        "/home/djangoprojects/myproject".
+  --traceback           Raise on CommandError exceptions
+  --no-color            Don't colorize the command output.
+  --force-color         Force colorization of the command output.
+
+
+❯ docker exec higlass-container \
+>     python higlass-server/manage.py ingest_tileset \
+>         --filename /data/SRR7939018.mcool \
+>         --filetype cooler \
+>         --datatype matrix
+
+
+❯ curl http://localhost:8888/api/v1/tilesets/
+{"count":1,"next":null,"previous":null,"results":[{"uuid":"SSibmIFARuGpkcdcXMRi0w","datafile":"http://localhost:8888/api/v1/tilesets/media/uploads/SRR7939018.mcool","filetype":"cooler","datatype":"matrix","name":"SRR7939018.mcool","coordSystem":"","coordSystem2":"","created":"2023-07-06T22:36:07.679853Z","project":"SVNc_qSfRkGab57HGsyjvQ","project_name":"","description":"","private":false}]}%
+
+
+❯ [[ "${rough_G1}" == TRUE ]] &&
+
+❯ docker exec higlass-container \
+>     python higlass-server/manage.py ingest_tileset \
+>         --filename /data/SRR11893107.mcool \
+>         --filetype cooler \
+>         --datatype matrix
+
+
+❯ curl http://localhost:8888/api/v1/tilesets/
+{"count":2,"next":null,"previous":null,"results":[{"uuid":"SSibmIFARuGpkcdcXMRi0w","datafile":"http://localhost:8888/api/v1/tilesets/media/uploads/SRR7939018.mcool","filetype":"cooler","datatype":"matrix","name":"SRR7939018.mcool","coordSystem":"","coordSystem2":"","created":"2023-07-06T22:36:07.679853Z","project":"SVNc_qSfRkGab57HGsyjvQ","project_name":"","description":"","private":false},{"uuid":"EicDrjqTS4W4iXD8pyWyBA","datafile":"http://localhost:8888/api/v1/tilesets/media/uploads/SRR11893107.mcool","filetype":"cooler","datatype":"matrix","name":"SRR11893107.mcool","coordSystem":"","coordSystem2":"","created":"2023-07-07T22:49:26.751463Z","project":"SVNc_qSfRkGab57HGsyjvQ","project_name":"","description":"","private":false}]}%
+
+
+❯ docker exec higlass-container \
+>     python higlass-server/manage.py ingest_tileset \
+>     --filename /data/S288C_reference_sequence_R64-3-1_20210421.size \
+>     --filetype chromsizes-tsv \
+>     --datatype chromsizes
+
+
+❯ curl http://localhost:8888/api/v1/tilesets/
+{"count":3,"next":null,"previous":null,"results":[{"uuid":"SSibmIFARuGpkcdcXMRi0w","datafile":"http://localhost:8888/api/v1/tilesets/media/uploads/SRR7939018.mcool","filetype":"cooler","datatype":"matrix","name":"SRR7939018.mcool","coordSystem":"","coordSystem2":"","created":"2023-07-06T22:36:07.679853Z","project":"SVNc_qSfRkGab57HGsyjvQ","project_name":"","description":"","private":false},{"uuid":"EicDrjqTS4W4iXD8pyWyBA","datafile":"http://localhost:8888/api/v1/tilesets/media/uploads/SRR11893107.mcool","filetype":"cooler","datatype":"matrix","name":"SRR11893107.mcool","coordSystem":"","coordSystem2":"","created":"2023-07-07T22:49:26.751463Z","project":"SVNc_qSfRkGab57HGsyjvQ","project_name":"","description":"","private":false},{"uuid":"Kb-bcjysSlWc8H1dlRuqJA","datafile":"http://localhost:8888/api/v1/tilesets/media/uploads/S288C_reference_sequence_R64-3-1_20210421.size","filetype":"chromsizes-tsv","datatype":"chromsizes","name":"S288C_reference_sequence_R64-3-1_20210421.size","coordSystem":"","coordSystem2":"","created":"2023-07-07T22:58:53.689824Z","project":"SVNc_qSfRkGab57HGsyjvQ","project_name":"","description":"","private":false}]}
+```
+</details>
+<br />
