@@ -16,22 +16,28 @@
         1. [Install HiGlass](#install-higlass)
             1. [Code](#code-2)
             1. [Printed](#printed-2)
-1. [Work through the steps of pairtools](#work-through-the-steps-of-pairtools)
+1. [Set up the Micro-C processing workflow](#set-up-the-micro-c-processing-workflow)
     1. [0. Get situated](#0-get-situated)
         1. [Get to work directory, initialize environment](#get-to-work-directory-initialize-environment)
             1. [Code](#code-3)
         1. [Initialize variables, create outdirectories](#initialize-variables-create-outdirectories)
-            1. [Code](#code-4)
-            1. [Printed](#printed-3)
+            1. [Initialize "general" variables for workflow](#initialize-general-variables-for-workflow)
+                1. [Code](#code-4)
+            1. [Initialize "specific" variables for workflow](#initialize-specific-variables-for-workflow)
+                1. [Code](#code-5)
+            1. [If applicable, then run logic for running `pairtools merge`](#if-applicable-then-run-logic-for-running-pairtools-merge)
+                1. [Code](#code-6)
+            1. [Create outdirectories if not present](#create-outdirectories-if-not-present)
+                1. [Code](#code-7)
     1. [1. Trim fastq files](#1-trim-fastq-files)
-        1. [Code](#code-5)
-        1. [Printed](#printed-4)
+        1. [Code](#code-8)
+        1. [Printed](#printed-3)
     1. [2. Align datasets](#2-align-datasets)
-        1. [Code](#code-6)
-        1. [Printed](#printed-5)
+        1. [Code](#code-9)
+        1. [Printed](#printed-4)
     1. [3. Run `pairtools parse`](#3-run-pairtools-parse)
-        1. [Code](#code-7)
-        1. [Printed](#printed-6)
+        1. [Code](#code-10)
+        1. [Printed](#printed-5)
             1. [Check the documentation](#check-the-documentation)
                 1. [`pairtools parse`](#pairtools-parse)
                 1. [`pairtools parse2`](#pairtools-parse2)
@@ -40,39 +46,57 @@
             1. [Examine the pairs outfile](#examine-the-pairs-outfile)
             1. [Examine the stats outfile](#examine-the-stats-outfile)
     1. [4. Run `pairtools sort`](#4-run-pairtools-sort)
-        1. [Code](#code-8)
-        1. [Printed](#printed-7)
+        1. [Code](#code-11)
+        1. [Printed](#printed-6)
             1. [Check the documentation](#check-the-documentation-1)
             1. [Run `pairtools sort`](#run-pairtools-sort)
             1. [Examine the sorted pairs outfile](#examine-the-sorted-pairs-outfile)
     1. [5. Run `pairtools dedup` and `pairtools split`](#5-run-pairtools-dedup-and-pairtools-split)
-        1. [Code](#code-9)
-        1. [Printed](#printed-8)
+        1. [Code](#code-12)
+        1. [Printed](#printed-7)
             1. [Check the documentation](#check-the-documentation-2)
             1. [Run `pairtools dedup`](#run-pairtools-dedup)
             1. [Check the various outfiles](#check-the-various-outfiles)
             1. [Examine the unique pairs](#examine-the-unique-pairs)
             1. [Check the stats outfile](#check-the-stats-outfile)
-    1. [6. Run `pairtools select`](#6-run-pairtools-select)
-        1. [Code](#code-10)
-        1. [Printed](#printed-9)
-            1. [Check the documentation](#check-the-documentation-3)
-            1. [`pairtools select`](#pairtools-select)
-    1. [7. Run `pairtools stats`](#7-run-pairtools-stats)
-        1. [Code](#code-11)
-        1. [Printed](#printed-10)
-            1. [Check the documentation](#check-the-documentation-4)
-            1. [Do a trial run of `pairtools stats`](#do-a-trial-run-of-pairtools-stats)
-            1. [Check the contents of the stats files](#check-the-contents-of-the-stats-files)
-    1. [8. Load pairs to cooler](#8-load-pairs-to-cooler)
-        1. [Code](#code-12)
-        1. [Printed](#printed-11)
-    1. [9. Generate a multi-resolution cooler by coarsening](#9-generate-a-multi-resolution-cooler-by-coarsening)
+    1. [X. Run `pairtools merge` if applicable](#x-run-pairtools-merge-if-applicable)
         1. [Code](#code-13)
-        1. [Printed](#printed-12)
-    1. [10. Ingest files for HiGlass](#10-ingest-files-for-higlass)
+        1. [Printed](#printed-8)
+            1. [Check the documentation](#check-the-documentation-3)
+            1. [Do a trial run of `pairtools merge`](#do-a-trial-run-of-pairtools-merge)
+            1. [Check the contents of the merge files](#check-the-contents-of-the-merge-files)
+    1. [X. Run `pairtools select`](#x-run-pairtools-select)
         1. [Code](#code-14)
-        1. [Printed](#printed-13)
+        1. [Printed](#printed-9)
+            1. [Check the documentation](#check-the-documentation-4)
+            1. [`pairtools select`](#pairtools-select)
+    1. [6. Run `pairtools stats`](#6-run-pairtools-stats)
+        1. [Individual pairs files](#individual-pairs-files)
+            1. [Code](#code-15)
+            1. [Printed](#printed-10)
+                1. [Check the documentation](#check-the-documentation-5)
+                1. [Do a trial run of `pairtools stats`](#do-a-trial-run-of-pairtools-stats)
+                1. [Check the contents of the stats files](#check-the-contents-of-the-stats-files)
+        1. [Merged pairs files](#merged-pairs-files)
+            1. [Code](#code-16)
+            1. [Printed](#printed-11)
+    1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
+        1. [Individual pairs file](#individual-pairs-file)
+            1. [Code](#code-17)
+            1. [Printed](#printed-12)
+        1. [Merged pairs files](#merged-pairs-files-1)
+            1. [Code](#code-18)
+            1. [Printed](#printed-13)
+    1. [8. Generate a multi-resolution cooler by coarsening](#8-generate-a-multi-resolution-cooler-by-coarsening)
+        1. [Cools from individual pairs files](#cools-from-individual-pairs-files)
+            1. [Code](#code-19)
+            1. [Printed](#printed-14)
+        1. [Cools from merged pairs files](#cools-from-merged-pairs-files)
+            1. [Code](#code-20)
+            1. [Printed](#printed-15)
+    1. [9. Ingest files for HiGlass](#9-ingest-files-for-higlass)
+        1. [Code](#code-21)
+        1. [Printed](#printed-16)
 
 <!-- /MarkdownTOC -->
 <br />
@@ -94,6 +118,7 @@
 
 run=FALSE
 if [[ "${run}" == TRUE ]]; then
+    #  Get GNU parallel, which is used below
     mamba create \
         -n pairtools_env \
         -c conda-forge \
@@ -101,9 +126,15 @@ if [[ "${run}" == TRUE ]]; then
     
     source activate pairtools_env
     
+    #  Obtain the Open2C suite of tools, plus Perl rename
     mamba install \
         -c bioconda \
-            bioframe cooler coolpuppy cooltools pairtools rename
+            bioframe \
+            cooler \
+            coolpuppy \
+            cooltools \
+            pairtools \
+            rename
 
     #  Packages needed for Atria, etc.
     mamba install \
@@ -1076,7 +1107,7 @@ run=FALSE
         julia build_atria.jl
     }
 
-run=FALSE  #IMPORTANT
+run=FALSE
 [[ "${run}" == TRUE ]] &&
     {
         alias atria="\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
@@ -1997,9 +2028,8 @@ run=FALSE
             --name higlass-container \
             higlass/higlass-docker
 
-        docker exec higlass-container ls /tmp
-
-        docker exec higlass-container ls /data
+        # docker exec higlass-container ls /tmp
+        # docker exec higlass-container ls /data
     }
 ```
 </details>
@@ -2116,8 +2146,8 @@ log
 <br />
 <br />
 
-<a id="work-through-the-steps-of-pairtools"></a>
-## Work through the steps of [pairtools](https://pairtools.readthedocs.io/en/latest/)
+<a id="set-up-the-micro-c-processing-workflow"></a>
+## Set up the Micro-C processing workflow
 <a id="0-get-situated"></a>
 ### 0. Get situated
 <a id="get-to-work-directory-initialize-environment"></a>
@@ -2130,10 +2160,12 @@ log
 ```bash
 #!/bin/bash
 
-grabnode  # 8 cores, default settings
+#  Workflow is written to be interactive
+grabnode  # 8 cores: 20, 8, 1, N
 
-cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process" ||
-    echo "cd'ing failed; check on this..."
+p_base="${HOME}/tsukiyamalab/kalavatt"  #ARGUMENT
+p_proj="2023_rDNA/results/2023-0307_work_Micro-C_align-process"
+cd "${p_base}/${p_proj}" || echo "cd'ing failed; check on this..."
 
 source activate pairtools_env
 ```
@@ -2142,22 +2174,29 @@ source activate pairtools_env
 
 <a id="initialize-variables-create-outdirectories"></a>
 #### Initialize variables, create outdirectories
+<a id="initialize-general-variables-for-workflow"></a>
+##### Initialize "general" variables for workflow
 <a id="code-4"></a>
-##### Code
+###### Code
 <details>
-<summary><i>Code: Initialize variables, create outdirectories</i></summary>
+<summary><i>Code: Initialize "general" variables for workflow</i></summary>
 
 ```bash
 #!/bin/bash
 
-#  Initialize variables -------------------------------------------------------
-#  General variables
-# analysis="Q"  #ARGUMENT
-analysis="G1"  #ARGUMENT
-# analysis="G2-M"  #ARGUMENT
+#  Initial setting for flag to *not* run pairtools merge
+flag_merge=FALSE  #HARDCODED  # echo "${flag_merge}"
+
+# analysis="Q"  #ARGUMENT  # echo "${analysis}"
+# analysis="G1"  #ARGUMENT  # echo "${analysis}"
+analysis="G2-M"  #ARGUMENT  # echo "${analysis}"
 
 threads="${SLURM_CPUS_ON_NODE}"  #ARGUMENT  # echo "${threads}"
+
 scratch="/fh/scratch/delete30/tsukiyama_t"  #ARGUMENT  # ., "${scratch}"
+
+# [[ "${analysis}" == "G2-M" ]] && rep=1  #ARGUMENT (if "G2-M")
+[[ "${analysis}" == "G2-M" ]] && rep=2  #ARGUMENT (if "G2-M")
 
 #  Specify samples to analyze
 if [[ "${analysis}" == "Q" ]]; then
@@ -2171,12 +2210,63 @@ elif [[ "${analysis}" == "G1" ]]; then
 
     flag_merge=FALSE
 elif [[ "${analysis}" == "G2-M" ]]; then
-    p_fq="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA636358"  # ., "${p_fq}"
-    f_pre="SRR11893084"  # ., "${p_fq}/${f_pre}"*
-    f_pre="SRR11893085"
+    #  If condition is met, then set flag to *run* pairtools merge
+    flag_merge=TRUE  #HARDCODED  # echo "${flag_merge}"
     
-    flag_merge=TRUE
+    #  Set path and file prefix information
+    p_fq="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA636358"  # ., "${p_fq}"
+    
+    if [[ "${rep}" -eq 1 ]]; then
+        f_pre="SRR11893084"  # ., "${p_fq}/${f_pre}"*
+    elif [[ "${rep}" -eq 2 ]]; then
+        f_pre="SRR11893085"  # ., "${p_fq}/${f_pre}"*
+    fi
+    
+    #  Set up hash, indices (needed for logic below)
+    unset arr_merge; unset order
+    typeset -A arr_merge; typeset -a order
+    arr_merge["SRR11893084"]="SRR11893085"; order+=("SRR11893084")
+    arr_merge["SRR11893085"]="SRR11893084"; order+=("SRR11893085")
+
+    run_test=FALSE
+    [[ "${run_test}" == TRUE ]] &&
+        {
+            #  Return hash keys, values in order
+            for i in "${order[@]}"; do
+                echo "  key  ${i}"
+                echo "value  ${arr_merge[${i}]}"
+                echo ""
+            done
+        }
 fi
+
+print_test=TRUE  #ARGUMENT
+[[ "${print_test}" == TRUE ]] &&
+    {
+        echo """
+        General variables for workflow
+        ==============================
+        analysis=${analysis}
+        threads=${threads}
+        scratch=${scratch}
+        p_fq=${p_fq}
+        f_pre=${f_pre}
+        flag_merge=${flag_merge}
+        """
+    }
+```
+</details>
+<br />
+
+<a id="initialize-specific-variables-for-workflow"></a>
+##### Initialize "specific" variables for workflow
+<a id="code-5"></a>
+###### Code
+<details>
+<summary><i>Code: Initialize "specific" variables for workflow</i></summary>
+
+```bash
+#!/bin/bash
 
 #  For atria, bwa mem
 d_trim="01_trim"  # ., "${d_trim}"
@@ -2194,17 +2284,17 @@ p_index="${HOME}/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa"  # 
 f_index="S288C_R64-3-1.fa"  # ., "${p_index}/${f_index}"*
 a_index="${p_index}/${f_index}"  # ., "${a_index}"*
 
-#  For pairtools parse
+#  For pairtools parse2
 p_size="${HOME}/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed"  # .,s "${p_size}"
 f_size="S288C_reference_sequence_R64-3-1_20210421.size"  # ., "${p_size}/${f_size}"
 a_size="${p_size}/${f_size}"  # ., "${a_size}"
 
 d_pairs="03_parse"  # echo "${d_pairs}"
-# f_pairs="${f_pre}.txt.gz"  # echo "${f_pairs}"
-f_pairs="${f_pre}.p2.txt.gz"  # echo "${f_pairs}"
+f_pairs="${f_pre}.txt.gz"  # echo "${f_pairs}"
 a_pairs="${d_pairs}/${f_pairs}"  # echo "${a_pairs}"
 
 assembly="S288C_R64-3-1"  # echo "${assembly}"
+max_mismatch=0  #ARGUMENT  # echo "${max_mismatch}"
 
 d_stats="06_stats"  # echo "${d_stats}"
 f_stats="${f_pre}.stats.txt"  # echo "${f_stats}"
@@ -2238,10 +2328,8 @@ a_dedup_pre_pairs_stats="${d_stats}/${f_dedup_pre_pairs_stats}"  # echo "${a_ded
 a_dup_pre_pairs_stats="${d_stats}/${f_dup_pre_pairs_stats}"  # echo "${a_dup_pre_pairs_stats}"
 a_unmap_pre_pairs_stats="${d_stats}/${f_unmap_pre_pairs_stats}"  # echo "${a_unmap_pre_pairs_stats}"
 
-max_mismatch=0  # echo "${max_mismatch}"
-
 #  For cooler cload pairs
-bin_initial=50  # echo "${bin_initial}"
+bin_initial=50  #ARGUMENT  # echo "${bin_initial}"
 
 d_cload="07_cload"  # echo "${d_cload}"
 f_cload="${f_pre}.cload.cool"  # echo "${f_cload}"
@@ -2252,8 +2340,211 @@ d_zoom="08_zoom"  # echo "${d_zoom}"
 f_zoom="${f_pre}.mcool"  # echo "${f_zoom}"
 a_zoom="${d_zoom}/${f_zoom}"  # echo "${a_zoom}"
 
+print_test=TRUE  #ARGUMENT
+[[ "${print_test}" == TRUE ]] &&
+    {
+        echo """
+        Specific variables for workflow
+        ===============================
+        For atria, bwa mem
+        ------------------
+        d_trim=${d_trim}
+        a_fq_1=${a_fq_1}
+        a_fq_2=${a_fq_2}
+        a_afq_1=${a_afq_1}
+        a_afq_2=${a_afq_2}
+        
+        d_bam=${d_bam}
+        f_bam=${f_bam}
+        a_bam=${a_bam}
+        
+        p_index=${p_index}
+        f_index=${f_index}
+        a_index=${a_index}
+        
+        For pairtools parse2
+        --------------------
+        p_size=${p_size}
+        f_size=${f_size}
+        a_size=${a_size}
+        
+        d_pairs=${d_pairs}
+        f_pairs=${f_pairs}
+        a_pairs=${a_pairs}
+        
+        assembly=${assembly}
+        max_mismatch=${max_mismatch}
+        
+        d_stats=${d_stats}
+        f_stats=${f_stats}
+        a_stats=${a_stats}
 
-#  Create outdirectories ------------------------------------------------------
+        For pairtools sort
+        ------------------
+        d_sort=${d_sort}
+        f_sort=${f_sort}
+        a_sort=${a_sort}
+
+        For pairtools dedup
+        -------------------
+        d_dedup=${d_dedup}
+        f_dedup_pre=${f_dedup_pre}
+        f_dup_pre=${f_dup_pre}
+        f_unmap_pre=${f_unmap_pre}
+        a_dedup_pre_pairs=${a_dedup_pre_pairs}
+        a_dup_pre_pairs=${a_dup_pre_pairs}
+        a_unmap_pre_pairs=${a_unmap_pre_pairs}
+        
+        f_dedup_stats=${f_dedup_stats}
+        a_dedup_stats=${a_dedup_stats}
+        
+        For subsequent calls to pairtools stats
+        ---------------------------------------
+        f_dedup_pre_pairs_stats=${f_dedup_pre_pairs_stats}
+        f_dup_pre_pairs_stats=${f_dup_pre_pairs_stats}
+        f_unmap_pre_pairs_stats=${f_unmap_pre_pairs_stats}
+        a_dedup_pre_pairs_stats=${a_dedup_pre_pairs_stats}
+        a_dup_pre_pairs_stats=${a_dup_pre_pairs_stats}
+        a_unmap_pre_pairs_stats=${a_unmap_pre_pairs_stats}
+        
+        For cooler cload pairs
+        ----------------------
+        bin_initial=${bin_initial}
+        d_cload=${d_cload}
+        f_cload=${f_cload}
+        a_cload=${a_cload}
+
+        For cooler zoomify
+        ------------------
+        d_zoom=${d_zoom}
+        f_zoom=${f_zoom}
+        a_zoom=${a_zoom}
+        """
+    }
+```
+</details>
+<br />
+
+<a id="if-applicable-then-run-logic-for-running-pairtools-merge"></a>
+##### If applicable, then run logic for running `pairtools merge`
+<a id="code-6"></a>
+###### Code
+<details>
+<summary><i>Code: If applicable, then run logic for running pairtools merge</i></summary>
+
+```bash
+#!/bin/bash
+
+[[ "${flag_merge}" == TRUE ]] &&
+    {
+        #  Check if ${f_pre} is present in hash ${arr_merge}
+        #+
+        #+ ${arr_merge[$f_pre]+present} evaluates to "present" if
+        #+ arr_merge[$f_pre] is set
+        if [[ "${arr_merge[$f_pre]+present}" == "present" ]]; then
+            # echo "arr_merge[\$f_pre] is in hash ${arr_merge}"
+            # echo "arr_merge[\$f_pre] is set to ${arr_merge[$f_pre]}"
+            
+            #TODO Logic for if >2, <2, etc.
+            if [[ "${#order[@]}" -eq 2 ]]; then
+                el_1=0  # echo "${el_1}"
+                el_2=1  # echo "${el_2}"
+            fi
+
+            #  For pairtools merge
+            name_1="${order[${el_1}]}"  # echo "${name_1}"
+            name_2="${order[${el_2}]}"  # echo "${name_2}"
+
+            post="nodups.pairs.gz"  # echo "${post}"
+            in_1="${d_dedup}/${name_1}.${post}"  # ., "${in_1}"
+            in_2="${d_dedup}/${name_2}.${post}"  # ., "${in_2}"
+
+            [[ -f "${in_1}" && -f "${in_2}" ]] ||
+                {
+                    echo "Warning: Infiles for pairtools merge not found; stopping the operations"
+                    return 1
+                }
+
+            d_merge="${d_dedup}"  # echo "${d_dedup}"
+            f_merge_pre="${name_1}-${name_2}"  # echo "${f_merge_pre}"
+            f_merge="${f_merge_pre}.${post}"  # echo "${f_merge}"
+            a_merge="${d_merge}/${f_merge}"  # echo "${a_merge}"
+
+            #  For pairtools stats
+            d_merge_stats="06_stats"  # echo "${d_merge_stats}"
+            f_merge_stats="${f_merge_pre}.stats.txt"  # echo "${f_merge_stats}"
+            a_merge_stats="${d_merge_stats}/${f_merge_stats}"  # echo "${a_merge_stats}"
+
+            #  For cooler cload pairs
+            d_merge_cload="07_cload"  # echo "${d_merge_cload}"
+            f_merge_cload="${f_merge_pre}.cload.cool"  # echo "${f_merge_cload}"
+            a_merge_cload="${d_merge_cload}/${f_merge_cload}"  # echo "${a_merge_cload}"
+
+            #  For cooler zoomify
+            d_merge_zoom="08_zoom"  # echo "${d_merge_zoom}"
+            f_merge_zoom="${f_merge_pre}.mcool"  # echo "${f_merge_zoom}"
+            a_merge_zoom="${d_merge_zoom}/${f_merge_zoom}"  # echo "${a_merge_zoom}"
+        else
+            #  Reset flag to FALSE
+            flag_merge=FALSE  # echo "${flag_merge}"
+            
+            echo "Warning: arr_merge[\$f_pre] is not set; stopping the operations"
+            return 1
+        fi
+    }
+
+print_test=TRUE  #ARGUMENT
+[[ "${flag_merge}" == TRUE && "${print_test}" == TRUE ]] &&
+    {
+        echo """
+        Specific variables for merged .cool files
+        =========================================
+        For pairtools merge
+        -------------------
+        name_1=${name_1}
+        name_2=${name_2}
+
+        in_1=${in_1}
+        in_2=${in_2}
+
+        d_merge=${d_merge}
+        f_merge_pre=${f_merge_pre}
+        f_merge=${f_merge}
+        a_merge=${a_merge}
+
+        For pairtools stats
+        -------------------
+        d_merge_stats=${d_merge_stats}
+        f_merge_stats=${f_merge_stats}
+        a_merge_stats=${a_merge_stats}
+
+        For cooler cload pairs
+        ----------------------
+        d_merge_cload=${d_merge_cload}
+        f_merge_cload=${f_merge_cload}
+        a_merge_cload=${a_merge_cload}
+
+        For cooler zoomify
+        ------------------
+        d_merge_zoom=${d_merge_zoom}
+        f_merge_zoom=${f_merge_zoom}
+        a_merge_zoom=${a_merge_zoom}
+        """
+    }
+```
+</details>
+<br />
+
+<a id="create-outdirectories-if-not-present"></a>
+##### Create outdirectories if not present
+<a id="code-7"></a>
+###### Code
+<details>
+<summary><i>Code: Create outdirectories if not present</i></summary>
+
+```bash
+#!/bin/bash
+
 if [[ ! -d "${d_trim}" ]]; then mkdir -p "${d_trim}/err_out"; fi
 if [[ ! -d "${d_bam}" ]]; then mkdir -p "${d_bam}/err_out"; fi
 if [[ ! -d "${d_pairs}" ]]; then mkdir -p "${d_pairs}/err_out"; fi
@@ -2266,58 +2557,9 @@ if [[ ! -d "${d_zoom}" ]]; then mkdir -p "${d_zoom}/err_out"; fi
 </details>
 <br />
 
-<a id="printed-3"></a>
-##### Printed
-<details>
-<summary><i>Printed: Initialize variables, create outdirectories</i></summary>
-
-```txt
-❯ if [[ ! -d "${d_trim}" ]]; then mkdir -p "${d_trim}/err_out"; fi
-mkdir: created directory '01_trim'
-mkdir: created directory '01_trim/err_out'
-
-
-❯ if [[ ! -d "${d_bam}" ]]; then mkdir -p "${d_bam}/err_out"; fi
-mkdir: created directory '02_align'
-mkdir: created directory '02_align/err_out'
-
-
-❯ if [[ ! -d "${d_pairs}" ]]; then mkdir -p "${d_pairs}/err_out"; fi
-mkdir: created directory '03_parse'
-mkdir: created directory '03_parse/err_out'
-
-
-❯ if [[ ! -d "${d_stats}" ]]; then mkdir -p "${d_stats}"; fi
-mkdir: created directory '06_stats'
-
-
-❯ if [[ ! -d "${d_sort}" ]]; then mkdir -p "${d_sort}/err_out"; fi
-mkdir: created directory '04_sort'
-mkdir: created directory '04_sort/err_out'
-
-
-❯ if [[ ! -d "${d_dedup}" ]]; then mkdir -p ${d_dedup}/{pairs,bam,err_out}; fi
-mkdir: created directory '05_dedup'
-mkdir: created directory '05_dedup/pairs'
-mkdir: created directory '05_dedup/bam'
-mkdir: created directory '05_dedup/err_out'
-
-
-❯ if [[ ! -d "${d_cload}" ]]; then mkdir -p "${d_cload}/err_out"; fi
-mkdir: created directory '07_cload'
-mkdir: created directory '07_cload/err_out'
-
-
-❯ if [[ ! -d "${d_zoom}" ]]; then mkdir -p "${d_zoom}/err_out"; fi
-mkdir: created directory '08_zoom'
-mkdir: created directory '08_zoom/err_out'
-```
-</details>
-<br />
-
 <a id="1-trim-fastq-files"></a>
 ### 1. Trim fastq files
-<a id="code-5"></a>
+<a id="code-8"></a>
 #### Code
 <details>
 <summary><i>Code: 1. Trim fastq files</i></summary>
@@ -2326,8 +2568,8 @@ mkdir: created directory '08_zoom/err_out'
 #!/bin/bash
 
 #  Echo test
-run=TRUE
-[[ "${run}" == TRUE ]] &&
+print_test=TRUE  #ARGUMENT
+[[ "${print_test}" == TRUE ]] &&
     {
         echo """
         \"\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria\" \\
@@ -2343,7 +2585,10 @@ run=TRUE
 run=TRUE
 [[ "${run}" == TRUE ]] &&
     {
-        #  Two versions of atria: v3.2.2 (2023_rDNA) to v3.2.1 (2022_transcriptome-construction)
+        #  Two versions of atria:
+        #+ - v3.2.2 (2023_rDNA)
+        #+ - v3.2.1 (2022_transcriptome-construction)
+        
         # "\${HOME}/tsukiyamalab/kalavatt/2022_transcriptome-construction/software/Atria/app-3.2.1/bin/atria" \
         "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria" \
             -t "${threads}" \
@@ -2351,17 +2596,17 @@ run=TRUE
             -R "${a_fq_2}" \
             -o "${d_trim}" \
             --no-length-filtration
-    }
 
-#  Store logs in err_out/
-if compgen -G ${d_trim}/*.{log,log.json} > /dev/null; then
-    mv ${d_trim}/*.{log,log.json} "${d_trim}/err_out"
-fi
+        #  Store logs in err_out/
+        if compgen -G ${d_trim}/*.{log,log.json} > /dev/null; then
+            mv ${d_trim}/*.{log,log.json} "${d_trim}/err_out"
+        fi
+    }
 ```
 </details>
 <br />
 
-<a id="printed-4"></a>
+<a id="printed-3"></a>
 #### Printed
 <details>
 <summary><i>Printed: 1. Trim fastq files</i></summary>
@@ -2611,7 +2856,7 @@ pigz 2.6
 
 <a id="2-align-datasets"></a>
 ### 2. Align datasets
-<a id="code-6"></a>
+<a id="code-9"></a>
 #### Code
 <details>
 <summary><i>Code: 2. Align datasets</i></summary>
@@ -2625,8 +2870,8 @@ ml BWA/0.7.17-GCCcore-11.2.0 SAMtools/1.16.1-GCC-11.2.0
 #  pairtools parse expects unsorted bams, so *don't* run the following chunk,
 #+ which sees the bwa mem outstream piped to samtools sort; more information:
 #+ github.com/open2c/pairtools/issues/178#issuecomment-1554866847
-problem=FALSE
-[[ "${problem}" == TRUE ]] &&
+do_not_do=TRUE
+[[ "${do_not_do}" == FALSE ]] &&
     {
         echo """
         {
@@ -2665,9 +2910,10 @@ problem=FALSE
             2> >(tee -a "${d_bam}/err_out/$(basename ${a_bam} .bam).stderr.txt" >&2)
     }
 
+
 #  This call to bwa mem is correct for subsequent use with pairtools parse
-correct_echo=TRUE
-[[ "${correct_echo}" == TRUE ]] &&
+print_test=TRUE  #ARGUMENT
+[[ "${print_test}" == TRUE ]] &&
     {
         echo """
         {
@@ -2683,8 +2929,8 @@ correct_echo=TRUE
         """
     }
 
-correct=TRUE
-[[ "${correct}" == TRUE ]] &&
+run=TRUE
+[[ "${run}" == TRUE ]] &&
     {
         echo """
         {
@@ -2714,7 +2960,7 @@ correct=TRUE
 </details>
 <br />
 
-<a id="printed-5"></a>
+<a id="printed-4"></a>
 #### Printed
 <details>
 <summary><i>Printed: 2. Align datasets</i></summary>
@@ -2807,7 +3053,7 @@ correct=TRUE
 
 <a id="3-run-pairtools-parse"></a>
 ### 3. Run `pairtools parse`
-<a id="code-7"></a>
+<a id="code-10"></a>
 #### Code
 <details>
 <summary><i>Code: 3. Run pairtools parse</i></summary>
@@ -2816,15 +3062,18 @@ correct=TRUE
 #!/bin/bash
 
 #  Check the documentation ----------------------------------------------------
-pairtools parse --help
-pairtools parse2 --help
+check_documentation=FALSE
+[[ "${check_documentation}" == TRUE ]] &&
+    {
+        pairtools parse --help
+        pairtools parse2 --help
+    }
 
 
 #  Do a trial run of pairtools parse ------------------------------------------
-#MAYBE Delete this section on parse (but not the section on parse2)
-run=FALSE
-[[ "${run}" == TRUE ]] &&
-[[ -f "${a_bam}" ]] &&
+#+ However, no longer using parse and, instead, using parse2 (see below)
+do_not_do=TRUE  #HARDCODED
+[[ "${do_not_do}" == FALSE && -f "${a_bam}" ]] &&
     {
         echo """
         pairtools parse \\
@@ -2842,9 +3091,8 @@ run=FALSE
         """
     }
 
-run=FALSE
-[[ "${run}" == TRUE ]] &&
-[[ -f "${a_bam}" ]] &&
+do_not_do=TRUE  #HARDCODED
+[[ "${do_not_do}" == FALSE && -f "${a_bam}" ]] &&
     {
         pairtools parse \
             -o "${a_pairs}" \
@@ -2862,23 +3110,30 @@ run=FALSE
 
 
 #  Do a trial run of pairtools parse2 -----------------------------------------
-#  Example call: github.com/open2c/pairtools/issues/159
-#+ See also github.com/open2c/pairtools/issues/176
-# pairtools parse2 \
-#     --min-mapq 30 \
-#     --report-position read \
-#     --report-orientation read \
-#     --add-pair-index \
-#     --add-columns pos5,pos3 \
-#     --max-inter-align-gap 30 \
-#     --nproc-in 16 \
-#     --nproc-out 16 \
-#     --chroms-path /data/kun/Align_Index/grch38_no_alt/hg38.genome test.sam \
-#         > test.pairsam
+print_example_call=FALSE  #HARDCODED
+[[ "${print_example_call}" ]] &&
+    {
+        echo """
+        #  Example call: github.com/open2c/pairtools/issues/159
+        #+ See also github.com/open2c/pairtools/issues/176
+        pairtools parse2 \\
+            --min-mapq 30 \\
+            --report-position read \\
+            --report-orientation read \\
+            --add-pair-index \\
+            --add-columns pos5,pos3 \\
+            --max-inter-align-gap 30 \\
+            --nproc-in 16 \\
+            --nproc-out 16 \\
+            --chroms-path /data/kun/Align_Index/grch38_no_alt/hg38.genome \\
+            test.sam \\
+                > test.pairsam
+        """
+    }
 
-run=TRUE
-[[ "${run}" == TRUE ]] &&
-[[ -f "${a_bam}" ]] &&
+#TODO Can probably save space by excluding mismatches (--add-columns)
+print_test=TRUE  #ARGUMENT
+[[ "${print_test}" == TRUE && -f "${a_bam}" ]] &&
     {
         echo """
         pairtools parse2 \\
@@ -2898,13 +3153,14 @@ run=TRUE
             --nproc-in \"${threads}\" \\
             --nproc-out \"${threads}\" \\
             \"${a_bam}\" \\
-                2> >(tee -a \"${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).p2.stderr.txt\" >&2)
+                2> >(tee -a \"${d_pairs}/err_out/${f_pre}.stderr.txt\" >&2)
         """
     }
 
+
+#NOTE Quite time-consuming in comparison to pairtools parse
 run=TRUE
-[[ "${run}" == TRUE ]] &&
-[[ -f "${a_bam}" ]] &&
+[[ "${run}" == TRUE && -f "${a_bam}" ]] &&
     {
         pairtools parse2 \
             -o "${a_pairs}" \
@@ -2923,41 +3179,49 @@ run=TRUE
             --nproc-in "${threads}" \
             --nproc-out "${threads}" \
             "${a_bam}" \
-                2> >(tee -a "${d_pairs}/err_out/$(basename ${a_pairs} .txt.gz).p2.stderr.txt" >&2)
+                2> >(tee -a "${d_pairs}/err_out/${f_pre}.stderr.txt" >&2)
     }
 
 
 #  Examine the pairs outfile --------------------------------------------------
-., "${a_pairs}"
+run_check=FALSE  #ARGUMENT
+[[ "${run_check}" == TRUE && -f "${a_pairs}" ]] &&
+    {
+        ., "${a_pairs}"
 
-zcat "${a_pairs}" | wc -l
-samtools view -c "${a_bam}"
+        zcat "${a_pairs}" | wc -l
+        samtools view -c "${a_bam}"
 
-samtools view "${a_bam}" | head
+        samtools view "${a_bam}" | head
 
-n_lines="$(zcat "${a_pairs}" | wc -l)"
-echo $(( n_lines - 41 ))  # Subtract header, column-name lines
+        n_lines="$(zcat "${a_pairs}" | wc -l)"
+        echo $(( n_lines - 41 ))  # Subtract header, column-name lines
 
-n_pairs="$(samtools view -c "${a_bam}")"
-echo $(( n_pairs / 2 ))
+        n_pairs="$(samtools view -c "${a_bam}")"
+        echo $(( n_pairs / 2 ))
 
-echo $(( $(( n_pairs / 2 )) - n_lines ))  # Pairs missing from "${a_pairs}"?
+        echo $(( $(( n_pairs / 2 )) - n_lines ))  # Pairs missing?
 
-zcat "${a_pairs}" | head -100
-zcat "${a_pairs}" | tail -100
+        zcat "${a_pairs}" | head -100
+        zcat "${a_pairs}" | tail -100
+    }
 
 
 #  Examine the stats outfile --------------------------------------------------
-., "${a_stats}"
+run_check=FALSE  #ARGUMENT
+[[ "${run_check}" == TRUE && -f "${a_stats}" ]] &&
+    {
+        ., "${a_stats}"
 
-cat "${a_stats}" | wc -l
+        cat "${a_stats}" | wc -l
 
-cat "${a_stats}"
+        cat "${a_stats}"
+    }
 ```
 </details>
 <br />
 
-<a id="printed-6"></a>
+<a id="printed-5"></a>
 #### Printed
 <details>
 <summary><i>Printed: 3. Run pairtools parse</i></summary>
@@ -4154,7 +4418,7 @@ dist_freq/562341325+/++ 0
 
 <a id="4-run-pairtools-sort"></a>
 ### 4. Run `pairtools sort`
-<a id="code-8"></a>
+<a id="code-11"></a>
 #### Code
 <details>
 <summary><i>Code: 4. Run pairtools sort</i></summary>
@@ -4163,13 +4427,16 @@ dist_freq/562341325+/++ 0
 #!/bin/bash
 
 #  Check the documentation ----------------------------------------------------
-pairtools sort --help
+check_documentation=FALSE
+[[ "${check_documentation}" == TRUE ]] &&
+    {
+        pairtools sort --help
+    }
 
 
-#  Do a trial run of pairtools parse ------------------------------------------
-run=TRUE
-[[ "${run}" == TRUE ]] &&
-[[ -f "${a_pairs}" ]] &&
+#  Do a trial run of pairtools sort ------------------------------------------
+print_test=TRUE  #ARGUMENT
+[[ "${print_test}" == TRUE && -f "${a_pairs}" ]] &&
     {
         echo """
             pairtools sort \\
@@ -4177,36 +4444,40 @@ run=TRUE
                 --tmpdir \"${scratch}\" \\
                 --output \"${a_sort}\" \\
                 \"${a_pairs}\" \\
-                    2> >(tee -a \"${d_pairs}/err_out/$(basename ${a_sort} .txt.gz).stderr.txt\" >&2)
-            """
+                    2> >(tee -a \"${d_pairs}/err_out/${f_sort%.txt.gz}.stderr.txt\" >&2)
+        """
     }
 
-[[ "${run}" == TRUE ]] &&
-[[ -f "${a_pairs}" ]] &&
+run=TRUE
+[[ "${run}" == TRUE && -f "${a_pairs}" ]] &&
     {
         pairtools sort \
             --nproc "${threads}" \
             --tmpdir "${scratch}" \
             --output "${a_sort}" \
             "${a_pairs}" \
-                2> >(tee -a "${d_pairs}/err_out/$(basename ${a_sort} .txt.gz).stderr.txt" >&2)
+                2> >(tee -a "${d_pairs}/err_out/${f_sort%.txt.gz}.stderr.txt" >&2)
     }
 
 
 #  Examine the sorted pairs outfile -------------------------------------------
-., "${a_sort}"
+run_check=FALSE  #ARGUMENT
+[[ "${run_check}" == TRUE && -f "${s_sort}" ]] &&
+    {
+        ., "${a_sort}"
 
-n_lines="$(zcat "${a_sort}" | wc -l)"
-echo "${n_lines}"
-echo $(( n_lines - 43 ))  # Subtract header, column-name lines
+        n_lines="$(zcat "${a_sort}" | wc -l)"
+        echo "${n_lines}"
+        echo $(( n_lines - 43 ))  # Subtract header, column-name lines
 
-zcat "${a_sort}" | head -100
-zcat "${a_sort}" | tail -100
+        zcat "${a_sort}" | head -100
+        zcat "${a_sort}" | tail -100
+    }
 ```
 </details>
 <br />
 
-<a id="printed-7"></a>
+<a id="printed-6"></a>
 #### Printed
 <details>
 <summary><i>Printed: 4. Run pairtools sort</i></summary>
@@ -4539,7 +4810,7 @@ SRR7939018.57420183 XVI 946300  XVI 939782  -   +   UU  1   R1-2    946300  9397
 
 <a id="5-run-pairtools-dedup-and-pairtools-split"></a>
 ### 5. Run `pairtools dedup` and `pairtools split`
-<a id="code-9"></a>
+<a id="code-12"></a>
 #### Code
 <details>
 <summary><i>Code: 5. Run pairtools dedup</i></summary>
@@ -4548,14 +4819,17 @@ SRR7939018.57420183 XVI 946300  XVI 939782  -   +   UU  1   R1-2    946300  9397
 #!/bin/bash
 
 #  Check the documentation ----------------------------------------------------
-pairtools dedup --help
-pairtools split --help
+check_documentation=FALSE
+[[ "${check_documentation}" == TRUE ]] &&
+    {
+        pairtools dedup --help
+        pairtools split --help
+    }
 
 
 #  Do a trial run of pairtools dedup ------------------------------------------
-run=TRUE
-[[ "${run}" == TRUE ]] &&
-[[ -f "${a_sort}" ]] &&
+print_test=TRUE  #ARGUMENT
+[[ "${print_test}" == TRUE && -f "${a_sort}" ]] &&
     {
         echo """
         pairtools dedup \\
@@ -4563,20 +4837,11 @@ run=TRUE
             --max-mismatch \"${max_mismatch}\" \\
             --mark-dups \\
             --output \\
-                >(
-                    pairtools split \\
-                        --output-pairs \"${a_dedup_pre_pairs}\"
-                ) \\
+                >(pairtools split --output-pairs \"${a_dedup_pre_pairs}\") \\
             --output-unmapped \\
-                >(
-                    pairtools split \\
-                        --output-pairs \"${a_dup_pre_pairs}\"
-                ) \\
+                >(pairtools split --output-pairs \"${a_unmap_pre_pairs}\") \\
             --output-dups \\
-                >(
-                    pairtools split \\
-                        --output-pairs \"${a_unmap_pre_pairs}\"
-                ) \\
+                >(pairtools split --output-pairs \"${a_dup_pre_pairs}\") \\
             --output-stats \"${a_dedup_stats}\" \\
             \"${a_sort}\" \\
                 2> >(tee -a \"${d_dedup}/err_out/${f_pre}.dedup.stderr.txt\" >&2)
@@ -4584,25 +4849,18 @@ run=TRUE
     }
 
 run=TRUE
-[[ "${run}" == TRUE ]] &&
-[[ -f "${a_sort}" ]] &&
+[[ "${run}" == TRUE && -f "${a_sort}" ]] &&
     {
         pairtools dedup \
             --n-proc "${threads}" \
             --max-mismatch "${max_mismatch}" \
             --mark-dups \
             --output \
-                >(
-                    pairtools split --output-pairs "${a_dedup_pre_pairs}"
-                ) \
+                >(pairtools split --output-pairs "${a_dedup_pre_pairs}") \
             --output-unmapped \
-                >(
-                    pairtools split --output-pairs "${a_dup_pre_pairs}"
-                ) \
+                >(pairtools split --output-pairs "${a_unmap_pre_pairs}") \
             --output-dups \
-                >(
-                    pairtools split --output-pairs "${a_unmap_pre_pairs}"
-                ) \
+                >(pairtools split --output-pairs "${a_dup_pre_pairs}") \
             --output-stats "${a_dedup_stats}" \
             "${a_sort}" \
                 2> >(tee -a "${d_dedup}/err_out/${f_pre}.dedup.stderr.txt" >&2)
@@ -4610,39 +4868,56 @@ run=TRUE
 
 
 #  Check the various outfiles -------------------------------------------------
-., "${d_dedup}/err_out/${f_pre}.dedup.stderr.txt"
+run_check=FALSE  #ARGUMENT
+[[ 
+    "${run_check}" == TRUE && \
+        -f "${a_dedup_pre_pairs}" && \
+        -f "${a_dup_pre_pairs}" && \
+        -f "${a_unmap_pre_pairs}"
+]] &&
+    {
+        ., "${d_dedup}/err_out/${f_pre}.dedup.stderr.txt"
 
-., "${a_dedup_pre_pairs}"
-., "${a_dup_pre_pairs}"
-., "${a_unmap_pre_pairs}"
+        ., "${a_dedup_pre_pairs}"
+        ., "${a_dup_pre_pairs}"
+        ., "${a_unmap_pre_pairs}"
 
-zcat "${a_dedup_pre_pairs}" | head -100  # zcat "${a_dedup_pre_pairs}" | less
-zcat "${a_dup_pre_pairs}" | head -100
-zcat "${a_unmap_pre_pairs}" | head -100
+        zcat "${a_dedup_pre_pairs}" | head -100  # zcat "${a_dedup_pre_pairs}" | less
+        zcat "${a_dup_pre_pairs}" | head -100
+        zcat "${a_unmap_pre_pairs}" | head -100
+    }
 
 
 #  Examine the unique pairs ---------------------------------------------------
-zcat "${a_dedup_pre_pairs}" | grep -v "#" | head -300
+run_check=FALSE  #ARGUMENT
+[[ "${run_check}" == TRUE ]] &&
+    {
+        zcat "${a_dedup_pre_pairs}" | grep -v "#" | head -300
 
-#  Count number of unique pairs type in "${a_dedup_pre_pairs}"
-zcat "${a_dedup_pre_pairs}" \
-    | grep -v "^#" \
-    | cut -f 8 \
-    | sort \
-    | uniq -c
+        #  Count number of unique pairs type in "${a_dedup_pre_pairs}"
+        zcat "${a_dedup_pre_pairs}" \
+            | grep -v "^#" \
+            | cut -f 8 \
+            | sort \
+            | uniq -c
 
-#  What are the RU and UR pair types?
-zcat "${a_dedup_pre_pairs}" | grep "RU\|UR"
+        #  What are the RU and UR pair types?
+        zcat "${a_dedup_pre_pairs}" | grep "RU\|UR"
+    }
 
 
 #  Check the stats outfile ----------------------------------------------------
-., "${a_dedup_stats}"
-cat "${a_dedup_stats}"  # less "${a_dedup_stats}"
+run_check=FALSE  #ARGUMENT
+[[ "${run_check}" == TRUE && -f "${a_dedup_stats}" ]] &&
+    {
+        ., "${a_dedup_stats}"
+        cat "${a_dedup_stats}"  # less "${a_dedup_stats}"
+    }
 ```
 </details>
 <br />
 
-<a id="printed-8"></a>
+<a id="printed-7"></a>
 #### Printed
 <details>
 <summary><i>Printed: 5. Run pairtools dedup</i></summary>
@@ -6195,12 +6470,283 @@ dist_freq/562341325+/++ 0
 </details>
 <br />
 
-<a id="6-run-pairtools-select"></a>
-### 6. Run `pairtools select`
-<a id="code-10"></a>
+<a id="x-run-pairtools-merge-if-applicable"></a>
+### X. Run `pairtools merge` if applicable
+<a id="code-13"></a>
 #### Code
 <details>
-<summary><i>Code: 6. Run pairtools select</i></summary>
+<summary><i>Code: Run pairtools merge if applicable</i></summary>
+
+```bash
+#!/bin/bash
+
+#  Check the documentation ----------------------------------------------------
+check_documentation=FALSE
+[[ "${check_documentation}" == TRUE ]] &&
+    {
+        pairtools merge --help
+    }
+
+
+#  Do a trial run of pairtools merge ------------------------------------------
+print_example_call=FALSE  #HARDCODED
+[[ "${print_example_call}" ]] &&
+    {
+        echo """
+        #  Example call: github.com/open2c/pairtools/issues/160
+        pairtools merge \\
+            -o test.pairsam.gz \\
+            --nproc 14 \\
+                PC-T25-29-0159_S1_L002.pairsam.gz \\
+                PC-T25-29-0159_S1_L003.pairsam.gz
+        """
+    }
+
+
+print_test=TRUE
+[[
+    "${print_test}" == TRUE && \
+        ${flag_merge} == TRUE && \
+        -f "${in_1}" && \
+        -f "${in_2}"
+]] &&
+    {
+        echo """
+        pairtools merge \\
+            -o \"${a_merge}\" \\
+            --nproc \"${threads}\" \\
+                \"${in_1}\" \\
+                \"${in_2}\" \\
+                    2> >(tee \"${d_merge}/err_out/${f_merge_pre}.merge.stderr.txt\" >&2)
+        """
+    }
+
+run=TRUE
+[[
+    "${run}" == TRUE && \
+        ${flag_merge} == TRUE && \
+        -f "${in_1}" && \
+        -f "${in_2}"
+]] &&
+    {
+        pairtools merge \
+            -o "${a_merge}" \
+            --nproc "${threads}" \
+                "${in_1}" \
+                "${in_2}" \
+                    2> >(tee "${d_merge}/err_out/${f_merge_pre}.merge.stderr.txt" >&2)
+    }
+
+
+#  Check the contents of the merge files --------------------------------------
+run_check=TRUE  #ARGUMENT
+[[ "${run_check}" == TRUE && -f "${a_merge}" ]] &&
+    {
+        ls -lhaFG "${a_merge}"
+        ls -lhaFG "${d_merge}"
+        ls -lhaFG "${d_merge}/err_out"
+    }
+```
+</details>
+<br />
+
+<a id="printed-8"></a>
+#### Printed
+<details>
+<summary><i>Printed: Run pairtools merge if applicable</i></summary>
+
+<a id="check-the-documentation-3"></a>
+##### Check the documentation
+<details>
+<summary><i>Printed: Check the documentation</i></summary>
+
+```txt
+❯ check_documentation=TRUE
+
+
+❯ [[ "${check_documentation}" == TRUE ]] &&
+>     {
+>         pairtools merge --help
+>     }
+Usage: pairtools merge [OPTIONS] [PAIRS_PATH]...
+
+  Merge .pairs/.pairsam files. By default, assumes that the files are sorted
+  and maintains the sorting.
+
+  Merge triu-flipped sorted pairs/pairsam files. If present, the @SQ records
+  of the SAM header must be identical; the sorting order of these lines is
+  taken from the first file in the list. The ID fields of the @PG records of
+  the SAM header are modified with a numeric suffix to produce unique records.
+  The other unique SAM and non-SAM header lines are copied into the output
+  header.
+
+  PAIRS_PATH : upper-triangular flipped sorted .pairs/.pairsam files to merge
+  or a group/groups of .pairs/.pairsam files specified by a wildcard. For
+  paths ending in .gz/.lz4, the files are decompressed by bgzip/lz4c.
+
+Options:
+  -o, --output TEXT               output file. If the path ends with .gz/.lz4,
+                                  the output is compressed by bgzip/lz4c. By
+                                  default, the output is printed into stdout.
+  --max-nmerge INTEGER            The maximal number of inputs merged at once.
+                                  For more, store merged intermediates in
+                                  temporary files.  [default: 8]
+  --tmpdir TEXT                   Custom temporary folder for merged
+                                  intermediates.
+  --memory TEXT                   The amount of memory used by default.
+                                  [default: 2G]
+  --compress-program TEXT         A binary to compress temporary merged
+                                  chunks. Must decompress input when the flag
+                                  -d is provided. Suggested alternatives:
+                                  lz4c, gzip, lzop, snzip. NOTE: fails
+                                  silently if the command syntax is wrong.
+  --nproc INTEGER                 Number of threads for merging.  [default: 8]
+  --nproc-in INTEGER              Number of processes used by the auto-guessed
+                                  input decompressing command.  [default: 1]
+  --nproc-out INTEGER             Number of processes used by the auto-guessed
+                                  output compressing command.  [default: 8]
+  --cmd-in TEXT                   A command to decompress the input. If
+                                  provided, fully overrides the auto-guessed
+                                  command. Does not work with stdin. Must read
+                                  input from stdin and print output into
+                                  stdout. EXAMPLE: pbgzip -dc -n 3
+  --cmd-out TEXT                  A command to compress the output. If
+                                  provided, fully overrides the auto-guessed
+                                  command. Does not work with stdout. Must
+                                  read input from stdin and print output into
+                                  stdout. EXAMPLE: pbgzip -c -n 8
+  --keep-first-header / --no-keep-first-header
+                                  Keep the first header or merge the headers
+                                  together. Default: merge headers.  [default:
+                                  no-keep-first-header]
+  --concatenate / --no-concatenate
+                                  Simple concatenate instead of merging sorted
+                                  files.  [default: no-concatenate]
+  -h, --help                      Show this message and exit.
+```
+</details>
+<br />
+
+<a id="do-a-trial-run-of-pairtools-merge"></a>
+##### Do a trial run of `pairtools merge`
+<details>
+<summary><i>Printed: Do a trial run of pairtools merge</i></summary>
+
+```txt
+❯ print_example_call=FALSE  #HARDCODED
+
+
+❯ [[ "${print_example_call}" ]] &&
+>     {
+>         echo """
+>         #  Example call: github.com/open2c/pairtools/issues/160
+>         pairtools merge \\
+>             -o test.pairsam.gz \\
+>             --nproc 14 \\
+>                 PC-T25-29-0159_S1_L002.pairsam.gz \\
+>                 PC-T25-29-0159_S1_L003.pairsam.gz
+>         """
+>     }
+
+        #  Example call: github.com/open2c/pairtools/issues/160
+        pairtools merge \
+            -o test.pairsam.gz \
+            --nproc 14 \
+                PC-T25-29-0159_S1_L002.pairsam.gz \
+                PC-T25-29-0159_S1_L003.pairsam.gz
+
+
+❯ print_test=TRUE
+
+
+❯ [[ "${print_test}" == TRUE && -f "${in_1}" && -f "${in_2}" ]] &&
+>     {
+>         echo """
+>         pairtools merge \\
+>             -o \"${a_merge}\" \\
+>             --nproc \"${threads}\" \\
+>                 \"${in_1}\" \\
+>                 \"${in_2}\" \\
+>                     2> >(tee \"${d_merge}/err_out/${f_merge_pre}.merge.stderr.txt\" >&2)
+>         """
+>     }
+
+        pairtools merge \
+            -o "05_dedup/SRR11893084-SRR11893085.nodups.pairs.gz" \
+            --nproc "8" \
+                "05_dedup/SRR11893084.nodups.pairs.gz" \
+                "05_dedup/SRR11893085.nodups.pairs.gz" \
+                    2> >(tee "05_dedup/err_out/SRR11893084-SRR11893085.merge.stderr.txt" >&2)
+
+
+❯ run=TRUE
+
+
+❯ [[ "${run}" == TRUE && -f "${in_1}" && -f "${in_2}" ]] &&
+>     {
+>         pairtools merge \
+>             -o "${a_merge}" \
+>             --nproc "${threads}" \
+>                 "${in_1}" \
+>                 "${in_2}" \
+>                     2> >(tee "${d_merge}/err_out/${f_merge_pre}.merge.stderr.txt" >&2)
+>     }
+```
+</details>
+<br />
+
+<a id="check-the-contents-of-the-merge-files"></a>
+##### Check the contents of the merge files
+<details>
+<summary><i>Printed: Check the contents of the merge files</i></summary>
+
+```txt
+❯ [[ "${run_check}" == TRUE && -f "${a_merge}" ]] &&
+>     {
+>         ls -lhaFG "${a_merge}"
+>         ls -lhaFG "${d_merge}"
+>         ls -lhaFG "${d_merge}/err_out"
+>     }
+-rw-rw---- 1 kalavatt 1.5G Jul  8 14:46 05_dedup/SRR11893084-SRR11893085.nodups.pairs.gz
+
+total 6.8G
+drwxrws---  3 kalavatt  619 Jul  8 14:45 ./
+drwxrws--- 10 kalavatt  443 Jul  8 13:58 ../
+drwxrws---  2 kalavatt  234 Jul  8 14:45 err_out/
+-rw-rw----  1 kalavatt  78M Jul  8 11:22 SRR11893084.dups.pairs.gz
+-rw-rw----  1 kalavatt 720M Jul  8 11:22 SRR11893084.nodups.pairs.gz
+-rw-rw----  1 kalavatt 1.5G Jul  8 14:46 SRR11893084-SRR11893085.nodups.pairs.gz
+-rw-rw----  1 kalavatt  78M Jul  8 11:22 SRR11893084.unmapped.pairs.gz
+-rw-rw----  1 kalavatt  81M Jul  8 12:18 SRR11893085.dups.pairs.gz
+-rw-rw----  1 kalavatt 797M Jul  8 12:18 SRR11893085.nodups.pairs.gz
+-rw-rw----  1 kalavatt  88M Jul  8 12:18 SRR11893085.unmapped.pairs.gz
+-rw-rw----  1 kalavatt 199M Jul  7 13:29 SRR11893107.dups.pairs.gz
+-rw-rw----  1 kalavatt 1.2G Jul  7 13:29 SRR11893107.nodups.pairs.gz
+-rw-rw----  1 kalavatt 223M Jul  7 13:29 SRR11893107.unmapped.pairs.gz
+-rw-rw----  1 kalavatt 213M Jul  6 12:41 SRR7939018.dups.pairs.gz
+-rw-rw----  1 kalavatt 748M Jul  6 12:41 SRR7939018.nodups.pairs.gz
+-rw-rw----  1 kalavatt 158M Jul  6 12:41 SRR7939018.unmapped.pairs.gz
+
+total 200K
+drwxrws--- 2 kalavatt  234 Jul  8 14:45 ./
+drwxrws--- 3 kalavatt  619 Jul  8 14:45 ../
+-rw-rw---- 1 kalavatt 6.9K Jul  8 11:22 SRR11893084.dedup.stderr.txt
+-rw-rw---- 1 kalavatt    0 Jul  8 14:45 SRR11893084-SRR11893085.merge.stderr.txt
+-rw-rw---- 1 kalavatt 6.6K Jul  8 12:18 SRR11893085.dedup.stderr.txt
+-rw-rw---- 1 kalavatt 6.4K Jul  7 13:28 SRR11893107.dedup.stderr.txt
+-rw-rw---- 1 kalavatt 6.2K Jul  6 12:41 SRR7939018.dedup.stderr.txt
+```
+</details>
+<br />
+</details>
+<br />
+
+<a id="x-run-pairtools-select"></a>
+### X. Run `pairtools select`
+<a id="code-14"></a>
+#### Code
+<details>
+<summary><i>Code: X. Run pairtools select</i></summary>
 
 ```bash
 #!/bin/bash
@@ -6213,9 +6759,9 @@ dist_freq/562341325+/++ 0
 <a id="printed-9"></a>
 #### Printed
 <details>
-<summary><i>Printed: 6. Run pairtools select</i></summary>
+<summary><i>Printed: X. Run pairtools select</i></summary>
 
-<a id="check-the-documentation-3"></a>
+<a id="check-the-documentation-4"></a>
 ##### Check the documentation
 <details>
 <summary><i>Printed: Check the documentation</i></summary>
@@ -6239,28 +6785,34 @@ dist_freq/562341325+/++ 0
 </details>
 <br />
 
-<a id="7-run-pairtools-stats"></a>
-### 7. Run `pairtools stats`
-Is this any different from collecting stats when running [`pairtools dedup`](#code-7) or [`pairtools parse`](#code-5)?
-
-<a id="code-11"></a>
-#### Code
+<a id="6-run-pairtools-stats"></a>
+### 6. Run `pairtools stats`
+<a id="individual-pairs-files"></a>
+#### Individual pairs files
+<a id="code-15"></a>
+##### Code
 <details>
-<summary><i>Code: 7. Run pairtools stats</i></summary>
+<summary><i>Code: 6. Run pairtools stats</i></summary>
 
 ```bash
 #!/bin/bash
 
 #  Check the documentation ----------------------------------------------------
-pairtools stats --help
+check_documentation=FALSE
+[[ "${check_documentation}" == TRUE ]] &&
+    {
+        pairtools stats --help
+    }
 
 
 #  Do a trial run of pairtools stats ------------------------------------------
 run=TRUE
-[[ "${run}" == TRUE ]] &&
-[[ -f "${a_dedup_pre_pairs}" ]] &&
-[[ -f "${a_dup_pre_pairs}" ]] &&
-[[ -f "${a_unmap_pre_pairs}" ]] &&
+[[ 
+    "${run}" == TRUE && \
+        -f "${a_dedup_pre_pairs}" && \
+        -f "${a_dup_pre_pairs}" && \
+        -f "${a_unmap_pre_pairs}" 
+]] &&
     {
         pairtools stats \
             -o "${a_dedup_pre_pairs_stats}" \
@@ -6277,20 +6829,29 @@ run=TRUE
 
 
 #  Check the contents of the stats files --------------------------------------
-cat "${a_dedup_pre_pairs_stats}"
-cat "${a_dup_pre_pairs_stats}"
-cat "${a_unmap_pre_pairs_stats}"
+run_check=FALSE  #ARGUMENT
+[[ 
+    "${run_check}" == TRUE &&
+        -f "${a_dedup_pre_pairs_stats}" && \
+        -f "${a_dup_pre_pairs_stats}" && \
+        -f "${a_unmap_pre_pairs_stats}" 
+]] &&
+    {
+        cat "${a_dedup_pre_pairs_stats}"
+        cat "${a_dup_pre_pairs_stats}"
+        cat "${a_unmap_pre_pairs_stats}"
+    }
 ```
 </details>
 <br />
 
 <a id="printed-10"></a>
-#### Printed
+##### Printed
 <details>
-<summary><i>Printed: 7. Run pairtools stats</i></summary>
+<summary><i>Printed: 6. Run pairtools stats</i></summary>
 
-<a id="check-the-documentation-4"></a>
-##### Check the documentation
+<a id="check-the-documentation-5"></a>
+###### Check the documentation
 <details>
 <summary><i>Printed: Check the documentation</i></summary>
 
@@ -6386,7 +6947,7 @@ Options:
 <br />
 
 <a id="do-a-trial-run-of-pairtools-stats"></a>
-##### Do a trial run of `pairtools stats`
+###### Do a trial run of `pairtools stats`
 <details>
 <summary><i>Printed: Do a trial run of pairtools stats</i></summary>
 
@@ -6418,7 +6979,7 @@ WARNING:pairtools:All the sequences are duplicates. Do you run complexity estima
 <br />
 
 <a id="check-the-contents-of-the-stats-files"></a>
-##### Check the contents of the stats files
+###### Check the contents of the stats files
 <details>
 <summary><i>Printed: Check the contents of the stats files</i></summary>
 
@@ -7311,12 +7872,601 @@ chromsizes/Mito 85779
 </details>
 <br />
 
-<a id="8-load-pairs-to-cooler"></a>
-### 8. Load pairs to cooler
-<a id="code-12"></a>
-#### Code
+<a id="merged-pairs-files"></a>
+#### Merged pairs files
+<a id="code-16"></a>
+##### Code
 <details>
-<summary><i>Code: 8. Load pairs to cooler</i></summary>
+<summary><i>Code: 6. Run pairtools stats</i></summary>
+
+```bash
+#!/bin/bash
+
+print_test=TRUE
+[[
+    "${print_test}" == TRUE && \
+        ${flag_merge} == TRUE && \
+        -f "${a_merge}"
+]] &&
+    {
+        echo """
+        pairtools stats \\
+            -o \"${a_merge_stats}\" \\
+            \"${a_merge}\"
+        """
+    }
+
+run=TRUE
+[[
+    "${run}" == TRUE && \
+        ${flag_merge} == TRUE && \
+        -f "${a_merge}"
+]] &&
+    {
+        pairtools stats \
+            -o "${a_merge_stats}" \
+            "${a_merge}"
+    }
+
+run_check=TRUE
+[[
+    "${run_check}" == TRUE && \
+        ${flag_merge} == TRUE && \
+        -f "${a_merge_stats}"
+]] &&
+    {
+        ls -lhaFG "${a_merge_stats}"
+        cat "${a_merge_stats}"
+    }
+```
+</details>
+<br />
+
+<a id="printed-11"></a>
+##### Printed
+<details>
+<summary><i>Printed: 6. Run pairtools stats</i></summary>
+
+```txt
+❯ print_test=TRUE
+
+
+❯ [[
+>     "${print_test}" == TRUE && \
+>         ${flag_merge} == TRUE && \
+>         -f "${a_merge}"
+> ]] &&
+>     {
+>         echo """
+>         pairtools stats \\
+>             -o \"${a_merge_stats}\" \\
+>             \"${a_merge}\"
+>         """
+>     }
+
+        pairtools stats \
+            -o "06_stats/SRR11893084-SRR11893085.stats.txt" \
+            "05_dedup/SRR11893084-SRR11893085.nodups.pairs.gz"
+
+
+❯ [[
+>     "${run}" == TRUE && \
+>         ${flag_merge} == TRUE && \
+>         -f "${a_merge}"
+> ]] &&
+>     {
+>         pairtools stats \
+>             -o "${a_merge_stats}" \
+>             "${a_merge}"
+>     }
+WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/stats.py:888: RuntimeWarning: divide by zero encountered in double_scalars
+  complexity = float(nseq / seq_to_complexity)  # clean np.int64 data type
+
+
+❯ [[
+>     "${run_check}" == TRUE && \
+>         ${flag_merge} == TRUE && \
+>         -f "${a_merge_stats}"
+> ]] &&
+>     {
+>         ls -lhaFG "${a_merge_stats}"
+>         cat "${a_merge_stats}"
+>     }
+-rw-rw---- 1 kalavatt 13K Jul  8 15:20 06_stats/SRR11893084-SRR11893085.stats.txt
+total   53763530
+total_unmapped  0
+total_single_sided_mapped   0
+total_mapped    53763530
+total_dups  0
+total_nodups    53763530
+cis 49771300
+trans   3992230
+pair_types/UU   53763530
+cis_1kb+    29924045
+cis_2kb+    24530347
+cis_4kb+    19619150
+cis_10kb+   13510957
+cis_20kb+   8746053
+cis_40kb+   4543227
+summary/frac_cis    0.9257446451153784
+summary/frac_cis_1kb+   0.5565863141798911
+summary/frac_cis_2kb+   0.4562636977147892
+summary/frac_cis_4kb+   0.3649155849699601
+summary/frac_cis_10kb+  0.25130338353899007
+summary/frac_cis_20kb+  0.16267631608266794
+summary/frac_cis_40kb+  0.08450388209256349
+summary/frac_dups   0.0
+summary/complexity_naive    inf
+chrom_freq/I/I  847266
+chrom_freq/I/VIII   21860
+chrom_freq/I/IV 7741
+chrom_freq/I/VII    7571
+chrom_freq/I/II 6607
+chrom_freq/I/IX 5906
+chrom_freq/I/V  5504
+chrom_freq/I/III    5064
+chrom_freq/I/VI 4378
+chrom_freq/I/Mito   422
+chrom_freq/II/II    3416593
+chrom_freq/I/XII    9672
+chrom_freq/I/XVI    7363
+chrom_freq/I/XV 6964
+chrom_freq/II/I 6625
+chrom_freq/I/XIV    6513
+chrom_freq/I/XI 6484
+chrom_freq/I/X  6423
+chrom_freq/I/XIII   6252
+chrom_freq/II/III   9472
+chrom_freq/II/IV    31388
+chrom_freq/II/VII   27848
+chrom_freq/II/IX    17491
+chrom_freq/II/V 15254
+chrom_freq/II/VI    8437
+chrom_freq/II/VIII  14643
+chrom_freq/II/Mito  1895
+chrom_freq/II/XIII  21538
+chrom_freq/II/XII   20275
+chrom_freq/II/X 18173
+chrom_freq/II/XI    17176
+chrom_freq/II/XIV   19966
+chrom_freq/III/III  1346387
+chrom_freq/II/XV    24479
+chrom_freq/II/XVI   22058
+chrom_freq/III/II   9283
+chrom_freq/III/I    5088
+chrom_freq/III/XI   17910
+chrom_freq/III/IV   12848
+chrom_freq/III/VII  11022
+chrom_freq/III/IX   10706
+chrom_freq/III/X    8968
+chrom_freq/III/VIII 8303
+chrom_freq/III/V    7923
+chrom_freq/III/VI   5385
+chrom_freq/III/Mito 717
+chrom_freq/III/XII  17691
+chrom_freq/IV/II    31610
+chrom_freq/III/XV   10932
+chrom_freq/III/XVI  10422
+chrom_freq/III/XIV  10314
+chrom_freq/III/XIII 9833
+chrom_freq/IV/I 7650
+chrom_freq/IV/III   12444
+chrom_freq/IV/IV    5878418
+chrom_freq/IV/IX    17081
+chrom_freq/IV/VII   39063
+chrom_freq/IV/V 21555
+chrom_freq/IV/VIII  20872
+chrom_freq/IV/VI    10503
+chrom_freq/IV/Mito  3263
+chrom_freq/IV/XII   29829
+chrom_freq/IV/X 27601
+chrom_freq/IV/XI    25487
+chrom_freq/IV/XIII  34290
+chrom_freq/IV/XV    41140
+chrom_freq/IV/XIV   30684
+chrom_freq/IV/XVI   34161
+chrom_freq/IX/IX    1902145
+chrom_freq/IX/IV    17432
+chrom_freq/IX/II    17395
+chrom_freq/IX/III   10709
+chrom_freq/IX/I 5998
+chrom_freq/IX/V 10398
+chrom_freq/IX/VI    7040
+chrom_freq/IX/VII   17355
+chrom_freq/IX/Mito  1002
+chrom_freq/IX/XII   20473
+chrom_freq/IX/XIII  14014
+chrom_freq/IX/XIV   12773
+chrom_freq/IX/X 12521
+chrom_freq/IX/XI    12056
+chrom_freq/IX/VIII  10323
+chrom_freq/IX/XV    16360
+chrom_freq/Mito/Mito    26317
+chrom_freq/V/II 15051
+chrom_freq/IX/XVI   14298
+chrom_freq/V/III    7747
+chrom_freq/V/I  5531
+chrom_freq/Mito/IV  2304
+chrom_freq/Mito/XII 2172
+chrom_freq/Mito/VII 1742
+chrom_freq/Mito/XVI 1690
+chrom_freq/Mito/XV  1670
+chrom_freq/Mito/XIII    1424
+chrom_freq/Mito/II  1200
+chrom_freq/Mito/XIV 1163
+chrom_freq/Mito/XI  1103
+chrom_freq/Mito/X   1091
+chrom_freq/Mito/V   888
+chrom_freq/Mito/VIII    825
+chrom_freq/Mito/IX  696
+chrom_freq/Mito/III 512
+chrom_freq/Mito/VI  455
+chrom_freq/Mito/I   292
+chrom_freq/V/V  2203029
+chrom_freq/V/IV 21657
+chrom_freq/V/IX 10476
+chrom_freq/V/Mito   1242
+chrom_freq/V/VII    17792
+chrom_freq/V/X  16872
+chrom_freq/V/VIII   11363
+chrom_freq/V/XI 13512
+chrom_freq/V/VI 6601
+chrom_freq/V/XV 17762
+chrom_freq/V/XVI    16439
+chrom_freq/V/XIII   15758
+chrom_freq/V/XII    14916
+chrom_freq/V/XIV    14165
+chrom_freq/VI/II    8359
+chrom_freq/VI/III   5308
+chrom_freq/VI/I 4415
+chrom_freq/VI/VI    1134351
+chrom_freq/VI/IV    10391
+chrom_freq/VI/IX    7066
+chrom_freq/VI/V 6681
+chrom_freq/VI/Mito  645
+chrom_freq/VI/VII   9091
+chrom_freq/VI/XII   8630
+chrom_freq/VI/XI    8043
+chrom_freq/VI/X 7988
+chrom_freq/VI/VIII  7178
+chrom_freq/VII/II   27887
+chrom_freq/VII/IV   39430
+chrom_freq/VII/III  10680
+chrom_freq/VI/XV    9115
+chrom_freq/VI/XVI   8956
+chrom_freq/VI/XIV   8687
+chrom_freq/VI/XIII  8326
+chrom_freq/VII/I    7631
+chrom_freq/VII/VII  4268018
+chrom_freq/VII/V    17815
+chrom_freq/VII/IX   17124
+chrom_freq/VII/VI   9177
+chrom_freq/VII/Mito 2384
+chrom_freq/VII/XI   23852
+chrom_freq/VII/X    21398
+chrom_freq/VII/VIII 17321
+chrom_freq/VII/XII  27361
+chrom_freq/VII/XIII 27043
+chrom_freq/VII/XIV  24173
+chrom_freq/VII/XV   31151
+chrom_freq/VII/XVI  27902
+chrom_freq/VIII/I   21720
+chrom_freq/VIII/IV  21443
+chrom_freq/VIII/II  14435
+chrom_freq/VIII/III 8359
+chrom_freq/VIII/VIII    2196952
+chrom_freq/VIII/VII 17381
+chrom_freq/VIII/V   11545
+chrom_freq/VIII/IX  10472
+chrom_freq/VIII/VI  7272
+chrom_freq/VIII/Mito    1173
+chrom_freq/VIII/XII 14915
+chrom_freq/VIII/XI  13950
+chrom_freq/VIII/X   13271
+chrom_freq/VIII/XIII    15989
+chrom_freq/X/II 17895
+chrom_freq/VIII/XV  17472
+chrom_freq/VIII/XVI 16955
+chrom_freq/VIII/XIV 15214
+chrom_freq/X/IV 27716
+chrom_freq/X/III    8938
+chrom_freq/X/I  6383
+chrom_freq/X/VII    21939
+chrom_freq/X/V  16823
+chrom_freq/X/VIII   13211
+chrom_freq/X/IX 12394
+chrom_freq/X/X  3020356
+chrom_freq/X/VI 7833
+chrom_freq/X/Mito   1583
+chrom_freq/X/XIII   19033
+chrom_freq/X/XV 21675
+chrom_freq/X/XIV    18254
+chrom_freq/X/XII    18076
+chrom_freq/X/XI 16307
+chrom_freq/XI/IV    25431
+chrom_freq/X/XVI    20286
+chrom_freq/XI/III   17627
+chrom_freq/XI/II    17453
+chrom_freq/XI/IX    12107
+chrom_freq/XI/I 6621
+chrom_freq/XI/VII   23903
+chrom_freq/XI/XI    2762268
+chrom_freq/XI/X 16211
+chrom_freq/XI/VIII  13836
+chrom_freq/XI/V 13494
+chrom_freq/XI/VI    7930
+chrom_freq/XI/Mito  1550
+chrom_freq/XI/XIII  18704
+chrom_freq/XI/XIV   17566
+chrom_freq/XI/XII   17417
+chrom_freq/XI/XV    20774
+chrom_freq/XII/II   20398
+chrom_freq/XI/XVI   20219
+chrom_freq/XII/III  17527
+chrom_freq/XII/IV   29763
+chrom_freq/XII/I    9656
+chrom_freq/XII/VII  27301
+chrom_freq/XII/IX   20823
+chrom_freq/XII/V    14775
+chrom_freq/XII/VIII 14356
+chrom_freq/XII/VI   8486
+chrom_freq/XII/Mito 3081
+chrom_freq/XII/XII  5590505
+chrom_freq/XII/XI   17812
+chrom_freq/XII/X    17782
+chrom_freq/XII/XV   23237
+chrom_freq/XII/XIV  20909
+chrom_freq/XII/XIII 20771
+chrom_freq/XII/XVI  21926
+chrom_freq/XIII/IV  34413
+chrom_freq/XIII/II  21255
+chrom_freq/XIII/IX  14128
+chrom_freq/XIII/III 9603
+chrom_freq/XIII/I   6423
+chrom_freq/XIII/VII 27258
+chrom_freq/XIII/X   19098
+chrom_freq/XIII/VIII    15643
+chrom_freq/XIII/V   15565
+chrom_freq/XIII/XI  18696
+chrom_freq/XIII/VI  8345
+chrom_freq/XIII/Mito    1996
+chrom_freq/XIII/XIII    3758834
+chrom_freq/XIII/XII 20991
+chrom_freq/XIII/XIV 21192
+chrom_freq/XIII/XV  26471
+chrom_freq/XIII/XVI 24147
+chrom_freq/XIV/II   19528
+chrom_freq/XIV/III  9709
+chrom_freq/XIV/I    6760
+chrom_freq/XIV/IV   30282
+chrom_freq/XIV/VII  24283
+chrom_freq/XIV/V    14436
+chrom_freq/XIV/IX   12942
+chrom_freq/XIV/VIII 15269
+chrom_freq/XIV/VI   8837
+chrom_freq/XIV/Mito 1704
+chrom_freq/XIV/XII  21779
+chrom_freq/XIV/XIII 21426
+chrom_freq/XIV/X    18243
+chrom_freq/XIV/XIV  3317092
+chrom_freq/XIV/XI   17577
+chrom_freq/XIV/XV   24530
+chrom_freq/XV/II    24458
+chrom_freq/XIV/XVI  21867
+chrom_freq/XV/IV    40928
+chrom_freq/XV/III   10694
+chrom_freq/XV/I 7114
+chrom_freq/XV/VII   31229
+chrom_freq/XV/V 17717
+chrom_freq/XV/IX    16152
+chrom_freq/XV/VI    9009
+chrom_freq/XV/Mito  2371
+chrom_freq/XV/XII   23254
+chrom_freq/XV/X 22001
+chrom_freq/XV/XI    21211
+chrom_freq/XV/VIII  17076
+chrom_freq/XV/XIII  26696
+chrom_freq/XV/XV    4351325
+chrom_freq/XV/XIV   24558
+chrom_freq/XV/XVI   27639
+chrom_freq/XVI/IV   34176
+chrom_freq/XVI/II   21944
+chrom_freq/XVI/III  9868
+chrom_freq/XVI/IX   14143
+chrom_freq/XVI/I    7197
+chrom_freq/XVI/VII  27700
+chrom_freq/XVI/X    19974
+chrom_freq/XVI/VIII 16627
+chrom_freq/XVI/V    16355
+chrom_freq/XVI/VI   8916
+chrom_freq/XVI/Mito 2209
+chrom_freq/XVI/XI   19290
+chrom_freq/XVI/XIII 24018
+chrom_freq/XVI/XII  21693
+chrom_freq/XVI/XIV  21630
+chrom_freq/XVI/XV   27143
+chrom_freq/XVI/XVI  3751444
+dist_freq/0-1/+-    3162
+dist_freq/0-1/-+    3118
+dist_freq/0-1/--    4459
+dist_freq/0-1/++    4913
+dist_freq/1-2/+-    6015
+dist_freq/1-2/-+    5980
+dist_freq/1-2/--    491
+dist_freq/1-2/++    496
+dist_freq/2-3/+-    6231
+dist_freq/2-3/-+    6322
+dist_freq/2-3/--    114
+dist_freq/2-3/++    122
+dist_freq/3-6/+-    26933
+dist_freq/3-6/-+    26977
+dist_freq/3-6/--    292
+dist_freq/3-6/++    349
+dist_freq/6-10/+-   31210
+dist_freq/6-10/-+   31426
+dist_freq/6-10/--   424
+dist_freq/6-10/++   456
+dist_freq/10-18/+-  49065
+dist_freq/10-18/-+  48706
+dist_freq/10-18/--  948
+dist_freq/10-18/++  1042
+dist_freq/18-32/+-  81424
+dist_freq/18-32/-+  81142
+dist_freq/18-32/--  2111
+dist_freq/18-32/++  2261
+dist_freq/32-56/+-  158489
+dist_freq/32-56/-+  158728
+dist_freq/32-56/--  35225
+dist_freq/32-56/++  35422
+dist_freq/56-100/+- 294241
+dist_freq/56-100/-+ 294079
+dist_freq/56-100/-- 184106
+dist_freq/56-100/++ 184463
+dist_freq/100-178/+-    414307
+dist_freq/100-178/-+    414753
+dist_freq/100-178/--    932610
+dist_freq/100-178/++    931914
+dist_freq/178-316/+-    1780358
+dist_freq/178-316/-+    1780820
+dist_freq/178-316/--    998556
+dist_freq/178-316/++    1000123
+dist_freq/316-562/+-    1286939
+dist_freq/316-562/-+    1287749
+dist_freq/316-562/--    1176512
+dist_freq/316-562/++    1175695
+dist_freq/562-1000/+-   1245353
+dist_freq/562-1000/-+   1245216
+dist_freq/562-1000/--   1201922
+dist_freq/562-1000/++   1203486
+dist_freq/1000-1778/+-  1136856
+dist_freq/1000-1778/-+  1136308
+dist_freq/1000-1778/--  1122049
+dist_freq/1000-1778/++  1120430
+dist_freq/1778-3162/+-  1043113
+dist_freq/1778-3162/-+  1044056
+dist_freq/1778-3162/--  1040397
+dist_freq/1778-3162/++  1041844
+dist_freq/3162-5623/+-  974553
+dist_freq/3162-5623/-+  976658
+dist_freq/3162-5623/--  974762
+dist_freq/3162-5623/++  973909
+dist_freq/5623-10000/+- 959122
+dist_freq/5623-10000/-+ 956402
+dist_freq/5623-10000/-- 956063
+dist_freq/5623-10000/++ 956566
+dist_freq/10000-17783/+-    989701
+dist_freq/10000-17783/-+    988538
+dist_freq/10000-17783/--    989718
+dist_freq/10000-17783/++    989955
+dist_freq/17783-31623/+-    933887
+dist_freq/17783-31623/-+    935158
+dist_freq/17783-31623/--    933709
+dist_freq/17783-31623/++    936075
+dist_freq/31623-56234/+-    679501
+dist_freq/31623-56234/-+    680183
+dist_freq/31623-56234/--    678816
+dist_freq/31623-56234/++    679203
+dist_freq/56234-100000/+-   361414
+dist_freq/56234-100000/-+   361928
+dist_freq/56234-100000/--   361644
+dist_freq/56234-100000/++   361811
+dist_freq/100000-177828/+-  182289
+dist_freq/100000-177828/-+  183041
+dist_freq/100000-177828/--  182664
+dist_freq/100000-177828/++  182506
+dist_freq/177828-316228/+-  118793
+dist_freq/177828-316228/-+  120251
+dist_freq/177828-316228/--  120162
+dist_freq/177828-316228/++  120259
+dist_freq/316228-562341/+-  73763
+dist_freq/316228-562341/-+  74555
+dist_freq/316228-562341/--  74425
+dist_freq/316228-562341/++  74038
+dist_freq/562341-1000000/+- 31881
+dist_freq/562341-1000000/-+ 32091
+dist_freq/562341-1000000/-- 31929
+dist_freq/562341-1000000/++ 31765
+dist_freq/1000000-1778279/+-    3702
+dist_freq/1000000-1778279/-+    3847
+dist_freq/1000000-1778279/--    3912
+dist_freq/1000000-1778279/++    3843
+dist_freq/1778279-3162278/+-    0
+dist_freq/1778279-3162278/-+    0
+dist_freq/1778279-3162278/--    0
+dist_freq/1778279-3162278/++    0
+dist_freq/3162278-5623413/+-    0
+dist_freq/3162278-5623413/-+    0
+dist_freq/3162278-5623413/--    0
+dist_freq/3162278-5623413/++    0
+dist_freq/5623413-10000000/+-   0
+dist_freq/5623413-10000000/-+   0
+dist_freq/5623413-10000000/--   0
+dist_freq/5623413-10000000/++   0
+dist_freq/10000000-17782794/+-  0
+dist_freq/10000000-17782794/-+  0
+dist_freq/10000000-17782794/--  0
+dist_freq/10000000-17782794/++  0
+dist_freq/17782794-31622777/+-  0
+dist_freq/17782794-31622777/-+  0
+dist_freq/17782794-31622777/--  0
+dist_freq/17782794-31622777/++  0
+dist_freq/31622777-56234133/+-  0
+dist_freq/31622777-56234133/-+  0
+dist_freq/31622777-56234133/--  0
+dist_freq/31622777-56234133/++  0
+dist_freq/56234133-100000000/+- 0
+dist_freq/56234133-100000000/-+ 0
+dist_freq/56234133-100000000/-- 0
+dist_freq/56234133-100000000/++ 0
+dist_freq/100000000-177827941/+-    0
+dist_freq/100000000-177827941/-+    0
+dist_freq/100000000-177827941/--    0
+dist_freq/100000000-177827941/++    0
+dist_freq/177827941-316227766/+-    0
+dist_freq/177827941-316227766/-+    0
+dist_freq/177827941-316227766/--    0
+dist_freq/177827941-316227766/++    0
+dist_freq/316227766-562341325/+-    0
+dist_freq/316227766-562341325/-+    0
+dist_freq/316227766-562341325/--    0
+dist_freq/316227766-562341325/++    0
+dist_freq/562341325-1000000000/+-   0
+dist_freq/562341325-1000000000/-+   0
+dist_freq/562341325-1000000000/--   0
+dist_freq/562341325-1000000000/++   0
+dist_freq/562341325+/+- 0
+dist_freq/562341325+/-+ 0
+dist_freq/562341325+/-- 0
+dist_freq/562341325+/++ 0
+chromsizes/I    230218
+chromsizes/II   813184
+chromsizes/III  316620
+chromsizes/IV   1531933
+chromsizes/IX   439888
+chromsizes/Mito 85779
+chromsizes/V    576874
+chromsizes/VI   270161
+chromsizes/VII  1090940
+chromsizes/VIII 562643
+chromsizes/X    745751
+chromsizes/XI   666816
+chromsizes/XII  1078177
+chromsizes/XIII 924431
+chromsizes/XIV  784333
+chromsizes/XV   1091291
+chromsizes/XVI  948066
+```
+</details>
+<br />
+
+<a id="7-load-pairs-to-cooler"></a>
+### 7. Load pairs to cooler
+<a id="individual-pairs-file"></a>
+#### Individual pairs file
+<a id="code-17"></a>
+##### Code
+<details>
+<summary><i>Code: 7. Load pairs to cooler</i></summary>
 
 ```bash
 #!/bin/bash
@@ -7324,10 +8474,9 @@ chromsizes/Mito 85779
 #  Check the documentation
 cooler cload pairs --help
 
-#  Echo test
-run=TRUE
-[[ "${run}" == TRUE ]] &&
-[[ -f "${a_dedup_pre_pairs}" ]] &&
+#  Print test
+print_test=TRUE
+[[ "${print_test}" == TRUE && -f "${a_dedup_pre_pairs}" ]] &&
     {
         echo """
         cooler cload pairs \\
@@ -7341,8 +8490,7 @@ run=TRUE
 
 #  Create a .cool from the processed, filtered pairs
 run=TRUE
-[[ "${run}" == TRUE ]] &&
-[[ -f "${a_dedup_pre_pairs}" ]] &&
+[[ "${run}" == TRUE && -f "${a_dedup_pre_pairs}" ]] &&
     {
         cooler cload pairs \
             -c1 2 -p1 3 -c2 4 -p2 5 \
@@ -7357,10 +8505,10 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-11"></a>
-#### Printed
+<a id="printed-12"></a>
+##### Printed
 <details>
-<summary><i>Printed: 8. Load pairs to cooler</i></summary>
+<summary><i>Printed: 7. Load pairs to cooler</i></summary>
 
 ```txt
 ❯ #  Check the documentation
@@ -7516,12 +8664,134 @@ INFO:cooler.create:Writing info
 </details>
 <br />
 
-<a id="9-generate-a-multi-resolution-cooler-by-coarsening"></a>
-### 9. Generate a multi-resolution cooler by coarsening
-<a id="code-13"></a>
-#### Code
+<a id="merged-pairs-files-1"></a>
+#### Merged pairs files
+<a id="code-18"></a>
+##### Code
 <details>
-<summary><i>Code: 9. Generate a multi-resolution cooler by coarsening</i></summary>
+<summary><i>Code: 7. Load pairs to cooler</i></summary>
+
+```bash
+#!/bin/bash
+
+print_test=TRUE
+[[ "${print_test}" == TRUE && -f "${a_merge}" ]] &&
+    {
+        echo """
+        cooler cload pairs \\
+            -c1 2 -p1 3 -c2 4 -p2 5 \\
+            --assembly \"${assembly}\" \\
+            \"${a_size}\":\"${bin_initial}\" \\
+            \"${a_merge}\" \\
+            \"${a_merge_cload}\"
+        """
+    }
+
+run=TRUE
+[[ "${run}" == TRUE && -f "${a_dedup_pre_pairs}" ]] &&
+    {
+        cooler cload pairs \
+            -c1 2 -p1 3 -c2 4 -p2 5 \
+            --assembly "${assembly}" \
+            "${a_size}":"${bin_initial}" \
+            "${a_merge}" \
+            "${a_merge_cload}"
+    }
+
+#TODO Write standard error
+```
+</details>
+<br />
+
+<a id="printed-13"></a>
+##### Printed
+<details>
+<summary><i>Printed: 7. Load pairs to cooler</i></summary>
+
+```txt
+❯ print_test=TRUE
+
+
+❯ [[ "${print_test}" == TRUE && -f "${a_merge}" ]] &&
+>     {
+>         echo """
+>         cooler cload pairs \\
+>             -c1 2 -p1 3 -c2 4 -p2 5 \\
+>             --assembly \"${assembly}\" \\
+>             \"${a_size}\":\"${bin_initial}\" \\
+>             \"${a_merge}\" \\
+>             \"${a_merge_cload}\"
+>         """
+>     }
+
+        cooler cload pairs \
+            -c1 2 -p1 3 -c2 4 -p2 5 \
+            --assembly "S288C_R64-3-1" \
+            "/home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size":"50" \
+            "05_dedup/SRR11893084-SRR11893085.nodups.pairs.gz" \
+            "07_cload/SRR11893084-SRR11893085.cload.cool"
+
+
+❯ [[ "${run}" == TRUE && -f "${a_dedup_pre_pairs}" ]] &&
+>     {
+>         cooler cload pairs \
+>             -c1 2 -p1 3 -c2 4 -p2 5 \
+>             --assembly "${assembly}" \
+>             "${a_size}":"${bin_initial}" \
+>             "${a_merge}" \
+>             "${a_merge_cload}"
+>     }
+INFO:cooler.create:Writing chunk 0: /fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/07_cload/tmpvneec_vq.multi.cool::0
+INFO:cooler.create:Creating cooler at "/fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/07_cload/tmpvneec_vq.multi.cool::/0"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.create:Writing chunk 1: /fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/07_cload/tmpvneec_vq.multi.cool::1
+INFO:cooler.create:Creating cooler at "/fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/07_cload/tmpvneec_vq.multi.cool::/1"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.create:Writing chunk 2: /fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/07_cload/tmpvneec_vq.multi.cool::2
+INFO:cooler.create:Creating cooler at "/fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/07_cload/tmpvneec_vq.multi.cool::/2"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.create:Writing chunk 3: /fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/07_cload/tmpvneec_vq.multi.cool::3
+INFO:cooler.create:Creating cooler at "/fh/fast/tsukiyama_t/grp/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/07_cload/tmpvneec_vq.multi.cool::/3"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.create:Merging into 07_cload/SRR11893084-SRR11893085.cload.cool
+INFO:cooler.create:Creating cooler at "07_cload/SRR11893084-SRR11893085.cload.cool::/"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:nnzs: [8919946, 8880162, 8675198, 5261652]
+INFO:cooler.reduce:current: [8000487, 6282823, 411510, 305087]
+INFO:cooler.reduce:current: [8899813, 8880162, 8675198, 3544734]
+INFO:cooler.reduce:current: [8919946, 8880162, 8675198, 5261652]
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+```
+</details>
+<br />
+
+<a id="8-generate-a-multi-resolution-cooler-by-coarsening"></a>
+### 8. Generate a multi-resolution cooler by coarsening
+<a id="cools-from-individual-pairs-files"></a>
+#### Cools from individual pairs files
+<a id="code-19"></a>
+##### Code
+<details>
+<summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
 
 ```bash
 #!/bin/bash
@@ -7529,10 +8799,9 @@ INFO:cooler.create:Writing info
 #  Check the documentation
 cooler zoomify --help
 
-#  Echo test
-run=TRUE
-[[ "${run}" == TRUE ]] &&
-[[ -f "${a_cload}" ]] &&
+#  Print test
+print_test=TRUE
+[[ "${print_test}" == TRUE && -f "${a_cload}" ]] &&
     {
         echo """
         cooler zoomify \\
@@ -7546,10 +8815,8 @@ run=TRUE
     }
 
 #  Run cooler zoomify (generate a multi-resolution cooler by coarsening)
-if [[ -f "${a_zoom}" ]]; then rm "${a_zoom}"; fi
 run=TRUE
-[[ "${run}" == TRUE ]] &&
-[[ -f "${a_cload}" ]] &&
+[[ "${run}" == TRUE && -f "${a_cload}" ]] &&
     {
         cooler zoomify \
             --out "${a_zoom}" \
@@ -7560,17 +8827,14 @@ run=TRUE
             "${a_cload}" \
                 2> >(tee -a "${d_zoom}/err_out/${f_pre}.stderr.txt" >&2)
     }
-#HERE
-#DONE Add Balance arguments (--nproc is eight by default)
-#NO Go ahead and include resolution 50 in the mcool
 ```
 </details>
 <br />
 
-<a id="printed-12"></a>
-#### Printed
+<a id="printed-14"></a>
+##### Printed
 <details>
-<summary><i>Printed: 9. Generate a multi-resolution cooler by coarsening</i></summary>
+<summary><i>Printed: 8. Generate a multi-resolution cooler by coarsening</i></summary>
 
 ```txt
 ❯ #  Check the documentation
@@ -7987,9 +9251,200 @@ INFO:cooler.balance:variance is 7.734072057040814e-06
 </details>
 <br />
 
-<a id="10-ingest-files-for-higlass"></a>
-### 10. Ingest files for HiGlass
-<a id="code-14"></a>
+<a id="cools-from-merged-pairs-files"></a>
+#### Cools from merged pairs files
+<a id="code-20"></a>
+##### Code
+<details>
+<summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
+
+```bash
+#!/bin/bash
+
+#  Print test
+print_test=TRUE
+[[ "${print_test}" == TRUE && -f "${a_cload}" ]] &&
+    {
+        echo """
+        cooler zoomify \\
+            --out \"${a_merge_zoom}\" \\
+            --nproc \"${threads}\" \\
+            --resolutions 100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \\
+            --balance \\
+            \"${a_merge_cload}\" \\
+                2> >(tee -a \"${d_zoom}/err_out/${f_merge_pre}.stderr.txt\" >&2)
+        """
+    }
+
+#  Run cooler zoomify (generate a multi-resolution cooler by coarsening)
+run=TRUE
+[[ "${run}" == TRUE && -f "${a_cload}" ]] &&
+    {
+        cooler zoomify \
+            --out "${a_merge_zoom}" \
+            --nproc "${threads}" \
+            --resolutions 100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \
+            --balance \
+            --balance-args '--max-iters 2000' \
+            "${a_merge_cload}" \
+                2> >(tee -a "${d_zoom}/err_out/${f_merge_pre}.stderr.txt" >&2)
+    }
+```
+</details>
+<br />
+
+<a id="printed-15"></a>
+##### Printed
+<details>
+<summary><i>Printed: 8. Generate a multi-resolution cooler by coarsening</i></summary>
+
+```txt
+❯ print_test=TRUE
+
+
+❯ [[ "${print_test}" == TRUE && -f "${a_cload}" ]] &&
+>     {
+>         echo """
+>         cooler zoomify \\
+>             --out \"${a_merge_zoom}\" \\
+>             --nproc \"${threads}\" \\
+>             --resolutions 100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \\
+>             --balance \\
+>             \"${a_merge_cload}\" \\
+>                 2> >(tee -a \"${d_zoom}/err_out/${f_merge_pre}.stderr.txt\" >&2)
+>         """
+>     }
+
+        cooler zoomify \
+            --out "08_zoom/SRR11893084-SRR11893085.mcool" \
+            --nproc "8" \
+            --resolutions 100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \
+            --balance \
+            "07_cload/SRR11893084-SRR11893085.cload.cool" \
+                2> >(tee -a "08_zoom/err_out/SRR11893084-SRR11893085.stderr.txt" >&2)
+
+
+❯ run=TRUE
+
+
+❯ [[ "${run}" == TRUE && -f "${a_cload}" ]] &&
+>     {
+>         cooler zoomify \
+>             --out "${a_merge_zoom}" \
+>             --nproc "${threads}" \
+>             --resolutions 100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \
+>             --balance \
+>             --balance-args '--max-iters 2000' \
+>             "${a_merge_cload}" \
+>                 2> >(tee -a "${d_zoom}/err_out/${f_merge_pre}.stderr.txt" >&2)
+>     }
+INFO:cooler.cli.zoomify:Recursively aggregating "07_cload/SRR11893084-SRR11893085.cload.cool"
+INFO:cooler.cli.zoomify:Writing to "08_zoom/SRR11893084-SRR11893085.mcool"
+INFO:cooler.reduce:Copying base matrices and producing 12 new zoom levels.
+INFO:cooler.reduce:Bin size: 50
+INFO:cooler.reduce:Aggregating from 50 to 100.
+INFO:cooler.create:Creating cooler at "08_zoom/SRR11893084-SRR11893085.mcool::/resolutions/100"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:30000006 31701891
+INFO:cooler.reduce:20000248 30000006
+INFO:cooler.reduce:10000133 20000248
+INFO:cooler.reduce:0 10000133
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 100 to 200.
+INFO:cooler.create:Creating cooler at "08_zoom/SRR11893084-SRR11893085.mcool::/resolutions/200"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:20000125 22793108
+INFO:cooler.reduce:10000476 20000125
+INFO:cooler.reduce:0 10000476
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 200 to 400.
+INFO:cooler.create:Creating cooler at "08_zoom/SRR11893084-SRR11893085.mcool::/resolutions/400"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:10000082 15030070
+INFO:cooler.reduce:0 10000082
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 400 to 800.
+INFO:cooler.create:Creating cooler at "08_zoom/SRR11893084-SRR11893085.mcool::/resolutions/800"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:0 9521786
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 800 to 1600.
+INFO:cooler.create:Creating cooler at "08_zoom/SRR11893084-SRR11893085.mcool::/resolutions/1600"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:0 6379116
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 1600 to 3200.
+INFO:cooler.create:Creating cooler at "08_zoom/SRR11893084-SRR11893085.mcool::/resolutions/3200"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:0 4553526
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 3200 to 6400.
+INFO:cooler.create:Creating cooler at "08_zoom/SRR11893084-SRR11893085.mcool::/resolutions/6400"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:0 3057819
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 6400 to 12800.
+INFO:cooler.create:Creating cooler at "08_zoom/SRR11893084-SRR11893085.mcool::/resolutions/12800"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:0 1489395
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 12800 to 25600.
+INFO:cooler.create:Creating cooler at "08_zoom/SRR11893084-SRR11893085.mcool::/resolutions/25600"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:0 446283
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 25600 to 51200.
+INFO:cooler.create:Creating cooler at "08_zoom/SRR11893084-SRR11893085.mcool::/resolutions/51200"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:0 115893
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.reduce:Aggregating from 51200 to 102400.
+INFO:cooler.create:Creating cooler at "08_zoom/SRR11893084-SRR11893085.mcool::/resolutions/102400"
+INFO:cooler.create:Writing chroms
+INFO:cooler.create:Writing bins
+INFO:cooler.create:Writing pixels
+INFO:cooler.reduce:0 30380
+INFO:cooler.create:Writing indexes
+INFO:cooler.create:Writing info
+INFO:cooler.cli.zoomify:Balancing zoom level with bin size 100
+```
+</details>
+<br />
+
+
+<a id="9-ingest-files-for-higlass"></a>
+### 9. Ingest files for HiGlass
+<a id="code-21"></a>
 #### Code
 <details>
 <summary><i>Code: Ingest files for HiGlass</i></summary>
@@ -7997,6 +9452,7 @@ INFO:cooler.balance:variance is 7.734072057040814e-06
 ```bash
 #!/bin/bash
 
+#  Run on WorkMac (local)
 run_check=FALSE
 [[ "${run_check}" == TRUE ]] &&
     {
@@ -8017,8 +9473,7 @@ rough_Q=FALSE
                 --filetype cooler \
                 --datatype matrix
 
-        curl http://localhost:8888/api/v1/tilesets/
-        #  OK, it works!
+        # curl http://localhost:8888/api/v1/tilesets/
     }
 
 rough_G1=FALSE
@@ -8030,27 +9485,57 @@ rough_G1=FALSE
                 --filetype cooler \
                 --datatype matrix
 
-        curl http://localhost:8888/api/v1/tilesets/
-        #  OK, it works!
+        # curl http://localhost:8888/api/v1/tilesets/
     }
 
-rough_size=TRUE
+rough_G2_M=FALSE
+[[ ${rough_G2_M} == TRUE ]] &&
+    {
+        docker exec higlass-container \
+            python higlass-server/manage.py ingest_tileset \
+                --filename /data/SRR11893084-SRR11893085.mcool \
+                --filetype cooler \
+                --datatype matrix
+
+        # curl http://localhost:8888/api/v1/tilesets/
+    }
+
+#  Test my "${rough_G2_M}" .mcool against the publicly available .mcool
+rough_G2_M_GSE151553=TRUE
+[[ ${rough_G2_M_GSE151553} == TRUE ]] &&
+    {
+        docker exec higlass-container \
+            python higlass-server/manage.py ingest_tileset \
+                --filename /data/GSE151553_A364_merged.mcool \
+                --filetype cooler \
+                --datatype matrix
+
+        # curl http://localhost:8888/api/v1/tilesets/
+    }
+
+rough_size=FALSE
 [[ "${rough_size}" == TRUE ]] &&
     {
         docker exec higlass-container \
             python higlass-server/manage.py ingest_tileset \
-            --filename /data/S288C_reference_sequence_R64-3-1_20210421.size \
-            --filetype chromsizes-tsv \
-            --datatype chromsizes
+                --filename /data/S288C_reference_sequence_R64-3-1_20210421.size \
+                --filetype chromsizes-tsv \
+                --datatype chromsizes
 
-        curl http://localhost:8888/api/v1/tilesets/
+        # curl http://localhost:8888/api/v1/tilesets/
     }
 
+#TODO
+# rough_gene_track=TRUE
+# [[ "${rough_gene_track}" == TRUE ]] &&
+#     {
+#
+#     }
 ```
 </details>
 <br />
 
-<a id="printed-13"></a>
+<a id="printed-16"></a>
 #### Printed
 <details>
 <summary><i>Printed: Ingest files for HiGlass</i></summary>
@@ -8157,6 +9642,7 @@ optional arguments:
   --force-color         Force colorization of the command output.
 
 
+❯ [[ "${rough_Q}" == TRUE ]]
 ❯ docker exec higlass-container \
 >     python higlass-server/manage.py ingest_tileset \
 >         --filename /data/SRR7939018.mcool \
@@ -8164,12 +9650,7 @@ optional arguments:
 >         --datatype matrix
 
 
-❯ curl http://localhost:8888/api/v1/tilesets/
-{"count":1,"next":null,"previous":null,"results":[{"uuid":"SSibmIFARuGpkcdcXMRi0w","datafile":"http://localhost:8888/api/v1/tilesets/media/uploads/SRR7939018.mcool","filetype":"cooler","datatype":"matrix","name":"SRR7939018.mcool","coordSystem":"","coordSystem2":"","created":"2023-07-06T22:36:07.679853Z","project":"SVNc_qSfRkGab57HGsyjvQ","project_name":"","description":"","private":false}]}%
-
-
-❯ [[ "${rough_G1}" == TRUE ]] &&
-
+❯ [[ "${rough_G1}" == TRUE ]]
 ❯ docker exec higlass-container \
 >     python higlass-server/manage.py ingest_tileset \
 >         --filename /data/SRR11893107.mcool \
@@ -8177,19 +9658,25 @@ optional arguments:
 >         --datatype matrix
 
 
-❯ curl http://localhost:8888/api/v1/tilesets/
-{"count":2,"next":null,"previous":null,"results":[{"uuid":"SSibmIFARuGpkcdcXMRi0w","datafile":"http://localhost:8888/api/v1/tilesets/media/uploads/SRR7939018.mcool","filetype":"cooler","datatype":"matrix","name":"SRR7939018.mcool","coordSystem":"","coordSystem2":"","created":"2023-07-06T22:36:07.679853Z","project":"SVNc_qSfRkGab57HGsyjvQ","project_name":"","description":"","private":false},{"uuid":"EicDrjqTS4W4iXD8pyWyBA","datafile":"http://localhost:8888/api/v1/tilesets/media/uploads/SRR11893107.mcool","filetype":"cooler","datatype":"matrix","name":"SRR11893107.mcool","coordSystem":"","coordSystem2":"","created":"2023-07-07T22:49:26.751463Z","project":"SVNc_qSfRkGab57HGsyjvQ","project_name":"","description":"","private":false}]}%
+❯ rough_G2_M=TRUE
+❯ [[ ${rough_G2_M} == TRUE ]] &&
+> {
+>     docker exec higlass-container \
+>         python higlass-server/manage.py ingest_tileset \
+>             --filename /data/SRR11893084-SRR11893085.mcool \
+>             --filetype cooler \
+>             --datatype matrix
+>
+>     # curl http://localhost:8888/api/v1/tilesets/
+> }
 
 
+❯ [[ "${rough_size}" == TRUE ]]
 ❯ docker exec higlass-container \
 >     python higlass-server/manage.py ingest_tileset \
 >     --filename /data/S288C_reference_sequence_R64-3-1_20210421.size \
 >     --filetype chromsizes-tsv \
 >     --datatype chromsizes
-
-
-❯ curl http://localhost:8888/api/v1/tilesets/
-{"count":3,"next":null,"previous":null,"results":[{"uuid":"SSibmIFARuGpkcdcXMRi0w","datafile":"http://localhost:8888/api/v1/tilesets/media/uploads/SRR7939018.mcool","filetype":"cooler","datatype":"matrix","name":"SRR7939018.mcool","coordSystem":"","coordSystem2":"","created":"2023-07-06T22:36:07.679853Z","project":"SVNc_qSfRkGab57HGsyjvQ","project_name":"","description":"","private":false},{"uuid":"EicDrjqTS4W4iXD8pyWyBA","datafile":"http://localhost:8888/api/v1/tilesets/media/uploads/SRR11893107.mcool","filetype":"cooler","datatype":"matrix","name":"SRR11893107.mcool","coordSystem":"","coordSystem2":"","created":"2023-07-07T22:49:26.751463Z","project":"SVNc_qSfRkGab57HGsyjvQ","project_name":"","description":"","private":false},{"uuid":"Kb-bcjysSlWc8H1dlRuqJA","datafile":"http://localhost:8888/api/v1/tilesets/media/uploads/S288C_reference_sequence_R64-3-1_20210421.size","filetype":"chromsizes-tsv","datatype":"chromsizes","name":"S288C_reference_sequence_R64-3-1_20210421.size","coordSystem":"","coordSystem2":"","created":"2023-07-07T22:58:53.689824Z","project":"SVNc_qSfRkGab57HGsyjvQ","project_name":"","description":"","private":false}]}
 ```
 </details>
 <br />
