@@ -1,8 +1,74 @@
 
+`rough-draft_determine-analysis-strategy_rDNA-Micro-C.md`
+<br />
+<br />
+
+<details>
+<summary><b><font size="+2"><i>Table of contents</i></font></b></summary>
+<!-- MarkdownTOC -->
+
+1. [Test: Working with pairs files](#test-working-with-pairs-files)
+    1. [Run an initial assessment of the non-deduplicated files](#run-an-initial-assessment-of-the-non-deduplicated-files)
+        1. [Code](#code)
+    1. [Printed](#printed)
+    1. [Notes](#notes)
+        1. [On what and where the columns are](#on-what-and-where-the-columns-are)
+        1. [On what the pair types are](#on-what-the-pair-types-are)
+1. [Work out the logic to isolate rDNA pairs](#work-out-the-logic-to-isolate-rdna-pairs)
+    1. [Review awk tutorial #1](#review-awk-tutorial-1)
+        1. [Code](#code-1)
+        1. [Printed](#printed-1)
+    1. [Review awk tutorial #2](#review-awk-tutorial-2)
+        1. [Code](#code-2)
+        1. [Printed](#printed-2)
+    1. [Begin to write and test usable logic](#begin-to-write-and-test-usable-logic)
+        1. [Code](#code-3)
+        1. [Printed](#printed-3)
+1. [Slouching toward obtaining and processing rDNA multimappers](#slouching-toward-obtaining-and-processing-rdna-multimappers)
+    1. [Tests in which I had not yet determined how to retain multimappers](#tests-in-which-i-had-not-yet-determined-how-to-retain-multimappers)
+        1. [Check that we have deduplicated rDNA read pairs](#check-that-we-have-deduplicated-rdna-read-pairs)
+            1. [Code](#code-4)
+            1. [Printed](#printed-4)
+            1. [Notes](#notes-1)
+            1. [Scraps](#scraps)
+    1. [Work after I had determined a strategy to retain rDNA multimappers](#work-after-i-had-determined-a-strategy-to-retain-rdna-multimappers)
+        1. [Check that we have deduplicated rDNA read pairs](#check-that-we-have-deduplicated-rdna-read-pairs-1)
+            1. [Code](#code-5)
+            1. [Printed](#printed-5)
+            1. [Notes](#notes-2)
+    1. [Implement logic for creation of deduplicated "`standard-rDNA-complete`" files](#implement-logic-for-creation-of-deduplicated-standard-rdna-complete-files)
+        1. [So, what's the next step?](#so-whats-the-next-step)
+            1. [Notes](#notes-3)
+        1. [Updates to the naming scheme](#updates-to-the-naming-scheme)
+            1. [Notes](#notes-4)
+        1. [Clean up directory, then re-copy in only necessary files](#clean-up-directory-then-re-copy-in-only-necessary-files)
+            1. [Code](#code-6)
+            1. [Printed](#printed-6)
+        1. [Run the actual processing](#run-the-actual-processing)
+            1. [Code](#code-7)
+                1. [1. Exclude rDNA-associated cis and trans interactions from "standard"](#1-exclude-rdna-associated-cis-and-trans-interactions-from-standard)
+                1. [2. Retain only rDNA-associated cis and trans interactions in "keep-MM"](#2-retain-only-rdna-associated-cis-and-trans-interactions-in-keep-mm)
+                1. [3. Concatenate "standard-no-rDNA" and "rDNA-only" files](#3-concatenate-standard-no-rdna-and-rdna-only-files)
+                1. [4. Copy file to remote, then run `pairtools sort`](#4-copy-file-to-remote-then-run-pairtools-sort)
+            1. [Printed](#printed-7)
+                1. [1. Exclude rDNA-associated cis and trans interactions from "standard"](#1-exclude-rdna-associated-cis-and-trans-interactions-from-standard-1)
+                1. [2. Retain only rDNA-associated cis and trans interactions in "keep-MM"](#2-retain-only-rdna-associated-cis-and-trans-interactions-in-keep-mm-1)
+                1. [3. Concatenate "standard-no-rDNA" and "keep-MM rDNA-only" files](#3-concatenate-standard-no-rdna-and-keep-mm-rdna-only-files)
+                1. [4. Copy file to remote, then run `pairtools sort`](#4-copy-file-to-remote-then-run-pairtools-sort-1)
+            1. [Scraps](#scraps-1)
+
+<!-- /MarkdownTOC -->
+</details>
+<br />
+<br />
+
+<a id="test-working-with-pairs-files"></a>
 ## Test: Working with pairs files
 <u>Goal</u>: Add rDNA-associated pairs records to deduplicated pairs files
 
+<a id="run-an-initial-assessment-of-the-non-deduplicated-files"></a>
 ### Run an initial assessment of the non-deduplicated files
+<a id="code"></a>
 #### Code
 <details>
 <summary><i>Code: Run an initial assessment of the non-deduplicated files</i></summary>
@@ -77,6 +143,7 @@ zcat < SRR7939018.dups.pairs.gz > SRR7939018.dups.pairs.txt
 </details>
 <br />
 
+<a id="printed"></a>
 ### Printed
 <details>
 <summary><i>Printed: Run an initial assessment of the non-deduplicated files</i></summary>
@@ -300,10 +367,12 @@ cmdor>     echo "cd'ing failed; check on this..."
 </details>
 <br />
 
+<a id="notes"></a>
 ### Notes
 <details>
 <summary><i>Notes: Run an initial assessment of the non-deduplicated files</i></summary>
 
+<a id="on-what-and-where-the-columns-are"></a>
 #### On what and where the columns are
 - column 02: chrom1
 - column 03: pos1 (chrom1 5' position)
@@ -321,14 +390,18 @@ cmdor>     echo "cd'ing failed; check on this..."
 - column 17: mismatches1
 - column 18: mismatches2
 
+<a id="on-what-the-pair-types-are"></a>
 #### On what the pair types are
 - *doesn't really matter right now* `#LATER`
 </details>
 <br />
 <br />
 
+<a id="work-out-the-logic-to-isolate-rdna-pairs"></a>
 ## Work out the logic to isolate rDNA pairs
+<a id="review-awk-tutorial-1"></a>
 ### Review awk [tutorial #1](https://towardsdatascience.com/mastering-file-and-text-manipulation-with-awk-utility-65fc09d56bef)
+<a id="code-1"></a>
 #### Code
 <details>
 <summary><i>Code: Review awk tutorial #1</i></summary>
@@ -425,6 +498,7 @@ cat "${df}" \
 </details>
 <br />
 
+<a id="printed-1"></a>
 #### Printed
 <details>
 <summary><i>Printed: Review awk tutorial #1</i></summary>
@@ -824,7 +898,9 @@ cat "${df}" \
 </details>
 <br />
 
+<a id="review-awk-tutorial-2"></a>
 ### Review awk [tutorial #2](https://www.tim-dennis.com/data/tech/2016/08/09/using-awk-filter-rows.html)
+<a id="code-2"></a>
 #### Code
 <details>
 <summary><i>Code: Review awk tutorial #2</i></summary>
@@ -881,6 +957,7 @@ cat "${df}" \
 </details>
 <br />
 
+<a id="printed-2"></a>
 #### Printed
 <details>
 <summary><i>Printed: Review awk tutorial #2</i></summary>
@@ -1018,10 +1095,12 @@ SRR7939018.55862767 I   1357    XII 1038870 +   +   DD  1   R1-2    1357    1038
 </details>
 <br />
 
-### ...and begin to write usable logic
+<a id="begin-to-write-and-test-usable-logic"></a>
+### Begin to write and test usable logic
+<a id="code-3"></a>
 #### Code
 <details>
-<summary><i>Code: ...and begin to write usable logic</i></summary>
+<summary><i>Code: Begin to write and test usable logic</i></summary>
 
 ```bash
 #!/bin/bash
@@ -1213,9 +1292,10 @@ cmp --silent *-tmp.txt *-tmp-2.txt \
 </details>
 <br />
 
+<a id="printed-3"></a>
 #### Printed
 <details>
-<summary><i>Printed: ...and begin to write usable logic</i></summary>
+<summary><i>Printed: Begin to write and test usable logic</i></summary>
 
 ```txt
 ❯ #  Return lines when more complicated condition is met (cont.) ================
@@ -1506,11 +1586,16 @@ Files are the same
 <br />
 <br />
 
-## TBD
-### Check that rDNA read pairs in "dedup" are not in "nodup"
-#### Code
+<a id="slouching-toward-obtaining-and-processing-rdna-multimappers"></a>
+## Slouching toward obtaining and processing rDNA multimappers
+<a id="tests-in-which-i-had-not-yet-determined-how-to-retain-multimappers"></a>
+### Tests in which I had not yet determined how to retain multimappers
+<a id="check-that-we-have-deduplicated-rdna-read-pairs"></a>
+#### Check that we have deduplicated rDNA read pairs
+<a id="code-4"></a>
+##### Code
 <details>
-<summary><i>Code: Check that rDNA read pairs in "dedup" are not in "nodup"</i></summary>
+<summary><i>Code: Check that we have deduplicated rDNA read pairs</i></summary>
 
 ```bash
 #!/bin/bash
@@ -1634,9 +1719,10 @@ zcat < "${nodups}" \
 </details>
 <br />
 
-#### Printed
+<a id="printed-4"></a>
+##### Printed
 <details>
-<summary><i>Printed: Check that rDNA read pairs in "dedup" are not in "nodup"</i></summary>
+<summary><i>Printed: Check that we have deduplicated rDNA read pairs</i></summary>
 
 ```txt
 ❯ #  Pull all XII records from the dataframe ------------------------------------
@@ -1800,9 +1886,10 @@ pipe pipe>         > "${nodups_12}"
 </details>
 <br />
 
-#### Notes
+<a id="notes-1"></a>
+##### Notes
 <details>
-<summary><i>Notes: Check that rDNA read pairs in "dedup" are not in "nodup"</i></summary>
+<summary><i>Notes: Check that we have deduplicated rDNA read pairs</i></summary>
 
 OK, it seems like this is not the way to be going about things&mdash;multimapping reads have not even made it to this stage of the analysis (i.e., the [pairtools dedup](https://pairtools.readthedocs.io/en/latest/cli_tools.html#pairtools-dedup) stage). When looking `rDNA-tmp.txt`, for example, the regex '`\tXII\t461\d{3}\tXII\t461\d{3}`' cannot be found, revealing that read pairs with both mates originating in XII:461000-461999 are not present in neither `SRR7939018.dups.pairs.gz`, nor are they present in `SRR7939018.nodups.pairs.gz`
 
@@ -1863,20 +1950,21 @@ SRR7939018.23
 
 It's not super clear what I can do with this... Well, I have sent an email to Seungsoo Kim, the analyst who did the Micro-C analyses for the 2019 *Mol Cell* paper. Before digging into this even deeper, let's take a break until we here back from him. We risk wasting time on a solution that has already been discovered, and which just needs to be communicated.
 
-However, if I were to continue on, my next step would be to, I think
+However, if I were to continue on, I think my next steps would be to...
 - Identify, tally, and define the flags present in the `SRR7939018.bam`
 - Look into how I can isolate <u>paired</u> alignments (*cis* and *trans*) associated with XII, then subset those for records with at least one mate in the padded rDNA locus
-- From there... it's not so clear how to do this within the pairtools framework&mdash;this is where input from Seungsoo Kim will be helpful
+- From there... it's not so clear how to do this within the pairtools framework&mdash;this is where input from Seungsoo Kim could be helpful
     + It may be that I need to switch away from `bwa mem`/`pairtools`
 
-
-For the time being, leave the temporary files in `2023-0307_work_Micro-C_align-process`.
-
+Also, for the time being, leave the temporary files in `2023-0307_work_Micro-C_align-process`.
 </details>
 <br />
-<br />
 
-## Scraps
+<a id="scraps"></a>
+##### Scraps
+<details>
+<summary><i>Scraps: Check that we have deduplicated rDNA read pairs</i></summary>
+
 - In `SRR7939018.nodups.pairs.XII.txt`, the regex '`XII\t461\d{3}`' matches nothing.
 - In `rDNA-tmp.txt`,
     + the regex '`XII\t461\d{3}`' matches nothing
@@ -1888,3 +1976,1036 @@ For the time being, leave the temporary files in `2023-0307_work_Micro-C_align-p
 - In `SRR7939018.dups.pairs.txt`,
     + the regex '`XII\t461\d{3}`' matches nothing
     + the regex '`XII\t462\d{3}`' matches nothing
+</details>
+<br />
+<br />
+
+<a id="work-after-i-had-determined-a-strategy-to-retain-rdna-multimappers"></a>
+### Work after I had determined a strategy to retain rDNA multimappers
+<a id="check-that-we-have-deduplicated-rdna-read-pairs-1"></a>
+#### Check that we have deduplicated rDNA read pairs
+<a id="code-5"></a>
+##### Code
+<details>
+<summary><i>Code: Check that we have deduplicated rDNA read pairs</i></summary>
+
+```bash
+#!/bin/bash
+
+#  Create necessary dataframes ------------------------------------------------
+nodups="SRR7939018.rDNA.nodups.pairs.gz"  # ls -lhaFG "${nodups}"
+nodups_12="${nodups/.pairs.gz/.pairs.XII.txt}"  # echo "${nodups_12}"
+nodups_12_no_rDNA="${nodups/.pairs.gz/.pairs.XII.no-rDNA.txt}"  # echo "${nodups_12_no_rDNA}"
+nodups_12_rDNA="${nodups/.pairs.gz/.pairs.XII.rDNA.txt}"  # echo "${nodups_12_rDNA}"
+
+[[ -f "${nodups_12}" ]] && rm "${nodups_12}"
+zcat < "${nodups}" \
+    | grep -v "^#" \
+    | awk '($2 == "XII" || $4 == "XII")' \
+        > "${nodups_12}"
+
+[[ -f "${nodups_12_no_rDNA}" ]] && rm "${nodups_12_no_rDNA}"
+zcat < "${nodups}" \
+    | grep -v "^#" \
+    | awk \
+        -v left=451526 \
+        -v right=468980 \
+        '( \
+            $2 == "XII" && ($11 < left || $11 > right) \
+        ) || ( \
+            $4 == "XII" && ($12 < left || $12 > right) \
+        )' \
+    > "${nodups_12_no_rDNA}"
+
+[[ -f "${nodups_12_rDNA}" ]] && rm "${nodups_12_rDNA}"
+zcat < "${nodups}" \
+    | grep -v "^#" \
+    | awk \
+        -v left=451526 \
+        -v right=468980 \
+        '( \
+            $2 == "XII" && $11 >= left && $11 <= right \
+        ) || ( \
+            $4 == "XII" && $12 >= left && $12 <= right \
+        )' \
+    > "${nodups_12_rDNA}"
+
+
+#  Check that we have all of the dataframes
+ls -lhaFG "${nodups}"
+ls -lhaFG "${nodups_12}"
+ls -lhaFG "${nodups_12_no_rDNA}"
+ls -lhaFG "${nodups_12_rDNA}"
+
+
+#  Scan through SRR7939018.rDNA.nodups.pairs.XII.rDNA.txt ---------------------
+#+ ...to see if we're truly capturing deduplicated rDNA information
+#+ 
+#+ #QUESTION
+#+ Are we picking up more than just NTS1-2?
+cat < SRR7939018.rDNA.nodups.pairs.XII.rDNA.txt | less
+
+#  ANSWER
+#+ The initial answer is, "Yes."
+#+ 
+#+ ::checks some more::
+#+ The answer is, "Yes." This approach does what we want.
+```
+</details>
+<br />
+
+<a id="printed-5"></a>
+##### Printed
+<details>
+<summary><i>Printed: Process rDNA read pairs in "standard nodup", "rDNA nodup"</i></summary>
+
+```txt
+❯ #  Create necessary dataframes ------------------------------------------------
+
+
+❯ nodups="SRR7939018.rDNA.nodups.pairs.gz"
+
+
+❯ nodups_12="${nodups/.pairs.gz/.pairs.XII.txt}"
+
+
+❯ nodups_12_no_rDNA="${nodups/.pairs.gz/.pairs.XII.no-rDNA.txt}"
+
+
+❯ nodups_12_rDNA="${nodups/.pairs.gz/.pairs.XII.rDNA.txt}"
+
+
+❯ ls -lhaFG "${nodups}"
+-rwx------  1 kalavatt  staff   1.0G Jul 11 10:17 SRR7939018.rDNA.nodups.pairs.gz*
+
+
+❯ echo "${nodups_12}"
+SRR7939018.rDNA.nodups.pairs.XII.txt
+
+
+❯ echo "${nodups_12_no_rDNA}"
+SRR7939018.rDNA.nodups.pairs.XII.no-rDNA.txt
+
+
+❯ echo "${nodups_12_rDNA}"
+SRR7939018.rDNA.nodups.pairs.XII.rDNA.txt
+
+
+❯ zcat < "${nodups}" \
+>     | grep -v "^#" \
+pipe>     | head
+SRR7939018.44042564 I   1   I   15064   +   -   UU  1   R1-2    1   15064   48  15015   48  13
+SRR7939018.17569487 I   5   I   194653  +   -   UU  1   R1-2    5   194653  57  194604  0   60
+SRR7939018.47769906 I   5   I   207832  +   +   UU  1   R1-2    5   207832  54  207881  28  0
+SRR7939018.3451089  I   6   I   229024  +   -   UU  1   R1-2    6   229024  55  228975  28  0
+SRR7939018.44810319 I   7   I   1001    +   +   UU  1   R1-2    7   1001    56  1050    28  46
+SRR7939018.29094541 I   7   I   1292    +   -   UU  1   R1-2    7   1292    56  1243    28  13
+SRR7939018.17270740 I   8   I   2024    +   +   UU  1   R1-2    8   2024    41  2073    21  13
+SRR7939018.55685650 I   8   I   9446    +   -   UU  1   R1-2    8   9446    57  9397    28  60
+SRR7939018.20572273 I   10  I   130 +   +   UU  1   R1-2    10  130 59  179 35  53
+SRR7939018.14854904 I   10  I   318 +   -   UU  1   R1-2    10  318 59  269 35  60
+
+
+❯ [[ -f "${nodups_12}" ]] && rm "${nodups_12}"
+
+
+❯ zcat < "${nodups}" \
+>     | grep -v "^#" \
+pipe>     | awk '($2 == "XII" || $4 == "XII")' \
+pipe pipe>         > "${nodups_12}"
+
+
+❯ [[ -f "${nodups_12_no_rDNA}" ]] && rm "${nodups_12_no_rDNA}"
+
+
+❯ zcat < "${nodups}" \
+>     | grep -v "^#" \
+pipe>     | awk \
+pipe pipe>         -v left=451526 \
+pipe pipe>         -v right=468980 \
+pipe pipe>         '( \
+pipe pipe quote>             $2 == "XII" && ($11 < left || $11 > right) \
+pipe pipe quote>         ) || ( \
+pipe pipe quote>             $4 == "XII" && ($12 < left || $12 > right) \
+pipe pipe quote>         )' \
+pipe pipe>     > "${nodups_12_no_rDNA}"
+
+
+❯ [[ -f "${nodups_12_rDNA}" ]] && rm "${nodups_12_rDNA}"
+
+
+❯ zcat < "${nodups}" \
+>     | grep -v "^#" \
+pipe>     | awk \
+pipe pipe>         -v left=451526 \
+pipe pipe>         -v right=468980 \
+pipe pipe>         '( \
+pipe pipe quote>             $2 == "XII" && $11 >= left && $11 <= right \
+pipe pipe quote>         ) || ( \
+pipe pipe quote>             $4 == "XII" && $12 >= left && $12 <= right \
+pipe pipe quote>         )' \
+pipe pipe>     > "${nodups_12_rDNA}"
+
+
+❯ #  Check that we have all of the dataframes
+
+
+❯ ls -lhaFG "${nodups}"
+-rwx------  1 kalavatt  staff   1.0G Jul 11 10:17 SRR7939018.rDNA.nodups.pairs.gz*
+
+
+❯ ls -lhaFG "${nodups_12}"
+-rw-r--r--  1 kalavatt  staff   1.5G Jul 11 10:38 SRR7939018.rDNA.nodups.pairs.XII.txt
+
+
+❯ ls -lhaFG "${nodups_12_no_rDNA}"
+-rw-r--r--  1 kalavatt  staff   507M Jul 11 10:51 SRR7939018.rDNA.nodups.pairs.XII.no-rDNA.txt
+
+
+❯ ls -lhaFG "${nodups_12_rDNA}"
+-rw-r--r--  1 kalavatt  staff   1.2G Jul 11 11:04 SRR7939018.rDNA.nodups.pairs.XII.rDNA.txt
+
+
+❯ #  Scan through SRR7939018.rDNA.nodups.pairs.XII.rDNA.txt ---------------------
+❯ #+ ...to see if we're truly capturing deduplicated rDNA information
+❯ #+ 
+❯ #+ #QUESTION
+❯ #+ Are we picking up more than just NTS1-2?
+
+
+❯ cat < SRR7939018.rDNA.nodups.pairs.XII.rDNA.txt | less
+
+
+❯ #  ANSWER
+❯ #+ The initial answer is, "Yes."
+❯ #+
+❯ #+ ::checks some more::
+❯ #+ The answer is, "Yes." This approach does what we want.
+```
+</details>
+<br />
+
+<a id="notes-2"></a>
+##### Notes
+<details>
+<summary><i>Notes: Process rDNA read pairs in "standard nodup", "rDNA nodup"</i></summary>
+
+The Sublime text editor regex searches I did yesterday (see above) get numerous matches.
+</details>
+<br />
+
+<a id="implement-logic-for-creation-of-deduplicated-standard-rdna-complete-files"></a>
+### Implement logic for creation of deduplicated "`standard-rDNA-complete`" files
+<a id="so-whats-the-next-step"></a>
+#### So, what's the next step?
+<a id="notes-3"></a>
+##### Notes
+<details>
+<summary><i>Notes: So, what's the next step?</i></summary>
+
+- We need to filter rDNA-associated *cis* and *trans* interactions from `SRR7939018.nodups.pairs.gz`
+    + (`SRR7939018.nodups.pairs.gz` is to be renamed to `SRR7939018.standard.nodups.pairs.gz`)
+    + The filtered outfile will be `SRR7939018.standard-no-rDNA.nodups.pairs.gz`
+- Once we have both `SRR7939018.standard-no-rDNA.nodups.pairs.gz` and `SRR7939018.keep-MM.nodups.pairs.XII-rDNA.txt`, we will concatenate the files
+    + (`SRR7939018.rDNA.nodups.pairs.XII.rDNA.txt` will have been copied to `SRR7939018.rDNA-only.nodups.pairs.txt`)
+    + The concatenated outfile will be `SRR7939018.standard-rDNA-complete.nodups.pairs.gz`
+</details>
+<br />
+
+<a id="updates-to-the-naming-scheme"></a>
+#### Updates to the naming scheme
+<a id="notes-4"></a>
+##### Notes
+<details>
+<summary><i>Notes: Updates to the naming scheme</i></summary>
+
+- Files from the "standard" processing approach will have the prefix, e.g., `SRR7939018.standard`
+- Files from the "retain-multimappers" ("rDNA") processing approach will have the prefix, e.g., `SRR7939018.keep-MM`
+- "retain-multimappers" files processed to comprise only rDNA *cis* and *trans* interactions will have the prefix, `SRR7939018.rDNA-only`
+- "standard" files processed to exclude all rDNA *cis* and *trans* interactions (e.g., those associated with NTS1-2) will have the prefix `SRR7939018.standard-no-rDNA`
+- Files processed to include "`rDNA-only`" and "`standard-no-rDNA`" will have the prefix, e.g., `SRR7939018.standard-rDNA-complete`
+</details>
+<br />
+
+<a id="clean-up-directory-then-re-copy-in-only-necessary-files"></a>
+#### Clean up directory, then re-copy in only necessary files
+<a id="code-6"></a>
+##### Code
+<details>
+<summary><i>Code: Clean up directory, then re-copy in only necessary files</i></summary>
+
+```bash
+#!/bin/bash
+
+cd "${HOME}/projects-etc/2023_rDNA/results/2023-0307_work_Micro-C_align-process" \
+    || echo "cd'ing failed; check on this..."
+
+ls -lhaFG
+
+rm SRR7939018.* rDNA-tmp* && echo "Removed files from above test work"
+
+ls -lhaFG
+
+#NOTE
+#  Copied in SRR7939018.rDNA.nodups.pairs.gz and SRR7939018.nodups.pairs.gz
+#+ rhino (remote)
+
+#  Give the new files updated names (see above)
+mv SRR7939018.rDNA.nodups.pairs.gz SRR7939018.keep-MM.nodups.pairs.gz
+mv SRR7939018.nodups.pairs.gz SRR7939018.standard.nodups.pairs.gz
+
+ls -lhaFG
+```
+</details>
+<br />
+
+<a id="printed-6"></a>
+##### Printed
+<details>
+<summary><i>Printed: Clean up directory, then re-copy in only necessary files</i></summary>
+
+```txt
+❯ cd "${HOME}/projects-etc/2023_rDNA/results/2023-0307_work_Micro-C_align-process" \
+>     || echo "cd'ing failed; check on this..."
+
+
+❯ ls -lhaFG
+total 32527680
+drwxr-xr-x  29 kalavatt  staff   928B Jul 11 11:02 ./
+drwxr-xr-x   6 kalavatt  staff   192B Jul 11 10:38 ../
+-rwx------   1 kalavatt  staff   6.1G Jul  6 08:36 SRR7939018.bam*
+-rwx------   1 kalavatt  staff   157M Jul  6 12:41 SRR7939018.dups.pairs.gz*
+-rw-r--r--@  1 kalavatt  staff   603M Jul  9 09:23 SRR7939018.dups.pairs.txt
+-rw-r--r--@  1 kalavatt  staff   151M Jul 10 10:08 SRR7939018.nodups.pairs.XII.no-rDNA-complete.txt
+-rw-r--r--@  1 kalavatt  staff   332M Jul 10 09:39 SRR7939018.nodups.pairs.XII.no-rDNA.txt
+-rw-r--r--@  1 kalavatt  staff   351M Jul 10 10:54 SRR7939018.nodups.pairs.XII.txt
+-rwx------   1 kalavatt  staff   748M Jul  6 12:41 SRR7939018.nodups.pairs.gz*
+-rwx------   1 kalavatt  staff   1.3G Jul  6 11:25 SRR7939018.p2.txt.gz*
+-rwx------   1 kalavatt  staff   187M Jul 11 10:17 SRR7939018.rDNA.dups.pairs.gz*
+-rw-r--r--   1 kalavatt  staff   507M Jul 11 10:51 SRR7939018.rDNA.nodups.pairs.XII.no-rDNA.txt
+-rw-r--r--@  1 kalavatt  staff   1.2G Jul 11 11:04 SRR7939018.rDNA.nodups.pairs.XII.rDNA.txt
+-rw-r--r--   1 kalavatt  staff   1.5G Jul 11 10:38 SRR7939018.rDNA.nodups.pairs.XII.txt
+-rwx------   1 kalavatt  staff   1.0G Jul 11 10:17 SRR7939018.rDNA.nodups.pairs.gz*
+-rwx------   1 kalavatt  staff    66M Jul 11 10:17 SRR7939018.rDNA.unmapped.pairs.gz*
+-rwx------   1 kalavatt  staff   1.0G Jul  6 12:22 SRR7939018.sort.txt.gz*
+-rwx------   1 kalavatt  staff   213M Jul  6 12:41 SRR7939018.unmapped.pairs.gz*
+drwxr-xr-x  13 kalavatt  staff   416B Jul  8 17:44 cool/
+drwxr-xr-x   4 kalavatt  staff   128B Jul 11 07:12 notebook/
+-rw-r--r--   1 kalavatt  staff   9.9M Jul 10 08:11 rDNA-tmp-2.txt
+-rw-r--r--   1 kalavatt  staff   9.9M Jul 10 08:06 rDNA-tmp.txt
+-rw-r--r--@  1 kalavatt  staff    97K Jul 11 11:43 rough-draft_determine-analysis-strategy_rDNA-Micro-C.md
+-rw-r--r--@  1 kalavatt  staff   576K Jul 11 10:32 rough-draft_workflow_Micro-C_align-process.md
+-rw-r--r--   1 kalavatt  staff   7.5K Jul  6 16:02 symlink-rename-H4Ac-ChIP-seq-data.txt
+-rw-r--r--   1 kalavatt  staff    33K Jul  6 16:01 symlink-rename-MicroC-data.txt
+-rwx------   1 kalavatt  staff   304K Jul 11 08:41 test-1000.SRR7939018.rDNA.txt.gz*
+-rw-r--r--@  1 kalavatt  staff    34K Mar  7 13:06 work_docker-4dn-hic_install.md
+-rw-r--r--@  1 kalavatt  staff    23K Jun 10 15:55 work_indices_create.md
+
+
+❯ rm SRR7939018.* rDNA-tmp* && echo "Removed files from above test work"
+Removed files from above test work
+
+
+❯ ls -lhaFG
+total 2432
+drwxr-xr-x  11 kalavatt  staff   352B Jul 11 11:44 ./
+drwxr-xr-x   6 kalavatt  staff   192B Jul 11 10:38 ../
+drwxr-xr-x  13 kalavatt  staff   416B Jul  8 17:44 cool/
+drwxr-xr-x   4 kalavatt  staff   128B Jul 11 07:12 notebook/
+-rw-r--r--@  1 kalavatt  staff   100K Jul 11 11:45 rough-draft_determine-analysis-strategy_rDNA-Micro-C.md
+-rw-r--r--@  1 kalavatt  staff   576K Jul 11 10:32 rough-draft_workflow_Micro-C_align-process.md
+-rw-r--r--   1 kalavatt  staff   7.5K Jul  6 16:02 symlink-rename-H4Ac-ChIP-seq-data.txt
+-rw-r--r--   1 kalavatt  staff    33K Jul  6 16:01 symlink-rename-MicroC-data.txt
+-rwx------   1 kalavatt  staff   304K Jul 11 08:41 test-1000.SRR7939018.rDNA.txt.gz*
+-rw-r--r--@  1 kalavatt  staff    34K Mar  7 13:06 work_docker-4dn-hic_install.md
+-rw-r--r--@  1 kalavatt  staff    23K Jun 10 15:55 work_indices_create.md
+
+
+❯ #NOTE
+❯ #  Copied in SRR7939018.rDNA.nodups.pairs.gz and SRR7939018.nodups.pairs.gz
+❯ #+ rhino (remote)
+
+
+❯ #  Give the new files updated names (see above)
+
+
+❯ mv SRR7939018.rDNA.nodups.pairs.gz SRR7939018.keep-MM.nodups.pairs.gz
+
+
+❯ mv SRR7939018.nodups.pairs.gz SRR7939018.standard.nodups.pairs.gz
+
+
+❯ ls -lhaFG
+total 3677288
+drwxr-xr-x  13 kalavatt  staff   416B Jul 11 11:50 ./
+drwxr-xr-x   6 kalavatt  staff   192B Jul 11 10:38 ../
+-rwx------   1 kalavatt  staff   1.0G Jul 11 10:17 SRR7939018.keep-MM.nodups.pairs.gz*
+-rwx------   1 kalavatt  staff   748M Jul  6 12:41 SRR7939018.standard.nodups.pairs.gz*
+drwxr-xr-x  13 kalavatt  staff   416B Jul  8 17:44 cool/
+drwxr-xr-x   4 kalavatt  staff   128B Jul 11 07:12 notebook/
+-rw-r--r--@  1 kalavatt  staff   102K Jul 11 11:50 rough-draft_determine-analysis-strategy_rDNA-Micro-C.md
+-rw-r--r--@  1 kalavatt  staff   576K Jul 11 10:32 rough-draft_workflow_Micro-C_align-process.md
+-rw-r--r--   1 kalavatt  staff   7.5K Jul  6 16:02 symlink-rename-H4Ac-ChIP-seq-data.txt
+-rw-r--r--   1 kalavatt  staff    33K Jul  6 16:01 symlink-rename-MicroC-data.txt
+-rw-r--r--@  1 kalavatt  staff    34K Mar  7 13:06 work_docker-4dn-hic_install.md
+-rw-r--r--@  1 kalavatt  staff    23K Jun 10 15:55 work_indices_create.md
+```
+</details>
+<br />
+
+<a id="run-the-actual-processing"></a>
+#### Run the actual processing
+<a id="code-7"></a>
+##### Code
+<details>
+<summary><i>Code: Run the actual processing</i></summary>
+
+<a id="1-exclude-rdna-associated-cis-and-trans-interactions-from-standard"></a>
+###### 1. Exclude rDNA-associated cis and trans interactions from "standard"
+```bash
+#!/bin/bash
+
+left=451526
+right=468980
+
+f_pre="SRR7939018"  # echo "${f_pre}"
+f_post="nodups.pairs.gz"  # echo "${f_post}"
+standard="${f_pre}.standard.${f_post}"  # echo "${standard}"
+standard_no_rDNA="${f_pre}.standard-no-rDNA.${f_post}"  # echo "${standard_no_rDNA}"
+
+#       IF chrom1 != "XII" && chrom2 != "XII" THEN print record
+#+ ELSE IF chrom1 == "XII" && chrom2 != "XII" && pos1 != rDNA THEN print record
+#+ ELSE IF chrom1 != "XII" && chrom2 == "XII" && pos2 != rDNA THEN print record
+#+ ELSE IF chrom1 == "XII" && chrom2 == "XII" && pos1 != rDNA && pos2 != rDNA THEN print record
+[[ -f "${standard_no_rDNA}" ]] && rm "${standard_no_rDNA}"
+zcat < "${standard}" \
+    | grep -v "^#" \
+    | awk \
+        -v left="${left}" \
+        -v right="${right}" \
+        '{
+            if ($2 != "XII" && $4 != "XII") {  
+                print $0
+            } else if (($2 == "XII" && $4 != "XII") && ($11 < left || $11 > right)) {
+                print $0
+            } else if (($4 == "XII" && $2 != "XII") && ($12 < left || $12 > right)) {
+                print $0
+            } else if ($2 == "XII" && $4 == "XII" && ($11 < left || $11 > right) && ($12 < left || $12 > right)) {
+                print $0
+            }
+        }' \
+    | gzip \
+        > "${standard_no_rDNA}"
+
+#  Manually check that any XII-associated records are not rDNA-associated
+[[ -f "${standard_no_rDNA/.gz/.txt}" ]] && rm "${standard_no_rDNA/.gz/.txt}"
+zcat < "${standard_no_rDNA}" > "${standard_no_rDNA/.gz/.txt}"
+
+#NOTE
+#  This seems to have done the trick!
+rm "${standard_no_rDNA/.gz/.txt}"
+```
+
+<a id="2-retain-only-rdna-associated-cis-and-trans-interactions-in-keep-mm"></a>
+###### 2. Retain only rDNA-associated cis and trans interactions in "keep-MM"
+```bash
+#!/bin/bash
+
+left=451526
+right=468980
+
+f_pre="SRR7939018"  # echo "${f_pre}"
+f_post="nodups.pairs.gz"  # echo "${f_post}"
+keep_MM="${f_pre}.keep-MM.${f_post}"  # ., "${keep_MM}"
+rDNA_only="${f_pre}.rDNA-only.${f_post}"  # echo "${rDNA_only}"
+
+#     IF chrom1 == "XII" && pos1 >= rDNA left && pos1 <= rDNA right
+#+ OR IF chrom2 == "XII" && pos2 >= rDNA left && pos2 <= rDNA right
+#+  THEN print record
+[[ -f "${rDNA_only}" ]] && rm "${rDNA_only}"
+zcat < "${keep_MM}" \
+    | grep -v "^#" \
+    | awk \
+        -v left="${left}" \
+        -v right="${right}" \
+        '( \
+            $2 == "XII" && $11 >= left && $11 <= right \
+        ) || ( \
+            $4 == "XII" && $12 >= left && $12 <= right \
+        )' \
+    | gzip \
+        > "${rDNA_only}"
+
+#  Manually check that there are only rDNA-associated records
+[[ -f "${rDNA_only/.gz/.txt}" ]] && rm "${rDNA_only/.gz/.txt}"
+zcat < "${rDNA_only}" > "${rDNA_only/.gz/.txt}"
+
+#NOTE
+#  This seems to have done the trick!
+rm "${rDNA_only/.gz/.txt}"
+```
+
+<a id="3-concatenate-standard-no-rdna-and-rdna-only-files"></a>
+###### 3. Concatenate "standard-no-rDNA" and "rDNA-only" files
+```bash
+#!/bin/bash
+
+f_pre="SRR7939018"  # echo "${f_pre}"
+f_post="nodups.pairs.gz"  # echo "${f_post}"
+standard_no_rDNA="${f_pre}.standard-no-rDNA.${f_post}"  # ., "${standard_no_rDNA}"
+rDNA_only="${f_pre}.rDNA-only.${f_post}"  # ., "${rDNA_only}"
+standard_rDNA_complete="${f_pre}.standard-rDNA-complete.${f_post}"  # echo "${standard_rDNA_complete}"
+
+cat "${standard_no_rDNA}" "${rDNA_only}" \
+    > "${standard_rDNA_complete}"
+
+zcat < "${standard_rDNA_complete}" | less
+zcat < "${standard_rDNA_complete}" | less +G
+
+#  Remove columns 17 and 18
+zcat < "${standard_rDNA_complete}" \
+    | awk '{ for (i = 1; i <= NF-2; i++) printf "%s ", $i; printf "\n" }' \
+    | gzip \
+        > sans-last-two.txt.gz
+
+#  Dataframe needs to be tab separated
+tr ' ' \\t < <(zcat < sans-last-two.txt.gz) | gzip > sans-last-two-tabs.txt.gz
+
+zcat < sans-last-two-tabs.txt.gz | less
+zcat < sans-last-two-tabs.txt.gz | less +G
+
+#NOTE
+#  The below is apparently not the way to add a header this; instead, we need
+#+ to run `pairtools header generate` or `pairtools header transfer``
+do_not_do=TRUE
+[[ "${do_not_do}" == FALSE ]] &&
+    {
+        #  Add a header to the file
+        zcat < "${standard}" | grep "^#" | gzip > "tmp.header.gz"
+        [[ -f "tmp.header.gz" && -f "${standard_rDNA_complete}" ]] &&
+            {
+                cat "tmp.header.gz" "${standard_rDNA_complete}" > "tmp.file.gz"
+            }
+
+        zcat < "tmp.file.gz" | less
+
+        [[ -f "tmp.file.gz" && -f "${standard_rDNA_complete}" ]] &&
+            {
+                mv -f "tmp.file.gz" "${standard_rDNA_complete}"
+            }
+
+        [[ ! -f "tmp.file.gz" ]] && rm "tmp.header.gz"
+
+        zcat < "${standard_rDNA_complete}" | grep "^#"
+    }
+```
+
+<a id="4-copy-file-to-remote-then-run-pairtools-sort"></a>
+###### 4. Copy file to remote, then run `pairtools sort`
+```bash
+#!/bin/bash
+
+grabnode  # 20, 8, 1, N
+
+p_proj="${HOME}/tsukiyamalab/kalavatt/2023_rDNA"
+p_exp="results/2023-0307_work_Micro-C_align-process"
+
+cd "${p_proj}/${p_exp}" || echo "cd'ing failed; check on this..."
+
+source activate pairtools_env
+
+ls -lhaFG
+
+threads="${SLURM_CPUS_ON_NODE}"  # echo "${threads}"
+scratch="/fh/scratch/delete30/tsukiyama_t"  # echo "${scratch}"
+chroms="${HOME}/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size"  # ., "${chroms}"
+columns="readID,chrom1,pos1,chrom2,pos2,strand1,strand2,pair_type,walk_pair_index,walk_pair_type,pos51,pos52,pos31,pos32,mapq1,mapq2"  # echo "${columns}"
+a_transfer="05_dedup/SRR7939018.nodups.pairs.gz"  # ., "${a_transfer}"
+# a_pairs="SRR7939018.standard-rDNA-complete.nodups.pairs.gz"  # echo "${a_pairs}"
+a_pairs="sans-last-two-tabs.txt.gz"
+a_sort="${a_pairs/.gz/.sort.gz}"  # echo "${a_sort}"
+
+pairtools header transfer --help
+pairtools header transfer \
+    -o "${a_pairs/.gz/.header.gz}" \
+    -r "${a_transfer}" \
+    "${a_pairs}"
+
+zcat "${a_pairs}" | less
+
+pairtools header generate --help
+
+echo """
+pairtools header generate \\
+    -o \"${a_pairs/.txt.gz/.header.txt.gz}\" \\
+    --chroms-path \"${chroms}\" \\
+    --pairs \"${a_pairs}\" \\
+    --columns \"${columns}\" \\
+        2> >(tee -a \"${a_pairs/.gz/.header}.stderr.txt\" >&2)
+"""
+
+
+pairtools header generate \
+    -o "${a_pairs/.gz/.header.gz}" \
+    --chroms-path "${chroms}" \
+    --pairs "${a_pairs}" \
+    --columns "${columns}"
+
+zcat < sans-last-two-tabs.txt.gz | less
+#  OK, it looks like I'm going to need to regenerate the standard pairs file from scratch to ensure it has only 16 columns
+
+zcat < "${a_transfer}" | grep "^#"
+
+echo """
+pairtools sort \\
+    --nproc \"${threads}\" \\
+    --tmpdir \"${scratch}\" \\
+    --output \"${a_sort}\" \\
+    \"${a_pairs}\" \\
+        2> >(tee -a \"${a_sort%.gz}.stderr.txt\" >&2)
+"""
+
+pairtools sort \
+    --nproc "${threads}" \
+    --tmpdir "${scratch}" \
+    --output "${a_sort}" \
+    "${a_pairs}" \
+        2> >(tee -a "${a_sort%.gz}.stderr.txt" >&2)
+
+zcat "${a_pairs}" | less
+```
+</details>
+<br />
+
+<a id="printed-7"></a>
+##### Printed
+<details>
+<summary><i>Printed: Run the actual processing</i></summary>
+
+<a id="1-exclude-rdna-associated-cis-and-trans-interactions-from-standard-1"></a>
+###### 1. Exclude rDNA-associated cis and trans interactions from "standard"
+```txt
+❯ left=451526
+
+
+❯ right=468980
+
+
+❯ f_pre="SRR7939018"
+
+
+❯ f_post="nodups.pairs.gz"
+
+
+❯ standard="${f_pre}.standard.${f_post}"
+
+
+❯ standard_no_rDNA="${f_pre}.standard-no-rDNA.${f_post}"
+
+
+❯ echo "${f_pre}"
+SRR7939018
+
+
+❯ echo "${f_post}"
+nodups.pairs.gz
+
+
+❯ echo "${standard}"
+SRR7939018.standard.nodups.pairs.gz
+
+
+❯ echo "${standard_no_rDNA}"
+SRR7939018.standard-no-rDNA.nodups.pairs.gz
+
+
+❯ #       IF chrom1 != "XII" && chrom2 != "XII" THEN print record
+❯ #+ ELSE IF chrom1 == "XII" && chrom2 != "XII" && pos1 != rDNA THEN print record
+❯ #+ ELSE IF chrom1 != "XII" && chrom2 == "XII" && pos2 != rDNA THEN print record
+❯ #+ ELSE IF chrom1 == "XII" && chrom2 == "XII" && pos1 != rDNA && pos2 != rDNA THEN print record
+
+
+❯ [[ -f "${standard_no_rDNA}" ]] && rm "${standard_no_rDNA}"
+
+
+❯ zcat < "${standard}" \
+>     | grep -v "^#" \
+pipe>     | awk \
+pipe pipe>         -v left="${left}" \
+pipe pipe>         -v right="${right}" \
+pipe pipe>         '{
+pipe pipe quote>             if ($2 != "XII" && $4 != "XII") {
+pipe pipe quote>                 print $0
+pipe pipe quote>             } else if (($2 == "XII" && $4 != "XII") && ($11 < left || $11 > right)) {
+pipe pipe quote>                 print $0
+pipe pipe quote>             } else if (($4 == "XII" && $2 != "XII") && ($12 < left || $12 > right)) {
+pipe pipe quote>                 print $0
+pipe pipe quote>             } else if ($2 == "XII" && $4 == "XII" && ($11 < left || $11 > right) && ($12 < left || $12 > right)) {
+pipe pipe quote>                 print $0
+pipe pipe quote>             }
+pipe pipe quote>         }' \
+pipe pipe>     | gzip \
+pipe pipe pipe>         > "${standard_no_rDNA}"
+
+
+❯ #  Manually check that any XII-associated records are not rDNA-associated
+
+
+❯ [[ -f "${standard_no_rDNA/.gz/.txt}" ]] && rm "${standard_no_rDNA/.gz/.txt}"
+
+
+❯ zcat < "${standard_no_rDNA}" > "${standard_no_rDNA/.gz/.txt}"
+
+
+❯ #NOTE
+❯ #  This seems to have done the trick!
+
+
+❯ rm "${standard_no_rDNA/.gz/.txt}"
+```
+
+<a id="2-retain-only-rdna-associated-cis-and-trans-interactions-in-keep-mm-1"></a>
+###### 2. Retain only rDNA-associated cis and trans interactions in "keep-MM"
+```txt
+❯ left=451526
+
+
+❯ right=468980
+
+
+❯ f_pre="SRR7939018"
+
+
+❯ f_post="nodups.pairs.gz"
+
+
+❯ keep_MM="${f_pre}.keep-MM.${f_post}"
+
+
+❯ rDNA_only="${f_pre}.rDNA-only.${f_post}"
+
+
+❯ echo "${f_pre}"
+SRR7939018
+
+
+❯ echo "${f_post}"
+nodups.pairs.gz
+
+
+❯ ., "${keep_MM}"
+-rwx------  1 kalavatt  staff   1.0G Jul 11 10:17 SRR7939018.keep-MM.nodups.pairs.gz*
+
+
+❯ echo "${rDNA_only}"
+SRR7939018.rDNA-only.nodups.pairs.gz
+
+
+❯ #     IF chrom1 == "XII" && pos1 >= rDNA left && pos1 <= rDNA right
+❯ #+ OR IF chrom2 == "XII" && pos2 >= rDNA left && pos2 <= rDNA right
+❯ #+  THEN print record
+
+
+❯ [[ -f "${rDNA_only}" ]] && rm "${rDNA_only}"
+
+
+❯ zcat < "${keep_MM}" \
+>     | grep -v "^#" \
+pipe>     | awk \
+pipe pipe>         -v left="${left}" \
+pipe pipe>         -v right="${right}" \
+pipe pipe>         '( \
+pipe pipe quote>             $2 == "XII" && $11 >= left && $11 <= right \
+pipe pipe quote>         ) || ( \
+pipe pipe quote>             $4 == "XII" && $12 >= left && $12 <= right \
+pipe pipe quote>         )' \
+pipe pipe>     | gzip \
+pipe pipe pipe>         > "${rDNA_only}"
+
+
+❯ #  Manually check that there are only rDNA-associated records
+
+
+❯ [[ -f "${rDNA_only/.gz/.txt}" ]] && rm "${rDNA_only/.gz/.txt}"
+
+
+❯ zcat < "${rDNA_only}" > "${rDNA_only/.gz/.txt}"
+
+
+❯ #NOTE
+❯ #  This seems to have done the trick!
+
+
+❯ rm "${rDNA_only/.gz/.txt}"
+```
+
+<a id="3-concatenate-standard-no-rdna-and-keep-mm-rdna-only-files"></a>
+###### 3. Concatenate "standard-no-rDNA" and "keep-MM rDNA-only" files
+```txt
+❯ f_pre="SRR7939018"  # echo "${f_pre}"
+
+
+❯ f_post="nodups.pairs.gz"  # echo "${f_post}"
+
+
+❯ standard_no_rDNA="${f_pre}.standard-no-rDNA.${f_post}"  # ., "${standard_no_rDNA}"
+
+
+❯ rDNA_only="${f_pre}.rDNA-only.${f_post}"  # ., "${rDNA_only}"
+
+
+❯ standard_rDNA_complete="${f_pre}.standard-rDNA-complete.${f_post}"  # echo "${standard_rDNA_complete}"
+
+
+❯ echo "${f_pre}"
+SRR7939018
+
+
+❯ echo "${f_post}"
+nodups.pairs.gz
+
+
+❯ ., "${standard_no_rDNA}"
+-rw-r--r--@ 1 kalavatt  staff   706M Jul 11 12:49 SRR7939018.standard-no-rDNA.nodups.pairs.gz
+
+
+❯ ., "${rDNA_only}"
+-rw-r--r--  1 kalavatt  staff   230M Jul 11 13:21 SRR7939018.rDNA-only.nodups.pairs.gz
+
+
+❯ echo "${standard_rDNA_complete}"
+SRR7939018.standard-rDNA-complete.nodups.pairs.gz
+
+
+❯ cat "${standard_no_rDNA}" "${rDNA_only}" \
+>     > "${standard_rDNA_complete}"
+
+
+❯ zcat < "${standard_rDNA_complete}" | less
+
+
+❯ zcat < "${standard_rDNA_complete}" | less +G
+
+
+❯ #  Add a header to the file
+
+
+❯ zcat < "${standard}" | grep "^#" | gzip > "tmp.header.gz"
+
+
+❯ [[ -f "tmp.header.gz" && -f "${standard_rDNA_complete}" ]] &&
+cmdand>     {
+cmdand cursh>         cat "tmp.header.gz" "${standard_rDNA_complete}" > "tmp.file.gz"
+cmdand cursh>     }
+
+
+❯ zcat < "tmp.file.gz" | less
+
+
+❯ [[ -f "tmp.file.gz" && -f "${standard_rDNA_complete}" ]] &&
+cmdand>     {
+cmdand cursh>         mv -f "tmp.file.gz" "${standard_rDNA_complete}"
+cmdand cursh>     }
+
+
+❯ [[ ! -f "tmp.file.gz" ]] && rm "tmp.header.gz"
+
+
+❯ zcat < "${standard_rDNA_complete}" | grep "^#"
+## pairs format v1.0.0
+#sorted: chr1-chr2-pos1-pos2
+#shape: whole matrix
+#genome_assembly: S288C_R64-3-1
+#chromsize: I 230218
+#chromsize: II 813184
+#chromsize: III 316620
+#chromsize: IV 1531933
+#chromsize: V 576874
+#chromsize: VI 270161
+#chromsize: VII 1090940
+#chromsize: VIII 562643
+#chromsize: IX 439888
+#chromsize: X 745751
+#chromsize: XI 666816
+#chromsize: XII 1078177
+#chromsize: XIII 924431
+#chromsize: XIV 784333
+#chromsize: XV 1091291
+#chromsize: XVI 948066
+#chromsize: Mito 85779
+#samheader: @SQ SN:I    LN:230218
+#samheader: @SQ SN:II   LN:813184
+#samheader: @SQ SN:III  LN:316620
+#samheader: @SQ SN:IV   LN:1531933
+#samheader: @SQ SN:V    LN:576874
+#samheader: @SQ SN:VI   LN:270161
+#samheader: @SQ SN:VII  LN:1090940
+#samheader: @SQ SN:VIII LN:562643
+#samheader: @SQ SN:IX   LN:439888
+#samheader: @SQ SN:X    LN:745751
+#samheader: @SQ SN:XI   LN:666816
+#samheader: @SQ SN:XII  LN:1078177
+#samheader: @SQ SN:XIII LN:924431
+#samheader: @SQ SN:XIV  LN:784333
+#samheader: @SQ SN:XV   LN:1091291
+#samheader: @SQ SN:XVI  LN:948066
+#samheader: @SQ SN:Mito LN:85779
+#samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 8 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
+#samheader: @PG ID:samtools PN:samtools PP:bwa  VN:1.16.1   CL:samtools view -@ 8 -S -b
+#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.p2.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq,mismatches --drop-seq --drop-sam --output-stats 0X_stats/SRR7939018.stats.p2.txt --nproc-in 8 --nproc-out 8 02_aln/SRR7939018.bam  PP:samtools VN:1.0.2
+#samheader: @PG ID:pairtools_sort   PN:pairtools_sort   CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 8 --tmpdir /fh/scratch/delete30/tsukiyama_t --output 04_sort/SRR7939018.sort.txt.gz 03_parse/SRR7939018.p2.txt.gz    PP:pairtools_parse2 VN:1.0.2
+#samheader: @PG ID:pairtools_dedup  PN:pairtools_dedup  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 8 --max-mismatch 0 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats 0X_stats/SRR7939018.dedup.stats.txt 04_sort/SRR7939018.sort.txt.gz PP:pairtools_sort   VN:1.0.2
+#samheader: @PG ID:pairtools_split  PN:pairtools_split  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs 05_dedup/pairs/SRR7939018.nodups.pairs.gz    PP:pairtools_dedup  VN:1.0.2
+#columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type walk_pair_index walk_pair_type pos51 pos52 pos31 pos32 mapq1 mapq2 mismatches1 mismatches2
+```
+
+<a id="4-copy-file-to-remote-then-run-pairtools-sort-1"></a>
+###### 4. Copy file to remote, then run `pairtools sort`
+```txt
+❯ p_proj="${HOME}/tsukiyamalab/kalavatt/2023_rDNA"
+
+
+❯ p_exp="results/2023-0307_work_Micro-C_align-process"
+
+
+❯ cd "${p_proj}/${p_exp}" || echo "cd'ing failed; check on this..."
+
+
+❯ source activate pairtools_env
+
+
+❯ ls -lhaFG
+total 1.2G
+drwxrws--- 10 kalavatt  510 Jul 11 13:45 ./
+drwxrws---  5 kalavatt  212 Jul 11 08:42 ../
+drwxrws---  3 kalavatt  391 Jul  8 10:54 01_trim/
+drwxrws---  3 kalavatt  156 Jul  8 10:56 02_align/
+drwxrws---  3 kalavatt  249 Jul 11 08:43 03_parse/
+drwxrws---  3 kalavatt  233 Jul 11 09:24 04_sort/
+drwxrws---  3 kalavatt  766 Jul 11 10:08 05_dedup/
+drwxrws---  2 kalavatt 1.1K Jul 11 10:08 06_stats/
+drwxrws---  3 kalavatt  236 Jul  8 16:11 07_cload/
+drwxrws---  3 kalavatt  211 Jul  8 16:23 08_zoom/
+-rw-rw----  1 kalavatt 936M Jul 11 13:38 SRR7939018.standard-rDNA-complete.nodups.pairs.gz
+-rw-rw----  1 kalavatt 7.6K Jul  8 09:33 symlink-rename-H4Ac-ChIP-seq-data.txt
+-rw-rw----  1 kalavatt  34K Jul  8 09:33 symlink-rename-MicroC-data.txt
+-rw-rw----  1 kalavatt  34K Jul  6 16:52 work_docker-4dn-hic_install.md
+-rw-rw----  1 kalavatt  23K Jul  6 16:52 work_indices_create.md
+-rw-rw----  1 kalavatt 399K Jul  8 09:33 work_Micro-C_align-process.md
+
+
+❯ threads="${SLURM_CPUS_ON_NODE}"  # echo "${threads}"
+
+
+❯ scratch="/fh/scratch/delete30/tsukiyama_t"  # echo "${scratch}"
+
+
+❯ a_transfer="05_dedup/SRR7939018.nodups.pairs.gz"  # ., "${a_transfer}"
+
+
+❯ a_pairs="SRR7939018.standard-rDNA-complete.nodups.pairs.gz"  # echo "${a_pairs}"
+
+
+❯ a_sort="${a_pairs/.gz/.sort.gz}"  # echo "${a_sort}"
+
+
+❯ echo "${threads}"
+8
+
+
+❯ echo "${scratch}"
+/fh/scratch/delete30/tsukiyama_t
+
+
+❯ ., "${a_transfer}"
+-rw-rw---- 1 kalavatt 748M Jul  6 12:41 05_dedup/SRR7939018.nodups.pairs.gz
+
+
+❯ echo "${a_pairs}"
+SRR7939018.standard-rDNA-complete.nodups.pairs.gz
+
+
+❯ echo "${a_sort}"
+SRR7939018.standard-rDNA-complete.nodups.pairs.sort.gz
+
+
+❯ echo """
+> pairtools sort \\
+>     --nproc \"${threads}\" \\
+>     --tmpdir \"${scratch}\" \\
+>     --output \"${a_sort}\" \\
+>     \"${a_pairs}\" \\
+>         2> >(tee -a \"${a_sort%.gz}.stderr.txt\" >&2)
+> """
+
+pairtools sort \
+    --nproc "8" \
+    --tmpdir "/fh/scratch/delete30/tsukiyama_t" \
+    --output "SRR7939018.standard-rDNA-complete.nodups.pairs.sort.gz" \
+    "SRR7939018.standard-rDNA-complete.nodups.pairs.gz" \
+        2> >(tee -a "SRR7939018.standard-rDNA-complete.nodups.pairs.sort.stderr.txt" >&2)
+
+
+(Run on a pairs file that doesn't have a header)
+❯ pairtools sort \
+>     --nproc "${threads}" \
+>     --tmpdir "${scratch}" \
+>     --output "${a_sort}" \
+>     "${a_pairs}" \
+>         2> >(tee -a "${a_sort%.gz}.stderr.txt" >&2)
+invalid block header
+reader reader_read_block: bug encountered
+WARNING:pairtools:Headerless input, please, add the header by `pairtools header generate` or `pairtools header transfer`
+Traceback (most recent call last):
+  File "/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools", line 11, in <module>
+    sys.exit(cli())
+  File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/click/core.py", line 1130, in __call__
+    return self.main(*args, **kwargs)
+  File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/click/core.py", line 1055, in main
+    rv = self.invoke(ctx)
+  File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/click/core.py", line 1657, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+  File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/click/core.py", line 1404, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+  File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/click/core.py", line 760, in invoke
+    return __callback(*args, **kwargs)
+  File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/cli/__init__.py", line 183, in wrapper
+    return func(*args, **kwargs)
+  File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/cli/sort.py", line 70, in sort
+    sort_py(pairs_path, output, nproc, tmpdir, memory, compress_program, **kwargs)
+  File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/cli/sort.py", line 89, in sort_py
+    header = headerops.append_new_pg(header, ID=UTIL_NAME, PN=UTIL_NAME)
+  File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/headerops.py", line 346, in append_new_pg
+    raise Exception("Input file is not valid .pairs, has no header or is empty.")
+Exception: Input file is not valid .pairs, has no header or is empty.
+
+
+(Run on a pairs file that *does* have a header)
+```
+</details>
+<br />
+
+
+<a id="scraps-1"></a>
+##### Scraps
+<details>
+<summary><i>Scraps: ...</i></summary>
+
+```bash
+#!/bin/bash
+
+# [[ -f "${standard_no_rDNA}" ]] && rm "${standard_no_rDNA}"
+# zcat < "${standard}" \
+#     | grep -v "^#" \
+#     | awk \
+#         -v left=451526 \
+#         -v right=468980 \
+#         '( \
+#             $2 == "XII" && ($11 < left || $11 > right) \
+#         ) || ( \
+#             $4 == "XII" && ($12 < left || $12 > right) \
+#         )' \
+#     > "${standard_no_rDNA}"
+```
+</details>
+<br />
