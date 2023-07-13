@@ -22,6 +22,8 @@
     1. [0. Get situated](#0-get-situated)
         1. [Get to work directory, initialize environment](#get-to-work-directory-initialize-environment)
             1. [Code](#code-3)
+                1. [`grabnode`](#grabnode)
+                1. [Go to work directory, initialize environment](#go-to-work-directory-initialize-environment)
         1. [Initialize variables, create outdirectories](#initialize-variables-create-outdirectories)
             1. [Initialize "general" variables for workflow](#initialize-general-variables-for-workflow)
                 1. [Code](#code-4)
@@ -46,23 +48,23 @@
             1. [Run `pairtools parse`](#run-pairtools-parse)
             1. [Run `pairtools parse2`](#run-pairtools-parse2)
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2)
-                1. [Testing the "rDNA" call to `pairtools parse2`](#testing-the-rdna-call-to-pairtools-parse2)
+                1. [Testing the "`keep-MM`" call to `pairtools parse2`](#testing-the-keep-mm-call-to-pairtools-parse2)
             1. [Examine the pairs outfile](#examine-the-pairs-outfile)
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-1)
-                1. [Testing the "rDNA" call to `pairtools parse2`](#testing-the-rdna-call-to-pairtools-parse2-1)
+                1. [Testing the "`keep-MM`" call to `pairtools parse2`](#testing-the-keep-mm-call-to-pairtools-parse2-1)
             1. [Examine the stats outfile](#examine-the-stats-outfile)
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-2)
-                1. [Testing the "rDNA" call to `pairtools parse2`](#testing-the-rdna-call-to-pairtools-parse2-2)
+                1. [Testing the "`keep-MM`" call to `pairtools parse2`](#testing-the-keep-mm-call-to-pairtools-parse2-2)
     1. [4. Run `pairtools sort`](#4-run-pairtools-sort)
         1. [Code](#code-11)
         1. [Printed](#printed-6)
             1. [Check the documentation](#check-the-documentation-1)
             1. [Run `pairtools sort`](#run-pairtools-sort)
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-3)
-                1. [Testing the "rDNA" call to `pairtools parse2`](#testing-the-rdna-call-to-pairtools-parse2-3)
+                1. [Testing the "rDNA" call to `pairtools parse2`](#testing-the-rdna-call-to-pairtools-parse2)
             1. [Examine the sorted pairs outfile](#examine-the-sorted-pairs-outfile)
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-4)
-                1. [Testing the "rDNA" call to `pairtools parse2`](#testing-the-rdna-call-to-pairtools-parse2-4)
+                1. [Testing the "rDNA" call to `pairtools parse2`](#testing-the-rdna-call-to-pairtools-parse2-1)
     1. [5. Run `pairtools dedup` and `pairtools split`](#5-run-pairtools-dedup-and-pairtools-split)
         1. [Code](#code-12)
         1. [Printed](#printed-7)
@@ -94,36 +96,39 @@
         1. [A. Exclude rDNA-associated *cis* and *trans* interactions from "`standard.nodups`" file](#a-exclude-rdna-associated-cis-and-trans-interactions-from-standardnodups-file)
             1. [Code](#code-15)
             1. [Printed](#printed-10)
-        1. [B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`rDNA.nodups`" file](#b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-rdnanodups-file)
+        1. [B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file](#b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file)
             1. [Code](#code-16)
             1. [Printed](#printed-11)
-    1. [6. Run `pairtools stats`](#6-run-pairtools-stats)
-        1. [Individual pairs files](#individual-pairs-files)
+        1. [C. Concatenate the "`standard.nodups`" and "`keep-MM.nodups`" files](#c-concatenate-the-standardnodups-and-keep-mmnodups-files)
             1. [Code](#code-17)
             1. [Printed](#printed-12)
+    1. [6. Run `pairtools stats`](#6-run-pairtools-stats)
+        1. [Individual pairs files](#individual-pairs-files)
+            1. [Code](#code-18)
+            1. [Printed](#printed-13)
                 1. [Check the documentation](#check-the-documentation-5)
                 1. [Do a trial run of `pairtools stats`](#do-a-trial-run-of-pairtools-stats)
                 1. [Check the contents of the stats files](#check-the-contents-of-the-stats-files)
         1. [Merged pairs files](#merged-pairs-files)
-            1. [Code](#code-18)
-            1. [Printed](#printed-13)
-    1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
-        1. [Individual pairs file](#individual-pairs-file)
             1. [Code](#code-19)
             1. [Printed](#printed-14)
-        1. [Merged pairs files](#merged-pairs-files-1)
+    1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
+        1. [Individual pairs file](#individual-pairs-file)
             1. [Code](#code-20)
             1. [Printed](#printed-15)
-    1. [8. Generate a multi-resolution cooler by coarsening](#8-generate-a-multi-resolution-cooler-by-coarsening)
-        1. [Cools from individual pairs files](#cools-from-individual-pairs-files)
+        1. [Merged pairs files](#merged-pairs-files-1)
             1. [Code](#code-21)
             1. [Printed](#printed-16)
-        1. [Cools from merged pairs files](#cools-from-merged-pairs-files)
+    1. [8. Generate a multi-resolution cooler by coarsening](#8-generate-a-multi-resolution-cooler-by-coarsening)
+        1. [Cools from individual pairs files](#cools-from-individual-pairs-files)
             1. [Code](#code-22)
             1. [Printed](#printed-17)
+        1. [Cools from merged pairs files](#cools-from-merged-pairs-files)
+            1. [Code](#code-23)
+            1. [Printed](#printed-18)
     1. [9. Ingest files for HiGlass](#9-ingest-files-for-higlass)
-        1. [Code](#code-23)
-        1. [Printed](#printed-18)
+        1. [Code](#code-24)
+        1. [Printed](#printed-19)
 
 <!-- /MarkdownTOC -->
 </details>
@@ -2186,11 +2191,19 @@ log
 <details>
 <summary><i>Code: Get to work directory, initialize environment</i></summary>
 
+<a id="grabnode"></a>
+###### `grabnode`
 ```bash
 #!/bin/bash
 
 #  Workflow is written to be interactive
 grabnode  # 8 cores: 20, 8, 1, N
+```
+
+<a id="go-to-work-directory-initialize-environment"></a>
+###### Go to work directory, initialize environment
+```bash
+#!/bin/bash
 
 p_base="${HOME}/tsukiyamalab/kalavatt"  #ARGUMENT
 p_proj="2023_rDNA/results/2023-0307_work_Micro-C_align-process"
@@ -3742,8 +3755,8 @@ WARNING:py.warnings:/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/
   complexity = float(nseq / seq_to_complexity)  # clean np.int64 data type
 ```
 
-<a id="testing-the-rdna-call-to-pairtools-parse2"></a>
-###### Testing the "rDNA" call to `pairtools parse2`
+<a id="testing-the-keep-mm-call-to-pairtools-parse2"></a>
+###### Testing the "`keep-MM`" call to `pairtools parse2`
 ```txt
 ❯ #DONE Can save space by excluding "mismatches" in --add-columns
 
@@ -4090,8 +4103,8 @@ SRR7939018.66837071 VII 391704  !   0   -   -   UN  1   R1-2    391704  0   3916
 SRR7939018.66837072 IX  143298  !   0   +   -   UN  1   R1-2    143298  0   143347  0   55  0   T:N:2:143302:5,G:N:2:143323:26,A:N:2:143324:27,T:N:2:143325:28,A:N:2:143326:29,T:N:2:143327:30
 ```
 
-<a id="testing-the-rdna-call-to-pairtools-parse2-1"></a>
-###### Testing the "rDNA" call to `pairtools parse2`
+<a id="testing-the-keep-mm-call-to-pairtools-parse2-1"></a>
+###### Testing the "`keep-MM`" call to `pairtools parse2`
 ```txt
 ❯ run_check=TRUE  #ARGUMENT
 
@@ -4857,8 +4870,8 @@ dist_freq/562341325+/-- 0
 dist_freq/562341325+/++ 0
 ```
 
-<a id="testing-the-rdna-call-to-pairtools-parse2-2"></a>
-###### Testing the "rDNA" call to `pairtools parse2`
+<a id="testing-the-keep-mm-call-to-pairtools-parse2-2"></a>
+###### Testing the "`keep-MM`" call to `pairtools parse2`
 ```txt
 ❯ run_check=TRUE  #ARGUMENT
 
@@ -5530,7 +5543,7 @@ pairtools sort \
 >         2> >(tee -a "${d_pairs}/err_out/$(basename ${a_sort} .txt.gz).stderr.txt" >&2)
 ```
 
-<a id="testing-the-rdna-call-to-pairtools-parse2-3"></a>
+<a id="testing-the-rdna-call-to-pairtools-parse2"></a>
 ###### Testing the "rDNA" call to `pairtools parse2`
 ```txt
 ❯ print_test=TRUE  #ARGUMENT
@@ -5806,7 +5819,7 @@ SRR7939018.55113867 XVI 946300  XVI 939782  -   +   UU  1   R1-2    946300  9397
 SRR7939018.57420183 XVI 946300  XVI 939782  -   +   UU  1   R1-2    946300  939782  946251  939827  7   60
 ```
 
-<a id="testing-the-rdna-call-to-pairtools-parse2-4"></a>
+<a id="testing-the-rdna-call-to-pairtools-parse2-1"></a>
 ###### Testing the "rDNA" call to `pairtools parse2`
 ```txt
 ❯ [[ "${run_check}" == TRUE && -f "${a_sort}" ]] &&
@@ -9421,7 +9434,7 @@ Options:
 ```bash
 #!/bin/bash
 
-[[ "${flag_rDNA}" == TRUE ]] &&
+[[ "${flag_rDNA}" == FALSE ]] &&
     {
         #TODO Move variable assignments and mkdir call to step #0
         d_comp="0X_comp"  # echo "${d_comp}"
@@ -9527,17 +9540,71 @@ Options:
 </details>
 <br />
 
-<a id="b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-rdnanodups-file"></a>
-#### B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`rDNA.nodups`" file
+<a id="b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file"></a>
+#### B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file
 <a id="code-16"></a>
 ##### Code
 <details>
-<summary><i>Code: B. Exclude all but rDNA-associated cis and trans interactions from "rDNA.nodups" file</i></summary>
+<summary><i>Code: B. Exclude all but rDNA-associated cis and trans interactions from "keep-MM.nodups" file</i></summary>
 
 ```bash
 #!/bin/bash
 
+[[ "${flag_rDNA}" == FALSE ]] &&
+    {
+        #TODO Move variable assignments and mkdir call to step #0
+        d_comp="0X_comp"  # ., "${d_comp}"
+        [[ ! -d "${d_comp}" ]] && mkdir -p "${d_comp}/err_out"
+        
+        f_comp_std_pre="${f_pre}-rDNA"  # echo "${f_comp_std_pre}"
+        f_comp_std_suf="${a_dedup_pre_pairs##"${d_dedup}/${f_pre}."}"  # echo "${f_comp_std_suf}"
+        f_comp_std="${f_comp_std_pre}.${f_comp_std_suf}"  # echo "${f_comp_std}"
+        a_comp_std="${d_comp}/${f_comp_std}"  # echo "${a_comp_std}"
 
+        #LOGIC
+        #     IF chrom1 == "XII" && pos1 >= rDNA left && pos1 <= rDNA right
+        #+ OR IF chrom2 == "XII" && pos2 >= rDNA left && pos2 <= rDNA right
+        #+  THEN print record
+
+        print_test=TRUE
+        [[ "${print_test}" == TRUE ]] &&
+            {
+                echo """
+                zcat < \"${a_dedup_pre_pairs}\" \\
+                    | grep -v \"^#\" \\
+                    | awk \\
+                        -v chr=\"XII\" \\
+                        -v left=\"${rDNA_pos_l}\" \\
+                        -v right=\"${rDNA_pos_r}\" \\
+                        '( \\
+                            \$2 == chr && \$11 >= left && \$11 <= right \\
+                        ) || ( \\
+                            \$4 == chr && \$12 >= left && \$12 <= right \\
+                        )' \\
+                    | pbgzip -c \\
+                        > \"${a_comp_std}\"
+                    """
+            }
+
+        run=TRUE
+        [[ "${run}" == TRUE ]] &&
+            {
+                zcat < "${a_dedup_pre_pairs}" \
+                    | grep -v "^#" \
+                    | awk \
+                        -v chr="XII" \
+                        -v left="${rDNA_pos_l}" \
+                        -v right="${rDNA_pos_r}" \
+                        '( \
+                            $2 == "XII" && $11 >= left && $11 <= right \
+                        ) || ( \
+                            $4 == "XII" && $12 >= left && $12 <= right \
+                        )' \
+                    | pbgzip -c \
+                        > "${a_comp_std}"
+            }
+
+    }
 ```
 </details>
 <br />
@@ -9545,7 +9612,44 @@ Options:
 <a id="printed-11"></a>
 ##### Printed
 <details>
-<summary><i>Printed: B. Exclude all but rDNA-associated cis and trans interactions from "rDNA.nodups" file</i></summary>
+<summary><i>Printed: B. Exclude all but rDNA-associated cis and trans interactions from "keep-MM.nodups" file</i></summary>
+
+```txt
+
+```
+</details>
+<br />
+
+<a id="c-concatenate-the-standardnodups-and-keep-mmnodups-files"></a>
+#### C. Concatenate the "`standard.nodups`" and "`keep-MM.nodups`" files
+...and re-header the file
+
+<a id="code-17"></a>
+##### Code
+<details>
+<summary><i>Code: C. Concatenate the "standard.nodups" and "keep-MM.nodups" files</i></summary>
+
+```bash
+#!/bin/bash
+
+d_comp="0X_comp"  # ., "${d_comp}"
+f_keep="${f_pre%.*}.keep-MM-rDNA.nodups.pairs.gz"
+a_keep="${d_comp}/${f_keep}"  # ., "${a_keep}"
+f_std="${f_pre%.*}.standard-no-rDNA.nodups.pairs.gz"
+a_std="${d_comp}/${f_std}"  # ., "${a_std}"
+
+[[ -f "${a_keep}" && -f "${a_std}" ]] &&
+    {
+        cat 
+    }
+```
+</details>
+<br />
+
+<a id="printed-12"></a>
+##### Printed
+<details>
+<summary><i>Printed: C. Concatenate the "standard.nodups" and "keep-MM.nodups" files</i></summary>
 
 ```txt
 
@@ -9557,7 +9661,7 @@ Options:
 ### 6. Run `pairtools stats`
 <a id="individual-pairs-files"></a>
 #### Individual pairs files
-<a id="code-17"></a>
+<a id="code-18"></a>
 ##### Code
 <details>
 <summary><i>Code: 6. Run pairtools stats</i></summary>
@@ -9613,7 +9717,7 @@ run_check=FALSE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-12"></a>
+<a id="printed-13"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 6. Run pairtools stats</i></summary>
@@ -10642,7 +10746,7 @@ chromsizes/Mito 85779
 
 <a id="merged-pairs-files"></a>
 #### Merged pairs files
-<a id="code-18"></a>
+<a id="code-19"></a>
 ##### Code
 <details>
 <summary><i>Code: 6. Run pairtools stats</i></summary>
@@ -10690,7 +10794,7 @@ run_check=TRUE
 </details>
 <br />
 
-<a id="printed-13"></a>
+<a id="printed-14"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 6. Run pairtools stats</i></summary>
@@ -11231,7 +11335,7 @@ chromsizes/XVI  948066
 ### 7. Load pairs to cooler
 <a id="individual-pairs-file"></a>
 #### Individual pairs file
-<a id="code-19"></a>
+<a id="code-20"></a>
 ##### Code
 <details>
 <summary><i>Code: 7. Load pairs to cooler</i></summary>
@@ -11273,7 +11377,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-14"></a>
+<a id="printed-15"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 7. Load pairs to cooler</i></summary>
@@ -11434,7 +11538,7 @@ INFO:cooler.create:Writing info
 
 <a id="merged-pairs-files-1"></a>
 #### Merged pairs files
-<a id="code-20"></a>
+<a id="code-21"></a>
 ##### Code
 <details>
 <summary><i>Code: 7. Load pairs to cooler</i></summary>
@@ -11471,7 +11575,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-15"></a>
+<a id="printed-16"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 7. Load pairs to cooler</i></summary>
@@ -11556,7 +11660,7 @@ INFO:cooler.create:Writing info
 ### 8. Generate a multi-resolution cooler by coarsening
 <a id="cools-from-individual-pairs-files"></a>
 #### Cools from individual pairs files
-<a id="code-21"></a>
+<a id="code-22"></a>
 ##### Code
 <details>
 <summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -11599,7 +11703,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-16"></a>
+<a id="printed-17"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -12021,7 +12125,7 @@ INFO:cooler.balance:variance is 7.734072057040814e-06
 
 <a id="cools-from-merged-pairs-files"></a>
 #### Cools from merged pairs files
-<a id="code-22"></a>
+<a id="code-23"></a>
 ##### Code
 <details>
 <summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -12061,7 +12165,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-17"></a>
+<a id="printed-18"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -12212,7 +12316,7 @@ INFO:cooler.cli.zoomify:Balancing zoom level with bin size 100
 
 <a id="9-ingest-files-for-higlass"></a>
 ### 9. Ingest files for HiGlass
-<a id="code-23"></a>
+<a id="code-24"></a>
 #### Code
 <details>
 <summary><i>Code: Ingest files for HiGlass</i></summary>
@@ -12303,7 +12407,7 @@ rough_size=FALSE
 </details>
 <br />
 
-<a id="printed-18"></a>
+<a id="printed-19"></a>
 #### Printed
 <details>
 <summary><i>Printed: Ingest files for HiGlass</i></summary>
