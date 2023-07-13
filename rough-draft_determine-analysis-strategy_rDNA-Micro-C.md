@@ -50,11 +50,15 @@
                 1. [2. Retain only rDNA-associated cis and trans interactions in "keep-MM"](#2-retain-only-rdna-associated-cis-and-trans-interactions-in-keep-mm)
                 1. [3. Concatenate "standard-no-rDNA" and "rDNA-only" files](#3-concatenate-standard-no-rdna-and-rdna-only-files)
                 1. [4. Copy file to remote, then run `pairtools sort`](#4-copy-file-to-remote-then-run-pairtools-sort)
+                1. [5. Troubleshoot the re-headering of pairs files](#5-troubleshoot-the-re-headering-of-pairs-files)
+                1. [6. Test that "`0X_comp/SRR7939018.standard-no-rDNA.nodups.pairs.gz`" can be re-headered](#6-test-that-0x_compsrr7939018standard-no-rdnanodupspairsgz-can-be-re-headered)
             1. [Printed](#printed-7)
                 1. [1. Exclude rDNA-associated cis and trans interactions from "standard"](#1-exclude-rdna-associated-cis-and-trans-interactions-from-standard-1)
                 1. [2. Retain only rDNA-associated cis and trans interactions in "keep-MM"](#2-retain-only-rdna-associated-cis-and-trans-interactions-in-keep-mm-1)
                 1. [3. Concatenate "standard-no-rDNA" and "keep-MM rDNA-only" files](#3-concatenate-standard-no-rdna-and-keep-mm-rdna-only-files)
                 1. [4. Copy file to remote, then run `pairtools sort`](#4-copy-file-to-remote-then-run-pairtools-sort-1)
+                1. [5. Troubleshoot the re-headering of pairs files](#5-troubleshoot-the-re-headering-of-pairs-files-1)
+                1. [6. Test that "`0X_comp/SRR7939018.standard-no-rDNA.nodups.pairs.gz`" can be re-headered](#6-test-that-0x_compsrr7939018standard-no-rdnanodupspairsgz-can-be-re-headered-1)
             1. [Scraps](#scraps-1)
 
 <!-- /MarkdownTOC -->
@@ -2525,37 +2529,6 @@ a_transfer="05_dedup/SRR7939018.nodups.pairs.gz"  # ., "${a_transfer}"
 a_pairs="sans-last-two-tabs.txt.gz"
 a_sort="${a_pairs/.gz/.sort.gz}"  # echo "${a_sort}"
 
-pairtools header transfer --help
-pairtools header transfer \
-    -o "${a_pairs/.gz/.header.gz}" \
-    -r "${a_transfer}" \
-    "${a_pairs}"
-
-zcat "${a_pairs}" | less
-
-pairtools header generate --help
-
-echo """
-pairtools header generate \\
-    -o \"${a_pairs/.txt.gz/.header.txt.gz}\" \\
-    --chroms-path \"${chroms}\" \\
-    --pairs \"${a_pairs}\" \\
-    --columns \"${columns}\" \\
-        2> >(tee -a \"${a_pairs/.gz/.header}.stderr.txt\" >&2)
-"""
-
-
-pairtools header generate \
-    -o "${a_pairs/.gz/.header.gz}" \
-    --chroms-path "${chroms}" \
-    --pairs "${a_pairs}" \
-    --columns "${columns}"
-
-zcat < sans-last-two-tabs.txt.gz | less
-#  OK, it looks like I'm going to need to regenerate the standard pairs file from scratch to ensure it has only 16 columns
-
-zcat < "${a_transfer}" | grep "^#"
-
 echo """
 pairtools sort \\
     --nproc \"${threads}\" \\
@@ -2571,8 +2544,114 @@ pairtools sort \
     --output "${a_sort}" \
     "${a_pairs}" \
         2> >(tee -a "${a_sort%.gz}.stderr.txt" >&2)
+```
 
-zcat "${a_pairs}" | less
+<a id="5-troubleshoot-the-re-headering-of-pairs-files"></a>
+###### 5. Troubleshoot the re-headering of pairs files
+```bash
+#!/bin/bash
+
+#  Get situated ---------------------------------------------------------------
+p_work="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/0X_comp"
+[[ ! $(pwd) =~ "0X" ]] && cd "${p_work}"
+
+
+#  Generate non-compressed minimal example files ------------------------------
+[[ -f file-without-header.txt ]] && rm file-without-header.txt
+[[ -f file-with-header.txt ]] && rm file-with-header.txt
+
+zcat < SRR7939018.standard-no-rDNA.nodups.pairs.gz | head -100 > file-without-header.txt
+zcat < ../05_dedup/SRR7939018.standard.nodups.pairs.gz | head -100 > file-with-header.txt
+
+head file-without-header.txt
+
+
+#  pairtools header transfer --------------------------------------------------
+pairtools header transfer \
+    -o "re-headered-file.txt" \
+    -r "file-with-header.txt" \
+    "file-without-header.txt"
+
+head -50 re-headered-file.txt
+
+
+#  pairtools header generate --------------------------------------------------
+chroms="${HOME}/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size"
+columns="readID,chrom1,pos1,chrom2,pos2,strand1,strand2,pair_type,walk_pair_index,walk_pair_type,pos51,pos52,pos31,pos32,mapq1,mapq2"
+
+pairtools header generate \
+    -o re-headered-file-2.txt \
+    --chroms-path "${chroms}" \
+    --pairs file-without-header.txt \
+    --columns "${columns}"
+
+
+#  Generate pbgzip-compressed minimal example files ---------------------------
+[[ ! -f file-with-header.txt.gz ]] && pbgzip -c file-with-header.txt > file-with-header.txt.gz
+[[ ! -f file-without-header.txt.gz ]] && pbgzip -c file-without-header.txt > file-without-header.txt.gz
+
+
+#  Compressed file: pairtools header transfer ---------------------------------
+pairtools header transfer \
+    --output re-headered-file.txt.gz \
+    --reference-file file-with-header.txt.gz \
+    file-without-header.txt.gz
+#  It works!
+
+
+#  Compressed file: pairtools header generate ---------------------------------
+chroms="${HOME}/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size"
+columns="readID,chrom1,pos1,chrom2,pos2,strand1,strand2,pair_type,walk_pair_index,walk_pair_type,pos51,pos52,pos31,pos32,mapq1,mapq2"
+
+pairtools header generate \
+    -o re-headered-file-2.txt.gz \
+    --chroms-path "${chroms}" \
+    --pairs file-without-header.txt.gz \
+    --columns "${columns}"
+
+
+#NOTE
+#  OK, so the solution is to make sure any compression is performed with the
+#+ program pbgzip, which was installed alongside pairtools and is part of the
+#+ pairtools_env miniconda3 environment
+#+ 
+#+ We will encounter errors if we compress files with a standard program like
+#+ gzip
+
+
+#  Clean up -------------------------------------------------------------------
+[[ ! -d test-re-headering/ ]] && mkdir test-re-headering/
+mv file-with* re-headered-file* test-re-headering/
+```
+
+<a id="6-test-that-0x_compsrr7939018standard-no-rdnanodupspairsgz-can-be-re-headered"></a>
+###### 6. Test that "`0X_comp/SRR7939018.standard-no-rDNA.nodups.pairs.gz`" can be re-headered
+```bash
+#!/bin/bash
+
+#  pbgzip-compressed pairtools header transfer --------------------------------
+echo """
+pairtools header transfer \\
+    -o \"${a_comp_std/.nodups.pairs.gz/.re-headered.nodups.pairs.gz}\" \\
+    -r \"${a_dedup_pre_pairs}\" \\
+    \"${a_comp_std}\"
+"""
+
+ls -lhaFG "${a_dedup_pre_pairs}"
+ls -lhaFG "${a_comp_std}"
+
+pairtools header transfer \
+    -o "${a_comp_std/.nodups.pairs.gz/.re-headered.nodups.pairs.gz}" \
+    -r "${a_dedup_pre_pairs}" \
+    "${a_comp_std}"
+
+pbgzip -dc < "${a_comp_std/.nodups.pairs.gz/.re-headered.nodups.pairs.gz}" \
+    | head -50
+
+#NOTE
+#  This works!
+
+rm SRR7939018.standard-no-rDNA.re-headered.nodups.pairs.gz
 ```
 </details>
 <br />
@@ -2585,6 +2664,33 @@ zcat "${a_pairs}" | less
 <a id="1-exclude-rdna-associated-cis-and-trans-interactions-from-standard-1"></a>
 ###### 1. Exclude rDNA-associated cis and trans interactions from "standard"
 ```txt
+❯ pairtools header transfer --help
+Usage: pairtools header transfer [OPTIONS] [PAIRS_PATH]
+
+  Transfer the header from one pairs file to another
+
+Options:
+  -o, --output TEXT          output file. If the path ends with .gz or .lz4,
+                             the output is bgzip-/lz4c-compressed. By default,
+                             the output is printed into stdout.
+  --nproc-in INTEGER         Number of processes used by the auto-guessed
+                             input decompressing command.  [default: 1]
+  --nproc-out INTEGER        Number of processes used by the auto-guessed
+                             output compressing command.  [default: 8]
+  --cmd-in TEXT              A command to decompress the input. If provided,
+                             fully overrides the auto-guessed command. Does
+                             not work with stdin. Must read input from stdin
+                             and print output into stdout. EXAMPLE: pbgzip -dc
+                             -n 3
+  --cmd-out TEXT             A command to compress the output. If provided,
+                             fully overrides the auto-guessed command. Does
+                             not work with stdout. Must read input from stdin
+                             and print output into stdout. EXAMPLE: pbgzip -c
+                             -n 8
+  -r, --reference-file TEXT  Header file for transfer  [required]
+  -h, --help                 Show this message and exit.
+
+
 ❯ left=451526
 
 
@@ -2982,9 +3088,272 @@ Exception: Input file is not valid .pairs, has no header or is empty.
 
 (Run on a pairs file that *does* have a header)
 ```
+
+<a id="5-troubleshoot-the-re-headering-of-pairs-files-1"></a>
+###### 5. Troubleshoot the re-headering of pairs files
+```txt
+❯ #  Get situated ---------------------------------------------------------------
+
+
+❯ p_work="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/0X_comp"
+
+
+❯ [[ ! $(pwd) =~ "0X" ]] && cd "${p_work}"
+
+
+❯ #  Generate non-compressed minimal example files ------------------------------
+
+
+❯ [[ -f file-without-header.txt ]] && rm file-without-header.txt
+
+
+1 ❯ [[ -f file-with-header.txt ]] && rm file-with-header.txt
+
+
+1 ❯ zcat < SRR7939018.standard-no-rDNA.nodups.pairs.gz | head -100 > file-without-header.txt
+
+
+❯ zcat < ../05_dedup/SRR7939018.standard.nodups.pairs.gz | head -100 > file-with-header.txt
+
+
+❯ head file-without-header.txt
+SRR7939018.44042564 I   1   I   15064   +   -   UU  1   R1-2    1   15064   48  15015   48  13
+SRR7939018.44810319 I   7   I   1001    +   +   UU  1   R1-2    7   1001    56  1050    28  46
+SRR7939018.29094541 I   7   I   1292    +   -   UU  1   R1-2    7   1292    56  1243    28  13
+SRR7939018.17270740 I   8   I   2024    +   +   UU  1   R1-2    8   2024    41  2073    21  13
+SRR7939018.55685650 I   8   I   9446    +   -   UU  1   R1-2    8   9446    57  9397    28  60
+SRR7939018.20572273 I   10  I   130 +   +   UU  1   R1-2    10  130 59  179 35  53
+SRR7939018.14854904 I   10  I   318 +   -   UU  1   R1-2    10  318 59  269 35  60
+SRR7939018.25573455 I   10  I   558 +   +   UU  1   R1-2    10  558 59  607 35  11
+SRR7939018.34992310 I   10  I   887 +   +   UU  1   R1-2    10  887 59  936 35  35
+SRR7939018.1104427  I   10  I   31959   +   -   UU  1   R1-2    10  31959   59  31910   35  60
+
+
+❯ #  pairtools header transfer --------------------------------------------------
+
+
+❯ pairtools header transfer \
+>     -o "re-headered-file.txt" \
+>     -r "file-with-header.txt" \
+>     "file-without-header.txt"
+
+
+❯ head -50 re-headered-file.txt
+## pairs format v1.0.0
+#sorted: chr1-chr2-pos1-pos2
+#shape: whole matrix
+#genome_assembly: S288C_R64-3-1
+#chromsize: I 230218
+#chromsize: II 813184
+#chromsize: III 316620
+#chromsize: IV 1531933
+#chromsize: V 576874
+#chromsize: VI 270161
+#chromsize: VII 1090940
+#chromsize: VIII 562643
+#chromsize: IX 439888
+#chromsize: X 745751
+#chromsize: XI 666816
+#chromsize: XII 1078177
+#chromsize: XIII 924431
+#chromsize: XIV 784333
+#chromsize: XV 1091291
+#chromsize: XVI 948066
+#chromsize: Mito 85779
+#samheader: @SQ SN:I    LN:230218
+#samheader: @SQ SN:II   LN:813184
+#samheader: @SQ SN:III  LN:316620
+#samheader: @SQ SN:IV   LN:1531933
+#samheader: @SQ SN:V    LN:576874
+#samheader: @SQ SN:VI   LN:270161
+#samheader: @SQ SN:VII  LN:1090940
+#samheader: @SQ SN:VIII LN:562643
+#samheader: @SQ SN:IX   LN:439888
+#samheader: @SQ SN:X    LN:745751
+#samheader: @SQ SN:XI   LN:666816
+#samheader: @SQ SN:XII  LN:1078177
+#samheader: @SQ SN:XIII LN:924431
+#samheader: @SQ SN:XIV  LN:784333
+#samheader: @SQ SN:XV   LN:1091291
+#samheader: @SQ SN:XVI  LN:948066
+#samheader: @SQ SN:Mito LN:85779
+#samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 8 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
+#samheader: @PG ID:samtools PN:samtools PP:bwa  VN:1.16.1   CL:samtools view -@ 8 -S -b
+#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.standard.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --min-mapq 1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq --drop-seq --drop-sam --output-stats 06_stats/SRR7939018.standard.stats.txt --nproc-in 8 --nproc-out 8 02_align/SRR7939018.bam  PP:samtools VN:1.0.2
+#samheader: @PG ID:pairtools_sort   PN:pairtools_sort   CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 8 --tmpdir /fh/scratch/delete30/tsukiyama_t --output 04_sort/SRR7939018.standard.sort.txt.gz 03_parse/SRR7939018.standard.txt.gz PP:pairtools_parse2 VN:1.0.2
+#samheader: @PG ID:pairtools_dedup  PN:pairtools_dedup  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 8 --max-mismatch 0 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats 06_stats/SRR7939018.standard.dedup.stats.txt 04_sort/SRR7939018.standard.sort.txt.gz   PP:pairtools_sort   VN:1.0.2
+#samheader: @PG ID:pairtools_split  PN:pairtools_split  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs 05_dedup/SRR7939018.standard.nodups.pairs.gzPP:pairtools_dedup   VN:1.0.2
+#samheader: @PG ID:pairtools_header PN:pairtools_header CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools header transfer -o re-headered-file.txt -r file-with-header.txt file-without-header.txt   PP:pairtools_split  VN:1.0.2
+#columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type walk_pair_index walk_pair_type pos51 pos52 pos31 pos32 mapq1 mapq2
+SRR7939018.44042564 I   1   I   15064   +   -   UU  1   R1-2    1   15064   48  15015   48  13
+SRR7939018.44810319 I   7   I   1001    +   +   UU  1   R1-2    7   1001    56  1050    28  46
+SRR7939018.29094541 I   7   I   1292    +   -   UU  1   R1-2    7   1292    56  1243    28  13
+SRR7939018.17270740 I   8   I   2024    +   +   UU  1   R1-2    8   2024    41  2073    21  13
+
+
+❯ #  pairtools header generate --------------------------------------------------
+
+
+❯ chroms="${HOME}/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size"
+
+
+❯ columns="readID,chrom1,pos1,chrom2,pos2,strand1,strand2,pair_type,walk_pair_index,walk_pair_type,pos51,pos52,pos31,pos32,mapq1,mapq2"
+
+
+❯ pairtools header generate \
+>     -o re-headered-file-2.txt \
+>     --chroms-path "${chroms}" \
+>     --pairs file-without-header.txt \
+>     --columns "${columns}"
+
+
+❯ #  Generate pbgzip-compressed minimal example files ---------------------------
+
+
+❯ [[ ! -f file-with-header.txt.gz ]] && pbgzip -c file-with-header.txt > file-with-header.txt.gz
+
+
+❯ [[ ! -f file-without-header.txt.gz ]] && pbgzip -c file-without-header.txt > file-without-header.txt.gz
+
+
+❯ #  Compressed file: pairtools header generate ---------------------------------
+
+
+❯ chroms="${HOME}/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size"
+
+
+❯ columns="readID,chrom1,pos1,chrom2,pos2,strand1,strand2,pair_type,walk_pair_index,walk_pair_type,pos51,pos52,pos31,pos32,mapq1,mapq2"
+
+
+❯ pairtools header generate \
+>     -o re-headered-file-2.txt.gz \
+>     --chroms-path "${chroms}" \
+>     --pairs file-without-header.txt.gz \
+>     --columns "${columns}"
+
+
+❯ #NOTE
+❯ #  OK, so the solution is to make sure any compression is performed with the
+❯ #+ program pbgzip, which was installed alongside pairtools and is part of the
+❯ #+ pairtools_env miniconda3 environment
+❯ #+
+❯ #+ We will encounter errors if we compress files with a standard program like
+❯ #+ gzip
+
+
+❯ #  Clean up -------------------------------------------------------------------
+
+
+❯ [[ ! -d test-re-headering/ ]] && mkdir test-re-headering/
+mkdir: created directory 'test-re-headering/'
+
+
+❯ mv file-with* re-headered-file* test-re-headering/
+'file-with-header.txt' -> 'test-re-headering/file-with-header.txt'
+'file-with-header.txt.gz' -> 'test-re-headering/file-with-header.txt.gz'
+'file-without-header.txt' -> 'test-re-headering/file-without-header.txt'
+'file-without-header.txt.gz' -> 'test-re-headering/file-without-header.txt.gz'
+'re-headered-file-2.txt' -> 'test-re-headering/re-headered-file-2.txt'
+'re-headered-file-2.txt.gz' -> 'test-re-headering/re-headered-file-2.txt.gz'
+'re-headered-file.txt' -> 'test-re-headering/re-headered-file.txt'
+'re-headered-file.txt.gz' -> 'test-re-headering/re-headered-file.txt.gz'
+```
+
+<a id="6-test-that-0x_compsrr7939018standard-no-rdnanodupspairsgz-can-be-re-headered-1"></a>
+###### 6. Test that "`0X_comp/SRR7939018.standard-no-rDNA.nodups.pairs.gz`" can be re-headered
+```txt
+❯ #  pbgzip-compressed pairtools header transfer --------------------------------
+
+
+❯ echo """
+> pairtools header transfer \\
+>     -o \"${a_comp_std/.nodups.pairs.gz/.re-headered.nodups.pairs.gz}\" \\
+>     -r \"${a_dedup_pre_pairs}\" \\
+>     \"${a_comp_std}\"
+> """
+
+pairtools header transfer \
+    -o "0X_comp/SRR7939018.standard-no-rDNA.re-headered.nodups.pairs.gz" \
+    -r "05_dedup/SRR7939018.standard.nodups.pairs.gz" \
+    "0X_comp/SRR7939018.standard-no-rDNA.nodups.pairs.gz"
+
+
+❯ ls -lhaFG "${a_dedup_pre_pairs}"
+-rw-rw---- 1 kalavatt 683M Jul 12 09:24 05_dedup/SRR7939018.standard.nodups.pairs.gz
+
+
+❯ ls -lhaFG "${a_comp_std}"
+-rw-rw---- 1 kalavatt 671M Jul 12 15:16 0X_comp/SRR7939018.standard-no-rDNA.nodups.pairs.gz
+
+
+❯ pairtools header transfer \
+>     -o "${a_comp_std/.nodups.pairs.gz/.re-headered.nodups.pairs.gz}" \
+>     -r "${a_dedup_pre_pairs}" \
+>     "${a_comp_std}"
+
+
+❯ pbgzip -dc < "${a_comp_std/.nodups.pairs.gz/.re-headered.nodups.pairs.gz}" \
+>     | head -50
+## pairs format v1.0.0
+#sorted: chr1-chr2-pos1-pos2
+#shape: whole matrix
+#genome_assembly: S288C_R64-3-1
+#chromsize: I 230218
+#chromsize: II 813184
+#chromsize: III 316620
+#chromsize: IV 1531933
+#chromsize: V 576874
+#chromsize: VI 270161
+#chromsize: VII 1090940
+#chromsize: VIII 562643
+#chromsize: IX 439888
+#chromsize: X 745751
+#chromsize: XI 666816
+#chromsize: XII 1078177
+#chromsize: XIII 924431
+#chromsize: XIV 784333
+#chromsize: XV 1091291
+#chromsize: XVI 948066
+#chromsize: Mito 85779
+#samheader: @SQ SN:I    LN:230218
+#samheader: @SQ SN:II   LN:813184
+#samheader: @SQ SN:III  LN:316620
+#samheader: @SQ SN:IV   LN:1531933
+#samheader: @SQ SN:V    LN:576874
+#samheader: @SQ SN:VI   LN:270161
+#samheader: @SQ SN:VII  LN:1090940
+#samheader: @SQ SN:VIII LN:562643
+#samheader: @SQ SN:IX   LN:439888
+#samheader: @SQ SN:X    LN:745751
+#samheader: @SQ SN:XI   LN:666816
+#samheader: @SQ SN:XII  LN:1078177
+#samheader: @SQ SN:XIII LN:924431
+#samheader: @SQ SN:XIV  LN:784333
+#samheader: @SQ SN:XV   LN:1091291
+#samheader: @SQ SN:XVI  LN:948066
+#samheader: @SQ SN:Mito LN:85779
+#samheader: @PG ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -t 8 -SP /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa/S288C_R64-3-1.fa /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_1.fastq.gz /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742/SRR7939018_2.fastq.gz
+#samheader: @PG ID:samtools PN:samtools PP:bwa  VN:1.16.1   CL:samtools view -@ 8 -S -b
+#samheader: @PG ID:pairtools_parse2 PN:pairtools_parse2 CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools parse2 -o 03_parse/SRR7939018.standard.txt.gz -c /home/kalavatt/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size --report-position outer --report-orientation pair --assembly S288C_R64-3-1 --min-mapq 1 --dedup-max-mismatch 0 --expand --add-pair-index --no-flip --add-columns pos5,pos3,mapq --drop-seq --drop-sam --output-stats 06_stats/SRR7939018.standard.stats.txt --nproc-in 8 --nproc-out 8 02_align/SRR7939018.bam  PP:samtools VN:1.0.2
+#samheader: @PG ID:pairtools_sort   PN:pairtools_sort   CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools sort --nproc 8 --tmpdir /fh/scratch/delete30/tsukiyama_t --output 04_sort/SRR7939018.standard.sort.txt.gz 03_parse/SRR7939018.standard.txt.gz PP:pairtools_parse2 VN:1.0.2
+#samheader: @PG ID:pairtools_dedup  PN:pairtools_dedup  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools dedup --n-proc 8 --max-mismatch 0 --mark-dups --output /dev/fd/63 --output-unmapped /dev/fd/62 --output-dups /dev/fd/61 --output-stats 06_stats/SRR7939018.standard.dedup.stats.txt 04_sort/SRR7939018.standard.sort.txt.gz   PP:pairtools_sort   VN:1.0.2
+#samheader: @PG ID:pairtools_split  PN:pairtools_split  CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools split --output-pairs 05_dedup/SRR7939018.standard.nodups.pairs.gzPP:pairtools_dedup   VN:1.0.2
+#samheader: @PG ID:pairtools_header PN:pairtools_header CL:/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools header transfer -o 0X_comp/SRR7939018.standard-no-rDNA.re-headered.nodups.pairs.gz -r 05_dedup/SRR7939018.standard.nodups.pairs.gz 0X_comp/SRR7939018.standard-no-rDNA.nodups.pairs.gz    PP:pairtools_split  VN:1.0.2
+#columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type walk_pair_index walk_pair_type pos51 pos52 pos31 pos32 mapq1 mapq2
+SRR7939018.44042564 I   1   I   15064   +   -   UU  1   R1-2    1   15064   48  15015   48  13
+SRR7939018.44810319 I   7   I   1001    +   +   UU  1   R1-2    7   1001    56  1050    28  46
+SRR7939018.29094541 I   7   I   1292    +   -   UU  1   R1-2    7   1292    56  1243    28  13
+SRR7939018.17270740 I   8   I   2024    +   +   UU  1   R1-2    8   2024    41  2073    21  13
+
+
+❯ #NOTE
+❯ #  This works!
+
+
+❯ rm SRR7939018.standard-no-rDNA.re-headered.nodups.pairs.gz
+```
 </details>
 <br />
-
 
 <a id="scraps-1"></a>
 ##### Scraps

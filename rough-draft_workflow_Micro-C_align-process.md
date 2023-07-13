@@ -90,33 +90,40 @@
         1. [Printed](#printed-9)
             1. [Check the documentation](#check-the-documentation-4)
             1. [`pairtools select`](#pairtools-select)
-    1. [6. Run `pairtools stats`](#6-run-pairtools-stats)
-        1. [Individual pairs files](#individual-pairs-files)
+    1. [X. Run "`standard-rDNA-complete`" processing if applicable](#x-run-standard-rdna-complete-processing-if-applicable)
+        1. [A. Exclude rDNA-associated *cis* and *trans* interactions from "`standard.nodups`" file](#a-exclude-rdna-associated-cis-and-trans-interactions-from-standardnodups-file)
             1. [Code](#code-15)
             1. [Printed](#printed-10)
+        1. [B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`rDNA.nodups`" file](#b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-rdnanodups-file)
+            1. [Code](#code-16)
+            1. [Printed](#printed-11)
+    1. [6. Run `pairtools stats`](#6-run-pairtools-stats)
+        1. [Individual pairs files](#individual-pairs-files)
+            1. [Code](#code-17)
+            1. [Printed](#printed-12)
                 1. [Check the documentation](#check-the-documentation-5)
                 1. [Do a trial run of `pairtools stats`](#do-a-trial-run-of-pairtools-stats)
                 1. [Check the contents of the stats files](#check-the-contents-of-the-stats-files)
         1. [Merged pairs files](#merged-pairs-files)
-            1. [Code](#code-16)
-            1. [Printed](#printed-11)
-    1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
-        1. [Individual pairs file](#individual-pairs-file)
-            1. [Code](#code-17)
-            1. [Printed](#printed-12)
-        1. [Merged pairs files](#merged-pairs-files-1)
             1. [Code](#code-18)
             1. [Printed](#printed-13)
-    1. [8. Generate a multi-resolution cooler by coarsening](#8-generate-a-multi-resolution-cooler-by-coarsening)
-        1. [Cools from individual pairs files](#cools-from-individual-pairs-files)
+    1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
+        1. [Individual pairs file](#individual-pairs-file)
             1. [Code](#code-19)
             1. [Printed](#printed-14)
-        1. [Cools from merged pairs files](#cools-from-merged-pairs-files)
+        1. [Merged pairs files](#merged-pairs-files-1)
             1. [Code](#code-20)
             1. [Printed](#printed-15)
+    1. [8. Generate a multi-resolution cooler by coarsening](#8-generate-a-multi-resolution-cooler-by-coarsening)
+        1. [Cools from individual pairs files](#cools-from-individual-pairs-files)
+            1. [Code](#code-21)
+            1. [Printed](#printed-16)
+        1. [Cools from merged pairs files](#cools-from-merged-pairs-files)
+            1. [Code](#code-22)
+            1. [Printed](#printed-17)
     1. [9. Ingest files for HiGlass](#9-ingest-files-for-higlass)
-        1. [Code](#code-21)
-        1. [Printed](#printed-16)
+        1. [Code](#code-23)
+        1. [Printed](#printed-18)
 
 <!-- /MarkdownTOC -->
 </details>
@@ -2211,12 +2218,17 @@ analysis="Q"  #ARGUMENT  # echo "${analysis}"
 # analysis="G1"  #ARGUMENT  # echo "${analysis}"
 # analysis="G2-M"  #ARGUMENT  # echo "${analysis}"
 
+#TEMPORARYAPPROACH
 #  Sub-setting for "G2-M" analysis: choose which replicate to use
-[[ "${analysis}" == "G2-M" ]] && rep=1  #ARGUMENT (if "G2-M")
-# [[ "${analysis}" == "G2-M" ]] && rep=2  #ARGUMENT (if "G2-M")
+# [[ "${analysis}" == "G2-M" ]] && rep=1  #ARGUMENT
+# [[ "${analysis}" == "G2-M" ]] && rep=2  #ARGUMENT
+[[ ${analysis} != "G2-M" ]] && rep=NA  #ARGUMENT
 
-#  Setting for flag to run standard or rDNA processing
-flag_rDNA=FALSE  #ARGUMENT  # echo "${flag_rDNA}"
+#  Setting for flag to run standard or rDNA processing, and variables for left-
+#+ and right-most positions to be considered for the rDNA locus on chrXII
+flag_rDNA=TRUE  #ARGUMENT  # echo "${flag_rDNA}"
+rDNA_pos_l=451526  #HARDCODED  # echo "${rDNA_pos_l}"
+rDNA_pos_r=468980  #HARDCODED  # echo "${rDNA_pos_r}"
 
 #  Initial setting for flag to *not* run pairtools merge
 flag_merge=FALSE  #HARDCODED  # echo "${flag_merge}"
@@ -2249,7 +2261,7 @@ elif [[ "${analysis}" == "G2-M" ]]; then
         f_pre="SRR11893085"  # ., "${p_fq}/${f_pre}"*
     fi
     
-    #  Set up hash, indices (needed for logic below)
+    #  Set up hash, indices (needed for replicate/merge logic below)
     unset arr_merge; unset order
     typeset -A arr_merge; typeset -a order
     arr_merge["SRR11893084"]="SRR11893085"; order+=("SRR11893084")
@@ -2276,10 +2288,13 @@ print_test=TRUE  #ARGUMENT
         analysis=${analysis}
         flag_merge=${flag_merge}
         flag_rDNA=${flag_rDNA}
+        rDNA_pos_l=${rDNA_pos_l}
+        rDNA_pos_r=${rDNA_pos_r}
         threads=${threads}
         scratch=${scratch}
         p_fq=${p_fq}
         f_pre=${f_pre}
+        rep=${rep}
         """
     }
 ```
@@ -2585,14 +2600,14 @@ print_test=TRUE  #ARGUMENT
 ```bash
 #!/bin/bash
 
-if [[ ! -d "${d_trim}" ]]; then mkdir -p "${d_trim}/err_out"; fi
-if [[ ! -d "${d_bam}" ]]; then mkdir -p "${d_bam}/err_out"; fi
-if [[ ! -d "${d_pairs}" ]]; then mkdir -p "${d_pairs}/err_out"; fi
-if [[ ! -d "${d_sort}" ]]; then mkdir -p "${d_sort}/err_out"; fi
-if [[ ! -d "${d_stats}" ]]; then mkdir -p "${d_stats}"; fi
-if [[ ! -d "${d_dedup}" ]]; then mkdir -p "${d_dedup}/err_out"; fi
-if [[ ! -d "${d_cload}" ]]; then mkdir -p "${d_cload}/err_out"; fi
-if [[ ! -d "${d_zoom}" ]]; then mkdir -p "${d_zoom}/err_out"; fi
+[[ ! -d "${d_trim}" ]] && mkdir -p "${d_trim}/err_out"
+[[ ! -d "${d_bam}" ]] && mkdir -p "${d_bam}/err_out"
+[[ ! -d "${d_pairs}" ]] && mkdir -p "${d_pairs}/err_out"
+[[ ! -d "${d_sort}" ]] && mkdir -p "${d_sort}/err_out"
+[[ ! -d "${d_stats}" ]] && mkdir -p "${d_stats}/err_out"
+[[ ! -d "${d_dedup}" ]] && mkdir -p "${d_dedup}/err_out"
+[[ ! -d "${d_cload}" ]] && mkdir -p "${d_cload}/err_out"
+[[ ! -d "${d_zoom}" ]] && mkdir -p "${d_zoom}/err_out"
 ```
 </details>
 <br />
@@ -6115,15 +6130,16 @@ run_check=TRUE  #ARGUMENT
         && -f "${a_unmap_pre_pairs}"
 ]] &&
     {
-        ., "${d_dedup}/err_out/${f_pre}.dedup.stderr.txt"
+        ., "${d_dedup}/err_out/${f_pre}.dedup.stderr.txt" && printf "\n\n"
 
-        ., "${a_dedup_pre_pairs}"
-        ., "${a_dup_pre_pairs}"
-        ., "${a_unmap_pre_pairs}"
+        ., "${a_dedup_pre_pairs}" && printf "\n\n"
+        ., "${a_dup_pre_pairs}" && printf "\n\n"
+        ., "${a_unmap_pre_pairs}" && printf "\n\n"
 
-        zcat "${a_dedup_pre_pairs}" | head -100  # zcat "${a_dedup_pre_pairs}" | less
-        zcat "${a_dup_pre_pairs}" | head -100
-        zcat "${a_unmap_pre_pairs}" | head -100
+        # zcat "${a_dedup_pre_pairs}" | less
+        ( zcat "${a_dedup_pre_pairs}" | head -100 ) && printf "\n\n"
+        ( zcat "${a_dup_pre_pairs}" | head -100 ) && printf "\n\n"
+        ( zcat "${a_unmap_pre_pairs}" | head -100 ) && printf "\n\n"
     } ||
     {
         echo "Warning: \"run_check\" for dedup outfiles did not run"
@@ -6135,17 +6151,20 @@ run_check=TRUE  #ARGUMENT
 run_check=TRUE  #ARGUMENT
 [[ "${run_check}" == TRUE && -f "${a_dedup_pre_pairs}" ]] &&
     {
-        zcat "${a_dedup_pre_pairs}" | grep -v "#" | head -300
+        ( zcat "${a_dedup_pre_pairs}" | grep -v "#" | head -300 ) && printf "\n\n"
 
         #  Count number of unique pairs type in "${a_dedup_pre_pairs}"
-        zcat "${a_dedup_pre_pairs}" \
-            | grep -v "^#" \
-            | cut -f 8 \
-            | sort \
-            | uniq -c
+        (
+            zcat "${a_dedup_pre_pairs}" \
+                | grep -v "^#" \
+                | cut -f 8 \
+                | sort \
+                | uniq -c
+        ) &&
+            printf "\n\n"
 
         #  What are the RU and UR pair types?
-        zcat "${a_dedup_pre_pairs}" | grep "RU\|UR" || echo "No \"RU|UR\""
+        ( zcat "${a_dedup_pre_pairs}" | grep "RU\|UR" || echo "No \"RU|UR\"" ) && printf "\n\n"
     } ||
     {
         echo "Warning: \"run_check\" for dedup unique pairs outfile did not run"
@@ -6157,8 +6176,8 @@ run_check=TRUE  #ARGUMENT
 run_check=TRUE  #ARGUMENT
 [[ "${run_check}" == TRUE && -f "${a_dedup_stats}" ]] &&
     {
-        ., "${a_dedup_stats}"
-        cat "${a_dedup_stats}"  # less "${a_dedup_stats}"
+        ., "${a_dedup_stats}" && printf "\n\n"
+        cat "${a_dedup_stats}" && printf "\n\n" # less "${a_dedup_stats}"
     } ||
     {
         echo "Warning: \"run_check\" for dedup stats did not run"
@@ -9390,11 +9409,155 @@ Options:
 </details>
 <br />
 
+<a id="x-run-standard-rdna-complete-processing-if-applicable"></a>
+### X. Run "`standard-rDNA-complete`" processing if applicable
+<a id="a-exclude-rdna-associated-cis-and-trans-interactions-from-standardnodups-file"></a>
+#### A. Exclude rDNA-associated *cis* and *trans* interactions from "`standard.nodups`" file
+<a id="code-15"></a>
+##### Code
+<details>
+<summary><i>Code: A. Exclude rDNA-associated cis and trans interactions from "standard"</i></summary>
+
+```bash
+#!/bin/bash
+
+[[ "${flag_rDNA}" == TRUE ]] &&
+    {
+        #TODO Move variable assignments and mkdir call to step #0
+        d_comp="0X_comp"  # echo "${d_comp}"
+        [[ ! -d "${d_comp}" ]] && mkdir -p "${d_comp}/err_out"
+        
+        f_comp_std_pre="${f_pre}-no-rDNA"  # echo "${f_comp_std_pre}"
+        f_comp_std_suf="$(
+            echo "${a_dedup_pre_pairs}" \
+                | sed "s:${d_dedup}\/${f_pre}\.::g"
+        )"  # echo "${f_comp_std_suf}"
+        f_comp_std="${f_comp_std_pre}.${f_comp_std_suf}"  # echo "${f_comp_std}"
+        a_comp_std="${d_comp}/${f_comp_std}"  # echo "${a_comp_std}"
+
+        #LOGIC
+        #       IF chrom1 != "XII" && chrom2 != "XII" THEN print record
+        #+ ELSE IF chrom1 == "XII" && chrom2 != "XII" && pos1 != rDNA THEN print record
+        #+ ELSE IF chrom1 != "XII" && chrom2 == "XII" && pos2 != rDNA THEN print record
+        #+ ELSE IF chrom1 == "XII" && chrom2 == "XII" && pos1 != rDNA && pos2 != rDNA THEN print record
+        
+        print_test=TRUE
+        [[ "${print_test}" == TRUE ]] &&
+            {
+                echo """
+                [[ -f \"${f_comp_std}\" ]] && rm \"${f_comp_std}\"
+                zcat < \"${a_dedup_pre_pairs}\" \\
+                    | grep -v \"^#\" \\
+                    | awk \\
+                        -v chr=\"XII\" \\
+                        -v left=\"${rDNA_pos_l}\" \\
+                        -v right=\"${rDNA_pos_r}\" \\
+                        '{
+                            if (\$2 != chr && \$4 != chr) {  
+                                print \$0
+                            } else if ((\$2 == chr && \$4 != chr) && (\$11 < left || \$11 > right)) {
+                                print \$0
+                            } else if ((\$4 == chr && \$2 != chr) && (\$12 < left || \$12 > right)) {
+                                print \$0
+                            } else if (\$2 == chr && \$4 == chr && (\$11 < left || \$11 > right) && (\$12 < left || \$12 > right)) {
+                                print \$0
+                            }
+                        }' \\
+                    | pbgzip -c \\
+                        > \"${a_comp_std}\" \\
+                        2> >(tee -a echo \"${d_comp}/err_out/${f_comp_std_pre}.stderr.txt\" >&2)
+                """
+            }
+
+        run=TRUE
+        [[ "${run}" == TRUE ]] &&
+            {
+                [[ -f "${f_comp_std}" ]] && rm "${f_comp_std}"
+                zcat < "${a_dedup_pre_pairs}" \
+                    | grep -v "^#" \
+                    | awk \
+                        -v chr="XII" \
+                        -v left="${rDNA_pos_l}" \
+                        -v right="${rDNA_pos_r}" \
+                        '{
+                            if ($2 != chr && $4 != chr) {  
+                                print $0
+                            } else if (($2 == chr && $4 != chr) && ($11 < left || $11 > right)) {
+                                print $0
+                            } else if (($4 == chr && $2 != chr) && ($12 < left || $12 > right)) {
+                                print $0
+                            } else if ($2 == chr && $4 == chr && ($11 < left || $11 > right) && ($12 < left || $12 > right)) {
+                                print $0
+                            }
+                        }' \
+                    | pbgzip -c \
+                        > "${a_comp_std}" \
+                        2> >(tee -a echo "${d_comp}/err_out/${f_comp_std_pre}.stderr.txt" >&2)
+            }
+
+        run_check_manual_1=FALSE
+        [[ "${run_check_manual_1}" == TRUE && -f "${a_comp_std}" ]] &&
+            {
+                #  Manually check that any XII-associated records are not rDNA-associated
+                [[ -f "${a_comp_std/.gz/.txt}" ]] && rm "${a_comp_std/.gz/.txt}"
+                zcat < "${a_comp_std}" > "${a_comp_std/.gz/.txt}"
+
+                # rm "${standard_no_rDNA/.gz/.txt}"
+            }
+
+        run_check_manual_2=FALSE
+        [[ "${run_check_manual_2}" == TRUE && -f "${a_comp_std}" ]] &&
+            {
+                #  Less through the file
+                zcat < "${a_comp_std}" | less
+            }
+    }
+```
+</details>
+<br />
+
+<a id="printed-10"></a>
+##### Printed
+<details>
+<summary><i>Printed: A. Exclude rDNA-associated cis and trans interactions from "standard"</i></summary>
+
+```txt
+
+```
+</details>
+<br />
+
+<a id="b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-rdnanodups-file"></a>
+#### B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`rDNA.nodups`" file
+<a id="code-16"></a>
+##### Code
+<details>
+<summary><i>Code: B. Exclude all but rDNA-associated cis and trans interactions from "rDNA.nodups" file</i></summary>
+
+```bash
+#!/bin/bash
+
+
+```
+</details>
+<br />
+
+<a id="printed-11"></a>
+##### Printed
+<details>
+<summary><i>Printed: B. Exclude all but rDNA-associated cis and trans interactions from "rDNA.nodups" file</i></summary>
+
+```txt
+
+```
+</details>
+<br />
+
 <a id="6-run-pairtools-stats"></a>
 ### 6. Run `pairtools stats`
 <a id="individual-pairs-files"></a>
 #### Individual pairs files
-<a id="code-15"></a>
+<a id="code-17"></a>
 ##### Code
 <details>
 <summary><i>Code: 6. Run pairtools stats</i></summary>
@@ -9450,7 +9613,7 @@ run_check=FALSE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-10"></a>
+<a id="printed-12"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 6. Run pairtools stats</i></summary>
@@ -10479,7 +10642,7 @@ chromsizes/Mito 85779
 
 <a id="merged-pairs-files"></a>
 #### Merged pairs files
-<a id="code-16"></a>
+<a id="code-18"></a>
 ##### Code
 <details>
 <summary><i>Code: 6. Run pairtools stats</i></summary>
@@ -10527,7 +10690,7 @@ run_check=TRUE
 </details>
 <br />
 
-<a id="printed-11"></a>
+<a id="printed-13"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 6. Run pairtools stats</i></summary>
@@ -11068,7 +11231,7 @@ chromsizes/XVI  948066
 ### 7. Load pairs to cooler
 <a id="individual-pairs-file"></a>
 #### Individual pairs file
-<a id="code-17"></a>
+<a id="code-19"></a>
 ##### Code
 <details>
 <summary><i>Code: 7. Load pairs to cooler</i></summary>
@@ -11110,7 +11273,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-12"></a>
+<a id="printed-14"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 7. Load pairs to cooler</i></summary>
@@ -11271,7 +11434,7 @@ INFO:cooler.create:Writing info
 
 <a id="merged-pairs-files-1"></a>
 #### Merged pairs files
-<a id="code-18"></a>
+<a id="code-20"></a>
 ##### Code
 <details>
 <summary><i>Code: 7. Load pairs to cooler</i></summary>
@@ -11308,7 +11471,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-13"></a>
+<a id="printed-15"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 7. Load pairs to cooler</i></summary>
@@ -11393,7 +11556,7 @@ INFO:cooler.create:Writing info
 ### 8. Generate a multi-resolution cooler by coarsening
 <a id="cools-from-individual-pairs-files"></a>
 #### Cools from individual pairs files
-<a id="code-19"></a>
+<a id="code-21"></a>
 ##### Code
 <details>
 <summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -11436,7 +11599,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-14"></a>
+<a id="printed-16"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -11858,7 +12021,7 @@ INFO:cooler.balance:variance is 7.734072057040814e-06
 
 <a id="cools-from-merged-pairs-files"></a>
 #### Cools from merged pairs files
-<a id="code-20"></a>
+<a id="code-22"></a>
 ##### Code
 <details>
 <summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -11898,7 +12061,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-15"></a>
+<a id="printed-17"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -12049,7 +12212,7 @@ INFO:cooler.cli.zoomify:Balancing zoom level with bin size 100
 
 <a id="9-ingest-files-for-higlass"></a>
 ### 9. Ingest files for HiGlass
-<a id="code-21"></a>
+<a id="code-23"></a>
 #### Code
 <details>
 <summary><i>Code: Ingest files for HiGlass</i></summary>
@@ -12140,7 +12303,7 @@ rough_size=FALSE
 </details>
 <br />
 
-<a id="printed-16"></a>
+<a id="printed-18"></a>
 #### Printed
 <details>
 <summary><i>Printed: Ingest files for HiGlass</i></summary>
