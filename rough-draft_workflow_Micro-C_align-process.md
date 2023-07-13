@@ -18,30 +18,33 @@
         1. [Install HiGlass](#install-higlass)
             1. [Code](#code-2)
             1. [Printed](#printed-2)
+        1. [Install Clodius and bedops](#install-clodius-and-bedops)
+            1. [Code](#code-3)
+            1. [Printed](#printed-3)
 1. [Set up the Micro-C processing workflow](#set-up-the-micro-c-processing-workflow)
     1. [0. Get situated](#0-get-situated)
         1. [Get to work directory, initialize environment](#get-to-work-directory-initialize-environment)
-            1. [Code](#code-3)
+            1. [Code](#code-4)
                 1. [`grabnode`](#grabnode)
                 1. [Go to work directory, initialize environment](#go-to-work-directory-initialize-environment)
         1. [Initialize variables, create outdirectories](#initialize-variables-create-outdirectories)
             1. [Initialize "general" variables for workflow](#initialize-general-variables-for-workflow)
-                1. [Code](#code-4)
-            1. [Initialize "specific" variables for workflow](#initialize-specific-variables-for-workflow)
                 1. [Code](#code-5)
-            1. [If applicable, then run logic for running `pairtools merge`](#if-applicable-then-run-logic-for-running-pairtools-merge)
+            1. [Initialize "specific" variables for workflow](#initialize-specific-variables-for-workflow)
                 1. [Code](#code-6)
-            1. [Create outdirectories if not present](#create-outdirectories-if-not-present)
+            1. [If applicable, then run logic for running `pairtools merge`](#if-applicable-then-run-logic-for-running-pairtools-merge)
                 1. [Code](#code-7)
+            1. [Create outdirectories if not present](#create-outdirectories-if-not-present)
+                1. [Code](#code-8)
     1. [1. Trim fastq files](#1-trim-fastq-files)
-        1. [Code](#code-8)
-        1. [Printed](#printed-3)
-    1. [2. Align datasets](#2-align-datasets)
         1. [Code](#code-9)
         1. [Printed](#printed-4)
-    1. [3. Run `pairtools parse`](#3-run-pairtools-parse)
+    1. [2. Align datasets](#2-align-datasets)
         1. [Code](#code-10)
         1. [Printed](#printed-5)
+    1. [3. Run `pairtools parse`](#3-run-pairtools-parse)
+        1. [Code](#code-11)
+        1. [Printed](#printed-6)
             1. [Check the documentation](#check-the-documentation)
                 1. [`pairtools parse`](#pairtools-parse)
                 1. [`pairtools parse2`](#pairtools-parse2)
@@ -56,8 +59,8 @@
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-2)
                 1. [Testing the "`keep-MM`" call to `pairtools parse2`](#testing-the-keep-mm-call-to-pairtools-parse2-2)
     1. [4. Run `pairtools sort`](#4-run-pairtools-sort)
-        1. [Code](#code-11)
-        1. [Printed](#printed-6)
+        1. [Code](#code-12)
+        1. [Printed](#printed-7)
             1. [Check the documentation](#check-the-documentation-1)
             1. [Run `pairtools sort`](#run-pairtools-sort)
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-3)
@@ -66,8 +69,8 @@
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-4)
                 1. [Testing the "rDNA" call to `pairtools parse2`](#testing-the-rdna-call-to-pairtools-parse2-1)
     1. [5. Run `pairtools dedup` and `pairtools split`](#5-run-pairtools-dedup-and-pairtools-split)
-        1. [Code](#code-12)
-        1. [Printed](#printed-7)
+        1. [Code](#code-13)
+        1. [Printed](#printed-8)
             1. [Check the documentation](#check-the-documentation-2)
             1. [Run `pairtools dedup`](#run-pairtools-dedup)
                 1. ["Standard"](#standard)
@@ -82,53 +85,54 @@
                 1. ["Standard"](#standard-3)
                 1. ["rDNA"](#rdna-3)
     1. [X. Run `pairtools merge` if applicable](#x-run-pairtools-merge-if-applicable)
-        1. [Code](#code-13)
-        1. [Printed](#printed-8)
+        1. [Code](#code-14)
+        1. [Printed](#printed-9)
             1. [Check the documentation](#check-the-documentation-3)
             1. [Do a trial run of `pairtools merge`](#do-a-trial-run-of-pairtools-merge)
             1. [Check the contents of the merge files](#check-the-contents-of-the-merge-files)
     1. [X. Run `pairtools select` if applicable](#x-run-pairtools-select-if-applicable)
-        1. [Code](#code-14)
-        1. [Printed](#printed-9)
+        1. [Code](#code-15)
+        1. [Printed](#printed-10)
             1. [Check the documentation](#check-the-documentation-4)
             1. [`pairtools select`](#pairtools-select)
     1. [X. Run "`standard-rDNA-complete`" processing if applicable](#x-run-standard-rdna-complete-processing-if-applicable)
         1. [A. Exclude rDNA-associated *cis* and *trans* interactions from "`standard.nodups`" file](#a-exclude-rdna-associated-cis-and-trans-interactions-from-standardnodups-file)
-            1. [Code](#code-15)
-            1. [Printed](#printed-10)
-        1. [B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file](#b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file)
             1. [Code](#code-16)
             1. [Printed](#printed-11)
-        1. [C. Concatenate the "`standard.nodups`" and "`keep-MM.nodups`" files](#c-concatenate-the-standardnodups-and-keep-mmnodups-files)
+        1. [B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file](#b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file)
             1. [Code](#code-17)
             1. [Printed](#printed-12)
-    1. [6. Run `pairtools stats`](#6-run-pairtools-stats)
-        1. [Individual pairs files](#individual-pairs-files)
+        1. [C. Re-header and merge the "`standard.nodups`" and "`keep-MM.nodups`" files](#c-re-header-and-merge-the-standardnodups-and-keep-mmnodups-files)
             1. [Code](#code-18)
             1. [Printed](#printed-13)
+    1. [6. Run `pairtools stats`](#6-run-pairtools-stats)
+        1. [Individual pairs files](#individual-pairs-files)
+            1. [Code](#code-19)
+            1. [Printed](#printed-14)
                 1. [Check the documentation](#check-the-documentation-5)
                 1. [Do a trial run of `pairtools stats`](#do-a-trial-run-of-pairtools-stats)
                 1. [Check the contents of the stats files](#check-the-contents-of-the-stats-files)
         1. [Merged pairs files](#merged-pairs-files)
-            1. [Code](#code-19)
-            1. [Printed](#printed-14)
-    1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
-        1. [Individual pairs file](#individual-pairs-file)
             1. [Code](#code-20)
             1. [Printed](#printed-15)
-        1. [Merged pairs files](#merged-pairs-files-1)
+    1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
+        1. [Individual pairs file](#individual-pairs-file)
             1. [Code](#code-21)
             1. [Printed](#printed-16)
-    1. [8. Generate a multi-resolution cooler by coarsening](#8-generate-a-multi-resolution-cooler-by-coarsening)
-        1. [Cools from individual pairs files](#cools-from-individual-pairs-files)
+        1. [Merged pairs files](#merged-pairs-files-1)
             1. [Code](#code-22)
             1. [Printed](#printed-17)
-        1. [Cools from merged pairs files](#cools-from-merged-pairs-files)
+    1. [8. Generate a multi-resolution cooler by coarsening](#8-generate-a-multi-resolution-cooler-by-coarsening)
+        1. [Cools from individual pairs files](#cools-from-individual-pairs-files)
             1. [Code](#code-23)
             1. [Printed](#printed-18)
+        1. [Cools from merged pairs files](#cools-from-merged-pairs-files)
+            1. [Code](#code-24)
+            1. [Printed](#printed-19)
     1. [9. Ingest files for HiGlass](#9-ingest-files-for-higlass)
-        1. [Code](#code-24)
-        1. [Printed](#printed-19)
+        1. [Code](#code-25)
+            1. [TBD](#tbd)
+        1. [Printed](#printed-20)
 
 <!-- /MarkdownTOC -->
 </details>
@@ -2180,13 +2184,435 @@ log
 <br />
 <br />
 
+<a id="install-clodius-and-bedops"></a>
+#### Install [Clodius](https://github.com/higlass/clodius) and [bedops](http://bedops.readthedocs.io/)
+<a id="code-3"></a>
+##### Code
+<details>
+<summary><i>Code: Install Clodius and bedops</i></summary>
+
+```bash
+#!/bin/bash
+
+install_clodius=FALSE
+[[ "${install_clodius}" == TRUE ]] && pip install clodius
+
+install_bedops=TRUE
+[[ "${install_bedops}" == TRUE ]] && mamba install -c bioconda bedops
+```
+</details>
+<br />
+
+<a id="printed-3"></a>
+##### Printed
+<details>
+<summary><i>Printed: Install Clodius and bedops</i></summary>
+
+```txt
+❯ [[ "${install_clodius}" == TRUE ]] && pip install clodius
+Collecting clodius
+  Downloading clodius-0.20.1-py2.py3-none-any.whl (82 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 82.6/82.6 kB 1.8 MB/s eta 0:00:00
+Requirement already satisfied: click>=7 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from clodius) (8.1.3)
+Requirement already satisfied: cooler>0.9.0 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from clodius) (0.9.2)
+Requirement already satisfied: dask in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from clodius) (2023.6.0)
+Requirement already satisfied: h5py in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from clodius) (3.8.0)
+Collecting negspy (from clodius)
+  Downloading negspy-0.2.24.tar.gz (1.7 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 15.6 MB/s eta 0:00:00
+  Preparing metadata (setup.py) ... done
+Requirement already satisfied: numpy in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from clodius) (1.23.5)
+Requirement already satisfied: pandas>=1.0 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from clodius) (2.0.2)
+Collecting pybbi>=0.2.0 (from clodius)
+  Downloading pybbi-0.3.5-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.2 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.2/3.2 MB 16.7 MB/s eta 0:00:00
+Collecting pydantic (from clodius)
+  Downloading pydantic-2.0.2-py3-none-any.whl (359 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 359.1/359.1 kB 19.0 MB/s eta 0:00:00
+Requirement already satisfied: pyfaidx in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from clodius) (0.7.2.1)
+Requirement already satisfied: pysam in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from clodius) (0.21.0)
+Requirement already satisfied: requests in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from clodius) (2.31.0)
+Collecting slugid (from clodius)
+  Downloading slugid-2.0.0-py2.py3-none-any.whl (8.2 kB)
+Requirement already satisfied: sortedcontainers in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from clodius) (2.4.0)
+Collecting tqdm (from clodius)
+  Downloading tqdm-4.65.0-py3-none-any.whl (77 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 77.1/77.1 kB 2.9 MB/s eta 0:00:00
+Requirement already satisfied: scipy>=0.16 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from cooler>0.9.0->clodius) (1.10.1)
+Requirement already satisfied: cytoolz in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from cooler>0.9.0->clodius) (0.12.0)
+Requirement already satisfied: multiprocess in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from cooler>0.9.0->clodius) (0.70.14)
+Requirement already satisfied: asciitree in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from cooler>0.9.0->clodius) (0.3.3)
+Requirement already satisfied: pyyaml in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from cooler>0.9.0->clodius) (6.0)
+Requirement already satisfied: simplejson in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from cooler>0.9.0->clodius) (3.19.1)
+Requirement already satisfied: python-dateutil>=2.8.2 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from pandas>=1.0->clodius) (2.8.2)
+Requirement already satisfied: pytz>=2020.1 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from pandas>=1.0->clodius) (2023.3)
+Requirement already satisfied: tzdata>=2022.1 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from pandas>=1.0->clodius) (2023.3)
+Requirement already satisfied: cloudpickle>=1.5.0 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from dask->clodius) (2.2.1)
+Requirement already satisfied: fsspec>=2021.09.0 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from dask->clodius) (2023.6.0)
+Requirement already satisfied: packaging>=20.0 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from dask->clodius) (23.1)
+Requirement already satisfied: partd>=1.2.0 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from dask->clodius) (1.4.0)
+Requirement already satisfied: toolz>=0.10.0 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from dask->clodius) (0.12.0)
+Requirement already satisfied: importlib-metadata>=4.13.0 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from dask->clodius) (6.6.0)
+Collecting annotated-types>=0.4.0 (from pydantic->clodius)
+  Downloading annotated_types-0.5.0-py3-none-any.whl (11 kB)
+Collecting pydantic-core==2.1.2 (from pydantic->clodius)
+  Downloading pydantic_core-2.1.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.8 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 59.2 MB/s eta 0:00:00
+Requirement already satisfied: typing-extensions>=4.6.1 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from pydantic->clodius) (4.6.3)
+Requirement already satisfied: six in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from pyfaidx->clodius) (1.16.0)
+Requirement already satisfied: setuptools in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from pyfaidx->clodius) (67.7.2)
+Collecting cython (from pysam->clodius)
+  Downloading Cython-0.29.36-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl (1.9 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.9/1.9 MB 48.9 MB/s eta 0:00:00
+Requirement already satisfied: charset-normalizer<4,>=2 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from requests->clodius) (3.1.0)
+Requirement already satisfied: idna<4,>=2.5 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from requests->clodius) (3.4)
+Requirement already satisfied: urllib3<3,>=1.21.1 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from requests->clodius) (2.0.3)
+Requirement already satisfied: certifi>=2017.4.17 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from requests->clodius) (2023.5.7)
+Requirement already satisfied: zipp>=0.5 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from importlib-metadata>=4.13.0->dask->clodius) (3.15.0)
+Requirement already satisfied: locket in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from partd>=1.2.0->dask->clodius) (1.0.0)
+Requirement already satisfied: dill>=0.3.6 in /home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages (from multiprocess->cooler>0.9.0->clodius) (0.3.6)
+Building wheels for collected packages: negspy
+  Building wheel for negspy (setup.py) ... done
+  Created wheel for negspy: filename=negspy-0.2.24-py3-none-any.whl size=1725345 sha256=d08e093a356c6f23d8a70a2ab3f65a67348126504cba3b02f47e0777db137578
+  Stored in directory: /home/kalavatt/.cache/pip/wheels/4c/01/07/77d7b941e82a624da932e7745bb9a1265418559a23b7bec627
+Successfully built negspy
+Installing collected packages: slugid, negspy, tqdm, pydantic-core, pybbi, cython, annotated-types, pydantic, clodius
+Successfully installed annotated-types-0.5.0 clodius-0.20.1 cython-0.29.36 negspy-0.2.24 pybbi-0.3.5 pydantic-2.0.2 pydantic-core-2.1.2 slugid-2.0.0 tqdm-4.65.0
+
+
+❯ [[ "${install_bedops}" == TRUE ]] && mamba install -c bioconda bedops
+
+                  __    __    __    __
+                 /  \  /  \  /  \  /  \
+                /    \/    \/    \/    \
+███████████████/  /██/  /██/  /██/  /████████████████████████
+              /  / \   / \   / \   / \  \____
+             /  /   \_/   \_/   \_/   \    o \__,
+            / _/                       \_____/  `
+            |/
+        ███╗   ███╗ █████╗ ███╗   ███╗██████╗  █████╗
+        ████╗ ████║██╔══██╗████╗ ████║██╔══██╗██╔══██╗
+        ██╔████╔██║███████║██╔████╔██║██████╔╝███████║
+        ██║╚██╔╝██║██╔══██║██║╚██╔╝██║██╔══██╗██╔══██║
+        ██║ ╚═╝ ██║██║  ██║██║ ╚═╝ ██║██████╔╝██║  ██║
+        ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝
+
+        mamba (1.3.1) supported by @QuantStack
+
+        GitHub:  https://github.com/mamba-org/mamba
+        Twitter: https://twitter.com/QuantStack
+
+█████████████████████████████████████████████████████████████
+
+
+Looking for: ['bedops']
+
+bioconda/noarch                                      4.5MB @   4.1MB/s  1.3s
+pkgs/main/linux-64                                   5.9MB @   4.3MB/s  1.6s
+pkgs/main/noarch                                   851.4kB @ 510.3kB/s  0.3s
+pkgs/r/noarch                                                 No change
+bioconda/linux-64                                    5.1MB @   2.9MB/s  1.9s
+pkgs/r/linux-64                                               No change
+conda-forge/noarch                                  13.3MB @   3.9MB/s  3.7s
+conda-forge/linux-64                                33.0MB @   4.2MB/s  8.6s
+
+Pinned packages:
+  - python 3.10.*
+
+
+Transaction
+
+  Prefix: /home/kalavatt/miniconda3/envs/pairtools_env
+
+  Updating specs:
+
+   - bedops
+   - ca-certificates
+   - certifi
+   - openssl
+
+
+  Package   Version  Build       Channel               Size
+─────────────────────────────────────────────────────────────
+  Install:
+─────────────────────────────────────────────────────────────
+
+  + bedops   2.4.41  h4ac6f70_1  bioconda/linux-64     11MB
+
+  Summary:
+
+  Install: 1 packages
+
+  Total download: 11MB
+
+─────────────────────────────────────────────────────────────
+
+
+Confirm changes: [Y/n] Y
+bedops
+
+Downloading and Extracting Packages
+
+Preparing transaction: done
+Verifying transaction: done
+Executing transaction: done
+```
+
+Local (WorkMac&mdash;not MacBook) installation in `gff3_env`
+```txt
+❯ pip install clodius
+Collecting clodius
+  Downloading clodius-0.20.1-py2.py3-none-any.whl (82 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 82.6/82.6 kB 2.4 MB/s eta 0:00:00
+Collecting h5py
+  Downloading h5py-3.9.0-cp310-cp310-macosx_10_9_x86_64.whl (3.2 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.2/3.2 MB 28.3 MB/s eta 0:00:00
+Collecting dask
+  Downloading dask-2023.7.0-py3-none-any.whl (1.2 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 65.2 MB/s eta 0:00:00
+Collecting click>=7
+  Downloading click-8.1.5-py3-none-any.whl (98 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 98.1/98.1 kB 12.6 MB/s eta 0:00:00
+Requirement already satisfied: numpy in /Users/kalavatt/mambaforge/envs/gff3_env/lib/python3.10/site-packages (from clodius) (1.24.2)
+Collecting pydantic
+  Downloading pydantic-2.0.2-py3-none-any.whl (359 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 359.1/359.1 kB 31.9 MB/s eta 0:00:00
+Collecting negspy
+  Downloading negspy-0.2.24.tar.gz (1.7 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 72.8 MB/s eta 0:00:00
+  Preparing metadata (setup.py) ... done
+Collecting cooler>0.9.0
+  Downloading cooler-0.9.2-py2.py3-none-any.whl (103 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 103.9/103.9 kB 14.7 MB/s eta 0:00:00
+Collecting pybbi>=0.2.0
+  Downloading pybbi-0.3.5-cp310-cp310-macosx_10_9_x86_64.whl (2.5 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.5/2.5 MB 3.7 MB/s eta 0:00:00
+Collecting slugid
+  Downloading slugid-2.0.0-py2.py3-none-any.whl (8.2 kB)
+Collecting sortedcontainers
+  Downloading sortedcontainers-2.4.0-py2.py3-none-any.whl (29 kB)
+Requirement already satisfied: pysam in /Users/kalavatt/mambaforge/envs/gff3_env/lib/python3.10/site-packages (from clodius) (0.20.0)
+Collecting pandas>=1.0
+  Downloading pandas-2.0.3-cp310-cp310-macosx_10_9_x86_64.whl (11.8 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 11.8/11.8 MB 73.1 MB/s eta 0:00:00
+Collecting requests
+  Downloading requests-2.31.0-py3-none-any.whl (62 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 62.6/62.6 kB 7.4 MB/s eta 0:00:00
+Collecting tqdm
+  Downloading tqdm-4.65.0-py3-none-any.whl (77 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 77.1/77.1 kB 8.5 MB/s eta 0:00:00
+Collecting pyfaidx
+  Downloading pyfaidx-0.7.2.1-py3-none-any.whl (28 kB)
+Collecting scipy>=0.16
+  Downloading scipy-1.11.1-cp310-cp310-macosx_10_9_x86_64.whl (37.2 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 37.2/37.2 MB 68.1 MB/s eta 0:00:00
+Collecting multiprocess
+  Downloading multiprocess-0.70.14-py310-none-any.whl (134 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.3/134.3 kB 15.6 MB/s eta 0:00:00
+Collecting asciitree
+  Downloading asciitree-0.3.3.tar.gz (4.0 kB)
+  Preparing metadata (setup.py) ... done
+Requirement already satisfied: pyyaml in /Users/kalavatt/mambaforge/envs/gff3_env/lib/python3.10/site-packages (from cooler>0.9.0->clodius) (6.0)
+Collecting simplejson
+  Downloading simplejson-3.19.1-cp310-cp310-macosx_10_9_x86_64.whl (76 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 76.4/76.4 kB 8.7 MB/s eta 0:00:00
+Collecting cytoolz
+  Downloading cytoolz-0.12.1-cp310-cp310-macosx_10_9_x86_64.whl (409 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 409.9/409.9 kB 41.7 MB/s eta 0:00:00
+Collecting pytz>=2020.1
+  Downloading pytz-2023.3-py2.py3-none-any.whl (502 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 502.3/502.3 kB 46.0 MB/s eta 0:00:00
+Collecting tzdata>=2022.1
+  Downloading tzdata-2023.3-py2.py3-none-any.whl (341 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 341.8/341.8 kB 38.7 MB/s eta 0:00:00
+Requirement already satisfied: python-dateutil>=2.8.2 in /Users/kalavatt/mambaforge/envs/gff3_env/lib/python3.10/site-packages (from pandas>=1.0->clodius) (2.8.2)
+Requirement already satisfied: importlib-metadata>=4.13.0 in /Users/kalavatt/mambaforge/envs/gff3_env/lib/python3.10/site-packages (from dask->clodius) (6.3.0)
+Collecting toolz>=0.10.0
+  Downloading toolz-0.12.0-py3-none-any.whl (55 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 55.8/55.8 kB 6.5 MB/s eta 0:00:00
+Collecting partd>=1.2.0
+  Downloading partd-1.4.0-py3-none-any.whl (18 kB)
+Collecting cloudpickle>=1.5.0
+  Downloading cloudpickle-2.2.1-py3-none-any.whl (25 kB)
+Collecting fsspec>=2021.09.0
+  Downloading fsspec-2023.6.0-py3-none-any.whl (163 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 163.8/163.8 kB 22.4 MB/s eta 0:00:00
+Requirement already satisfied: packaging>=20.0 in /Users/kalavatt/mambaforge/envs/gff3_env/lib/python3.10/site-packages (from dask->clodius) (23.1)
+Collecting pydantic-core==2.1.2
+  Downloading pydantic_core-2.1.2-cp310-cp310-macosx_10_7_x86_64.whl (1.5 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.5/1.5 MB 65.2 MB/s eta 0:00:00
+Collecting annotated-types>=0.4.0
+  Downloading annotated_types-0.5.0-py3-none-any.whl (11 kB)
+Collecting typing-extensions>=4.6.1
+  Downloading typing_extensions-4.7.1-py3-none-any.whl (33 kB)
+Requirement already satisfied: setuptools in /Users/kalavatt/mambaforge/envs/gff3_env/lib/python3.10/site-packages (from pyfaidx->clodius) (67.6.1)
+Requirement already satisfied: six in /Users/kalavatt/mambaforge/envs/gff3_env/lib/python3.10/site-packages (from pyfaidx->clodius) (1.16.0)
+Requirement already satisfied: certifi>=2017.4.17 in /Users/kalavatt/mambaforge/envs/gff3_env/lib/python3.10/site-packages (from requests->clodius) (2023.5.7)
+Collecting idna<4,>=2.5
+  Downloading idna-3.4-py3-none-any.whl (61 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 61.5/61.5 kB 7.1 MB/s eta 0:00:00
+Collecting urllib3<3,>=1.21.1
+  Downloading urllib3-2.0.3-py3-none-any.whl (123 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 123.6/123.6 kB 14.9 MB/s eta 0:00:00
+Collecting charset-normalizer<4,>=2
+  Downloading charset_normalizer-3.2.0-cp310-cp310-macosx_10_9_x86_64.whl (126 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 126.4/126.4 kB 12.7 MB/s eta 0:00:00
+Requirement already satisfied: zipp>=0.5 in /Users/kalavatt/mambaforge/envs/gff3_env/lib/python3.10/site-packages (from importlib-metadata>=4.13.0->dask->clodius) (3.15.0)
+Collecting locket
+  Downloading locket-1.0.0-py2.py3-none-any.whl (4.4 kB)
+Collecting dill>=0.3.6
+  Downloading dill-0.3.6-py3-none-any.whl (110 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 110.5/110.5 kB 12.6 MB/s eta 0:00:00
+Building wheels for collected packages: negspy, asciitree
+  Building wheel for negspy (setup.py) ... done
+  Created wheel for negspy: filename=negspy-0.2.24-py3-none-any.whl size=1725345 sha256=13b048a349cdb6763e6e3dcb3a866c4ba292dbd0a9659b71610df00ee31fa36b
+  Stored in directory: /Users/kalavatt/Library/Caches/pip/wheels/4c/01/07/77d7b941e82a624da932e7745bb9a1265418559a23b7bec627
+  Building wheel for asciitree (setup.py) ... done
+  Created wheel for asciitree: filename=asciitree-0.3.3-py3-none-any.whl size=5034 sha256=d496e403f0686077c3d61c8e94f4ddf21b425713ec0113881800002f0ae93dc2
+  Stored in directory: /Users/kalavatt/Library/Caches/pip/wheels/7f/4e/be/1171b40f43b918087657ec57cf3b81fa1a2e027d8755baa184
+Successfully built negspy asciitree
+Installing collected packages: sortedcontainers, slugid, pytz, negspy, asciitree, urllib3, tzdata, typing-extensions, tqdm, toolz, simplejson, scipy, pyfaidx, pybbi, locket, idna, h5py, fsspec, dill, cloudpickle, click, charset-normalizer, annotated-types, requests, pydantic-core, partd, pandas, multiprocess, cytoolz, pydantic, dask, cooler, clodius
+Successfully installed annotated-types-0.5.0 asciitree-0.3.3 charset-normalizer-3.2.0 click-8.1.5 clodius-0.20.1 cloudpickle-2.2.1 cooler-0.9.2 cytoolz-0.12.1 dask-2023.7.0 dill-0.3.6 fsspec-2023.6.0 h5py-3.9.0 idna-3.4 locket-1.0.0 multiprocess-0.70.14 negspy-0.2.24 pandas-2.0.3 partd-1.4.0 pybbi-0.3.5 pydantic-2.0.2 pydantic-core-2.1.2 pyfaidx-0.7.2.1 pytz-2023.3 requests-2.31.0 scipy-1.11.1 simplejson-3.19.1 slugid-2.0.0 sortedcontainers-2.4.0 toolz-0.12.0 tqdm-4.65.0 typing-extensions-4.7.1 tzdata-2023.3 urllib3-2.0.3
+
+
+❯ mamba install -c bioconda bedops
+
+                  __    __    __    __
+                 /  \  /  \  /  \  /  \
+                /    \/    \/    \/    \
+███████████████/  /██/  /██/  /██/  /████████████████████████
+              /  / \   / \   / \   / \  \____
+             /  /   \_/   \_/   \_/   \    o \__,
+            / _/                       \_____/  `
+            |/
+        ███╗   ███╗ █████╗ ███╗   ███╗██████╗  █████╗
+        ████╗ ████║██╔══██╗████╗ ████║██╔══██╗██╔══██╗
+        ██╔████╔██║███████║██╔████╔██║██████╔╝███████║
+        ██║╚██╔╝██║██╔══██║██║╚██╔╝██║██╔══██╗██╔══██║
+        ██║ ╚═╝ ██║██║  ██║██║ ╚═╝ ██║██████╔╝██║  ██║
+        ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝
+
+        mamba (1.4.1) supported by @QuantStack
+
+        GitHub:  https://github.com/mamba-org/mamba
+        Twitter: https://twitter.com/QuantStack
+
+█████████████████████████████████████████████████████████████
+
+
+Looking for: ['bedops']
+
+bioconda/osx-64                                      4.2MB @   4.5MB/s  1.0s
+bioconda/noarch                                      4.5MB @   4.3MB/s  1.2s
+pkgs/main/osx-64                                     5.6MB @   4.7MB/s  1.3s
+pkgs/r/osx-64                                                 No change
+pkgs/r/noarch                                                 No change
+pkgs/main/noarch                                   851.4kB @ 620.4kB/s  0.5s
+conda-forge/noarch                                  13.3MB @   4.6MB/s  3.2s
+conda-forge/osx-64                                  29.7MB @   4.6MB/s  7.2s
+
+Pinned packages:
+  - python 3.10.*
+
+
+Transaction
+
+  Prefix: /Users/kalavatt/mambaforge/envs/gff3_env
+
+  Updating specs:
+
+   - bedops
+   - ca-certificates
+   - certifi
+   - openssl
+
+
+  Package                     Version  Build               Channel                  Size
+──────────────────────────────────────────────────────────────────────────────────────────
+  Install:
+──────────────────────────────────────────────────────────────────────────────────────────
+
+  + bedops                     2.4.41  h85dcccf_1          bioconda/osx-64          13MB
+  + htslib                       1.17  h567f53e_1          bioconda/osx-64           2MB
+  + samtools                     1.17  h25dfcfb_1          bioconda/osx-64         463kB
+
+  Change:
+──────────────────────────────────────────────────────────────────────────────────────────
+
+  - bioconductor-rtracklayer   1.58.0  r42h6e925bd_1       bioconda
+  + bioconductor-rtracklayer   1.58.0  r42h4bb2b61_2       bioconda/osx-64           6MB
+  - krb5                       1.20.1  h0165f36_0          conda-forge
+  + krb5                       1.20.1  h049b76e_0          conda-forge/osx-64     Cached
+  - sigtool                     0.1.3  h57ddcff_0          conda-forge
+  + sigtool                     0.1.3  h88f4db0_0          conda-forge/osx-64     Cached
+
+  Upgrade:
+──────────────────────────────────────────────────────────────────────────────────────────
+
+  - curl                       7.87.0  haf73cf8_0          conda-forge
+  + curl                       7.88.1  h6df9250_1          conda-forge/osx-64      143kB
+  - libcurl                    7.87.0  haf73cf8_0          conda-forge
+  + libcurl                    7.88.1  h6df9250_1          conda-forge/osx-64      344kB
+  - libnghttp2                 1.51.0  h0dd9d14_0          conda-forge
+  + libnghttp2                 1.52.0  he2ab024_0          conda-forge/osx-64     Cached
+  - libssh2                    1.10.0  h7535e13_3          conda-forge
+  + libssh2                    1.11.0  hd019ec5_0          conda-forge/osx-64     Cached
+  - openssl                    1.1.1t  hfd90126_0          conda-forge
+  + openssl                     3.1.1  h8a1eda9_1          conda-forge/osx-64     Cached
+  - python                     3.10.0  h1248fe1_3_cpython  conda-forge
+  + python                    3.10.10  he7542f4_0_cpython  conda-forge/osx-64       12MB
+  - r-openssl                   2.0.5  r42h13d56fc_0       conda-forge
+  + r-openssl                   2.0.6  r42hc61a7e2_1       conda-forge/osx-64      633kB
+
+  Downgrade:
+──────────────────────────────────────────────────────────────────────────────────────────
+
+  - mysql-connector-c          6.1.11  h0f02589_1007       conda-forge
+  + mysql-connector-c           6.1.6  2                   bioconda/osx-64           7MB
+  - ucsc-liftover                 377  h516baf0_2          bioconda
+  + ucsc-liftover                 366  h1341992_0          bioconda/osx-64           2MB
+
+  Summary:
+
+  Install: 3 packages
+  Change: 3 packages
+  Upgrade: 7 packages
+  Downgrade: 2 packages
+
+  Total download: 43MB
+
+──────────────────────────────────────────────────────────────────────────────────────────
+
+
+Confirm changes: [Y/n] Y
+libcurl                                            344.2kB @   6.1MB/s  0.1s
+curl                                               143.3kB @   2.3MB/s  0.1s
+samtools                                           462.8kB @   4.5MB/s  0.0s
+r-openssl                                          633.5kB @   6.0MB/s  0.1s
+htslib                                               2.5MB @  15.9MB/s  0.1s
+ucsc-liftover                                        2.2MB @   4.2MB/s  0.5s
+bioconductor-rtracklayer                             5.5MB @  10.1MB/s  0.4s
+python                                              12.0MB @  21.7MB/s  0.6s
+mysql-connector-c                                    6.9MB @  11.6MB/s  0.6s
+bedops                                              12.9MB @  16.7MB/s  0.7s
+
+Downloading and Extracting Packages
+
+Preparing transaction: done
+Verifying transaction: done
+Executing transaction: done
+```
+</details>
+<br />
+
+
 <a id="set-up-the-micro-c-processing-workflow"></a>
 ## Set up the Micro-C processing workflow
 <a id="0-get-situated"></a>
 ### 0. Get situated
 <a id="get-to-work-directory-initialize-environment"></a>
 #### Get to work directory, initialize environment
-<a id="code-3"></a>
+<a id="code-4"></a>
 ##### Code
 <details>
 <summary><i>Code: Get to work directory, initialize environment</i></summary>
@@ -2218,7 +2644,7 @@ source activate pairtools_env
 #### Initialize variables, create outdirectories
 <a id="initialize-general-variables-for-workflow"></a>
 ##### Initialize "general" variables for workflow
-<a id="code-4"></a>
+<a id="code-5"></a>
 ###### Code
 <details>
 <summary><i>Code: Initialize "general" variables for workflow</i></summary>
@@ -2316,7 +2742,7 @@ print_test=TRUE  #ARGUMENT
 
 <a id="initialize-specific-variables-for-workflow"></a>
 ##### Initialize "specific" variables for workflow
-<a id="code-5"></a>
+<a id="code-6"></a>
 ###### Code
 <details>
 <summary><i>Code: Initialize "specific" variables for workflow</i></summary>
@@ -2495,7 +2921,7 @@ print_test=TRUE  #ARGUMENT
 
 <a id="if-applicable-then-run-logic-for-running-pairtools-merge"></a>
 ##### If applicable, then run logic for running `pairtools merge`
-<a id="code-6"></a>
+<a id="code-7"></a>
 ###### Code
 <details>
 <summary><i>Code: If applicable, then run logic for running pairtools merge</i></summary>
@@ -2605,7 +3031,7 @@ print_test=TRUE  #ARGUMENT
 
 <a id="create-outdirectories-if-not-present"></a>
 ##### Create outdirectories if not present
-<a id="code-7"></a>
+<a id="code-8"></a>
 ###### Code
 <details>
 <summary><i>Code: Create outdirectories if not present</i></summary>
@@ -2627,7 +3053,7 @@ print_test=TRUE  #ARGUMENT
 
 <a id="1-trim-fastq-files"></a>
 ### 1. Trim fastq files
-<a id="code-8"></a>
+<a id="code-9"></a>
 #### Code
 <details>
 <summary><i>Code: 1. Trim fastq files</i></summary>
@@ -2676,7 +3102,7 @@ run=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-3"></a>
+<a id="printed-4"></a>
 #### Printed
 <details>
 <summary><i>Printed: 1. Trim fastq files</i></summary>
@@ -2734,184 +3160,7 @@ pigz 2.6
 [ Info: Cycle 1: read 388237/388237 pairs; wrote 388237/388237 pairs; (copied 0/0 reads)
 [ Info: Cycle 2: read 385683/773920 pairs; wrote 385683/773920 pairs; (copied 0/0 reads)
 [ Info: Cycle 3: read 382096/1156016 pairs; wrote 382096/1156016 pairs; (copied 0/0 reads)
-[ Info: Cycle 4: read 377016/1533032 pairs; wrote 377016/1533032 pairs; (copied 0/0 reads)
-[ Info: Cycle 5: read 377016/1910048 pairs; wrote 377016/1910048 pairs; (copied 0/0 reads)
-[ Info: Cycle 6: read 377016/2287064 pairs; wrote 377016/2287064 pairs; (copied 0/0 reads)
-[ Info: Cycle 7: read 377016/2664080 pairs; wrote 377016/2664080 pairs; (copied 0/0 reads)
-[ Info: Cycle 8: read 377016/3041096 pairs; wrote 377016/3041096 pairs; (copied 0/0 reads)
-[ Info: Cycle 9: read 377016/3418112 pairs; wrote 377016/3418112 pairs; (copied 0/0 reads)
-[ Info: Cycle 10: read 377016/3795128 pairs; wrote 377016/3795128 pairs; (copied 0/0 reads)
-[ Info: Cycle 11: read 377016/4172144 pairs; wrote 377016/4172144 pairs; (copied 0/0 reads)
-[ Info: Cycle 12: read 377016/4549160 pairs; wrote 377016/4549160 pairs; (copied 0/0 reads)
-[ Info: Cycle 13: read 377016/4926176 pairs; wrote 377016/4926176 pairs; (copied 0/0 reads)
-[ Info: Cycle 14: read 377016/5303192 pairs; wrote 377016/5303192 pairs; (copied 0/0 reads)
-[ Info: Cycle 15: read 377016/5680208 pairs; wrote 377016/5680208 pairs; (copied 0/0 reads)
-[ Info: Cycle 16: read 377016/6057224 pairs; wrote 377016/6057224 pairs; (copied 0/0 reads)
-[ Info: Cycle 17: read 377016/6434240 pairs; wrote 377016/6434240 pairs; (copied 0/0 reads)
-[ Info: Cycle 18: read 377016/6811256 pairs; wrote 377016/6811256 pairs; (copied 0/0 reads)
-[ Info: Cycle 19: read 377016/7188272 pairs; wrote 377016/7188272 pairs; (copied 0/0 reads)
-[ Info: Cycle 20: read 377016/7565288 pairs; wrote 377016/7565288 pairs; (copied 0/0 reads)
-[ Info: Cycle 21: read 377016/7942304 pairs; wrote 377016/7942304 pairs; (copied 0/0 reads)
-[ Info: Cycle 22: read 377016/8319320 pairs; wrote 377016/8319320 pairs; (copied 0/0 reads)
-[ Info: Cycle 23: read 377016/8696336 pairs; wrote 377016/8696336 pairs; (copied 0/0 reads)
-[ Info: Cycle 24: read 377016/9073352 pairs; wrote 377016/9073352 pairs; (copied 0/0 reads)
-[ Info: Cycle 25: read 377016/9450368 pairs; wrote 377016/9450368 pairs; (copied 0/0 reads)
-[ Info: Cycle 26: read 377016/9827384 pairs; wrote 377016/9827384 pairs; (copied 0/0 reads)
-[ Info: Cycle 27: read 372523/10199907 pairs; wrote 372523/10199907 pairs; (copied 0/0 reads)
-[ Info: Cycle 28: read 368730/10568637 pairs; wrote 368730/10568637 pairs; (copied 0/0 reads)
-[ Info: Cycle 29: read 368730/10937367 pairs; wrote 368730/10937367 pairs; (copied 0/0 reads)
-[ Info: Cycle 30: read 368730/11306097 pairs; wrote 368730/11306097 pairs; (copied 0/0 reads)
-[ Info: Cycle 31: read 368730/11674827 pairs; wrote 368730/11674827 pairs; (copied 0/0 reads)
-[ Info: Cycle 32: read 368730/12043557 pairs; wrote 368730/12043557 pairs; (copied 0/0 reads)
-[ Info: Cycle 33: read 368730/12412287 pairs; wrote 368730/12412287 pairs; (copied 0/0 reads)
-[ Info: Cycle 34: read 368730/12781017 pairs; wrote 368730/12781017 pairs; (copied 0/0 reads)
-[ Info: Cycle 35: read 368730/13149747 pairs; wrote 368730/13149747 pairs; (copied 0/0 reads)
-[ Info: Cycle 36: read 368730/13518477 pairs; wrote 368730/13518477 pairs; (copied 0/0 reads)
-[ Info: Cycle 37: read 368730/13887207 pairs; wrote 368730/13887207 pairs; (copied 0/0 reads)
-[ Info: Cycle 38: read 368730/14255937 pairs; wrote 368730/14255937 pairs; (copied 0/0 reads)
-[ Info: Cycle 39: read 368730/14624667 pairs; wrote 368730/14624667 pairs; (copied 0/0 reads)
-[ Info: Cycle 40: read 368730/14993397 pairs; wrote 368730/14993397 pairs; (copied 0/0 reads)
-[ Info: Cycle 41: read 368730/15362127 pairs; wrote 368730/15362127 pairs; (copied 0/0 reads)
-[ Info: Cycle 42: read 368730/15730857 pairs; wrote 368730/15730857 pairs; (copied 0/0 reads)
-[ Info: Cycle 43: read 368730/16099587 pairs; wrote 368730/16099587 pairs; (copied 0/0 reads)
-[ Info: Cycle 44: read 368730/16468317 pairs; wrote 368730/16468317 pairs; (copied 0/0 reads)
-[ Info: Cycle 45: read 368730/16837047 pairs; wrote 368730/16837047 pairs; (copied 0/0 reads)
-[ Info: Cycle 46: read 368730/17205777 pairs; wrote 368730/17205777 pairs; (copied 0/0 reads)
-[ Info: Cycle 47: read 368730/17574507 pairs; wrote 368730/17574507 pairs; (copied 0/0 reads)
-[ Info: Cycle 48: read 368730/17943237 pairs; wrote 368730/17943237 pairs; (copied 0/0 reads)
-[ Info: Cycle 49: read 368730/18311967 pairs; wrote 368730/18311967 pairs; (copied 0/0 reads)
-[ Info: Cycle 50: read 368730/18680697 pairs; wrote 368730/18680697 pairs; (copied 0/0 reads)
-[ Info: Cycle 51: read 368730/19049427 pairs; wrote 368730/19049427 pairs; (copied 0/0 reads)
-[ Info: Cycle 52: read 368730/19418157 pairs; wrote 368730/19418157 pairs; (copied 0/0 reads)
-[ Info: Cycle 53: read 368730/19786887 pairs; wrote 368730/19786887 pairs; (copied 0/0 reads)
-[ Info: Cycle 54: read 368730/20155617 pairs; wrote 368730/20155617 pairs; (copied 0/0 reads)
-[ Info: Cycle 55: read 368730/20524347 pairs; wrote 368730/20524347 pairs; (copied 0/0 reads)
-[ Info: Cycle 56: read 368730/20893077 pairs; wrote 368730/20893077 pairs; (copied 0/0 reads)
-[ Info: Cycle 57: read 368730/21261807 pairs; wrote 368730/21261807 pairs; (copied 0/0 reads)
-[ Info: Cycle 58: read 368730/21630537 pairs; wrote 368730/21630537 pairs; (copied 0/0 reads)
-[ Info: Cycle 59: read 368730/21999267 pairs; wrote 368730/21999267 pairs; (copied 0/0 reads)
-[ Info: Cycle 60: read 368730/22367997 pairs; wrote 368730/22367997 pairs; (copied 0/0 reads)
-[ Info: Cycle 61: read 368730/22736727 pairs; wrote 368730/22736727 pairs; (copied 0/0 reads)
-[ Info: Cycle 62: read 368730/23105457 pairs; wrote 368730/23105457 pairs; (copied 0/0 reads)
-[ Info: Cycle 63: read 368730/23474187 pairs; wrote 368730/23474187 pairs; (copied 0/0 reads)
-[ Info: Cycle 64: read 368730/23842917 pairs; wrote 368730/23842917 pairs; (copied 0/0 reads)
-[ Info: Cycle 65: read 368730/24211647 pairs; wrote 368730/24211647 pairs; (copied 0/0 reads)
-[ Info: Cycle 66: read 368730/24580377 pairs; wrote 368730/24580377 pairs; (copied 0/0 reads)
-[ Info: Cycle 67: read 368730/24949107 pairs; wrote 368730/24949107 pairs; (copied 0/0 reads)
-[ Info: Cycle 68: read 368730/25317837 pairs; wrote 368730/25317837 pairs; (copied 0/0 reads)
-[ Info: Cycle 69: read 368730/25686567 pairs; wrote 368730/25686567 pairs; (copied 0/0 reads)
-[ Info: Cycle 70: read 368730/26055297 pairs; wrote 368730/26055297 pairs; (copied 0/0 reads)
-[ Info: Cycle 71: read 368730/26424027 pairs; wrote 368730/26424027 pairs; (copied 0/0 reads)
-[ Info: Cycle 72: read 368730/26792757 pairs; wrote 368730/26792757 pairs; (copied 0/0 reads)
-[ Info: Cycle 73: read 368730/27161487 pairs; wrote 368730/27161487 pairs; (copied 0/0 reads)
-[ Info: Cycle 74: read 368730/27530217 pairs; wrote 368730/27530217 pairs; (copied 0/0 reads)
-[ Info: Cycle 75: read 368730/27898947 pairs; wrote 368730/27898947 pairs; (copied 0/0 reads)
-[ Info: Cycle 76: read 368730/28267677 pairs; wrote 368730/28267677 pairs; (copied 0/0 reads)
-[ Info: Cycle 77: read 368730/28636407 pairs; wrote 368730/28636407 pairs; (copied 0/0 reads)
-[ Info: Cycle 78: read 368730/29005137 pairs; wrote 368730/29005137 pairs; (copied 0/0 reads)
-[ Info: Cycle 79: read 368730/29373867 pairs; wrote 368730/29373867 pairs; (copied 0/0 reads)
-[ Info: Cycle 80: read 368730/29742597 pairs; wrote 368730/29742597 pairs; (copied 0/0 reads)
-[ Info: Cycle 81: read 368730/30111327 pairs; wrote 368730/30111327 pairs; (copied 0/0 reads)
-[ Info: Cycle 82: read 368730/30480057 pairs; wrote 368730/30480057 pairs; (copied 0/0 reads)
-[ Info: Cycle 83: read 368730/30848787 pairs; wrote 368730/30848787 pairs; (copied 0/0 reads)
-[ Info: Cycle 84: read 368730/31217517 pairs; wrote 368730/31217517 pairs; (copied 0/0 reads)
-[ Info: Cycle 85: read 368730/31586247 pairs; wrote 368730/31586247 pairs; (copied 0/0 reads)
-[ Info: Cycle 86: read 368730/31954977 pairs; wrote 368730/31954977 pairs; (copied 0/0 reads)
-[ Info: Cycle 87: read 368730/32323707 pairs; wrote 368730/32323707 pairs; (copied 0/0 reads)
-[ Info: Cycle 88: read 368730/32692437 pairs; wrote 368730/32692437 pairs; (copied 0/0 reads)
-[ Info: Cycle 89: read 368730/33061167 pairs; wrote 368730/33061167 pairs; (copied 0/0 reads)
-[ Info: Cycle 90: read 368730/33429897 pairs; wrote 368730/33429897 pairs; (copied 0/0 reads)
-[ Info: Cycle 91: read 368730/33798627 pairs; wrote 368730/33798627 pairs; (copied 0/0 reads)
-[ Info: Cycle 92: read 368730/34167357 pairs; wrote 368730/34167357 pairs; (copied 0/0 reads)
-[ Info: Cycle 93: read 368730/34536087 pairs; wrote 368730/34536087 pairs; (copied 0/0 reads)
-[ Info: Cycle 94: read 368730/34904817 pairs; wrote 368730/34904817 pairs; (copied 0/0 reads)
-[ Info: Cycle 95: read 368730/35273547 pairs; wrote 368730/35273547 pairs; (copied 0/0 reads)
-[ Info: Cycle 96: read 368730/35642277 pairs; wrote 368730/35642277 pairs; (copied 0/0 reads)
-[ Info: Cycle 97: read 368730/36011007 pairs; wrote 368730/36011007 pairs; (copied 0/0 reads)
-[ Info: Cycle 98: read 368730/36379737 pairs; wrote 368730/36379737 pairs; (copied 0/0 reads)
-[ Info: Cycle 99: read 368730/36748467 pairs; wrote 368730/36748467 pairs; (copied 0/0 reads)
-[ Info: Cycle 100: read 368730/37117197 pairs; wrote 368730/37117197 pairs; (copied 0/0 reads)
-[ Info: Cycle 101: read 368730/37485927 pairs; wrote 368730/37485927 pairs; (copied 0/0 reads)
-[ Info: Cycle 102: read 368730/37854657 pairs; wrote 368730/37854657 pairs; (copied 0/0 reads)
-[ Info: Cycle 103: read 368730/38223387 pairs; wrote 368730/38223387 pairs; (copied 0/0 reads)
-[ Info: Cycle 104: read 368730/38592117 pairs; wrote 368730/38592117 pairs; (copied 0/0 reads)
-[ Info: Cycle 105: read 368730/38960847 pairs; wrote 368730/38960847 pairs; (copied 0/0 reads)
-[ Info: Cycle 106: read 368730/39329577 pairs; wrote 368730/39329577 pairs; (copied 0/0 reads)
-[ Info: Cycle 107: read 368730/39698307 pairs; wrote 368730/39698307 pairs; (copied 0/0 reads)
-[ Info: Cycle 108: read 368730/40067037 pairs; wrote 368730/40067037 pairs; (copied 0/0 reads)
-[ Info: Cycle 109: read 368730/40435767 pairs; wrote 368730/40435767 pairs; (copied 0/0 reads)
-[ Info: Cycle 110: read 368730/40804497 pairs; wrote 368730/40804497 pairs; (copied 0/0 reads)
-[ Info: Cycle 111: read 368730/41173227 pairs; wrote 368730/41173227 pairs; (copied 0/0 reads)
-[ Info: Cycle 112: read 368730/41541957 pairs; wrote 368730/41541957 pairs; (copied 0/0 reads)
-[ Info: Cycle 113: read 368730/41910687 pairs; wrote 368730/41910687 pairs; (copied 0/0 reads)
-[ Info: Cycle 114: read 368730/42279417 pairs; wrote 368730/42279417 pairs; (copied 0/0 reads)
-[ Info: Cycle 115: read 368730/42648147 pairs; wrote 368730/42648147 pairs; (copied 0/0 reads)
-[ Info: Cycle 116: read 368730/43016877 pairs; wrote 368730/43016877 pairs; (copied 0/0 reads)
-[ Info: Cycle 117: read 368730/43385607 pairs; wrote 368730/43385607 pairs; (copied 0/0 reads)
-[ Info: Cycle 118: read 368730/43754337 pairs; wrote 368730/43754337 pairs; (copied 0/0 reads)
-[ Info: Cycle 119: read 368730/44123067 pairs; wrote 368730/44123067 pairs; (copied 0/0 reads)
-[ Info: Cycle 120: read 368730/44491797 pairs; wrote 368730/44491797 pairs; (copied 0/0 reads)
-[ Info: Cycle 121: read 368730/44860527 pairs; wrote 368730/44860527 pairs; (copied 0/0 reads)
-[ Info: Cycle 122: read 368730/45229257 pairs; wrote 368730/45229257 pairs; (copied 0/0 reads)
-[ Info: Cycle 123: read 368730/45597987 pairs; wrote 368730/45597987 pairs; (copied 0/0 reads)
-[ Info: Cycle 124: read 368730/45966717 pairs; wrote 368730/45966717 pairs; (copied 0/0 reads)
-[ Info: Cycle 125: read 368730/46335447 pairs; wrote 368730/46335447 pairs; (copied 0/0 reads)
-[ Info: Cycle 126: read 368730/46704177 pairs; wrote 368730/46704177 pairs; (copied 0/0 reads)
-[ Info: Cycle 127: read 368730/47072907 pairs; wrote 368730/47072907 pairs; (copied 0/0 reads)
-[ Info: Cycle 128: read 368730/47441637 pairs; wrote 368730/47441637 pairs; (copied 0/0 reads)
-[ Info: Cycle 129: read 368730/47810367 pairs; wrote 368730/47810367 pairs; (copied 0/0 reads)
-[ Info: Cycle 130: read 368730/48179097 pairs; wrote 368730/48179097 pairs; (copied 0/0 reads)
-[ Info: Cycle 131: read 368730/48547827 pairs; wrote 368730/48547827 pairs; (copied 0/0 reads)
-[ Info: Cycle 132: read 368730/48916557 pairs; wrote 368730/48916557 pairs; (copied 0/0 reads)
-[ Info: Cycle 133: read 368730/49285287 pairs; wrote 368730/49285287 pairs; (copied 0/0 reads)
-[ Info: Cycle 134: read 368730/49654017 pairs; wrote 368730/49654017 pairs; (copied 0/0 reads)
-[ Info: Cycle 135: read 368730/50022747 pairs; wrote 368730/50022747 pairs; (copied 0/0 reads)
-[ Info: Cycle 136: read 368730/50391477 pairs; wrote 368730/50391477 pairs; (copied 0/0 reads)
-[ Info: Cycle 137: read 368730/50760207 pairs; wrote 368730/50760207 pairs; (copied 0/0 reads)
-[ Info: Cycle 138: read 368730/51128937 pairs; wrote 368730/51128937 pairs; (copied 0/0 reads)
-[ Info: Cycle 139: read 368730/51497667 pairs; wrote 368730/51497667 pairs; (copied 0/0 reads)
-[ Info: Cycle 140: read 368730/51866397 pairs; wrote 368730/51866397 pairs; (copied 0/0 reads)
-[ Info: Cycle 141: read 368730/52235127 pairs; wrote 368730/52235127 pairs; (copied 0/0 reads)
-[ Info: Cycle 142: read 368730/52603857 pairs; wrote 368730/52603857 pairs; (copied 0/0 reads)
-[ Info: Cycle 143: read 368730/52972587 pairs; wrote 368730/52972587 pairs; (copied 0/0 reads)
-[ Info: Cycle 144: read 368730/53341317 pairs; wrote 368730/53341317 pairs; (copied 0/0 reads)
-[ Info: Cycle 145: read 368730/53710047 pairs; wrote 368730/53710047 pairs; (copied 0/0 reads)
-[ Info: Cycle 146: read 368730/54078777 pairs; wrote 368730/54078777 pairs; (copied 0/0 reads)
-[ Info: Cycle 147: read 368730/54447507 pairs; wrote 368730/54447507 pairs; (copied 0/0 reads)
-[ Info: Cycle 148: read 368730/54816237 pairs; wrote 368730/54816237 pairs; (copied 0/0 reads)
-[ Info: Cycle 149: read 368730/55184967 pairs; wrote 368730/55184967 pairs; (copied 0/0 reads)
-[ Info: Cycle 150: read 368730/55553697 pairs; wrote 368730/55553697 pairs; (copied 0/0 reads)
-[ Info: Cycle 151: read 368730/55922427 pairs; wrote 368730/55922427 pairs; (copied 0/0 reads)
-[ Info: Cycle 152: read 368730/56291157 pairs; wrote 368730/56291157 pairs; (copied 0/0 reads)
-[ Info: Cycle 153: read 368730/56659887 pairs; wrote 368730/56659887 pairs; (copied 0/0 reads)
-[ Info: Cycle 154: read 368730/57028617 pairs; wrote 368730/57028617 pairs; (copied 0/0 reads)
-[ Info: Cycle 155: read 368730/57397347 pairs; wrote 368730/57397347 pairs; (copied 0/0 reads)
-[ Info: Cycle 156: read 368730/57766077 pairs; wrote 368730/57766077 pairs; (copied 0/0 reads)
-[ Info: Cycle 157: read 368730/58134807 pairs; wrote 368730/58134807 pairs; (copied 0/0 reads)
-[ Info: Cycle 158: read 368730/58503537 pairs; wrote 368730/58503537 pairs; (copied 0/0 reads)
-[ Info: Cycle 159: read 368730/58872267 pairs; wrote 368730/58872267 pairs; (copied 0/0 reads)
-[ Info: Cycle 160: read 368730/59240997 pairs; wrote 368730/59240997 pairs; (copied 0/0 reads)
-[ Info: Cycle 161: read 368730/59609727 pairs; wrote 368730/59609727 pairs; (copied 0/0 reads)
-[ Info: Cycle 162: read 368730/59978457 pairs; wrote 368730/59978457 pairs; (copied 0/0 reads)
-[ Info: Cycle 163: read 368730/60347187 pairs; wrote 368730/60347187 pairs; (copied 0/0 reads)
-[ Info: Cycle 164: read 368730/60715917 pairs; wrote 368730/60715917 pairs; (copied 0/0 reads)
-[ Info: Cycle 165: read 368730/61084647 pairs; wrote 368730/61084647 pairs; (copied 0/0 reads)
-[ Info: Cycle 166: read 368730/61453377 pairs; wrote 368730/61453377 pairs; (copied 0/0 reads)
-[ Info: Cycle 167: read 368730/61822107 pairs; wrote 368730/61822107 pairs; (copied 0/0 reads)
-[ Info: Cycle 168: read 368730/62190837 pairs; wrote 368730/62190837 pairs; (copied 0/0 reads)
-[ Info: Cycle 169: read 368730/62559567 pairs; wrote 368730/62559567 pairs; (copied 0/0 reads)
-[ Info: Cycle 170: read 368730/62928297 pairs; wrote 368730/62928297 pairs; (copied 0/0 reads)
-[ Info: Cycle 171: read 368730/63297027 pairs; wrote 368730/63297027 pairs; (copied 0/0 reads)
-[ Info: Cycle 172: read 368730/63665757 pairs; wrote 368730/63665757 pairs; (copied 0/0 reads)
-[ Info: Cycle 173: read 368730/64034487 pairs; wrote 368730/64034487 pairs; (copied 0/0 reads)
-[ Info: Cycle 174: read 368730/64403217 pairs; wrote 368730/64403217 pairs; (copied 0/0 reads)
-[ Info: Cycle 175: read 368730/64771947 pairs; wrote 368730/64771947 pairs; (copied 0/0 reads)
-[ Info: Cycle 176: read 368730/65140677 pairs; wrote 368730/65140677 pairs; (copied 0/0 reads)
-[ Info: Cycle 177: read 368730/65509407 pairs; wrote 368730/65509407 pairs; (copied 0/0 reads)
-[ Info: Cycle 178: read 368730/65878137 pairs; wrote 368730/65878137 pairs; (copied 0/0 reads)
-[ Info: Cycle 179: read 368730/66246867 pairs; wrote 368730/66246867 pairs; (copied 0/0 reads)
-[ Info: Cycle 180: read 368730/66615597 pairs; wrote 368730/66615597 pairs; (copied 0/0 reads)
-[ Info: Cycle 181: read 221475/66837072 pairs; wrote 221475/66837072 pairs; (copied 0/0 reads)
+...
 ┌ Info: ATRIA COMPLETE
 │   read1 = "01_trim/SRR7939018_1.atria.fastq.gz"
 └   read2 = "01_trim/SRR7939018_2.atria.fastq.gz"
@@ -2926,7 +3175,7 @@ pigz 2.6
 
 <a id="2-align-datasets"></a>
 ### 2. Align datasets
-<a id="code-9"></a>
+<a id="code-10"></a>
 #### Code
 <details>
 <summary><i>Code: 2. Align datasets</i></summary>
@@ -3033,7 +3282,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-4"></a>
+<a id="printed-5"></a>
 #### Printed
 <details>
 <summary><i>Printed: 2. Align datasets</i></summary>
@@ -3126,7 +3375,7 @@ run=TRUE
 
 <a id="3-run-pairtools-parse"></a>
 ### 3. Run `pairtools parse`
-<a id="code-10"></a>
+<a id="code-11"></a>
 #### Code
 <details>
 <summary><i>Code: 3. Run pairtools parse</i></summary>
@@ -3315,7 +3564,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-5"></a>
+<a id="printed-6"></a>
 #### Printed
 <details>
 <summary><i>Printed: 3. Run pairtools parse</i></summary>
@@ -5371,7 +5620,7 @@ dist_freq/562341325+/++ 0
 
 <a id="4-run-pairtools-sort"></a>
 ### 4. Run `pairtools sort`
-<a id="code-11"></a>
+<a id="code-12"></a>
 #### Code
 <details>
 <summary><i>Code: 4. Run pairtools sort</i></summary>
@@ -5443,7 +5692,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-6"></a>
+<a id="printed-7"></a>
 #### Printed
 <details>
 <summary><i>Printed: 4. Run pairtools sort</i></summary>
@@ -6057,7 +6306,7 @@ SRR7939018.38300170 XVI 948034  XVI 1219    -   -   UU  1   R1-2    948034  1219
 
 <a id="5-run-pairtools-dedup-and-pairtools-split"></a>
 ### 5. Run `pairtools dedup` and `pairtools split`
-<a id="code-12"></a>
+<a id="code-13"></a>
 #### Code
 <details>
 <summary><i>Code: 5. Run pairtools dedup</i></summary>
@@ -6200,7 +6449,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-7"></a>
+<a id="printed-8"></a>
 #### Printed
 <details>
 <summary><i>Printed: 5. Run pairtools dedup</i></summary>
@@ -9008,7 +9257,7 @@ dist_freq/562341325+/++ 0
 
 <a id="x-run-pairtools-merge-if-applicable"></a>
 ### X. Run `pairtools merge` if applicable
-<a id="code-13"></a>
+<a id="code-14"></a>
 #### Code
 <details>
 <summary><i>Code: Run pairtools merge if applicable</i></summary>
@@ -9094,7 +9343,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-8"></a>
+<a id="printed-9"></a>
 #### Printed
 <details>
 <summary><i>Printed: Run pairtools merge if applicable</i></summary>
@@ -9287,7 +9536,7 @@ drwxrws--- 3 kalavatt  619 Jul  8 14:45 ../
 
 <a id="x-run-pairtools-select-if-applicable"></a>
 ### X. Run `pairtools select` if applicable
-<a id="code-14"></a>
+<a id="code-15"></a>
 #### Code
 <details>
 <summary><i>Code: X. Run pairtools select if applicable</i></summary>
@@ -9307,7 +9556,7 @@ drwxrws--- 3 kalavatt  619 Jul  8 14:45 ../
 </details>
 <br />
 
-<a id="printed-9"></a>
+<a id="printed-10"></a>
 #### Printed
 <details>
 <summary><i>Printed: X. Run pairtools select</i></summary>
@@ -9426,7 +9675,7 @@ Options:
 ### X. Run "`standard-rDNA-complete`" processing if applicable
 <a id="a-exclude-rdna-associated-cis-and-trans-interactions-from-standardnodups-file"></a>
 #### A. Exclude rDNA-associated *cis* and *trans* interactions from "`standard.nodups`" file
-<a id="code-15"></a>
+<a id="code-16"></a>
 ##### Code
 <details>
 <summary><i>Code: A. Exclude rDNA-associated cis and trans interactions from "standard"</i></summary>
@@ -9529,7 +9778,7 @@ Options:
 </details>
 <br />
 
-<a id="printed-10"></a>
+<a id="printed-11"></a>
 ##### Printed
 <details>
 <summary><i>Printed: A. Exclude rDNA-associated cis and trans interactions from "standard"</i></summary>
@@ -9542,7 +9791,7 @@ Options:
 
 <a id="b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file"></a>
 #### B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file
-<a id="code-16"></a>
+<a id="code-17"></a>
 ##### Code
 <details>
 <summary><i>Code: B. Exclude all but rDNA-associated cis and trans interactions from "keep-MM.nodups" file</i></summary>
@@ -9567,7 +9816,11 @@ Options:
         #+  THEN print record
 
         print_test=TRUE
-        [[ "${print_test}" == TRUE ]] &&
+        [[
+            "${print_test}" == TRUE && \
+                -f "${a_dedup_pre_pairs}" && \
+                ! -f "${a_comp_std}"
+        ]] &&
             {
                 echo """
                 zcat < \"${a_dedup_pre_pairs}\" \\
@@ -9587,7 +9840,11 @@ Options:
             }
 
         run=TRUE
-        [[ "${run}" == TRUE ]] &&
+        [[
+            "${run}" == TRUE && \
+                -f "${a_dedup_pre_pairs}" && \
+                ! -f "${a_comp_std}"
+        ]] &&
             {
                 zcat < "${a_dedup_pre_pairs}" \
                     | grep -v "^#" \
@@ -9609,7 +9866,7 @@ Options:
 </details>
 <br />
 
-<a id="printed-11"></a>
+<a id="printed-12"></a>
 ##### Printed
 <details>
 <summary><i>Printed: B. Exclude all but rDNA-associated cis and trans interactions from "keep-MM.nodups" file</i></summary>
@@ -9620,39 +9877,515 @@ Options:
 </details>
 <br />
 
-<a id="c-concatenate-the-standardnodups-and-keep-mmnodups-files"></a>
-#### C. Concatenate the "`standard.nodups`" and "`keep-MM.nodups`" files
+<a id="c-re-header-and-merge-the-standardnodups-and-keep-mmnodups-files"></a>
+#### C. Re-header and merge the "`standard.nodups`" and "`keep-MM.nodups`" files
 ...and re-header the file
 
-<a id="code-17"></a>
+<a id="code-18"></a>
 ##### Code
 <details>
-<summary><i>Code: C. Concatenate the "standard.nodups" and "keep-MM.nodups" files</i></summary>
+<summary><i>Code: C. Re-header and merge the "standard.nodups" and "keep-MM.nodups" files</i></summary>
 
 ```bash
 #!/bin/bash
 
+#TODO Move variable initialization to Step #0
 d_comp="0X_comp"  # ., "${d_comp}"
-f_keep="${f_pre%.*}.keep-MM-rDNA.nodups.pairs.gz"
-a_keep="${d_comp}/${f_keep}"  # ., "${a_keep}"
-f_std="${f_pre%.*}.standard-no-rDNA.nodups.pairs.gz"
-a_std="${d_comp}/${f_std}"  # ., "${a_std}"
+suf="nodups.pairs.gz"  # echo "${suf}"
 
-[[ -f "${a_keep}" && -f "${a_std}" ]] &&
+f_std="${f_pre%.*}.standard-no-rDNA.${suf}"  # echo "${f_std}"
+f_std_tmp="${f_pre%.*}.re-header-standard-no-rDNA.${suf}"  # echo "${f_std_tmp}"
+f_kp="${f_pre%.*}.keep-MM-rDNA.${suf}"  # echo "${f_kp}"
+f_kp_tmp="${f_pre%.*}.re-header-keep-MM-rDNA.${suf}"  # echo "${f_kp_tmp}"
+
+f_std_re="${f_pre%%.*}.standard.${suf}"  # echo "${f_re_std}"
+f_kp_re="${f_pre%%.*}.keep-MM.${suf}"  # echo "${f_re_kp}"
+
+f_rDNA="${f_pre%.*}.standard-rDNA.${suf}"  # echo "${f_rDNA}"
+
+a_std="${d_comp}/${f_std}"  # ., "${a_std}"
+a_std_tmp="${d_comp}/${f_std_tmp}"  # echo "${f_std_tmp}"
+a_kp="${d_comp}/${f_kp}"  # ., "${a_kp}"
+a_kp_tmp="${d_comp}/${f_kp_tmp}"  # echo "${f_kp_tmp}"
+
+a_std_re="${d_dedup}/${f_re_std}"  # ., "${a_re_std}"
+a_kp_re="${d_dedup}/${f_re_kp}"  # ., "${a_re_kp}"
+
+a_rDNA="${d_comp}/${f_rDNA}"  # echo "${a_rDNA}"
+a_rDNA_tmp="${a_rDNA%%.*}.sorted-standard-rDNA.${suf}"  # echo "${a_rDNA_tmp}"
+
+f_rDNA_cload="$(echo "${f_rDNA}" | sed "s/${suf}/cload.cool/g")"  # echo "${f_rDNA_cload}"
+a_rDNA_cload="${d_comp}/${f_rDNA_cload}"  # echo "${a_rDNA_cload}"
+
+f_rDNA_zoom="$(echo "${f_rDNA_cload}" | sed "s/.cload.cool/.mcool/g")"  # echo "${f_rDNA_zoom}"
+a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
+
+[[ -f "${a_kp}" && -f "${a_std}" ]] &&
     {
-        cat 
+        print_test=TRUE
+        [[ ${print_test} == TRUE ]] &&
+            {
+                #  Re-headering -----------------------------------------------
+                echo """
+                #  Re-header \"\${a_std}\" using \"standard.nodups\"
+                pairtools header transfer \\
+                    --output \"${a_std_tmp}\" \\
+                    --reference-file \"${a_std_re}\" \\
+                        \"${a_std}\" \\
+                            2> >(tee -a \"${d_comp}/err_out/${f_std_tmp%.${suf}}.stderr.txt\")
+
+                #  Overwrite un-headered \"\${a_std}\" with re-headered \"\${a_std_tmp}\"
+                [[
+                    \$? == 0 && \\
+                        -f \"${a_std_tmp}\" && \\
+                        -f \"${a_std}\"
+                ]] &&
+                    {
+                        mv -f \\
+                            \"${a_std_tmp}\" \\
+                            \"${a_std}\"
+                    }
+
+                #  Re-header \"\${a_kp}\" using \"keep-MM.nodups\"
+                pairtools header transfer \\
+                    --output \"${a_kp_tmp}\" \\
+                    --reference-file \"${a_kp_re}\" \\
+                        \"${a_kp}\" \\
+                            2> >(tee -a \"${d_comp}/err_out/${f_kp_tmp%.${suf}}.stderr.txt\")
+
+                #  Overwrite un-headered \"\${a_kp}\" with re-headered \"\${a_kp_tmp}\"
+                [[
+                    \$? == 0 && \\
+                        -f \"${a_kp_tmp}\" && \\
+                        -f \"${a_kp}\"
+                ]] &&
+                    {
+                        mv -f \\
+                            \"${a_kp_tmp}\" \\
+                            \"${a_kp}\"
+                    }
+                """
+
+                #  Re-header "${a_std}" using "standard.nodups"
+                pairtools header transfer \
+                    --output "${a_std_tmp}" \
+                    --reference-file "${a_std_re}" \
+                        "${a_std}" \
+                            2> >(tee -a "${d_comp}/err_out/${f_std_tmp%.${suf}}.stderr.txt")
+
+                #  Overwrite un-headered "${a_std}" with re-headered "${a_std_tmp}"
+                [[
+                    $? == 0 && \
+                        -f "${a_std_tmp}" && \
+                        -f "${a_std}"
+                ]] &&
+                    {
+                        mv -f \
+                            "${a_std_tmp}" \
+                            "${a_std}"
+                    }
+
+                #  Re-header "${a_kp}" using "keep-MM.nodups"
+                pairtools header transfer \
+                    --output "${a_kp_tmp}" \
+                    --reference-file "${a_kp_re}" \
+                        "${a_kp}" \
+                            2> >(tee -a "${d_comp}/err_out/${f_kp_tmp%.${suf}}.stderr.txt")
+
+                #  Overwrite un-headered "${a_kp}" with re-headered "${a_kp_tmp}"
+                [[
+                    $? == 0 && \
+                        -f "${a_kp_tmp}" && \
+                        -f "${a_kp}"
+                ]] &&
+                    {
+                        mv -f \
+                            "${a_kp_tmp}" \
+                            "${a_kp}"
+                    }
+
+
+                #  Concatenation ----------------------------------------------
+                echo """
+                #  Merge \"\${a_std}\" and \"\${a_kp}\"
+                [[ -f \"${a_kp}\" && -f \"${a_std}\" ]] &&
+                    {
+                        pairtools merge \\
+                            --output \"${a_rDNA}\" \\
+                            --nproc \"${threads}\" \\
+                            --tmpdir \"${scratch}\" \\
+                                \"${a_kp}\" \\
+                                \"${a_std}\" \\
+                                    2> >(tee -a \"${d_comp}/err_out/${f_rDNA%.${suf}}.stderr.txt\")
+                    }
+                """
+
+                #  Merge "${a_std}" and "${a_kp}"
+                [[ -f "${a_kp}" && -f "${a_std}" ]] &&
+                    {
+                        pairtools merge \
+                            --output "${a_rDNA}" \
+                            --nproc "${threads}" \
+                            --tmpdir "${scratch}" \
+                                "${a_kp}" \
+                                "${a_std}" \
+                                    2> >(tee -a "${d_comp}/err_out/${f_rDNA%.${suf}}.stderr.txt")
+                    }
+
+                #  Sorting ----------------------------------------------------
+                echo """
+                #  Sort \"\${a_rDNA}\"
+                [[ -f \"${a_rDNA}\" ]] &&
+                    {
+                        pairtools sort \\
+                            --output \"${a_rDNA_tmp}\" \\
+                            --nproc \"${threads}\" \\
+                            --tmpdir \"${scratch}\" \\
+                            \"${a_rDNA}\" \\
+                                2> >(tee -a \"${d_comp}/err_out/${f_rDNA_tmp%.${suf}}.stderr.txt\" >&2)
+                    }
+
+                #  Overwrite unsorted \"\${a_rDNA}\" with sorted \"\${a_rDNA_tmp}\"
+                [[
+                    \$? == 0 && \\
+                        -f \"${a_rDNA_tmp}\" && \\
+                        -f \"${a_rDNA}\"
+                ]] &&
+                    {
+                        mv -f \\
+                            \"${a_rDNA_tmp}\" \\
+                            \"${a_rDNA}\"
+                    }
+                """
+
+                #  Sort "${a_rDNA}"
+                [[ -f "${a_rDNA}" ]] &&
+                    {
+                        pairtools sort \
+                            --output "${a_rDNA_tmp}" \
+                            --nproc "${threads}" \
+                            --tmpdir "${scratch}" \
+                            "${a_rDNA}" \
+                                2> >(tee -a "${d_comp}/err_out/${f_rDNA_tmp%.${suf}}.stderr.txt" >&2)
+                    }
+
+                #  Overwrite unsorted "${a_rDNA}" with sorted "${a_rDNA_tmp}"
+                [[
+                    $? == 0 && \
+                        -f "${a_rDNA_tmp}" && \
+                        -f "${a_rDNA}"
+                ]] &&
+                    {
+                        mv -f \
+                            "${a_rDNA_tmp}" \
+                            "${a_rDNA}"
+                    }
+
+
+                #  Collecting stats -------------------------------------------
+                #TODO
+
+
+                #  Loading pairs to cooler ------------------------------------
+                bin_initial=25  #TODO Make the change in Step #0 above
+                echo """
+                cooler cload pairs \\
+                    -c1 2 -p1 3 -c2 4 -p2 5 \\
+                    --assembly \"${assembly}\" \\
+                    \"${a_size}\":\"${bin_initial}\" \\
+                    \"${a_rDNA}\" \\
+                    \"${a_rDNA_cload}\" \\
+                        2> >(tee -a \"${d_comp}/err_out/${f_rDNA_cload%.cool}.stderr.txt\" >&2)
+                """
+
+                [[ -f "${a_rDNA}" && "${a_rDNA_cload}" ]] &&
+                    {
+                        cooler cload pairs \
+                            -c1 2 -p1 3 -c2 4 -p2 5 \
+                            --assembly "${assembly}" \
+                            "${a_size}":"${bin_initial}" \
+                            "${a_rDNA}" \
+                            "${a_rDNA_cload}" \
+                                2> >(tee -a "${d_comp}/err_out/${f_rDNA_cload%.cool}.stderr.txt" >&2)
+                    }
+
+
+                #  Coarsening matrix, then balancing resulting matrices -------
+                [[ -f "${a_rDNA_zoom}" ]] && rm "${a_rDNA_zoom}"
+                
+                echo """
+                cooler zoomify \\
+                    --out \"${a_rDNA_zoom}\" \\
+                    --nproc \"${threads}\" \\
+                    --resolutions 50,100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \\
+                    --balance \\
+                    --balance-args '--max-iters 2000' \\
+                    \"${a_rDNA_cload}\" \\
+                        2> >(tee -a \"${d_comp}/err_out/${f_rDNA_zoom%.mcool}.stderr.txt\" >&2)
+                """
+
+                cooler zoomify \
+                    --out "${a_rDNA_zoom}" \
+                    --nproc "${threads}" \
+                    --resolutions 50,100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \
+                    --balance \
+                    --balance-args '--max-iters 2000' \
+                    "${a_rDNA_cload}" \
+                        2> >(tee -a "${d_comp}/err_out/${f_rDNA_zoom%.mcool}.stderr.txt" >&2)
+            }
     }
+
 ```
 </details>
 <br />
 
-<a id="printed-12"></a>
+<a id="printed-13"></a>
 ##### Printed
 <details>
-<summary><i>Printed: C. Concatenate the "standard.nodups" and "keep-MM.nodups" files</i></summary>
+<summary><i>Printed: C. Re-header and merge the "standard.nodups" and "keep-MM.nodups" files</i></summary>
 
 ```txt
+❯                 echo """
+>                 #  Re-header \"\${a_std}\" using \"standard.nodups\"
+>                 pairtools header transfer \\
+>                     --output \"${a_std_tmp}\" \\
+>                     --reference-file \"${a_std_re}\" \\
+>                         \"${a_std}\" \\
+>                             2> >(tee -a \"${d_comp}/err_out/${f_std_tmp%.${suf}}.stderr.txt\")
+> 
+>                 #  Overwrite un-headered \"\${a_std}\" with re-headered \"\${a_std_tmp}\"
+>                 [[
+>                     \$? == 0 && \\
+>                         -f \"${a_std_tmp}\" && \\
+>                         -f \"${a_std}\"
+>                 ]] &&
+>                     {
+>                         mv -f \\
+>                             \"${a_std_tmp}\" \\
+>                             \"${a_std}\"
+>                     }
+> 
+>                 #  Re-header \"\${a_kp}\" using \"keep-MM.nodups\"
+>                 pairtools header transfer \\
+>                     --output \"${a_kp_tmp}\" \\
+>                     --reference-file \"${a_kp_re}\" \\
+>                         \"${a_kp}\" \\
+>                             2> >(tee -a \"${d_comp}/err_out/${f_kp_tmp%.${suf}}.stderr.txt\")
+> 
+>                 #  Overwrite un-headered \"\${a_kp}\" with re-headered \"\${a_kp_tmp}\"
+>                 [[
+>                     \$? == 0 && \\
+>                         -f \"${a_kp_tmp}\" && \\
+>                         -f \"${a_kp}\"
+>                 ]] &&
+>                     {
+>                         mv -f \\
+>                             \"${a_kp_tmp}\" \\
+>                             \"${a_kp}\"
+>                     }
+>                 """
 
+                #  Re-header "${a_std}" using "standard.nodups"
+                pairtools header transfer \
+                    --output "0X_comp/SRR7939018.re-header-standard-no-rDNA.nodups.pairs.gz" \
+                    --reference-file "05_dedup/SRR7939018.standard.nodups.pairs.gz" \
+                        "0X_comp/SRR7939018.standard-no-rDNA.nodups.pairs.gz" \
+                            2> >(tee -a "0X_comp/err_out/SRR7939018.re-header-standard-no-rDNA.stderr.txt")
+
+                #  Overwrite un-headered "${a_std}" with re-headered "${a_std_tmp}"
+                [[
+                    $? == 0 && \
+                        -f "0X_comp/SRR7939018.re-header-standard-no-rDNA.nodups.pairs.gz" && \
+                        -f "0X_comp/SRR7939018.standard-no-rDNA.nodups.pairs.gz"
+                ]] &&
+                    {
+                        mv -f \
+                            "0X_comp/SRR7939018.re-header-standard-no-rDNA.nodups.pairs.gz" \
+                            "0X_comp/SRR7939018.standard-no-rDNA.nodups.pairs.gz"
+                    }
+
+                #  Re-header "${a_kp}" using "keep-MM.nodups"
+                pairtools header transfer \
+                    --output "0X_comp/SRR7939018.re-header-keep-MM-rDNA.nodups.pairs.gz" \
+                    --reference-file "05_dedup/SRR7939018.keep-MM.nodups.pairs.gz" \
+                        "0X_comp/SRR7939018.keep-MM-rDNA.nodups.pairs.gz" \
+                            2> >(tee -a "0X_comp/err_out/SRR7939018.re-header-keep-MM-rDNA.stderr.txt")
+
+                #  Overwrite un-headered "${a_kp}" with re-headered "${a_kp_tmp}"
+                [[
+                    $? == 0 && \
+                        -f "0X_comp/SRR7939018.re-header-keep-MM-rDNA.nodups.pairs.gz" && \
+                        -f "0X_comp/SRR7939018.keep-MM-rDNA.nodups.pairs.gz"
+                ]] &&
+                    {
+                        mv -f \
+                            "0X_comp/SRR7939018.re-header-keep-MM-rDNA.nodups.pairs.gz" \
+                            "0X_comp/SRR7939018.keep-MM-rDNA.nodups.pairs.gz"
+                    }
+
+
+❯                 #  Re-header "${a_std}" using "standard.nodups"
+
+
+❯                 pairtools header transfer \
+>                     --output "${a_std_tmp}" \
+>                     --reference-file "${a_std_re}" \
+>                         "${a_std}" \
+>                             2> >(tee -a "${d_comp}/err_out/${f_std_tmp%.${suf}}.stderr.txt")
+
+
+❯                 #  Overwrite un-headered "${a_std}" with re-headered "${a_std_tmp}"
+
+
+❯                 [[
+>                     $? == 0 && \
+>                         -f "${a_std_tmp}" && \
+>                         -f "${a_std}"
+>                 ]] &&
+>                     {
+>                         mv -f \
+>                             "${a_std_tmp}" \
+>                             "${a_std}"
+>                     }
+'0X_comp/SRR7939018.re-header-standard-no-rDNA.nodups.pairs.gz' -> '0X_comp/SRR7939018.standard-no-rDNA.nodups.pairs.gz'
+
+
+❯                 pairtools header transfer \
+>                     --output "${a_kp_tmp}" \
+>                     --reference-file "${a_kp_re}" \
+>                         "${a_kp}" \
+>                             2> >(tee -a "${d_comp}/err_out/${f_kp_tmp%.${suf}}.stderr.txt")
+
+
+❯                 #  Overwrite un-headered "${a_kp}" with re-headered "${a_kp_tmp}"
+
+
+❯                 [[
+>                     $? == 0 && \
+>                         -f "${a_kp_tmp}" && \
+>                         -f "${a_kp}"
+>                 ]] &&
+>                     {
+>                         mv -f \
+>                             "${a_kp_tmp}" \
+>                             "${a_kp}"
+>                     }
+'0X_comp/SRR7939018.re-header-keep-MM-rDNA.nodups.pairs.gz' -> '0X_comp/SRR7939018.keep-MM-rDNA.nodups.pairs.gz'
+
+
+❯                 echo """
+>                 #  Merge \"\${a_std}\" and \"\${a_kp}\"
+>                 [[ -f \"${a_kp}\" && -f \"${a_std}\" ]] &&
+>                     {
+>                         pairtools merge \\
+>                             --output \"${a_rDNA}\" \\
+>                             --nproc \"${threads}\" \\
+>                             --tmpdir \"${scratch}\" \\
+>                                 \"${a_kp}\" \\
+>                                 \"${a_std}\" \\
+>                                     2> >(tee -a \"${d_comp}/err_out/${f_rDNA%.${suf}}.stderr.txt\")
+>                     }
+>                 """
+
+                #  Merge "${a_std}" and "${a_kp}"
+                [[ -f "0X_comp/SRR7939018.keep-MM-rDNA.nodups.pairs.gz" && -f "0X_comp/SRR7939018.standard-no-rDNA.nodups.pairs.gz" ]] &&
+                    {
+                        pairtools merge \
+                            --output "0X_comp/SRR7939018.standard-rDNA.nodups.pairs.gz" \
+                            --nproc "8" \
+                            --tmpdir "/fh/scratch/delete30/tsukiyama_t" \
+                                "0X_comp/SRR7939018.keep-MM-rDNA.nodups.pairs.gz" \
+                                "0X_comp/SRR7939018.standard-no-rDNA.nodups.pairs.gz" \
+                                    2> >(tee -a "0X_comp/err_out/SRR7939018.standard-rDNA.stderr.txt")
+                    }
+
+
+❯                 [[ -f "${a_kp}" && -f "${a_std}" ]] &&
+>                     {
+>                         pairtools merge \
+>                             --output "${a_rDNA}" \
+>                             --nproc "${threads}" \
+>                             --tmpdir "${scratch}" \
+>                                 "${a_kp}" \
+>                                 "${a_std}" \
+>                                     2> >(tee -a "${d_comp}/err_out/${f_rDNA%.${suf}}.stderr.txt")
+>                     }
+
+
+❯                 #  Sorting ----------------------------------------------------
+
+
+❯ echo """
+>                 #  Sort \"\${a_rDNA}\"
+>                 [[ -f \"${a_rDNA}\" ]] &&
+>                     {
+>                         pairtools sort \\
+>                             --output \"${a_rDNA_tmp}\" \\
+>                             --nproc \"${threads}\" \\
+>                             --tmpdir \"${scratch}\" \\
+>                             \"${a_rDNA}\" \\
+>                                 2> >(tee -a \"${d_comp}/err_out/${f_rDNA_tmp%.${suf}}.stderr.txt\" >&2)
+>                     }
+> 
+>                 #  Overwrite unsorted \"\${a_rDNA}\" with sorted \"\${a_rDNA_tmp}\"
+>                 [[
+>                     \$? == 0 && \\
+>                         -f \"${a_rDNA_tmp}\" && \\
+>                         -f \"${a_rDNA}\"
+>                 ]] &&
+>                     {
+>                         mv -f \\
+>                             \"${a_rDNA_tmp}\" \\
+>                             \"${a_rDNA}\"
+>                     }
+>                 """
+
+                #  Sort "${a_rDNA}"
+                [[ -f "0X_comp/SRR7939018.standard-rDNA.nodups.pairs.gz" ]] &&
+                    {
+                        pairtools sort \
+                            --output "0X_comp/SRR7939018.sorted-standard-rDNA.nodups.pairs.gz" \
+                            --nproc "8" \
+                            --tmpdir "/fh/scratch/delete30/tsukiyama_t" \
+                            "0X_comp/SRR7939018.standard-rDNA.nodups.pairs.gz" \
+                                2> >(tee -a "0X_comp/err_out/.stderr.txt" >&2)
+                    }
+
+                #  Overwrite unsorted "${a_rDNA}" with sorted "${a_rDNA_tmp}"
+                [[
+                    $? == 0 && \
+                        -f "0X_comp/SRR7939018.sorted-standard-rDNA.nodups.pairs.gz" && \
+                        -f "0X_comp/SRR7939018.standard-rDNA.nodups.pairs.gz"
+                ]] &&
+                    {
+                        mv -f \
+                            "0X_comp/SRR7939018.sorted-standard-rDNA.nodups.pairs.gz" \
+                            "0X_comp/SRR7939018.standard-rDNA.nodups.pairs.gz"
+                    }
+
+
+❯ [[ -f "${a_rDNA}" ]] &&
+>                     {
+>                         pairtools sort \
+>                             --output "${a_rDNA_tmp}" \
+>                             --nproc "${threads}" \
+>                             --tmpdir "${scratch}" \
+>                             "${a_rDNA}" \
+>                                 2> >(tee -a "${d_comp}/err_out/${f_rDNA_tmp%.${suf}}.stderr.txt" >&2)
+>                     }
+
+
+❯                 [[
+>                     $? == 0 && \
+>                         -f "${a_rDNA_tmp}" && \
+>                         -f "${a_rDNA}"
+>                 ]] &&
+>                     {
+>                         mv -f \
+>                             "${a_rDNA_tmp}" \
+>                             "${a_rDNA}"
+>                     }
+'0X_comp/SRR7939018.sorted-standard-rDNA.nodups.pairs.gz' -> '0X_comp/SRR7939018.standard-rDNA.nodups.pairs.gz'
 ```
 </details>
 <br />
@@ -9661,7 +10394,7 @@ a_std="${d_comp}/${f_std}"  # ., "${a_std}"
 ### 6. Run `pairtools stats`
 <a id="individual-pairs-files"></a>
 #### Individual pairs files
-<a id="code-18"></a>
+<a id="code-19"></a>
 ##### Code
 <details>
 <summary><i>Code: 6. Run pairtools stats</i></summary>
@@ -9717,7 +10450,7 @@ run_check=FALSE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-13"></a>
+<a id="printed-14"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 6. Run pairtools stats</i></summary>
@@ -10746,7 +11479,7 @@ chromsizes/Mito 85779
 
 <a id="merged-pairs-files"></a>
 #### Merged pairs files
-<a id="code-19"></a>
+<a id="code-20"></a>
 ##### Code
 <details>
 <summary><i>Code: 6. Run pairtools stats</i></summary>
@@ -10794,7 +11527,7 @@ run_check=TRUE
 </details>
 <br />
 
-<a id="printed-14"></a>
+<a id="printed-15"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 6. Run pairtools stats</i></summary>
@@ -11335,7 +12068,7 @@ chromsizes/XVI  948066
 ### 7. Load pairs to cooler
 <a id="individual-pairs-file"></a>
 #### Individual pairs file
-<a id="code-20"></a>
+<a id="code-21"></a>
 ##### Code
 <details>
 <summary><i>Code: 7. Load pairs to cooler</i></summary>
@@ -11377,7 +12110,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-15"></a>
+<a id="printed-16"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 7. Load pairs to cooler</i></summary>
@@ -11538,7 +12271,7 @@ INFO:cooler.create:Writing info
 
 <a id="merged-pairs-files-1"></a>
 #### Merged pairs files
-<a id="code-21"></a>
+<a id="code-22"></a>
 ##### Code
 <details>
 <summary><i>Code: 7. Load pairs to cooler</i></summary>
@@ -11575,7 +12308,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-16"></a>
+<a id="printed-17"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 7. Load pairs to cooler</i></summary>
@@ -11660,7 +12393,7 @@ INFO:cooler.create:Writing info
 ### 8. Generate a multi-resolution cooler by coarsening
 <a id="cools-from-individual-pairs-files"></a>
 #### Cools from individual pairs files
-<a id="code-22"></a>
+<a id="code-23"></a>
 ##### Code
 <details>
 <summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -11703,7 +12436,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-17"></a>
+<a id="printed-18"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -12125,7 +12858,7 @@ INFO:cooler.balance:variance is 7.734072057040814e-06
 
 <a id="cools-from-merged-pairs-files"></a>
 #### Cools from merged pairs files
-<a id="code-23"></a>
+<a id="code-24"></a>
 ##### Code
 <details>
 <summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -12165,7 +12898,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-18"></a>
+<a id="printed-19"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -12316,7 +13049,7 @@ INFO:cooler.cli.zoomify:Balancing zoom level with bin size 100
 
 <a id="9-ingest-files-for-higlass"></a>
 ### 9. Ingest files for HiGlass
-<a id="code-24"></a>
+<a id="code-25"></a>
 #### Code
 <details>
 <summary><i>Code: Ingest files for HiGlass</i></summary>
@@ -12397,17 +13130,416 @@ rough_size=FALSE
         # curl http://localhost:8888/api/v1/tilesets/
     }
 
-#TODO
-# rough_gene_track=TRUE
-# [[ "${rough_gene_track}" == TRUE ]] &&
-#     {
-#
-#     }
+rough_Q_rDNA=TRUE
+[[ "${rough_Q_rDNA}" == TRUE ]] &&
+    {
+        docker exec higlass-container \
+            python higlass-server/manage.py ingest_tileset \
+                --filename /data/SRR7939018.standard-rDNA.mcool \
+                --filetype cooler \
+                --datatype matrix
+
+        # curl http://localhost:8888/api/v1/tilesets/
+    }
+
+#  Work, 2023-0713
+docker exec higlass-container \
+    python higlass-server/manage.py --help
+
+docker exec higlass-container \
+    python higlass-server/manage.py ingest_tileset --help
+
+clodius --help
+
+clodius aggregate --help
+
+clodius aggregate bedfile --help
+
+clodius aggregate bedgraph --help
+
+clodius aggregate bedfile \
+    --output-file "${outfile}" \
+    --assembly "${assembly}" \
+
+#  Step #1: Convert gtfs of interest into beds
+gtf2bed \
+    < Greenlaw-et-al_non-collapsed-non-coding-transcriptome.gtf \
+    > Greenlaw-et-al_non-collapsed-non-coding-transcriptome.bed
+
+gtf2bed \
+    < Greenlaw-et-al_representative-coding-ncRNA-transcriptome.gtf \
+    > Greenlaw-et-al_representative-coding-ncRNA-transcriptome.bed
+
+gtf2bed \
+    < Greenlaw-et-al_representative-coding-non-pa-ncRNA-transcriptome.gtf \
+    > Greenlaw-et-al_representative-coding-non-pa-ncRNA-transcriptome.bed
+
+gtf2bed \
+    < Greenlaw-et-al_representative-coding-pa-ncRNA-transcriptome.gtf \
+    > Greenlaw-et-al_representative-coding-pa-ncRNA-transcriptome.bed
+
+gtf2bed \
+    < Greenlaw-et-al_representative-non-coding-transcriptome.gtf \
+    > Greenlaw-et-al_representative-non-coding-transcriptome.bed
+
+gtf2bed \
+    < processed_features-intergenic_sense-antisense.gtf \
+    > processed_features-intergenic_sense-antisense.bed
+
+gtf2bed \
+    < processed_features-intergenic_sense.gtf \
+    > processed_features-intergenic_sense.bed
+
+cat Saccharomyces_cerevisiae.R64-1-1.108.gtf \
+    | awk '{ if ($0 ~ "transcript_id") print $0; else print $0" transcript_id \"\";"; }' \
+    | gtf2bed - \
+        > Saccharomyces_cerevisiae.R64-1-1.108.bed
+
+cat Saccharomyces_cerevisiae.R64-1-1.108.bed | head
+
+#  Step #2: Aggregate bed files for use with HiGlass
+clodius aggregate bedfile \
+    --assembly "sacCer3" \
+    --output-file Saccharomyces_cerevisiae.R64-1-1.108.db \
+    --chromsizes-filename S288C_reference_sequence_R64-3-1_20210421.size \
+    Saccharomyces_cerevisiae.R64-1-1.108.bed
+
+#  Step #3: Ingest the aggregated bed files
+docker exec higlass-container \
+    python higlass-server/manage.py ingest_tileset \
+       --filename /data/Saccharomyces_cerevisiae.R64-1-1.108.db \
+       --filetype beddb \
+       --datatype bedlike \
+       --coordSystem sacCer3
+
+rough_gene_track=TRUE
+[[ "${rough_gene_track}" == TRUE ]] &&
+    {
+
+    }
 ```
 </details>
 <br />
 
-<a id="printed-19"></a>
+<a id="tbd"></a>
+##### TBD
+<details>
+<summary><i>Printed: TBD</i></summary>
+
+```txt
+❯ docker exec higlass-container \
+>     python higlass-server/manage.py --help
+
+docker exec higlass-container \
+    python higlass-server/manage.py ingest_tileset --help
+
+Type 'manage.py help <subcommand>' for help on a specific subcommand.
+
+Available subcommands:
+
+[auth]
+    changepassword
+    createsuperuser
+
+[contenttypes]
+    remove_stale_contenttypes
+
+[django]
+    check
+    compilemessages
+    createcachetable
+    dbshell
+    diffsettings
+    dumpdata
+    flush
+    inspectdb
+    loaddata
+    makemessages
+    makemigrations
+    migrate
+    sendtestemail
+    shell
+    showmigrations
+    sqlflush
+    sqlmigrate
+    sqlsequencereset
+    squashmigrations
+    startapp
+    startproject
+    test
+    testserver
+
+[guardian]
+    clean_orphan_obj_perms
+
+[rest_framework]
+    generateschema
+
+[sessions]
+    clearsessions
+
+[staticfiles]
+    collectstatic
+    findstatic
+    runserver
+
+[tilesets]
+    delete_tileset
+    ingest_tileset
+    list_tilesets
+    modify_tileset
+
+
+❯ docker exec higlass-container \
+>     python higlass-server/manage.py ingest_tileset --help
+usage: manage.py ingest_tileset [-h] [--filename FILENAME]
+                                [--indexfile INDEXFILE] [--datatype DATATYPE]
+                                [--filetype FILETYPE]
+                                [--coordSystem COORDSYSTEM]
+                                [--coordSystem2 COORDSYSTEM2] [--uid UID]
+                                [--name NAME] [--project-name PROJECT_NAME]
+                                [--no-upload] [--version] [-v {0,1,2,3}]
+                                [--settings SETTINGS]
+                                [--pythonpath PYTHONPATH] [--traceback]
+                                [--no-color] [--force-color]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --filename FILENAME
+  --indexfile INDEXFILE
+  --datatype DATATYPE
+  --filetype FILETYPE
+  --coordSystem COORDSYSTEM
+  --coordSystem2 COORDSYSTEM2
+  --uid UID
+  --name NAME
+  --project-name PROJECT_NAME
+  --no-upload           Skip upload
+  --version             show program's version number and exit
+  -v {0,1,2,3}, --verbosity {0,1,2,3}
+                        Verbosity level; 0=minimal output, 1=normal output,
+                        2=verbose output, 3=very verbose output
+  --settings SETTINGS   The Python path to a settings module, e.g.
+                        "myproject.settings.main". If this isn't provided, the
+                        DJANGO_SETTINGS_MODULE environment variable will be
+                        used.
+  --pythonpath PYTHONPATH
+                        A directory to add to the Python path, e.g.
+                        "/home/djangoprojects/myproject".
+  --traceback           Raise on CommandError exceptions
+  --no-color            Don't colorize the command output.
+  --force-color         Force colorization of the command output.
+
+
+❯ clodius --help
+Usage: clodius [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  -h, --help  Show this message and exit.
+
+Commands:
+  aggregate  Aggregate a data file so that it stores the data at multiple...
+  convert    Aggregate a data file so that it stores the data at multiple...
+
+
+❯ clodius aggregate --help
+Usage: clodius aggregate [OPTIONS] COMMAND [ARGS]...
+
+  Aggregate a data file so that it stores the data at multiple resolutions.
+
+Options:
+  -h, --help  Show this message and exit.
+
+Commands:
+  bedfile
+  bedgraph
+  bedpe     Aggregate bedpe files
+  geojson   Aggregate a geojson file
+  multivec  Aggregate a multivec file
+
+
+❯ clodius aggregate bedfile --help
+Usage: clodius aggregate bedfile [OPTIONS] FILEPATH
+
+Options:
+  -o, --output-file TEXT      The default output file name to use. If this
+                              isn't specified, clodius will replace the
+                              current extension with .multires.bed
+  -a, --assembly TEXT         The genome assembly that this file was created
+                              against
+  --importance-column TEXT    The column (1-based) containing information
+                              about how important that row is. If it's absent,
+                              then use the length of the region. If the value
+                              is equal to `random`, then a random value will
+                              be used for the importance (effectively leading
+                              to random sampling)
+  --has-header / --no-header  Does this file have a header that we should
+                              ignore
+  --chromosome TEXT           Only extract values for a particular chromosome.
+                              Use all chromosomes if not set.
+  --max-per-tile INTEGER      The maximum number of entries to store per tile
+  --tile-size INTEGER         The number of nucleotides that the highest
+                              resolution tiles should span. This determines
+                              the maximum zoom level
+  --delimiter TEXT
+  --chromsizes-filename TEXT  A file containing chromosome sizes and order
+  --offset INTEGER            Apply an offset to all the coordinates in this
+                              file
+  -h, --help                  Show this message and exit.
+
+
+❯ clodius aggregate bedgraph --help
+Usage: clodius aggregate bedgraph [OPTIONS] FILEPATH
+
+Options:
+  -o, --output-file TEXT          The default output file name to use. If this
+                                  isn't specified, clodius will replace the
+                                  current extension with .hitile
+  -a, --assembly [h37rv|hg38|danRer10|GCA_000001215.4_Release_6_plus_ISO1_MT_genomic|test3chroms|gorGor5|hg19|dm6|mm9|test|grch37-lite|ce11|sacCer3|GCF_000005845.2_ASM584v2_genomic|canFam3|galGal5|mm10|b37|galGal6|hs37d5|rheMac8|rn6|mm9b|grch37|panTro5|dm3|GCA_000001405.15_GRCh38_genomic]
+                                  The genome assembly that this file was
+                                  created against
+  --chromosome TEXT               Only extract values for a particular
+                                  chromosome. Use all chromosomes if not set.
+  -t, --tile-size INTEGER         The number of data points in each tile. Used
+                                  to determine the number of zoom levels to
+                                  create.
+  -c, --chunk-size INTEGER        How many values to aggregate at once.
+                                  Specified as a power of two multiplier of
+                                  the tile size
+  --chromosome-col INTEGER        The column number (1-based) which contains
+                                  the chromosome name
+  --from-pos-col INTEGER          The column number (1-based) which contains
+                                  the starting position
+  --to-pos-col INTEGER            The column number (1-based) which contains
+                                  the ending position
+  --value-col INTEGER             The column number (1-based) which contains
+                                  the actual value position
+  --has-header / --no-header      Does this file have a header that we should
+                                  ignore
+  --method [sum|average]          The method used to aggregate values (e.g.
+                                  sum, average...)
+  --nan-value TEXT                The string to use as a NaN value
+  --transform [none|exp2]         The method used to aggregate values (e.g.
+                                  sum, average...)
+  --count-nan                     Simply count the number of nan values in the
+                                  file
+  --closed-interval               Treat the to column as a closed interval
+  --chromsizes-filename TEXT      A file containing chromosome sizes and order
+  -z, --zoom-step INTEGER         The number of intermediate aggregation
+                                  levels to omit
+  -h, --help                      Show this message and exit.
+
+
+❯ #  Step #1: Convert gtfs of interest into beds
+
+
+❯ gtf2bed \
+>     < Greenlaw-et-al_non-collapsed-non-coding-transcriptome.gtf \
+>     > Greenlaw-et-al_non-collapsed-non-coding-transcriptome.bed
+Warning: If your Wiggle data is a significant portion of available system memory, use the --max-mem and --sort-tmpdir options, or use --do-not-sort to disable post-conversion sorting. See --help for more information.
+
+
+❯ gtf2bed \
+>     < Greenlaw-et-al_representative-coding-ncRNA-transcriptome.gtf \
+>     > Greenlaw-et-al_representative-coding-ncRNA-transcriptome.bed
+Warning: If your Wiggle data is a significant portion of available system memory, use the --max-mem and --sort-tmpdir options, or use --do-not-sort to disable post-conversion sorting. See --help for more information.
+
+
+❯ gtf2bed \
+>     < Greenlaw-et-al_representative-coding-non-pa-ncRNA-transcriptome.gtf \
+>     > Greenlaw-et-al_representative-coding-non-pa-ncRNA-transcriptome.bed
+Warning: If your Wiggle data is a significant portion of available system memory, use the --max-mem and --sort-tmpdir options, or use --do-not-sort to disable post-conversion sorting. See --help for more information.
+
+
+❯ gtf2bed \
+>     < Greenlaw-et-al_representative-coding-pa-ncRNA-transcriptome.gtf \
+>     > Greenlaw-et-al_representative-coding-pa-ncRNA-transcriptome.bed
+Warning: If your Wiggle data is a significant portion of available system memory, use the --max-mem and --sort-tmpdir options, or use --do-not-sort to disable post-conversion sorting. See --help for more information.
+
+
+❯ gtf2bed \
+>     < Greenlaw-et-al_representative-non-coding-transcriptome.gtf \
+>     > Greenlaw-et-al_representative-non-coding-transcriptome.bed
+Warning: If your Wiggle data is a significant portion of available system memory, use the --max-mem and --sort-tmpdir options, or use --do-not-sort to disable post-conversion sorting. See --help for more information.
+
+
+❯ gtf2bed \
+>     < processed_features-intergenic_sense-antisense.gtf \
+>     > processed_features-intergenic_sense-antisense.bed
+Warning: If your Wiggle data is a significant portion of available system memory, use the --max-mem and --sort-tmpdir options, or use --do-not-sort to disable post-conversion sorting. See --help for more information.
+
+
+❯ gtf2bed \
+>     < processed_features-intergenic_sense.gtf \
+>     > processed_features-intergenic_sense.bed
+Warning: If your Wiggle data is a significant portion of available system memory, use the --max-mem and --sort-tmpdir options, or use --do-not-sort to disable post-conversion sorting. See --help for more information.
+
+
+❯ cat Saccharomyces_cerevisiae.R64-1-1.108.gtf \
+>     | awk '{ if ($0 ~ "transcript_id") print $0; else print $0" transcript_id \"\";"; }' \
+pipe>     | gtf2bed - \
+pipe pipe>         > Saccharomyces_cerevisiae.R64-1-1.108.bed
+Warning: If your Wiggle data is a significant portion of available system memory, use the --max-mem and --sort-tmpdir options, or use --do-not-sort to disable post-conversion sorting. See --help for more information.
+
+
+❯ #  Step #2: Aggregate bed files for use with HiGlass
+
+
+❯ clodius aggregate bedfile \
+>     --assembly "sacCer3" \
+>     --output-file Saccharomyces_cerevisiae.R64-1-1.108.db \
+>     --chromsizes-filename S288C_reference_sequence_R64-3-1_20210421.size \
+>     Saccharomyces_cerevisiae.R64-1-1.108.bed
+delimiter: None
+output_file: Saccharomyces_cerevisiae.R64-1-1.108.db header: <map object at 0x112e59870>
+max_per_tile: 100
+counter: 0 9276
+counter: 1000 75
+counter: 2000 2247
+counter: 3000 3
+counter: 4000 3
+counter: 5000 1284
+counter: 6000 396
+counter: 7000 3
+counter: 8000 519
+counter: 9000 3
+counter: 10000 858
+counter: 11000 162
+counter: 12000 678
+counter: 13000 1554
+counter: 14000 2118
+counter: 15000 3
+counter: 16000 5314
+counter: 17000 3
+counter: 18000 1086
+counter: 19000 1866
+counter: 20000 675
+counter: 21000 906
+counter: 22000 3
+counter: 23000 3
+counter: 24000 2481
+counter: 25000 1704
+counter: 26000 879
+counter: 27000 121
+counter: 28000 3
+counter: 29000 726
+counter: 30000 2019
+counter: 31000 1128
+counter: 32000 3
+counter: 33000 1656
+counter: 34000 3
+counter: 35000 2484
+counter: 36000 3
+counter: 37000 735
+counter: 38000 3
+counter: 39000 3
+counter: 40000 1071
+counter: 41000 1359
+```
+</details>
+<br />
+
+<a id="printed-20"></a>
 #### Printed
 <details>
 <summary><i>Printed: Ingest files for HiGlass</i></summary>
@@ -12549,6 +13681,25 @@ optional arguments:
 >     --filename /data/S288C_reference_sequence_R64-3-1_20210421.size \
 >     --filetype chromsizes-tsv \
 >     --datatype chromsizes
+
+
+❯ rough_Q_rDNA=TRUE
+❯ [[ "${rough_Q_rDNA}" == TRUE ]] &&
+cmdand>     {
+cmdand cursh>         docker exec higlass-container \
+cmdand cursh>             python higlass-server/manage.py ingest_tileset \
+cmdand cursh>                 --filename /data/SRR7939018.standard-rDNA.mcool \
+cmdand cursh>                 --filetype cooler \
+cmdand cursh>                 --datatype matrix
+cmdand cursh>
+cmdand cursh>         # curl http://localhost:8888/api/v1/tilesets/
+cmdand cursh>     }
+
+
+❯ curl http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz > refGene.txt.gz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 7855k  100 7855k    0     0  18.9M      0 --:--:-- --:--:-- --:--:-- 18.9M
 ```
 </details>
 <br />
