@@ -24,27 +24,32 @@
 1. [Set up the Micro-C processing workflow](#set-up-the-micro-c-processing-workflow)
     1. [0. Get situated](#0-get-situated)
         1. [Get to work directory, initialize environment](#get-to-work-directory-initialize-environment)
-            1. [Code](#code-4)
-                1. [`grabnode`](#grabnode)
-                1. [Go to work directory, initialize environment](#go-to-work-directory-initialize-environment)
+            1. [`grabnode`](#grabnode)
+                1. [Code](#code-4)
+            1. [Go to work directory, initialize environment](#go-to-work-directory-initialize-environment)
+                1. [Code](#code-5)
+                1. [Printed](#printed-4)
+        1. [Symlink to and rename files of interest](#symlink-to-and-rename-files-of-interest)
+            1. [Code](#code-6)
+            1. [Printed](#printed-5)
         1. [Initialize variables, create outdirectories](#initialize-variables-create-outdirectories)
             1. [Initialize "general" variables for workflow](#initialize-general-variables-for-workflow)
-                1. [Code](#code-5)
-            1. [Initialize "specific" variables for workflow](#initialize-specific-variables-for-workflow)
-                1. [Code](#code-6)
-            1. [If applicable, then run logic for running `pairtools merge`](#if-applicable-then-run-logic-for-running-pairtools-merge)
                 1. [Code](#code-7)
-            1. [Create outdirectories if not present](#create-outdirectories-if-not-present)
+            1. [Initialize "specific" variables for workflow](#initialize-specific-variables-for-workflow)
                 1. [Code](#code-8)
+            1. [If applicable, then run logic for running `pairtools merge`](#if-applicable-then-run-logic-for-running-pairtools-merge)
+                1. [Code](#code-9)
+            1. [Create outdirectories if not present](#create-outdirectories-if-not-present)
+                1. [Code](#code-10)
     1. [1. Trim fastq files](#1-trim-fastq-files)
-        1. [Code](#code-9)
-        1. [Printed](#printed-4)
-    1. [2. Align datasets](#2-align-datasets)
-        1. [Code](#code-10)
-        1. [Printed](#printed-5)
-    1. [3. Run `pairtools parse`](#3-run-pairtools-parse)
         1. [Code](#code-11)
         1. [Printed](#printed-6)
+    1. [2. Align datasets](#2-align-datasets)
+        1. [Code](#code-12)
+        1. [Printed](#printed-7)
+    1. [3. Run `pairtools parse`](#3-run-pairtools-parse)
+        1. [Code](#code-13)
+        1. [Printed](#printed-8)
             1. [Check the documentation](#check-the-documentation)
                 1. [`pairtools parse`](#pairtools-parse)
                 1. [`pairtools parse2`](#pairtools-parse2)
@@ -59,8 +64,8 @@
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-2)
                 1. [Testing the "`keep-MM`" call to `pairtools parse2`](#testing-the-keep-mm-call-to-pairtools-parse2-2)
     1. [4. Run `pairtools sort`](#4-run-pairtools-sort)
-        1. [Code](#code-12)
-        1. [Printed](#printed-7)
+        1. [Code](#code-14)
+        1. [Printed](#printed-9)
             1. [Check the documentation](#check-the-documentation-1)
             1. [Run `pairtools sort`](#run-pairtools-sort)
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-3)
@@ -69,8 +74,8 @@
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-4)
                 1. [Testing the "rDNA" call to `pairtools parse2`](#testing-the-rdna-call-to-pairtools-parse2-1)
     1. [5. Run `pairtools dedup` and `pairtools split`](#5-run-pairtools-dedup-and-pairtools-split)
-        1. [Code](#code-13)
-        1. [Printed](#printed-8)
+        1. [Code](#code-15)
+        1. [Printed](#printed-10)
             1. [Check the documentation](#check-the-documentation-2)
             1. [Run `pairtools dedup`](#run-pairtools-dedup)
                 1. ["Standard"](#standard)
@@ -85,54 +90,54 @@
                 1. ["Standard"](#standard-3)
                 1. ["rDNA"](#rdna-3)
     1. [X. Run `pairtools merge` if applicable](#x-run-pairtools-merge-if-applicable)
-        1. [Code](#code-14)
-        1. [Printed](#printed-9)
+        1. [Code](#code-16)
+        1. [Printed](#printed-11)
             1. [Check the documentation](#check-the-documentation-3)
             1. [Do a trial run of `pairtools merge`](#do-a-trial-run-of-pairtools-merge)
             1. [Check the contents of the merge files](#check-the-contents-of-the-merge-files)
     1. [X. Run `pairtools select` if applicable](#x-run-pairtools-select-if-applicable)
-        1. [Code](#code-15)
-        1. [Printed](#printed-10)
+        1. [Code](#code-17)
+        1. [Printed](#printed-12)
             1. [Check the documentation](#check-the-documentation-4)
             1. [`pairtools select`](#pairtools-select)
     1. [X. Run "`standard-rDNA-complete`" processing if applicable](#x-run-standard-rdna-complete-processing-if-applicable)
         1. [A. Exclude rDNA-associated *cis* and *trans* interactions from "`standard.nodups`" file](#a-exclude-rdna-associated-cis-and-trans-interactions-from-standardnodups-file)
-            1. [Code](#code-16)
-            1. [Printed](#printed-11)
-        1. [B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file](#b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file)
-            1. [Code](#code-17)
-            1. [Printed](#printed-12)
-        1. [C. Re-header and merge the "`standard.nodups`" and "`keep-MM.nodups`" files](#c-re-header-and-merge-the-standardnodups-and-keep-mmnodups-files)
             1. [Code](#code-18)
             1. [Printed](#printed-13)
-    1. [6. Run `pairtools stats`](#6-run-pairtools-stats)
-        1. [Individual pairs files](#individual-pairs-files)
+        1. [B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file](#b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file)
             1. [Code](#code-19)
             1. [Printed](#printed-14)
+        1. [C. Re-header and merge the "`standard.nodups`" and "`keep-MM.nodups`" files](#c-re-header-and-merge-the-standardnodups-and-keep-mmnodups-files)
+            1. [Code](#code-20)
+            1. [Printed](#printed-15)
+    1. [6. Run `pairtools stats`](#6-run-pairtools-stats)
+        1. [Individual pairs files](#individual-pairs-files)
+            1. [Code](#code-21)
+            1. [Printed](#printed-16)
                 1. [Check the documentation](#check-the-documentation-5)
                 1. [Do a trial run of `pairtools stats`](#do-a-trial-run-of-pairtools-stats)
                 1. [Check the contents of the stats files](#check-the-contents-of-the-stats-files)
         1. [Merged pairs files](#merged-pairs-files)
-            1. [Code](#code-20)
-            1. [Printed](#printed-15)
-    1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
-        1. [Individual pairs file](#individual-pairs-file)
-            1. [Code](#code-21)
-            1. [Printed](#printed-16)
-        1. [Merged pairs files](#merged-pairs-files-1)
             1. [Code](#code-22)
             1. [Printed](#printed-17)
-    1. [8. Generate a multi-resolution cooler by coarsening](#8-generate-a-multi-resolution-cooler-by-coarsening)
-        1. [Cools from individual pairs files](#cools-from-individual-pairs-files)
+    1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
+        1. [Individual pairs file](#individual-pairs-file)
             1. [Code](#code-23)
             1. [Printed](#printed-18)
-        1. [Cools from merged pairs files](#cools-from-merged-pairs-files)
+        1. [Merged pairs files](#merged-pairs-files-1)
             1. [Code](#code-24)
             1. [Printed](#printed-19)
+    1. [8. Generate a multi-resolution cooler by coarsening](#8-generate-a-multi-resolution-cooler-by-coarsening)
+        1. [Cools from individual pairs files](#cools-from-individual-pairs-files)
+            1. [Code](#code-25)
+            1. [Printed](#printed-20)
+        1. [Cools from merged pairs files](#cools-from-merged-pairs-files)
+            1. [Code](#code-26)
+            1. [Printed](#printed-21)
     1. [9. Ingest files for HiGlass](#9-ingest-files-for-higlass)
-        1. [Code](#code-25)
+        1. [Code](#code-27)
             1. [TBD](#tbd)
-        1. [Printed](#printed-20)
+        1. [Printed](#printed-22)
 
 <!-- /MarkdownTOC -->
 </details>
@@ -2066,6 +2071,7 @@ install_higlass=FALSE
             --name higlass-container \
             higlass/higlass-docker
 
+        #  Check the mounts
         # docker exec higlass-container ls /tmp
         # docker exec higlass-container ls /data
     }
@@ -2163,6 +2169,9 @@ WARNING: The requested image's platform (linux/amd64) does not match the detecte
 5397123fc9c47ee2692fe0dd886e5fcf25964337da3b3a8319bfb74f282d7ebb
 
 
+❯ #  Check the mounts
+
+
 ❯ docker exec higlass-container ls /tmp
 Sublime Text.4cff18d2bab96a93366319a9e0fa060d.5708d8b708dcd64d09ce50548896f0ba.sock
 com.apple.launchd.La7pS0GCfq
@@ -2194,6 +2203,10 @@ log
 ```bash
 #!/bin/bash
 
+[[ "${CONDA_DEFAULT_ENV}" != "pairtools_env" ]] \
+    && source activate "pairtools_env" \
+    || conda activate "pairtools_env"
+
 install_clodius=FALSE
 [[ "${install_clodius}" == TRUE ]] && pip install clodius
 
@@ -2209,6 +2222,11 @@ install_bedops=TRUE
 <summary><i>Printed: Install Clodius and bedops</i></summary>
 
 ```txt
+❯ [[ "${CONDA_DEFAULT_ENV}" != "pairtools_env" ]] \
+>     && source activate "pairtools_env" \
+>     || conda activate "pairtools_env"
+
+
 ❯ [[ "${install_clodius}" == TRUE ]] && pip install clodius
 Collecting clodius
   Downloading clodius-0.20.1-py2.py3-none-any.whl (82 kB)
@@ -2358,7 +2376,7 @@ Verifying transaction: done
 Executing transaction: done
 ```
 
-Local (WorkMac&mdash;not MacBook) installation in `gff3_env`
+*Local (WorkMac&mdash;not MacBook) installation in `gff3_env`*
 ```txt
 ❯ pip install clodius
 Collecting clodius
@@ -2612,22 +2630,29 @@ Executing transaction: done
 ### 0. Get situated
 <a id="get-to-work-directory-initialize-environment"></a>
 #### Get to work directory, initialize environment
-<a id="code-4"></a>
-##### Code
-<details>
-<summary><i>Code: Get to work directory, initialize environment</i></summary>
-
 <a id="grabnode"></a>
-###### `grabnode`
+##### `grabnode`
+<a id="code-4"></a>
+###### Code
+<details>
+<summary><i>Code: grabnode</i></summary>
+
 ```bash
 #!/bin/bash
 
-#  Workflow is written to be interactive
-grabnode  # 8 cores: 20, 8, 1, N
+# #  Workflow is written to be interactive
+# grabnode  # 8 cores: 8, 20, 1, N
 ```
+</details>
+<br />
 
 <a id="go-to-work-directory-initialize-environment"></a>
-###### Go to work directory, initialize environment
+##### Go to work directory, initialize environment
+<a id="code-5"></a>
+###### Code
+<details>
+<summary><i>Code: Go to work directory, initialize environment</i></summary>
+
 ```bash
 #!/bin/bash
 
@@ -2635,7 +2660,199 @@ p_base="${HOME}/tsukiyamalab/kalavatt"  #ARGUMENT
 p_proj="2023_rDNA/results/2023-0307_work_Micro-C_align-process"
 cd "${p_base}/${p_proj}" || echo "cd'ing failed; check on this..."
 
-source activate pairtools_env
+
+[[ "${CONDA_DEFAULT_ENV}" != "pairtools_env" ]] \
+    && source activate pairtools_env \
+    || conda activate pairtools_env
+```
+</details>
+<br />
+
+<a id="printed-4"></a>
+###### Printed
+<details>
+<summary><i>Printed: Go to work directory, initialize environment</i></summary>
+
+```txt
+❯ p_base="${HOME}/tsukiyamalab/kalavatt"  #ARGUMENT
+
+
+❯ p_proj="2023_rDNA/results/2023-0307_work_Micro-C_align-process"
+
+
+❯ cd "${p_base}/${p_proj}" || echo "cd'ing failed; check on this..."
+
+
+❯ [[ "${CONDA_DEFAULT_ENV}" != "pairtools_env" ]] \
+>     && source activate pairtools_env \
+>     || conda activate pairtools_env
+```
+</details>
+<br />
+
+<a id="symlink-to-and-rename-files-of-interest"></a>
+#### Symlink to and rename files of interest
+<a id="code-6"></a>
+##### Code
+<details>
+<summary><i>Code: Symlink to and rename files of interest</i></summary>
+
+```bash
+#!/bin/bash
+
+p_Mol_Cell="${HOME}/2023_rDNA_data/PRJNA493742"
+p_eLife="${HOME}/2023_rDNA_data/PRJNA636358"
+
+ls -1 "${p_Mol_Cell}"
+ls -1 "${p_eLife}"
+
+
+"${p_Mol_Cell}/SRR7939018_1.fastq.gz"  # Q repM
+"${p_Mol_Cell}/SRR7939018_2.fastq.gz"  # Q repM
+
+"${p_Mol_Cell}/SRR7939017_1.fastq.gz"  # log repM
+"${p_Mol_Cell}/SRR7939017_2.fastq.gz"  # log repM
+
+SRR11893087_1.fastq.gz  # Mcd1-AID rep2
+SRR11893087_2.fastq.gz  # Mcd1-AID rep2
+
+SRR11893085_1.fastq.gz  # A364A rep2
+SRR11893085_2.fastq.gz  # A364A rep2
+
+
+SRR11893084 GSM4585126: A364_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 62084   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893084/SRR11893084.sra SRR11893084.sra SRR11893084_GSM4585126_A364_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/084/SRR11893084/SRR11893084_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/084/SRR11893084/SRR11893084_1.fastq.gz    SRR11893084_1.fastq.gz  SRR11893084_GSM4585126_A364_rep1_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
+SRR11893084 GSM4585126: A364_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 62084   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893084/SRR11893084.sra SRR11893084.sra SRR11893084_GSM4585126_A364_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/084/SRR11893084/SRR11893084_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/084/SRR11893084/SRR11893084_2.fastq.gz    SRR11893084_2.fastq.gz  SRR11893084_GSM4585126_A364_rep1_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
+
+
+SRR11893086 GSM4585128: mcd1-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 72278   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893086/SRR11893086.sra SRR11893086.sra SRR11893086_GSM4585128_mcd1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/086/SRR11893086/SRR11893086_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/086/SRR11893086/SRR11893086_1.fastq.gz    SRR11893086_1.fastq.gz  SRR11893086_GSM4585128_mcd1-AID_rep1_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
+SRR11893086 GSM4585128: mcd1-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 72278   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893086/SRR11893086.sra SRR11893086.sra SRR11893086_GSM4585128_mcd1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/086/SRR11893086/SRR11893086_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/086/SRR11893086/SRR11893086_2.fastq.gz    SRR11893086_2.fastq.gz  SRR11893086_GSM4585128_mcd1-AID_rep1_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
+
+
+SRR11893088 GSM4585130: brn1-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 65388   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893088/SRR11893088.sra SRR11893088.sra SRR11893088_GSM4585130_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/088/SRR11893088/SRR11893088_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/088/SRR11893088/SRR11893088_1.fastq.gz    SRR11893088_1.fastq.gz  SRR11893088_GSM4585130_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
+SRR11893088 GSM4585130: brn1-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 65388   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893088/SRR11893088.sra SRR11893088.sra SRR11893088_GSM4585130_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/088/SRR11893088/SRR11893088_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/088/SRR11893088/SRR11893088_2.fastq.gz    SRR11893088_2.fastq.gz  SRR11893088_GSM4585130_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
+
+SRR11893089 GSM4585131: brn1-AID_rep2; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 68913   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893089/SRR11893089.sra SRR11893089.sra SRR11893089_GSM4585131_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/089/SRR11893089/SRR11893089_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/089/SRR11893089/SRR11893089_1.fastq.gz    SRR11893089_1.fastq.gz  SRR11893089_GSM4585131_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
+SRR11893089 GSM4585131: brn1-AID_rep2; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 68913   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893089/SRR11893089.sra SRR11893089.sra SRR11893089_GSM4585131_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/089/SRR11893089/SRR11893089_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/089/SRR11893089/SRR11893089_2.fastq.gz    SRR11893089_2.fastq.gz  SRR11893089_GSM4585131_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
+
+
+
+
+
+SRR11893094 GSM4585136: pds5-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 84175   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893094/SRR11893094.sra SRR11893094.sra SRR11893094_GSM4585136_pds5-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/094/SRR11893094/SRR11893094_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/094/SRR11893094/SRR11893094_1.fastq.gz    SRR11893094_1.fastq.gz  SRR11893094_GSM4585136_pds5-AID_rep1_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
+SRR11893094 GSM4585136: pds5-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 84175   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893094/SRR11893094.sra SRR11893094.sra SRR11893094_GSM4585136_pds5-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/094/SRR11893094/SRR11893094_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/094/SRR11893094/SRR11893094_2.fastq.gz    SRR11893094_2.fastq.gz  SRR11893094_GSM4585136_pds5-AID_rep1_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
+
+
+SRR11893090 GSM4585132: mcd1-AID_brn1-AID_rep1; Saccharomyces cerevisiae; OTHER Illumina HiSeq 4000 91537   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893090/SRR11893090.sra SRR11893090.sra SRR11893090_GSM4585132_mcd1-AID_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/090/SRR11893090/SRR11893090_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/090/SRR11893090/SRR11893090_1.fastq.gz    SRR11893090_1.fastq.gz  SRR11893090_GSM4585132_mcd1-AID_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
+SRR11893090 GSM4585132: mcd1-AID_brn1-AID_rep1; Saccharomyces cerevisiae; OTHER Illumina HiSeq 4000 91537   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893090/SRR11893090.sra SRR11893090.sra SRR11893090_GSM4585132_mcd1-AID_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/090/SRR11893090/SRR11893090_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/090/SRR11893090/SRR11893090_2.fastq.gz    SRR11893090_2.fastq.gz  SRR11893090_GSM4585132_mcd1-AID_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
+
+SRR11893091 GSM4585133: mcd1-AID_brn1-AID_rep2; Saccharomyces cerevisiae; OTHER Illumina HiSeq 4000 62439   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893091/SRR11893091.sra SRR11893091.sra SRR11893091_GSM4585133_mcd1-AID_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER.sra    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/091/SRR11893091/SRR11893091_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/091/SRR11893091/SRR11893091_1.fastq.gz    SRR11893091_1.fastq.gz  SRR11893091_GSM4585133_mcd1-AID_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
+SRR11893091 GSM4585133: mcd1-AID_brn1-AID_rep2; Saccharomyces cerevisiae; OTHER Illumina HiSeq 4000 62439   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893091/SRR11893091.sra SRR11893091.sra SRR11893091_GSM4585133_mcd1-AID_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER.sra    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/091/SRR11893091/SRR11893091_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/091/SRR11893091/SRR11893091_2.fastq.gz    SRR11893091_2.fastq.gz  SRR11893091_GSM4585133_mcd1-AID_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
+
+
+SRR11893092 GSM4585134: wpl1-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 73693   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893092/SRR11893092.sra SRR11893092.sra SRR11893092_GSM4585134_wpl1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/092/SRR11893092/SRR11893092_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/092/SRR11893092/SRR11893092_1.fastq.gz    SRR11893092_1.fastq.gz  SRR11893092_GSM4585134_wpl1-AID_rep1_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
+SRR11893092 GSM4585134: wpl1-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 73693   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893092/SRR11893092.sra SRR11893092.sra SRR11893092_GSM4585134_wpl1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/092/SRR11893092/SRR11893092_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/092/SRR11893092/SRR11893092_2.fastq.gz    SRR11893092_2.fastq.gz  SRR11893092_GSM4585134_wpl1-AID_rep1_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
+
+SRR11893093 GSM4585135: wpl1-AID_rep2; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 81995   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893093/SRR11893093.sra SRR11893093.sra SRR11893093_GSM4585135_wpl1-AID_rep2_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/093/SRR11893093/SRR11893093_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/093/SRR11893093/SRR11893093_1.fastq.gz    SRR11893093_1.fastq.gz  SRR11893093_GSM4585135_wpl1-AID_rep2_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
+SRR11893093 GSM4585135: wpl1-AID_rep2; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 81995   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893093/SRR11893093.sra SRR11893093.sra SRR11893093_GSM4585135_wpl1-AID_rep2_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/093/SRR11893093/SRR11893093_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/093/SRR11893093/SRR11893093_2.fastq.gz    SRR11893093_2.fastq.gz  SRR11893093_GSM4585135_wpl1-AID_rep2_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
+
+
+
+SRR11893095 GSM4585137: timecourse-30C_15min; Saccharomyces cerevisiae; OTHER   Illumina HiSeq 4000 107332  1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893095/SRR11893095.sra SRR11893095.sra SRR11893095_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER.sra  ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/095/SRR11893095/SRR11893095_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/095/SRR11893095/SRR11893095_1.fastq.gz    SRR11893095_1.fastq.gz  SRR11893095_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
+SRR11893095 GSM4585137: timecourse-30C_15min; Saccharomyces cerevisiae; OTHER   Illumina HiSeq 4000 107332  1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893095/SRR11893095.sra SRR11893095.sra SRR11893095_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER.sra  ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/095/SRR11893095/SRR11893095_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/095/SRR11893095/SRR11893095_2.fastq.gz    SRR11893095_2.fastq.gz  SRR11893095_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
+
+SRR11893096 GSM4585137: timecourse-30C_15min; Saccharomyces cerevisiae; OTHER   Illumina HiSeq 4000 99402   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893096/SRR11893096.sra SRR11893096.sra SRR11893096_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER.sra  ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/096/SRR11893096/SRR11893096_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/096/SRR11893096/SRR11893096_1.fastq.gz    SRR11893096_1.fastq.gz  SRR11893096_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
+SRR11893096 GSM4585137: timecourse-30C_15min; Saccharomyces cerevisiae; OTHER   Illumina HiSeq 4000 99402   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893096/SRR11893096.sra SRR11893096.sra SRR11893096_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER.sra  ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/096/SRR11893096/SRR11893096_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/096/SRR11893096/SRR11893096_2.fastq.gz    SRR11893096_2.fastq.gz  SRR11893096_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
+
+
+SRR11893107 GSM4585143: timecourse-23C-15min; Saccharomyces cerevisiae; OTHER   Illumina HiSeq 4000 73956   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893107/SRR11893107.sra SRR11893107.sra SRR11893107_GSM4585143_timecourse-23C-15min_Saccharomyces_cerevisiae_OTHER.sra  ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/007/SRR11893107/SRR11893107_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/007/SRR11893107/SRR11893107_1.fastq.gz    SRR11893107_1.fastq.gz  SRR11893107_GSM4585143_timecourse-23C-15min_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
+SRR11893107 GSM4585143: timecourse-23C-15min; Saccharomyces cerevisiae; OTHER   Illumina HiSeq 4000 73956   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893107/SRR11893107.sra SRR11893107.sra SRR11893107_GSM4585143_timecourse-23C-15min_Saccharomyces_cerevisiae_OTHER.sra  ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/007/SRR11893107/SRR11893107_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/007/SRR11893107/SRR11893107_2.fastq.gz    SRR11893107_2.fastq.gz  SRR11893107_GSM4585143_timecourse-23C-15min_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
+
+```
+</details>
+<br />
+
+<a id="printed-5"></a>
+##### Printed
+<details>
+<summary><i>Printed: Symlink to and rename files of interest</i></summary>
+
+```txt
+❯ p_Mol_Cell="${HOME}/2023_rDNA_data/PRJNA493742"
+
+
+❯ p_eLife="${HOME}/2023_rDNA_data/PRJNA636358"
+
+
+❯ ls -1 "${p_Mol_Cell}"
+md5sum
+n_char
+PRJNA493742.SRR.txt.gz
+PRJNA493742.tsv.gz
+SRR7939017_1.fastq.gz
+SRR7939017_2.fastq.gz
+SRR7939018_1.fastq.gz
+SRR7939018_2.fastq.gz
+SRR7939019_1.fastq.gz
+SRR7939019_2.fastq.gz
+SRR7939020_1.fastq.gz
+SRR7939020_2.fastq.gz
+
+
+❯ ls -1 "${p_eLife}"
+md5sum
+n_char
+PRJNA636358.SRR.txt.gz
+PRJNA636358.tsv.gz
+SRR11893084_1.fastq.gz
+SRR11893084_2.fastq.gz
+SRR11893085_1.fastq.gz
+SRR11893085_2.fastq.gz
+SRR11893086_1.fastq.gz
+SRR11893086_2.fastq.gz
+SRR11893087_1.fastq.gz
+SRR11893087_2.fastq.gz
+SRR11893088_1.fastq.gz
+SRR11893088_2.fastq.gz
+SRR11893089_1.fastq.gz
+SRR11893089_2.fastq.gz
+SRR11893090_1.fastq.gz
+SRR11893090_2.fastq.gz
+SRR11893091_1.fastq.gz
+SRR11893091_2.fastq.gz
+SRR11893092_1.fastq.gz
+SRR11893092_2.fastq.gz
+SRR11893093_1.fastq.gz
+SRR11893093_2.fastq.gz
+SRR11893094_1.fastq.gz
+SRR11893094_2.fastq.gz
+SRR11893095_1.fastq.gz
+SRR11893095_2.fastq.gz
+SRR11893096_1.fastq.gz
+SRR11893096_2.fastq.gz
+SRR11893097_1.fastq.gz
+SRR11893097_2.fastq.gz
+SRR11893098_1.fastq.gz
+SRR11893098_2.fastq.gz
+SRR11893099_1.fastq.gz
+SRR11893099_2.fastq.gz
+SRR11893100_1.fastq.gz
+SRR11893100_2.fastq.gz
+SRR11893101_1.fastq.gz
+SRR11893101_2.fastq.gz
+SRR11893102_1.fastq.gz
+SRR11893102_2.fastq.gz
+SRR11893103_1.fastq.gz
+SRR11893103_2.fastq.gz
+SRR11893104_1.fastq.gz
+SRR11893104_2.fastq.gz
+SRR11893105_1.fastq.gz
+SRR11893105_2.fastq.gz
+SRR11893106_1.fastq.gz
+SRR11893106_2.fastq.gz
+SRR11893107_1.fastq.gz
+SRR11893107_2.fastq.gz
+SRR11893109_1.fastq.gz
+SRR11893109_2.fastq.gz
 ```
 </details>
 <br />
@@ -2644,7 +2861,7 @@ source activate pairtools_env
 #### Initialize variables, create outdirectories
 <a id="initialize-general-variables-for-workflow"></a>
 ##### Initialize "general" variables for workflow
-<a id="code-5"></a>
+<a id="code-7"></a>
 ###### Code
 <details>
 <summary><i>Code: Initialize "general" variables for workflow</i></summary>
@@ -2742,7 +2959,7 @@ print_test=TRUE  #ARGUMENT
 
 <a id="initialize-specific-variables-for-workflow"></a>
 ##### Initialize "specific" variables for workflow
-<a id="code-6"></a>
+<a id="code-8"></a>
 ###### Code
 <details>
 <summary><i>Code: Initialize "specific" variables for workflow</i></summary>
@@ -2921,7 +3138,7 @@ print_test=TRUE  #ARGUMENT
 
 <a id="if-applicable-then-run-logic-for-running-pairtools-merge"></a>
 ##### If applicable, then run logic for running `pairtools merge`
-<a id="code-7"></a>
+<a id="code-9"></a>
 ###### Code
 <details>
 <summary><i>Code: If applicable, then run logic for running pairtools merge</i></summary>
@@ -3031,7 +3248,7 @@ print_test=TRUE  #ARGUMENT
 
 <a id="create-outdirectories-if-not-present"></a>
 ##### Create outdirectories if not present
-<a id="code-8"></a>
+<a id="code-10"></a>
 ###### Code
 <details>
 <summary><i>Code: Create outdirectories if not present</i></summary>
@@ -3053,7 +3270,7 @@ print_test=TRUE  #ARGUMENT
 
 <a id="1-trim-fastq-files"></a>
 ### 1. Trim fastq files
-<a id="code-9"></a>
+<a id="code-11"></a>
 #### Code
 <details>
 <summary><i>Code: 1. Trim fastq files</i></summary>
@@ -3102,7 +3319,7 @@ run=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-4"></a>
+<a id="printed-6"></a>
 #### Printed
 <details>
 <summary><i>Printed: 1. Trim fastq files</i></summary>
@@ -3175,7 +3392,7 @@ pigz 2.6
 
 <a id="2-align-datasets"></a>
 ### 2. Align datasets
-<a id="code-10"></a>
+<a id="code-12"></a>
 #### Code
 <details>
 <summary><i>Code: 2. Align datasets</i></summary>
@@ -3282,7 +3499,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-5"></a>
+<a id="printed-7"></a>
 #### Printed
 <details>
 <summary><i>Printed: 2. Align datasets</i></summary>
@@ -3375,7 +3592,7 @@ run=TRUE
 
 <a id="3-run-pairtools-parse"></a>
 ### 3. Run `pairtools parse`
-<a id="code-11"></a>
+<a id="code-13"></a>
 #### Code
 <details>
 <summary><i>Code: 3. Run pairtools parse</i></summary>
@@ -3564,7 +3781,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-6"></a>
+<a id="printed-8"></a>
 #### Printed
 <details>
 <summary><i>Printed: 3. Run pairtools parse</i></summary>
@@ -5620,7 +5837,7 @@ dist_freq/562341325+/++ 0
 
 <a id="4-run-pairtools-sort"></a>
 ### 4. Run `pairtools sort`
-<a id="code-12"></a>
+<a id="code-14"></a>
 #### Code
 <details>
 <summary><i>Code: 4. Run pairtools sort</i></summary>
@@ -5692,7 +5909,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-7"></a>
+<a id="printed-9"></a>
 #### Printed
 <details>
 <summary><i>Printed: 4. Run pairtools sort</i></summary>
@@ -6306,7 +6523,7 @@ SRR7939018.38300170 XVI 948034  XVI 1219    -   -   UU  1   R1-2    948034  1219
 
 <a id="5-run-pairtools-dedup-and-pairtools-split"></a>
 ### 5. Run `pairtools dedup` and `pairtools split`
-<a id="code-13"></a>
+<a id="code-15"></a>
 #### Code
 <details>
 <summary><i>Code: 5. Run pairtools dedup</i></summary>
@@ -6449,7 +6666,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-8"></a>
+<a id="printed-10"></a>
 #### Printed
 <details>
 <summary><i>Printed: 5. Run pairtools dedup</i></summary>
@@ -9257,7 +9474,7 @@ dist_freq/562341325+/++ 0
 
 <a id="x-run-pairtools-merge-if-applicable"></a>
 ### X. Run `pairtools merge` if applicable
-<a id="code-14"></a>
+<a id="code-16"></a>
 #### Code
 <details>
 <summary><i>Code: Run pairtools merge if applicable</i></summary>
@@ -9343,7 +9560,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-9"></a>
+<a id="printed-11"></a>
 #### Printed
 <details>
 <summary><i>Printed: Run pairtools merge if applicable</i></summary>
@@ -9536,7 +9753,7 @@ drwxrws--- 3 kalavatt  619 Jul  8 14:45 ../
 
 <a id="x-run-pairtools-select-if-applicable"></a>
 ### X. Run `pairtools select` if applicable
-<a id="code-15"></a>
+<a id="code-17"></a>
 #### Code
 <details>
 <summary><i>Code: X. Run pairtools select if applicable</i></summary>
@@ -9556,7 +9773,7 @@ drwxrws--- 3 kalavatt  619 Jul  8 14:45 ../
 </details>
 <br />
 
-<a id="printed-10"></a>
+<a id="printed-12"></a>
 #### Printed
 <details>
 <summary><i>Printed: X. Run pairtools select</i></summary>
@@ -9675,7 +9892,7 @@ Options:
 ### X. Run "`standard-rDNA-complete`" processing if applicable
 <a id="a-exclude-rdna-associated-cis-and-trans-interactions-from-standardnodups-file"></a>
 #### A. Exclude rDNA-associated *cis* and *trans* interactions from "`standard.nodups`" file
-<a id="code-16"></a>
+<a id="code-18"></a>
 ##### Code
 <details>
 <summary><i>Code: A. Exclude rDNA-associated cis and trans interactions from "standard"</i></summary>
@@ -9778,7 +9995,7 @@ Options:
 </details>
 <br />
 
-<a id="printed-11"></a>
+<a id="printed-13"></a>
 ##### Printed
 <details>
 <summary><i>Printed: A. Exclude rDNA-associated cis and trans interactions from "standard"</i></summary>
@@ -9791,7 +10008,7 @@ Options:
 
 <a id="b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file"></a>
 #### B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file
-<a id="code-17"></a>
+<a id="code-19"></a>
 ##### Code
 <details>
 <summary><i>Code: B. Exclude all but rDNA-associated cis and trans interactions from "keep-MM.nodups" file</i></summary>
@@ -9866,7 +10083,7 @@ Options:
 </details>
 <br />
 
-<a id="printed-12"></a>
+<a id="printed-14"></a>
 ##### Printed
 <details>
 <summary><i>Printed: B. Exclude all but rDNA-associated cis and trans interactions from "keep-MM.nodups" file</i></summary>
@@ -9881,7 +10098,7 @@ Options:
 #### C. Re-header and merge the "`standard.nodups`" and "`keep-MM.nodups`" files
 ...and re-header the file
 
-<a id="code-18"></a>
+<a id="code-20"></a>
 ##### Code
 <details>
 <summary><i>Code: C. Re-header and merge the "standard.nodups" and "keep-MM.nodups" files</i></summary>
@@ -10139,7 +10356,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
 </details>
 <br />
 
-<a id="printed-13"></a>
+<a id="printed-15"></a>
 ##### Printed
 <details>
 <summary><i>Printed: C. Re-header and merge the "standard.nodups" and "keep-MM.nodups" files</i></summary>
@@ -10394,7 +10611,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
 ### 6. Run `pairtools stats`
 <a id="individual-pairs-files"></a>
 #### Individual pairs files
-<a id="code-19"></a>
+<a id="code-21"></a>
 ##### Code
 <details>
 <summary><i>Code: 6. Run pairtools stats</i></summary>
@@ -10450,7 +10667,7 @@ run_check=FALSE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-14"></a>
+<a id="printed-16"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 6. Run pairtools stats</i></summary>
@@ -11479,7 +11696,7 @@ chromsizes/Mito 85779
 
 <a id="merged-pairs-files"></a>
 #### Merged pairs files
-<a id="code-20"></a>
+<a id="code-22"></a>
 ##### Code
 <details>
 <summary><i>Code: 6. Run pairtools stats</i></summary>
@@ -11527,7 +11744,7 @@ run_check=TRUE
 </details>
 <br />
 
-<a id="printed-15"></a>
+<a id="printed-17"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 6. Run pairtools stats</i></summary>
@@ -12068,7 +12285,7 @@ chromsizes/XVI  948066
 ### 7. Load pairs to cooler
 <a id="individual-pairs-file"></a>
 #### Individual pairs file
-<a id="code-21"></a>
+<a id="code-23"></a>
 ##### Code
 <details>
 <summary><i>Code: 7. Load pairs to cooler</i></summary>
@@ -12110,7 +12327,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-16"></a>
+<a id="printed-18"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 7. Load pairs to cooler</i></summary>
@@ -12271,7 +12488,7 @@ INFO:cooler.create:Writing info
 
 <a id="merged-pairs-files-1"></a>
 #### Merged pairs files
-<a id="code-22"></a>
+<a id="code-24"></a>
 ##### Code
 <details>
 <summary><i>Code: 7. Load pairs to cooler</i></summary>
@@ -12308,7 +12525,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-17"></a>
+<a id="printed-19"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 7. Load pairs to cooler</i></summary>
@@ -12393,7 +12610,7 @@ INFO:cooler.create:Writing info
 ### 8. Generate a multi-resolution cooler by coarsening
 <a id="cools-from-individual-pairs-files"></a>
 #### Cools from individual pairs files
-<a id="code-23"></a>
+<a id="code-25"></a>
 ##### Code
 <details>
 <summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -12436,7 +12653,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-18"></a>
+<a id="printed-20"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -12858,7 +13075,7 @@ INFO:cooler.balance:variance is 7.734072057040814e-06
 
 <a id="cools-from-merged-pairs-files"></a>
 #### Cools from merged pairs files
-<a id="code-24"></a>
+<a id="code-26"></a>
 ##### Code
 <details>
 <summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -12898,7 +13115,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-19"></a>
+<a id="printed-21"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -13049,7 +13266,7 @@ INFO:cooler.cli.zoomify:Balancing zoom level with bin size 100
 
 <a id="9-ingest-files-for-higlass"></a>
 ### 9. Ingest files for HiGlass
-<a id="code-25"></a>
+<a id="code-27"></a>
 #### Code
 <details>
 <summary><i>Code: Ingest files for HiGlass</i></summary>
@@ -13539,7 +13756,7 @@ counter: 41000 1359
 </details>
 <br />
 
-<a id="printed-20"></a>
+<a id="printed-22"></a>
 #### Printed
 <details>
 <summary><i>Printed: Ingest files for HiGlass</i></summary>
