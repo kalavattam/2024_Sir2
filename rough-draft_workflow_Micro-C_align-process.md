@@ -30,26 +30,32 @@
                 1. [Code](#code-5)
                 1. [Printed](#printed-4)
         1. [Symlink to and rename files of interest](#symlink-to-and-rename-files-of-interest)
-            1. [Code](#code-6)
-            1. [Printed](#printed-5)
-        1. [Initialize variables, create outdirectories](#initialize-variables-create-outdirectories)
-            1. [Initialize "general" variables for workflow](#initialize-general-variables-for-workflow)
+            1. [Initialize variables and arrays, run checks](#initialize-variables-and-arrays-run-checks)
+                1. [Code](#code-6)
+                1. [Printed](#printed-5)
+            1. [Symlink to and rename the `fastq`s](#symlink-to-and-rename-the-fastqs)
                 1. [Code](#code-7)
-            1. [Initialize "specific" variables for workflow](#initialize-specific-variables-for-workflow)
+                1. [Printed](#printed-6)
+        1. [Initialize variables, create outdirectories](#initialize-variables-create-outdirectories)
+            1. [What datasets do we want to work with?](#what-datasets-do-we-want-to-work-with)
+                1. [Notes](#notes)
+            1. [Initialize "general" variables for workflow](#initialize-general-variables-for-workflow)
                 1. [Code](#code-8)
-            1. [If applicable, then run logic for running `pairtools merge`](#if-applicable-then-run-logic-for-running-pairtools-merge)
+            1. [Initialize "specific" variables for workflow](#initialize-specific-variables-for-workflow)
                 1. [Code](#code-9)
-            1. [Create outdirectories if not present](#create-outdirectories-if-not-present)
+            1. [If applicable, then run logic for running `pairtools merge`](#if-applicable-then-run-logic-for-running-pairtools-merge)
                 1. [Code](#code-10)
+            1. [Create outdirectories if not present](#create-outdirectories-if-not-present)
+                1. [Code](#code-11)
     1. [1. Trim fastq files](#1-trim-fastq-files)
-        1. [Code](#code-11)
-        1. [Printed](#printed-6)
-    1. [2. Align datasets](#2-align-datasets)
         1. [Code](#code-12)
         1. [Printed](#printed-7)
-    1. [3. Run `pairtools parse`](#3-run-pairtools-parse)
+    1. [2. Align datasets](#2-align-datasets)
         1. [Code](#code-13)
         1. [Printed](#printed-8)
+    1. [3. Run `pairtools parse`](#3-run-pairtools-parse)
+        1. [Code](#code-14)
+        1. [Printed](#printed-9)
             1. [Check the documentation](#check-the-documentation)
                 1. [`pairtools parse`](#pairtools-parse)
                 1. [`pairtools parse2`](#pairtools-parse2)
@@ -64,8 +70,8 @@
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-2)
                 1. [Testing the "`keep-MM`" call to `pairtools parse2`](#testing-the-keep-mm-call-to-pairtools-parse2-2)
     1. [4. Run `pairtools sort`](#4-run-pairtools-sort)
-        1. [Code](#code-14)
-        1. [Printed](#printed-9)
+        1. [Code](#code-15)
+        1. [Printed](#printed-10)
             1. [Check the documentation](#check-the-documentation-1)
             1. [Run `pairtools sort`](#run-pairtools-sort)
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-3)
@@ -74,8 +80,8 @@
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-4)
                 1. [Testing the "rDNA" call to `pairtools parse2`](#testing-the-rdna-call-to-pairtools-parse2-1)
     1. [5. Run `pairtools dedup` and `pairtools split`](#5-run-pairtools-dedup-and-pairtools-split)
-        1. [Code](#code-15)
-        1. [Printed](#printed-10)
+        1. [Code](#code-16)
+        1. [Printed](#printed-11)
             1. [Check the documentation](#check-the-documentation-2)
             1. [Run `pairtools dedup`](#run-pairtools-dedup)
                 1. ["Standard"](#standard)
@@ -90,54 +96,54 @@
                 1. ["Standard"](#standard-3)
                 1. ["rDNA"](#rdna-3)
     1. [X. Run `pairtools merge` if applicable](#x-run-pairtools-merge-if-applicable)
-        1. [Code](#code-16)
-        1. [Printed](#printed-11)
+        1. [Code](#code-17)
+        1. [Printed](#printed-12)
             1. [Check the documentation](#check-the-documentation-3)
             1. [Do a trial run of `pairtools merge`](#do-a-trial-run-of-pairtools-merge)
             1. [Check the contents of the merge files](#check-the-contents-of-the-merge-files)
     1. [X. Run `pairtools select` if applicable](#x-run-pairtools-select-if-applicable)
-        1. [Code](#code-17)
-        1. [Printed](#printed-12)
+        1. [Code](#code-18)
+        1. [Printed](#printed-13)
             1. [Check the documentation](#check-the-documentation-4)
             1. [`pairtools select`](#pairtools-select)
     1. [X. Run "`standard-rDNA-complete`" processing if applicable](#x-run-standard-rdna-complete-processing-if-applicable)
         1. [A. Exclude rDNA-associated *cis* and *trans* interactions from "`standard.nodups`" file](#a-exclude-rdna-associated-cis-and-trans-interactions-from-standardnodups-file)
-            1. [Code](#code-18)
-            1. [Printed](#printed-13)
-        1. [B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file](#b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file)
             1. [Code](#code-19)
             1. [Printed](#printed-14)
-        1. [C. Re-header and merge the "`standard.nodups`" and "`keep-MM.nodups`" files](#c-re-header-and-merge-the-standardnodups-and-keep-mmnodups-files)
+        1. [B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file](#b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file)
             1. [Code](#code-20)
             1. [Printed](#printed-15)
-    1. [6. Run `pairtools stats`](#6-run-pairtools-stats)
-        1. [Individual pairs files](#individual-pairs-files)
+        1. [C. Re-header and merge the "`standard.nodups`" and "`keep-MM.nodups`" files](#c-re-header-and-merge-the-standardnodups-and-keep-mmnodups-files)
             1. [Code](#code-21)
             1. [Printed](#printed-16)
+    1. [6. Run `pairtools stats`](#6-run-pairtools-stats)
+        1. [Individual pairs files](#individual-pairs-files)
+            1. [Code](#code-22)
+            1. [Printed](#printed-17)
                 1. [Check the documentation](#check-the-documentation-5)
                 1. [Do a trial run of `pairtools stats`](#do-a-trial-run-of-pairtools-stats)
                 1. [Check the contents of the stats files](#check-the-contents-of-the-stats-files)
         1. [Merged pairs files](#merged-pairs-files)
-            1. [Code](#code-22)
-            1. [Printed](#printed-17)
-    1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
-        1. [Individual pairs file](#individual-pairs-file)
             1. [Code](#code-23)
             1. [Printed](#printed-18)
-        1. [Merged pairs files](#merged-pairs-files-1)
+    1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
+        1. [Individual pairs file](#individual-pairs-file)
             1. [Code](#code-24)
             1. [Printed](#printed-19)
-    1. [8. Generate a multi-resolution cooler by coarsening](#8-generate-a-multi-resolution-cooler-by-coarsening)
-        1. [Cools from individual pairs files](#cools-from-individual-pairs-files)
+        1. [Merged pairs files](#merged-pairs-files-1)
             1. [Code](#code-25)
             1. [Printed](#printed-20)
-        1. [Cools from merged pairs files](#cools-from-merged-pairs-files)
+    1. [8. Generate a multi-resolution cooler by coarsening](#8-generate-a-multi-resolution-cooler-by-coarsening)
+        1. [Cools from individual pairs files](#cools-from-individual-pairs-files)
             1. [Code](#code-26)
             1. [Printed](#printed-21)
+        1. [Cools from merged pairs files](#cools-from-merged-pairs-files)
+            1. [Code](#code-27)
+            1. [Printed](#printed-22)
     1. [9. Ingest files for HiGlass](#9-ingest-files-for-higlass)
-        1. [Code](#code-27)
+        1. [Code](#code-28)
             1. [TBD](#tbd)
-        1. [Printed](#printed-22)
+        1. [Printed](#printed-23)
 
 <!-- /MarkdownTOC -->
 </details>
@@ -2692,95 +2698,102 @@ cd "${p_base}/${p_proj}" || echo "cd'ing failed; check on this..."
 
 <a id="symlink-to-and-rename-files-of-interest"></a>
 #### Symlink to and rename files of interest
+<a id="initialize-variables-and-arrays-run-checks"></a>
+##### Initialize variables and arrays, run checks
 <a id="code-6"></a>
-##### Code
+###### Code
 <details>
 <summary><i>Code: Symlink to and rename files of interest</i></summary>
 
 ```bash
 #!/bin/bash
 
-p_Mol_Cell="${HOME}/2023_rDNA_data/PRJNA493742"
-p_eLife="${HOME}/2023_rDNA_data/PRJNA636358"
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        p_Mol_Cell_2019="${HOME}/2023_rDNA_data/PRJNA493742"
+        p_eLife_2020="${HOME}/2023_rDNA_data/PRJNA636358"
+        p_eLife_2021="${HOME}/2023_rDNA_data/PRJNA702747"
 
-ls -1 "${p_Mol_Cell}"
-ls -1 "${p_eLife}"
+        ls -1 "${p_Mol_Cell}"
+        ls -1 "${p_eLife_2020}"
+        ls -1 "${p_eLife_2021}"
 
+        unset A_eLife_2020 && typeset -A A_eLife_2020
+        unset a_eLife_2020 && typeset -a a_eLife_2020
+        A_eLife_2020["SRR11893084"]="MC-2020_nz_WT_rep1"; a_eLife_2020="SRR11893084"
+        A_eLife_2020["SRR11893085"]="MC-2020_nz_WT_rep2"; a_eLife_2020="SRR11893085"
+        A_eLife_2020["SRR11893086"]="MC-2020_nz_MCD1-AID_rep1"; a_eLife_2020="SRR11893086"
+        A_eLife_2020["SRR11893087"]="MC-2020_nz_MCD1-AID_rep2"; a_eLife_2020="SRR11893087"
+        A_eLife_2020["SRR11893088"]="MC-2020_nz_BRN1-AID_rep1"; a_eLife_2020="SRR11893088"
+        A_eLife_2020["SRR11893089"]="MC-2020_nz_BRN1-AID_rep2"; a_eLife_2020="SRR11893089"
+        A_eLife_2020["SRR11893090"]="MC-2020_nz_MCD1-AID-BRN1-AID_rep1"; a_eLife_2020="SRR11893090"
+        A_eLife_2020["SRR11893091"]="MC-2020_nz_MCD1-AID-BRN1-AID_rep2"; a_eLife_2020="SRR11893091"
+        A_eLife_2020["SRR11893092"]="MC-2020_nz_WPL1-AID_rep1"; a_eLife_2020="SRR11893092"
+        A_eLife_2020["SRR11893093"]="MC-2020_nz_WPL1-AID_rep2"; a_eLife_2020="SRR11893093"
+        A_eLife_2020["SRR11893094"]="MC-2020_nz_PDS5-AID_rep0"; a_eLife_2020="SRR11893094"
+        A_eLife_2020["SRR11893095"]="MC-2020_30C-a15_WT_rep1"; a_eLife_2020="SRR11893095"
+        A_eLife_2020["SRR11893096"]="MC-2020_30C-a15_WT_rep2"; a_eLife_2020="SRR11893096"
+        A_eLife_2020["SRR11893107"]="MC-2020_23C-a15_WT_rep0"; a_eLife_2020="SRR11893107"
 
-"${p_Mol_Cell}/SRR7939018_1.fastq.gz"  # Q repM
-"${p_Mol_Cell}/SRR7939018_2.fastq.gz"  # Q repM
+        unset A_Mol_Cell_2019 && typeset -A A_Mol_Cell_2019
+        unset a_Mol_Cell_2019 && typeset -a a_Mol_Cell_2019
+        A_Mol_Cell_2019["SRR7939017"]="MC-2019_log_WT_repM"; a_Mol_Cell_2019="MC_log_WT_repM"
+        A_Mol_Cell_2019["SRR7939018"]="MC-2019_Q_WT_repM"; a_Mol_Cell_2019="MC_Q_WT_repM"
 
-"${p_Mol_Cell}/SRR7939017_1.fastq.gz"  # log repM
-"${p_Mol_Cell}/SRR7939017_2.fastq.gz"  # log repM
+        unset A_eLife_2021 && typeset -A A_eLife_2021
+        unset a_eLife_2021 && typeset -A a_eLife_2021
+        A_eLife_2021["SRR13736655"]="MC-2021_log_WT_repM"; a_eLife_2021="MC-2021_log_WT_repM"
+        A_eLife_2021["SRR13736659"]="MC-2021_Q_WT_repM"; a_eLife_2021="MC-2021_Q_WT_repM"
 
-SRR11893087_1.fastq.gz  # Mcd1-AID rep2
-SRR11893087_2.fastq.gz  # Mcd1-AID rep2
+        run_check=FALSE
+        [[ "${run_check}" == TRUE ]] &&
+            {
+                #  Check that files are correctly accessed
+                for i in "${!A_eLife_2020[@]}"; do
+                    echo "  key  ${i}"
+                    echo "value  ${A_eLife_2020[${i}]}"
+                    echo ""
 
-SRR11893085_1.fastq.gz  # A364A rep2
-SRR11893085_2.fastq.gz  # A364A rep2
+                    ls -lhaFG "${p_eLife_2020}/${i}_1.fastq.gz"
+                    ls -lhaFG "${p_eLife_2020}/${i}_2.fastq.gz"
+                    echo ""
+                done
 
+                for i in "${!A_Mol_Cell_2019[@]}"; do
+                    echo "  key  ${i}"
+                    echo "value  ${A_Mol_Cell_2019[${i}]}"
+                    echo ""
 
-SRR11893084 GSM4585126: A364_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 62084   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893084/SRR11893084.sra SRR11893084.sra SRR11893084_GSM4585126_A364_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/084/SRR11893084/SRR11893084_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/084/SRR11893084/SRR11893084_1.fastq.gz    SRR11893084_1.fastq.gz  SRR11893084_GSM4585126_A364_rep1_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
-SRR11893084 GSM4585126: A364_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 62084   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893084/SRR11893084.sra SRR11893084.sra SRR11893084_GSM4585126_A364_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/084/SRR11893084/SRR11893084_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/084/SRR11893084/SRR11893084_2.fastq.gz    SRR11893084_2.fastq.gz  SRR11893084_GSM4585126_A364_rep1_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
+                    ls -lhaFG "${p_Mol_Cell_2019}/${i}_1.fastq.gz"
+                    ls -lhaFG "${p_Mol_Cell_2019}/${i}_2.fastq.gz"
+                    echo ""
+                done
 
+                for i in "${!A_eLife_2021[@]}"; do
+                    echo "  key  ${i}"
+                    echo "value  ${A_eLife_2021[${i}]}"
+                    echo ""
 
-SRR11893086 GSM4585128: mcd1-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 72278   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893086/SRR11893086.sra SRR11893086.sra SRR11893086_GSM4585128_mcd1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/086/SRR11893086/SRR11893086_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/086/SRR11893086/SRR11893086_1.fastq.gz    SRR11893086_1.fastq.gz  SRR11893086_GSM4585128_mcd1-AID_rep1_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
-SRR11893086 GSM4585128: mcd1-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 72278   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893086/SRR11893086.sra SRR11893086.sra SRR11893086_GSM4585128_mcd1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/086/SRR11893086/SRR11893086_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/086/SRR11893086/SRR11893086_2.fastq.gz    SRR11893086_2.fastq.gz  SRR11893086_GSM4585128_mcd1-AID_rep1_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
-
-
-SRR11893088 GSM4585130: brn1-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 65388   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893088/SRR11893088.sra SRR11893088.sra SRR11893088_GSM4585130_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/088/SRR11893088/SRR11893088_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/088/SRR11893088/SRR11893088_1.fastq.gz    SRR11893088_1.fastq.gz  SRR11893088_GSM4585130_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
-SRR11893088 GSM4585130: brn1-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 65388   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893088/SRR11893088.sra SRR11893088.sra SRR11893088_GSM4585130_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/088/SRR11893088/SRR11893088_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/088/SRR11893088/SRR11893088_2.fastq.gz    SRR11893088_2.fastq.gz  SRR11893088_GSM4585130_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
-
-SRR11893089 GSM4585131: brn1-AID_rep2; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 68913   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893089/SRR11893089.sra SRR11893089.sra SRR11893089_GSM4585131_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/089/SRR11893089/SRR11893089_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/089/SRR11893089/SRR11893089_1.fastq.gz    SRR11893089_1.fastq.gz  SRR11893089_GSM4585131_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
-SRR11893089 GSM4585131: brn1-AID_rep2; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 68913   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893089/SRR11893089.sra SRR11893089.sra SRR11893089_GSM4585131_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/089/SRR11893089/SRR11893089_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/089/SRR11893089/SRR11893089_2.fastq.gz    SRR11893089_2.fastq.gz  SRR11893089_GSM4585131_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
-
-
-
-
-
-SRR11893094 GSM4585136: pds5-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 84175   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893094/SRR11893094.sra SRR11893094.sra SRR11893094_GSM4585136_pds5-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/094/SRR11893094/SRR11893094_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/094/SRR11893094/SRR11893094_1.fastq.gz    SRR11893094_1.fastq.gz  SRR11893094_GSM4585136_pds5-AID_rep1_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
-SRR11893094 GSM4585136: pds5-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 84175   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893094/SRR11893094.sra SRR11893094.sra SRR11893094_GSM4585136_pds5-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/094/SRR11893094/SRR11893094_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/094/SRR11893094/SRR11893094_2.fastq.gz    SRR11893094_2.fastq.gz  SRR11893094_GSM4585136_pds5-AID_rep1_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
-
-
-SRR11893090 GSM4585132: mcd1-AID_brn1-AID_rep1; Saccharomyces cerevisiae; OTHER Illumina HiSeq 4000 91537   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893090/SRR11893090.sra SRR11893090.sra SRR11893090_GSM4585132_mcd1-AID_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/090/SRR11893090/SRR11893090_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/090/SRR11893090/SRR11893090_1.fastq.gz    SRR11893090_1.fastq.gz  SRR11893090_GSM4585132_mcd1-AID_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
-SRR11893090 GSM4585132: mcd1-AID_brn1-AID_rep1; Saccharomyces cerevisiae; OTHER Illumina HiSeq 4000 91537   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893090/SRR11893090.sra SRR11893090.sra SRR11893090_GSM4585132_mcd1-AID_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/090/SRR11893090/SRR11893090_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/090/SRR11893090/SRR11893090_2.fastq.gz    SRR11893090_2.fastq.gz  SRR11893090_GSM4585132_mcd1-AID_brn1-AID_rep1_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
-
-SRR11893091 GSM4585133: mcd1-AID_brn1-AID_rep2; Saccharomyces cerevisiae; OTHER Illumina HiSeq 4000 62439   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893091/SRR11893091.sra SRR11893091.sra SRR11893091_GSM4585133_mcd1-AID_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER.sra    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/091/SRR11893091/SRR11893091_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/091/SRR11893091/SRR11893091_1.fastq.gz    SRR11893091_1.fastq.gz  SRR11893091_GSM4585133_mcd1-AID_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
-SRR11893091 GSM4585133: mcd1-AID_brn1-AID_rep2; Saccharomyces cerevisiae; OTHER Illumina HiSeq 4000 62439   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893091/SRR11893091.sra SRR11893091.sra SRR11893091_GSM4585133_mcd1-AID_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER.sra    ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/091/SRR11893091/SRR11893091_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/091/SRR11893091/SRR11893091_2.fastq.gz    SRR11893091_2.fastq.gz  SRR11893091_GSM4585133_mcd1-AID_brn1-AID_rep2_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
-
-
-SRR11893092 GSM4585134: wpl1-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 73693   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893092/SRR11893092.sra SRR11893092.sra SRR11893092_GSM4585134_wpl1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/092/SRR11893092/SRR11893092_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/092/SRR11893092/SRR11893092_1.fastq.gz    SRR11893092_1.fastq.gz  SRR11893092_GSM4585134_wpl1-AID_rep1_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
-SRR11893092 GSM4585134: wpl1-AID_rep1; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 73693   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893092/SRR11893092.sra SRR11893092.sra SRR11893092_GSM4585134_wpl1-AID_rep1_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/092/SRR11893092/SRR11893092_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/092/SRR11893092/SRR11893092_2.fastq.gz    SRR11893092_2.fastq.gz  SRR11893092_GSM4585134_wpl1-AID_rep1_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
-
-SRR11893093 GSM4585135: wpl1-AID_rep2; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 81995   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893093/SRR11893093.sra SRR11893093.sra SRR11893093_GSM4585135_wpl1-AID_rep2_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/093/SRR11893093/SRR11893093_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/093/SRR11893093/SRR11893093_1.fastq.gz    SRR11893093_1.fastq.gz  SRR11893093_GSM4585135_wpl1-AID_rep2_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
-SRR11893093 GSM4585135: wpl1-AID_rep2; Saccharomyces cerevisiae; OTHER  Illumina HiSeq 4000 81995   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893093/SRR11893093.sra SRR11893093.sra SRR11893093_GSM4585135_wpl1-AID_rep2_Saccharomyces_cerevisiae_OTHER.sra ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/093/SRR11893093/SRR11893093_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/093/SRR11893093/SRR11893093_2.fastq.gz    SRR11893093_2.fastq.gz  SRR11893093_GSM4585135_wpl1-AID_rep2_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
-
-
-
-SRR11893095 GSM4585137: timecourse-30C_15min; Saccharomyces cerevisiae; OTHER   Illumina HiSeq 4000 107332  1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893095/SRR11893095.sra SRR11893095.sra SRR11893095_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER.sra  ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/095/SRR11893095/SRR11893095_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/095/SRR11893095/SRR11893095_1.fastq.gz    SRR11893095_1.fastq.gz  SRR11893095_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
-SRR11893095 GSM4585137: timecourse-30C_15min; Saccharomyces cerevisiae; OTHER   Illumina HiSeq 4000 107332  1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893095/SRR11893095.sra SRR11893095.sra SRR11893095_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER.sra  ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/095/SRR11893095/SRR11893095_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/095/SRR11893095/SRR11893095_2.fastq.gz    SRR11893095_2.fastq.gz  SRR11893095_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
-
-SRR11893096 GSM4585137: timecourse-30C_15min; Saccharomyces cerevisiae; OTHER   Illumina HiSeq 4000 99402   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893096/SRR11893096.sra SRR11893096.sra SRR11893096_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER.sra  ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/096/SRR11893096/SRR11893096_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/096/SRR11893096/SRR11893096_1.fastq.gz    SRR11893096_1.fastq.gz  SRR11893096_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
-SRR11893096 GSM4585137: timecourse-30C_15min; Saccharomyces cerevisiae; OTHER   Illumina HiSeq 4000 99402   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893096/SRR11893096.sra SRR11893096.sra SRR11893096_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER.sra  ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/096/SRR11893096/SRR11893096_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/096/SRR11893096/SRR11893096_2.fastq.gz    SRR11893096_2.fastq.gz  SRR11893096_GSM4585137_timecourse-30C_15min_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
-
-
-SRR11893107 GSM4585143: timecourse-23C-15min; Saccharomyces cerevisiae; OTHER   Illumina HiSeq 4000 73956   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893107/SRR11893107.sra SRR11893107.sra SRR11893107_GSM4585143_timecourse-23C-15min_Saccharomyces_cerevisiae_OTHER.sra  ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/007/SRR11893107/SRR11893107_1.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/007/SRR11893107/SRR11893107_1.fastq.gz    SRR11893107_1.fastq.gz  SRR11893107_GSM4585143_timecourse-23C-15min_Saccharomyces_cerevisiae_OTHER_1.fastq.gz
-SRR11893107 GSM4585143: timecourse-23C-15min; Saccharomyces cerevisiae; OTHER   Illumina HiSeq 4000 73956   1604476800000   ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByRun/sra/SRR/SRR118/SRR11893107/SRR11893107.sra SRR11893107.sra SRR11893107_GSM4585143_timecourse-23C-15min_Saccharomyces_cerevisiae_OTHER.sra  ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/007/SRR11893107/SRR11893107_2.fastq.gz    era-fasp@fasp.sra.ebi.ac.uk:vol1/fastq/SRR118/007/SRR11893107/SRR11893107_2.fastq.gz    SRR11893107_2.fastq.gz  SRR11893107_GSM4585143_timecourse-23C-15min_Saccharomyces_cerevisiae_OTHER_2.fastq.gz
-
+                    ls -lhaFG "${p_eLife_2021}/${i}_1.fastq.gz"
+                    ls -lhaFG "${p_eLife_2021}/${i}_2.fastq.gz"
+                    echo ""
+                done
+            }
+    }
 ```
 </details>
 <br />
 
 <a id="printed-5"></a>
-##### Printed
+###### Printed
 <details>
 <summary><i>Printed: Symlink to and rename files of interest</i></summary>
 
 ```txt
-❯ p_Mol_Cell="${HOME}/2023_rDNA_data/PRJNA493742"
-
-
-❯ p_eLife="${HOME}/2023_rDNA_data/PRJNA636358"
+❯ p_Mol_Cell_2019="${HOME}/2023_rDNA_data/PRJNA493742"
+❯ p_eLife_2020="${HOME}/2023_rDNA_data/PRJNA636358"
+❯ p_eLife_2021="${HOME}/2023_rDNA_data/PRJNA702747"
 
 
 ❯ ls -1 "${p_Mol_Cell}"
@@ -2798,7 +2811,7 @@ SRR7939020_1.fastq.gz
 SRR7939020_2.fastq.gz
 
 
-❯ ls -1 "${p_eLife}"
+❯ ls -1 "${p_eLife_2020}"
 md5sum
 n_char
 PRJNA636358.SRR.txt.gz
@@ -2853,15 +2866,488 @@ SRR11893107_1.fastq.gz
 SRR11893107_2.fastq.gz
 SRR11893109_1.fastq.gz
 SRR11893109_2.fastq.gz
+
+
+❯ ls -1 "${p_eLife_2021}"
+md5sum
+n_char
+PRJNA702747.SRR.txt.gz
+PRJNA702747.tsv.gz
+SRR13736654_1.fastq.gz
+SRR13736654_2.fastq.gz
+SRR13736655_1.fastq.gz
+SRR13736655_2.fastq.gz
+SRR13736656_1.fastq.gz
+SRR13736656_2.fastq.gz
+SRR13736657_1.fastq.gz
+SRR13736657_2.fastq.gz
+SRR13736658_1.fastq.gz
+SRR13736658_2.fastq.gz
+SRR13736659_1.fastq.gz
+SRR13736659_2.fastq.gz
+SRR13736660_1.fastq.gz
+SRR13736660_2.fastq.gz
+SRR13736661_1.fastq.gz
+SRR13736661_2.fastq.gz
+
+
+❯ unset A_eLife_2020 && typeset -A A_eLife_2020
+❯ unset a_eLife_2020 && typeset -a a_eLife_2020
+❯ A_eLife_2020["SRR11893084"]="MC-2020_nz_WT_rep1"; a_eLife_2020="SRR11893084"
+❯ A_eLife_2020["SRR11893085"]="MC-2020_nz_WT_rep2"; a_eLife_2020="SRR11893085"
+❯ A_eLife_2020["SRR11893086"]="MC-2020_nz_MCD1-AID_rep1"; a_eLife_2020="SRR11893086"
+❯ A_eLife_2020["SRR11893087"]="MC-2020_nz_MCD1-AID_rep2"; a_eLife_2020="SRR11893087"
+❯ A_eLife_2020["SRR11893088"]="MC-2020_nz_BRN1-AID_rep1"; a_eLife_2020="SRR11893088"
+❯ A_eLife_2020["SRR11893089"]="MC-2020_nz_BRN1-AID_rep2"; a_eLife_2020="SRR11893089"
+❯ A_eLife_2020["SRR11893090"]="MC-2020_nz_MCD1-AID-BRN1-AID_rep1"; a_eLife_2020="SRR11893090"
+❯ A_eLife_2020["SRR11893091"]="MC-2020_nz_MCD1-AID-BRN1-AID_rep2"; a_eLife_2020="SRR11893091"
+❯ A_eLife_2020["SRR11893092"]="MC-2020_nz_WPL1-AID_rep1"; a_eLife_2020="SRR11893092"
+❯ A_eLife_2020["SRR11893093"]="MC-2020_nz_WPL1-AID_rep2"; a_eLife_2020="SRR11893093"
+❯ A_eLife_2020["SRR11893094"]="MC-2020_nz_PDS5-AID_rep0"; a_eLife_2020="SRR11893094"
+❯ A_eLife_2020["SRR11893095"]="MC-2020_30C-a15_WT_rep1"; a_eLife_2020="SRR11893095"
+❯ A_eLife_2020["SRR11893096"]="MC-2020_30C-a15_WT_rep2"; a_eLife_2020="SRR11893096"
+❯ A_eLife_2020["SRR11893107"]="MC-2020_23C-a15_WT_rep0"; a_eLife_2020="SRR11893107"
+
+
+❯ unset A_Mol_Cell_2019 && typeset -A A_Mol_Cell_2019
+❯ unset a_Mol_Cell_2019 && typeset -a a_Mol_Cell_2019
+❯ A_Mol_Cell_2019["SRR7939017"]="MC-2019_log_WT_repM"; a_Mol_Cell_2019="MC_log_WT_repM"
+❯ A_Mol_Cell_2019["SRR7939018"]="MC-2019_Q_WT_repM"; a_Mol_Cell_2019="MC_Q_WT_repM"
+
+
+❯ unset A_eLife_2021 && typeset -A A_eLife_2021
+❯ unset a_eLife_2021 && typeset -A a_eLife_2021
+❯ A_eLife_2021["SRR13736655"]="MC-2021_log_WT_repM"; a_eLife_2021="MC-2021_log_WT_repM"
+❯ A_eLife_2021["SRR13736659"]="MC-2021_Q_WT_repM"; a_eLife_2021="MC-2021_Q_WT_repM"
+
+
+❯ for i in "${!A_eLife_2020[@]}"; do
+>     echo "  key  ${i}"
+>     echo "value  ${A_eLife_2020[${i}]}"
+>     echo ""
+> 
+>     ls -lhaFG "${p_eLife_2020}/${i}_1.fastq.gz"
+>     ls -lhaFG "${p_eLife_2020}/${i}_2.fastq.gz"
+>     echo ""
+> done
+  key  SRR11893107
+value  MC-2020_23C-a15_WT_rep0
+
+-rw-rw---- 1 kalavatt 2.4G Mar  2 22:03 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893107_1.fastq.gz
+-rw-rw---- 1 kalavatt 2.8G Mar  2 22:03 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893107_2.fastq.gz
+
+  key  SRR11893089
+value  MC-2020_nz_BRN1-AID_rep2
+
+-rw-rw---- 1 kalavatt 2.1G Mar  1 22:16 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893089_1.fastq.gz
+-rw-rw---- 1 kalavatt 2.2G Mar  1 22:16 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893089_2.fastq.gz
+
+  key  SRR11893088
+value  MC-2020_nz_BRN1-AID_rep1
+
+-rw-rw---- 1 kalavatt 2.0G Mar  1 23:15 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893088_1.fastq.gz
+-rw-rw---- 1 kalavatt 2.1G Mar  1 23:15 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893088_2.fastq.gz
+
+  key  SRR11893085
+value  MC-2020_nz_WT_rep2
+
+-rw-rw---- 1 kalavatt 2.3G Mar  1 20:02 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893085_1.fastq.gz
+-rw-rw---- 1 kalavatt 2.5G Mar  1 20:01 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893085_2.fastq.gz
+
+  key  SRR11893084
+value  MC-2020_nz_WT_rep1
+
+-rw-rw---- 1 kalavatt 2.3G Mar  2 00:24 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893084_1.fastq.gz
+-rw-rw---- 1 kalavatt 2.1G Mar  2 00:24 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893084_2.fastq.gz
+
+  key  SRR11893087
+value  MC-2020_nz_MCD1-AID_rep2
+
+-rw-rw---- 1 kalavatt 2.0G Mar  1 18:34 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893087_1.fastq.gz
+-rw-rw---- 1 kalavatt 2.2G Mar  1 18:34 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893087_2.fastq.gz
+
+  key  SRR11893086
+value  MC-2020_nz_MCD1-AID_rep1
+
+-rw-rw---- 1 kalavatt 2.2G Mar  1 21:07 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893086_1.fastq.gz
+-rw-rw---- 1 kalavatt 2.4G Mar  1 21:07 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893086_2.fastq.gz
+
+  key  SRR11893096
+value  MC-2020_30C-a15_WT_rep2
+
+-rw-rw---- 1 kalavatt 2.8G Mar  2 09:18 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893096_1.fastq.gz
+-rw-rw---- 1 kalavatt 3.5G Mar  2 09:17 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893096_2.fastq.gz
+
+  key  SRR11893094
+value  MC-2020_nz_PDS5-AID_rep0
+
+-rw-rw---- 1 kalavatt 2.8G Mar  2 01:38 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893094_1.fastq.gz
+-rw-rw---- 1 kalavatt 3.0G Mar  2 01:38 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893094_2.fastq.gz
+
+  key  SRR11893095
+value  MC-2020_30C-a15_WT_rep1
+
+-rw-rw---- 1 kalavatt 3.0G Mar  2 04:00 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893095_1.fastq.gz
+-rw-rw---- 1 kalavatt 3.3G Mar  2 04:00 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893095_2.fastq.gz
+
+  key  SRR11893092
+value  MC-2020_nz_WPL1-AID_rep1
+
+-rw-rw---- 1 kalavatt 2.4G Mar  2 05:04 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893092_1.fastq.gz
+-rw-rw---- 1 kalavatt 2.7G Mar  2 05:04 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893092_2.fastq.gz
+
+  key  SRR11893093
+value  MC-2020_nz_WPL1-AID_rep2
+
+-rw-rw---- 1 kalavatt 2.7G Mar  2 06:15 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893093_1.fastq.gz
+-rw-rw---- 1 kalavatt 3.0G Mar  2 06:15 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893093_2.fastq.gz
+
+  key  SRR11893090
+value  MC-2020_nz_MCD1-AID-BRN1-AID_rep1
+
+-rw-rw---- 1 kalavatt 2.7G Mar  2 07:34 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893090_1.fastq.gz
+-rw-rw---- 1 kalavatt 2.8G Mar  2 07:34 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893090_2.fastq.gz
+
+  key  SRR11893091
+value  MC-2020_nz_MCD1-AID-BRN1-AID_rep2
+
+-rw-rw---- 1 kalavatt 1.8G Mar  2 02:29 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893091_1.fastq.gz
+-rw-rw---- 1 kalavatt 1.9G Mar  2 02:29 /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893091_2.fastq.gz
+
+
+❯ for i in "${!A_Mol_Cell_2019[@]}"; do
+>     echo "  key  ${i}"
+>     echo "value  ${A_Mol_Cell_2019[${i}]}"
+>     echo ""
+> 
+>     ls -lhaFG "${p_Mol_Cell_2019}/${i}_1.fastq.gz"
+>     ls -lhaFG "${p_Mol_Cell_2019}/${i}_2.fastq.gz"
+>     echo ""
+> done
+  key  SRR7939018
+value  MC-2019_Q_WT_repM
+
+-rw-rw---- 1 kalavatt 2.3G Mar  1 21:39 /home/kalavatt/2023_rDNA_data/PRJNA493742/SRR7939018_1.fastq.gz
+-rw-rw---- 1 kalavatt 2.3G Mar  1 21:38 /home/kalavatt/2023_rDNA_data/PRJNA493742/SRR7939018_2.fastq.gz
+
+  key  SRR7939017
+value  MC-2019_log_WT_repM
+
+-rw-rw---- 1 kalavatt 9.7G Mar  2 01:55 /home/kalavatt/2023_rDNA_data/PRJNA493742/SRR7939017_1.fastq.gz
+-rw-rw---- 1 kalavatt 9.9G Mar  2 01:56 /home/kalavatt/2023_rDNA_data/PRJNA493742/SRR7939017_2.fastq.gz
+
+
+❯ for i in "${!A_eLife_2021[@]}"; do
+>     echo "  key  ${i}"
+>     echo "value  ${A_eLife_2021[${i}]}"
+>     echo ""
+> 
+>     ls -lhaFG "${p_eLife_2021}/${i}_1.fastq.gz"
+>     ls -lhaFG "${p_eLife_2021}/${i}_2.fastq.gz"
+>     echo ""
+> done
+  key  SRR13736659
+value  MC-2021_Q_WT_repM
+
+-rw-rw---- 1 kalavatt 5.7G Jul  6 23:33 /home/kalavatt/2023_rDNA_data/PRJNA702747/SRR13736659_1.fastq.gz
+-rw-rw---- 1 kalavatt 5.7G Jul  6 23:32 /home/kalavatt/2023_rDNA_data/PRJNA702747/SRR13736659_2.fastq.gz
+
+  key  SRR13736655
+value  MC-2021_log_WT_repM
+
+-rw-rw---- 1 kalavatt 9.8G Jul  7 01:12 /home/kalavatt/2023_rDNA_data/PRJNA702747/SRR13736655_1.fastq.gz
+-rw-rw---- 1 kalavatt 9.9G Jul  7 01:12 /home/kalavatt/2023_rDNA_data/PRJNA702747/SRR13736655_2.fastq.gz
+```
+</details>
+<br />
+
+<a id="symlink-to-and-rename-the-fastqs"></a>
+##### Symlink to and rename the `fastq`s
+<a id="code-7"></a>
+###### Code
+<details>
+<summary><i>Code: Symlink to and rename the fastqs</i></summary>
+
+```bash
+#!/bin/bash
+
+run=FALSE
+[[ "${run}" == TRUE ]] &&
+    {
+        [[ $(pwd) =~ "2023-0307_work_Micro-C_align-process" ]] \
+            && cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process"
+        [[ ! -d "sym/" ]] && mkdir -p "sym/"
+
+        for i in "${!A_eLife_2020[@]}"; do
+            echo "  key  ${i}"
+            echo "value  ${A_eLife_2020[${i}]}"
+            echo ""
+
+            ln -s "${p_eLife_2020}/${i}_1.fastq.gz" "sym/${A_eLife_2020[${i}]}_R1.fastq.gz"
+            ln -s "${p_eLife_2020}/${i}_2.fastq.gz" "sym/${A_eLife_2020[${i}]}_R2.fastq.gz"
+            echo ""
+        done
+
+        for i in "${!A_Mol_Cell_2019[@]}"; do
+            echo "  key  ${i}"
+            echo "value  ${A_Mol_Cell_2019[${i}]}"
+            echo ""
+
+            ln -s "${p_Mol_Cell_2019}/${i}_1.fastq.gz" "sym/${A_Mol_Cell_2019[${i}]}_R1.fastq.gz"
+            ln -s "${p_Mol_Cell_2019}/${i}_2.fastq.gz" "sym/${A_Mol_Cell_2019[${i}]}_R2.fastq.gz"
+            echo ""
+        done
+
+        for i in "${!A_eLife_2021[@]}"; do
+            echo "  key  ${i}"
+            echo "value  ${A_eLife_2021[${i}]}"
+            echo ""
+
+            ln -s "${p_eLife_2021}/${i}_1.fastq.gz" "sym/${A_eLife_2021[${i}]}_R1.fastq.gz"
+            ln -s "${p_eLife_2021}/${i}_2.fastq.gz" "sym/${A_eLife_2021[${i}]}_R2.fastq.gz"
+            echo ""
+        done
+
+        run_check=FALSE
+        [[ "${run_check}" == TRUE ]] && ls -lhaFG sym/
+    }
+```
+</details>
+<br />
+
+<a id="printed-6"></a>
+###### Printed
+<details>
+<summary><i>Printed: Symlink to and rename the fastqs</i></summary>
+
+```txt
+❯ [[ $(pwd) =~ "2023-0307_work_Micro-C_align-process" ]] \
+>     && cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process"
+
+
+❯ [[ ! -d "sym/" ]] && mkdir -p "sym/"
+mkdir: created directory 'sym/'
+
+
+❯ for i in "${!A_eLife_2020[@]}"; do
+>     echo "  key  ${i}"
+>     echo "value  ${A_eLife_2020[${i}]}"
+>     echo ""
+> 
+>     ln -s "${p_eLife_2020}/${i}_1.fastq.gz" "sym/${A_eLife_2020[${i}]}_R1.fastq.gz"
+>     ln -s "${p_eLife_2020}/${i}_2.fastq.gz" "sym/${A_eLife_2020[${i}]}_R2.fastq.gz"
+>     echo ""
+> done
+  key  SRR11893107
+value  MC-2020_23C-a15_WT_rep0
+
+
+  key  SRR11893089
+value  MC-2020_nz_BRN1-AID_rep2
+
+
+  key  SRR11893088
+value  MC-2020_nz_BRN1-AID_rep1
+
+
+  key  SRR11893085
+value  MC-2020_nz_WT_rep2
+
+
+  key  SRR11893084
+value  MC-2020_nz_WT_rep1
+
+
+  key  SRR11893087
+value  MC-2020_nz_MCD1-AID_rep2
+
+
+  key  SRR11893086
+value  MC-2020_nz_MCD1-AID_rep1
+
+
+  key  SRR11893096
+value  MC-2020_30C-a15_WT_rep2
+
+
+  key  SRR11893094
+value  MC-2020_nz_PDS5-AID_rep0
+
+
+  key  SRR11893095
+value  MC-2020_30C-a15_WT_rep1
+
+
+  key  SRR11893092
+value  MC-2020_nz_WPL1-AID_rep1
+
+
+  key  SRR11893093
+value  MC-2020_nz_WPL1-AID_rep2
+
+
+  key  SRR11893090
+value  MC-2020_nz_MCD1-AID-BRN1-AID_rep1
+
+
+  key  SRR11893091
+value  MC-2020_nz_MCD1-AID-BRN1-AID_rep2
+
+
+❯ for i in "${!A_Mol_Cell_2019[@]}"; do
+>     echo "  key  ${i}"
+>     echo "value  ${A_Mol_Cell_2019[${i}]}"
+>     echo ""
+> 
+>     ln -s "${p_Mol_Cell_2019}/${i}_1.fastq.gz" "sym/${A_Mol_Cell_2019[${i}]}_R1.fastq.gz"
+>     ln -s "${p_Mol_Cell_2019}/${i}_2.fastq.gz" "sym/${A_Mol_Cell_2019[${i}]}_R2.fastq.gz"
+>     echo ""
+> done
+  key  SRR7939018
+value  MC-2019_Q_WT_repM
+
+
+  key  SRR7939017
+value  MC-2019_log_WT_repM
+
+
+❯ for i in "${!A_eLife_2021[@]}"; do
+>     echo "  key  ${i}"
+>     echo "value  ${A_eLife_2021[${i}]}"
+>     echo ""
+> 
+>     ln -s "${p_eLife_2021}/${i}_1.fastq.gz" "sym/${A_eLife_2021[${i}]}_R1.fastq.gz"
+>     ln -s "${p_eLife_2021}/${i}_2.fastq.gz" "sym/${A_eLife_2021[${i}]}_R2.fastq.gz"
+>     echo ""
+> done
+  key  SRR13736659
+value  MC-2021_Q_WT_repM
+
+
+  key  SRR13736655
+value  MC-2021_log_WT_repM
+
+
+❯ ls -lhaFG sym/
+total 1.1M
+drwxrws---  2 kalavatt 1.9K Aug  3 15:03 ./
+drwxrws--- 12 kalavatt  578 Aug  3 14:59 ../
+lrwxrwxrwx  1 kalavatt   63 Aug  3 15:03 MC-2019_log_WT_repM_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA493742/SRR7939017_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   63 Aug  3 15:03 MC-2019_log_WT_repM_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA493742/SRR7939017_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   63 Aug  3 15:03 MC-2019_Q_WT_repM_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA493742/SRR7939018_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   63 Aug  3 15:03 MC-2019_Q_WT_repM_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA493742/SRR7939018_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_23C-a15_WT_rep0_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893107_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_23C-a15_WT_rep0_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893107_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_30C-a15_WT_rep1_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893095_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_30C-a15_WT_rep1_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893095_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_30C-a15_WT_rep2_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893096_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_30C-a15_WT_rep2_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893096_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_BRN1-AID_rep1_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893088_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_BRN1-AID_rep1_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893088_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_BRN1-AID_rep2_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893089_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_BRN1-AID_rep2_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893089_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_MCD1-AID-BRN1-AID_rep1_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893090_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_MCD1-AID-BRN1-AID_rep1_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893090_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_MCD1-AID-BRN1-AID_rep2_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893091_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_MCD1-AID-BRN1-AID_rep2_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893091_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_MCD1-AID_rep1_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893086_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_MCD1-AID_rep1_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893086_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_MCD1-AID_rep2_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893087_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_MCD1-AID_rep2_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893087_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_PDS5-AID_rep0_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893094_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_PDS5-AID_rep0_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893094_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_WPL1-AID_rep1_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893092_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_WPL1-AID_rep1_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893092_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_WPL1-AID_rep2_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893093_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_WPL1-AID_rep2_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893093_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_WT_rep1_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893084_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_WT_rep1_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893084_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_WT_rep2_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893085_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2020_nz_WT_rep2_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893085_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2021_log_WT_repM_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA702747/SRR13736655_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2021_log_WT_repM_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA702747/SRR13736655_2.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2021_Q_WT_repM_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA702747/SRR13736659_1.fastq.gz
+lrwxrwxrwx  1 kalavatt   64 Aug  3 15:03 MC-2021_Q_WT_repM_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA702747/SRR13736659_2.fastq.gz
 ```
 </details>
 <br />
 
 <a id="initialize-variables-create-outdirectories"></a>
 #### Initialize variables, create outdirectories
+<a id="what-datasets-do-we-want-to-work-with"></a>
+##### What datasets do we want to work with?
+<a id="notes"></a>
+###### Notes
+<details>
+<summary><i>Notes: What datasets do we want to work with?</i></summary>
+<br />
+
+*These datasets...*  
+MC-2019_log_WT_repM_R1.fastq.gz  
+MC-2019_log_WT_repM_R2.fastq.gz
+
+MC-2019_Q_WT_repM_R1.fastq.gz  
+MC-2019_Q_WT_repM_R2.fastq.gz
+
+MC-2020_23C-a15_WT_rep0_R1.fastq.gz  
+MC-2020_23C-a15_WT_rep0_R2.fastq.gz
+
+MC-2020_30C-a15_WT_rep1_R1.fastq.gz  
+MC-2020_30C-a15_WT_rep1_R2.fastq.gz  
+MC-2020_30C-a15_WT_rep2_R1.fastq.gz  
+MC-2020_30C-a15_WT_rep2_R2.fastq.gz
+
+MC-2020_nz_BRN1-AID_rep1_R1.fastq.gz  
+MC-2020_nz_BRN1-AID_rep1_R2.fastq.gz  
+MC-2020_nz_BRN1-AID_rep2_R1.fastq.gz  
+MC-2020_nz_BRN1-AID_rep2_R2.fastq.gz
+
+MC-2020_nz_MCD1-AID-BRN1-AID_rep1_R1.fastq.gz  
+MC-2020_nz_MCD1-AID-BRN1-AID_rep1_R2.fastq.gz  
+MC-2020_nz_MCD1-AID-BRN1-AID_rep2_R1.fastq.gz  
+MC-2020_nz_MCD1-AID-BRN1-AID_rep2_R2.fastq.gz
+
+MC-2020_nz_MCD1-AID_rep1_R1.fastq.gz  
+MC-2020_nz_MCD1-AID_rep1_R2.fastq.gz  
+MC-2020_nz_MCD1-AID_rep2_R1.fastq.gz  
+MC-2020_nz_MCD1-AID_rep2_R2.fastq.gz
+
+MC-2020_nz_PDS5-AID_rep0_R1.fastq.gz  
+MC-2020_nz_PDS5-AID_rep0_R2.fastq.gz
+
+MC-2020_nz_WPL1-AID_rep1_R1.fastq.gz  
+MC-2020_nz_WPL1-AID_rep1_R2.fastq.gz  
+MC-2020_nz_WPL1-AID_rep2_R1.fastq.gz  
+MC-2020_nz_WPL1-AID_rep2_R2.fastq.gz
+
+MC-2020_nz_WT_rep1_R1.fastq.gz  
+MC-2020_nz_WT_rep1_R2.fastq.gz  
+MC-2020_nz_WT_rep2_R1.fastq.gz  
+MC-2020_nz_WT_rep2_R2.fastq.gz
+
+MC-2021_log_WT_repM_R1.fastq.gz  
+MC-2021_log_WT_repM_R2.fastq.gz
+
+MC-2021_Q_WT_repM_R1.fastq.gz  
+MC-2021_Q_WT_repM_R2.fastq.gz
+
+*I guess all of it...*
+
+*But to start with?*
+MC-2019_log_WT_repM_R1.fastq.gz  
+MC-2019_log_WT_repM_R2.fastq.gz
+
+MC-2019_Q_WT_repM_R1.fastq.gz  
+MC-2019_Q_WT_repM_R2.fastq.gz
+
+
+
+</details>
+<br />
+
 <a id="initialize-general-variables-for-workflow"></a>
 ##### Initialize "general" variables for workflow
-<a id="code-7"></a>
+<a id="code-8"></a>
 ###### Code
 <details>
 <summary><i>Code: Initialize "general" variables for workflow</i></summary>
@@ -2959,7 +3445,7 @@ print_test=TRUE  #ARGUMENT
 
 <a id="initialize-specific-variables-for-workflow"></a>
 ##### Initialize "specific" variables for workflow
-<a id="code-8"></a>
+<a id="code-9"></a>
 ###### Code
 <details>
 <summary><i>Code: Initialize "specific" variables for workflow</i></summary>
@@ -3138,7 +3624,7 @@ print_test=TRUE  #ARGUMENT
 
 <a id="if-applicable-then-run-logic-for-running-pairtools-merge"></a>
 ##### If applicable, then run logic for running `pairtools merge`
-<a id="code-9"></a>
+<a id="code-10"></a>
 ###### Code
 <details>
 <summary><i>Code: If applicable, then run logic for running pairtools merge</i></summary>
@@ -3248,7 +3734,7 @@ print_test=TRUE  #ARGUMENT
 
 <a id="create-outdirectories-if-not-present"></a>
 ##### Create outdirectories if not present
-<a id="code-10"></a>
+<a id="code-11"></a>
 ###### Code
 <details>
 <summary><i>Code: Create outdirectories if not present</i></summary>
@@ -3270,7 +3756,7 @@ print_test=TRUE  #ARGUMENT
 
 <a id="1-trim-fastq-files"></a>
 ### 1. Trim fastq files
-<a id="code-11"></a>
+<a id="code-12"></a>
 #### Code
 <details>
 <summary><i>Code: 1. Trim fastq files</i></summary>
@@ -3319,7 +3805,7 @@ run=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-6"></a>
+<a id="printed-7"></a>
 #### Printed
 <details>
 <summary><i>Printed: 1. Trim fastq files</i></summary>
@@ -3392,7 +3878,7 @@ pigz 2.6
 
 <a id="2-align-datasets"></a>
 ### 2. Align datasets
-<a id="code-12"></a>
+<a id="code-13"></a>
 #### Code
 <details>
 <summary><i>Code: 2. Align datasets</i></summary>
@@ -3499,7 +3985,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-7"></a>
+<a id="printed-8"></a>
 #### Printed
 <details>
 <summary><i>Printed: 2. Align datasets</i></summary>
@@ -3592,7 +4078,7 @@ run=TRUE
 
 <a id="3-run-pairtools-parse"></a>
 ### 3. Run `pairtools parse`
-<a id="code-13"></a>
+<a id="code-14"></a>
 #### Code
 <details>
 <summary><i>Code: 3. Run pairtools parse</i></summary>
@@ -3781,7 +4267,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-8"></a>
+<a id="printed-9"></a>
 #### Printed
 <details>
 <summary><i>Printed: 3. Run pairtools parse</i></summary>
@@ -5837,7 +6323,7 @@ dist_freq/562341325+/++ 0
 
 <a id="4-run-pairtools-sort"></a>
 ### 4. Run `pairtools sort`
-<a id="code-14"></a>
+<a id="code-15"></a>
 #### Code
 <details>
 <summary><i>Code: 4. Run pairtools sort</i></summary>
@@ -5909,7 +6395,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-9"></a>
+<a id="printed-10"></a>
 #### Printed
 <details>
 <summary><i>Printed: 4. Run pairtools sort</i></summary>
@@ -6523,7 +7009,7 @@ SRR7939018.38300170 XVI 948034  XVI 1219    -   -   UU  1   R1-2    948034  1219
 
 <a id="5-run-pairtools-dedup-and-pairtools-split"></a>
 ### 5. Run `pairtools dedup` and `pairtools split`
-<a id="code-15"></a>
+<a id="code-16"></a>
 #### Code
 <details>
 <summary><i>Code: 5. Run pairtools dedup</i></summary>
@@ -6666,7 +7152,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-10"></a>
+<a id="printed-11"></a>
 #### Printed
 <details>
 <summary><i>Printed: 5. Run pairtools dedup</i></summary>
@@ -9474,7 +9960,7 @@ dist_freq/562341325+/++ 0
 
 <a id="x-run-pairtools-merge-if-applicable"></a>
 ### X. Run `pairtools merge` if applicable
-<a id="code-16"></a>
+<a id="code-17"></a>
 #### Code
 <details>
 <summary><i>Code: Run pairtools merge if applicable</i></summary>
@@ -9560,7 +10046,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-11"></a>
+<a id="printed-12"></a>
 #### Printed
 <details>
 <summary><i>Printed: Run pairtools merge if applicable</i></summary>
@@ -9753,7 +10239,7 @@ drwxrws--- 3 kalavatt  619 Jul  8 14:45 ../
 
 <a id="x-run-pairtools-select-if-applicable"></a>
 ### X. Run `pairtools select` if applicable
-<a id="code-17"></a>
+<a id="code-18"></a>
 #### Code
 <details>
 <summary><i>Code: X. Run pairtools select if applicable</i></summary>
@@ -9773,7 +10259,7 @@ drwxrws--- 3 kalavatt  619 Jul  8 14:45 ../
 </details>
 <br />
 
-<a id="printed-12"></a>
+<a id="printed-13"></a>
 #### Printed
 <details>
 <summary><i>Printed: X. Run pairtools select</i></summary>
@@ -9892,7 +10378,7 @@ Options:
 ### X. Run "`standard-rDNA-complete`" processing if applicable
 <a id="a-exclude-rdna-associated-cis-and-trans-interactions-from-standardnodups-file"></a>
 #### A. Exclude rDNA-associated *cis* and *trans* interactions from "`standard.nodups`" file
-<a id="code-18"></a>
+<a id="code-19"></a>
 ##### Code
 <details>
 <summary><i>Code: A. Exclude rDNA-associated cis and trans interactions from "standard"</i></summary>
@@ -9995,7 +10481,7 @@ Options:
 </details>
 <br />
 
-<a id="printed-13"></a>
+<a id="printed-14"></a>
 ##### Printed
 <details>
 <summary><i>Printed: A. Exclude rDNA-associated cis and trans interactions from "standard"</i></summary>
@@ -10008,7 +10494,7 @@ Options:
 
 <a id="b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file"></a>
 #### B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file
-<a id="code-19"></a>
+<a id="code-20"></a>
 ##### Code
 <details>
 <summary><i>Code: B. Exclude all but rDNA-associated cis and trans interactions from "keep-MM.nodups" file</i></summary>
@@ -10083,7 +10569,7 @@ Options:
 </details>
 <br />
 
-<a id="printed-14"></a>
+<a id="printed-15"></a>
 ##### Printed
 <details>
 <summary><i>Printed: B. Exclude all but rDNA-associated cis and trans interactions from "keep-MM.nodups" file</i></summary>
@@ -10098,7 +10584,7 @@ Options:
 #### C. Re-header and merge the "`standard.nodups`" and "`keep-MM.nodups`" files
 ...and re-header the file
 
-<a id="code-20"></a>
+<a id="code-21"></a>
 ##### Code
 <details>
 <summary><i>Code: C. Re-header and merge the "standard.nodups" and "keep-MM.nodups" files</i></summary>
@@ -10356,7 +10842,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
 </details>
 <br />
 
-<a id="printed-15"></a>
+<a id="printed-16"></a>
 ##### Printed
 <details>
 <summary><i>Printed: C. Re-header and merge the "standard.nodups" and "keep-MM.nodups" files</i></summary>
@@ -10611,7 +11097,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
 ### 6. Run `pairtools stats`
 <a id="individual-pairs-files"></a>
 #### Individual pairs files
-<a id="code-21"></a>
+<a id="code-22"></a>
 ##### Code
 <details>
 <summary><i>Code: 6. Run pairtools stats</i></summary>
@@ -10667,7 +11153,7 @@ run_check=FALSE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-16"></a>
+<a id="printed-17"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 6. Run pairtools stats</i></summary>
@@ -11696,7 +12182,7 @@ chromsizes/Mito 85779
 
 <a id="merged-pairs-files"></a>
 #### Merged pairs files
-<a id="code-22"></a>
+<a id="code-23"></a>
 ##### Code
 <details>
 <summary><i>Code: 6. Run pairtools stats</i></summary>
@@ -11744,7 +12230,7 @@ run_check=TRUE
 </details>
 <br />
 
-<a id="printed-17"></a>
+<a id="printed-18"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 6. Run pairtools stats</i></summary>
@@ -12285,7 +12771,7 @@ chromsizes/XVI  948066
 ### 7. Load pairs to cooler
 <a id="individual-pairs-file"></a>
 #### Individual pairs file
-<a id="code-23"></a>
+<a id="code-24"></a>
 ##### Code
 <details>
 <summary><i>Code: 7. Load pairs to cooler</i></summary>
@@ -12327,7 +12813,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-18"></a>
+<a id="printed-19"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 7. Load pairs to cooler</i></summary>
@@ -12488,7 +12974,7 @@ INFO:cooler.create:Writing info
 
 <a id="merged-pairs-files-1"></a>
 #### Merged pairs files
-<a id="code-24"></a>
+<a id="code-25"></a>
 ##### Code
 <details>
 <summary><i>Code: 7. Load pairs to cooler</i></summary>
@@ -12525,7 +13011,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-19"></a>
+<a id="printed-20"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 7. Load pairs to cooler</i></summary>
@@ -12610,7 +13096,7 @@ INFO:cooler.create:Writing info
 ### 8. Generate a multi-resolution cooler by coarsening
 <a id="cools-from-individual-pairs-files"></a>
 #### Cools from individual pairs files
-<a id="code-25"></a>
+<a id="code-26"></a>
 ##### Code
 <details>
 <summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -12653,7 +13139,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-20"></a>
+<a id="printed-21"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -13075,7 +13561,7 @@ INFO:cooler.balance:variance is 7.734072057040814e-06
 
 <a id="cools-from-merged-pairs-files"></a>
 #### Cools from merged pairs files
-<a id="code-26"></a>
+<a id="code-27"></a>
 ##### Code
 <details>
 <summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -13115,7 +13601,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-21"></a>
+<a id="printed-22"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -13266,7 +13752,7 @@ INFO:cooler.cli.zoomify:Balancing zoom level with bin size 100
 
 <a id="9-ingest-files-for-higlass"></a>
 ### 9. Ingest files for HiGlass
-<a id="code-27"></a>
+<a id="code-28"></a>
 #### Code
 <details>
 <summary><i>Code: Ingest files for HiGlass</i></summary>
@@ -13756,7 +14242,7 @@ counter: 41000 1359
 </details>
 <br />
 
-<a id="printed-22"></a>
+<a id="printed-23"></a>
 #### Printed
 <details>
 <summary><i>Printed: Ingest files for HiGlass</i></summary>
