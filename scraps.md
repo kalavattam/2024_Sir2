@@ -94,8 +94,14 @@ print_test=TRUE  #ARGUMENT
 ```bash
 #!/bin/bash
 
-[[ "${flag_merge}" == TRUE ]] &&
-    {
+for (( i=0; i < "${#to_merge[@]}"; i++ )); do echo "${to_merge[${i}]}"; done
+    # i=1
+
+    #  For pairtools merge
+    name_1="${to_merge[${i}]}_rep1"  # echo "${name_1}"
+    name_2="${to_merge[${i}]}_rep2"  # echo "${name_2}"
+
+
         #  Check if ${f_pre} is present in hash ${arr_merge}
         #+
         #+ ${arr_merge[$f_pre]+present} evaluates to "present" if
@@ -190,6 +196,19 @@ print_test=TRUE  #ARGUMENT
         a_merge_zoom=${a_merge_zoom}
         """
     }
+```
+</details>
+<br />
+
+##### Temporary
+###### Code
+<details>
+<summary><i>Code: Temporary</i></summary>
+
+```bash
+#!/bin/bash
+
+
 ```
 </details>
 <br />
