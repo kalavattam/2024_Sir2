@@ -41,21 +41,20 @@
                 1. [Notes](#notes)
             1. [Initialize "general" variables for workflow](#initialize-general-variables-for-workflow)
                 1. [Code](#code-8)
+                1. [Printed](#printed-7)
             1. [Initialize "specific" variables for workflow](#initialize-specific-variables-for-workflow)
                 1. [Code](#code-9)
-            1. [If applicable, then run logic for running `pairtools merge`](#if-applicable-then-run-logic-for-running-pairtools-merge)
-                1. [Code](#code-10)
             1. [Create outdirectories if not present](#create-outdirectories-if-not-present)
-                1. [Code](#code-11)
+                1. [Code](#code-10)
     1. [1. Trim fastq files](#1-trim-fastq-files)
-        1. [Code](#code-12)
-        1. [Printed](#printed-7)
-    1. [2. Align datasets](#2-align-datasets)
-        1. [Code](#code-13)
+        1. [Code](#code-11)
         1. [Printed](#printed-8)
-    1. [3. Run `pairtools parse`](#3-run-pairtools-parse)
-        1. [Code](#code-14)
+    1. [2. Align datasets](#2-align-datasets)
+        1. [Code](#code-12)
         1. [Printed](#printed-9)
+    1. [3. Run `pairtools parse`](#3-run-pairtools-parse)
+        1. [Code](#code-13)
+        1. [Printed](#printed-10)
             1. [Check the documentation](#check-the-documentation)
                 1. [`pairtools parse`](#pairtools-parse)
                 1. [`pairtools parse2`](#pairtools-parse2)
@@ -70,8 +69,8 @@
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-2)
                 1. [Testing the "`keep-MM`" call to `pairtools parse2`](#testing-the-keep-mm-call-to-pairtools-parse2-2)
     1. [4. Run `pairtools sort`](#4-run-pairtools-sort)
-        1. [Code](#code-15)
-        1. [Printed](#printed-10)
+        1. [Code](#code-14)
+        1. [Printed](#printed-11)
             1. [Check the documentation](#check-the-documentation-1)
             1. [Run `pairtools sort`](#run-pairtools-sort)
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-3)
@@ -80,8 +79,8 @@
                 1. [Testing the standard call to `pairtools parse2`](#testing-the-standard-call-to-pairtools-parse2-4)
                 1. [Testing the "rDNA" call to `pairtools parse2`](#testing-the-rdna-call-to-pairtools-parse2-1)
     1. [5. Run `pairtools dedup` and `pairtools split`](#5-run-pairtools-dedup-and-pairtools-split)
-        1. [Code](#code-16)
-        1. [Printed](#printed-11)
+        1. [Code](#code-15)
+        1. [Printed](#printed-12)
             1. [Check the documentation](#check-the-documentation-2)
             1. [Run `pairtools dedup`](#run-pairtools-dedup)
                 1. ["Standard"](#standard)
@@ -96,54 +95,54 @@
                 1. ["Standard"](#standard-3)
                 1. ["rDNA"](#rdna-3)
     1. [X. Run `pairtools merge` if applicable](#x-run-pairtools-merge-if-applicable)
-        1. [Code](#code-17)
-        1. [Printed](#printed-12)
+        1. [Code](#code-16)
+        1. [Printed](#printed-13)
             1. [Check the documentation](#check-the-documentation-3)
             1. [Do a trial run of `pairtools merge`](#do-a-trial-run-of-pairtools-merge)
             1. [Check the contents of the merge files](#check-the-contents-of-the-merge-files)
     1. [X. Run `pairtools select` if applicable](#x-run-pairtools-select-if-applicable)
-        1. [Code](#code-18)
-        1. [Printed](#printed-13)
+        1. [Code](#code-17)
+        1. [Printed](#printed-14)
             1. [Check the documentation](#check-the-documentation-4)
             1. [`pairtools select`](#pairtools-select)
     1. [X. Run "`standard-rDNA-complete`" processing if applicable](#x-run-standard-rdna-complete-processing-if-applicable)
         1. [A. Exclude rDNA-associated *cis* and *trans* interactions from "`standard.nodups`" file](#a-exclude-rdna-associated-cis-and-trans-interactions-from-standardnodups-file)
-            1. [Code](#code-19)
-            1. [Printed](#printed-14)
-        1. [B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file](#b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file)
-            1. [Code](#code-20)
+            1. [Code](#code-18)
             1. [Printed](#printed-15)
-        1. [C. Re-header and merge the "`standard.nodups`" and "`keep-MM.nodups`" files](#c-re-header-and-merge-the-standardnodups-and-keep-mmnodups-files)
-            1. [Code](#code-21)
+        1. [B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file](#b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file)
+            1. [Code](#code-19)
             1. [Printed](#printed-16)
+        1. [C. Re-header and merge the "`standard.nodups`" and "`keep-MM.nodups`" files](#c-re-header-and-merge-the-standardnodups-and-keep-mmnodups-files)
+            1. [Code](#code-20)
+            1. [Printed](#printed-17)
     1. [6. Run `pairtools stats`](#6-run-pairtools-stats)
         1. [Individual pairs files](#individual-pairs-files)
-            1. [Code](#code-22)
-            1. [Printed](#printed-17)
+            1. [Code](#code-21)
+            1. [Printed](#printed-18)
                 1. [Check the documentation](#check-the-documentation-5)
                 1. [Do a trial run of `pairtools stats`](#do-a-trial-run-of-pairtools-stats)
                 1. [Check the contents of the stats files](#check-the-contents-of-the-stats-files)
         1. [Merged pairs files](#merged-pairs-files)
-            1. [Code](#code-23)
-            1. [Printed](#printed-18)
+            1. [Code](#code-22)
+            1. [Printed](#printed-19)
     1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
         1. [Individual pairs file](#individual-pairs-file)
-            1. [Code](#code-24)
-            1. [Printed](#printed-19)
-        1. [Merged pairs files](#merged-pairs-files-1)
-            1. [Code](#code-25)
+            1. [Code](#code-23)
             1. [Printed](#printed-20)
+        1. [Merged pairs files](#merged-pairs-files-1)
+            1. [Code](#code-24)
+            1. [Printed](#printed-21)
     1. [8. Generate a multi-resolution cooler by coarsening](#8-generate-a-multi-resolution-cooler-by-coarsening)
         1. [Cools from individual pairs files](#cools-from-individual-pairs-files)
-            1. [Code](#code-26)
-            1. [Printed](#printed-21)
-        1. [Cools from merged pairs files](#cools-from-merged-pairs-files)
-            1. [Code](#code-27)
+            1. [Code](#code-25)
             1. [Printed](#printed-22)
+        1. [Cools from merged pairs files](#cools-from-merged-pairs-files)
+            1. [Code](#code-26)
+            1. [Printed](#printed-23)
     1. [9. Ingest files for HiGlass](#9-ingest-files-for-higlass)
-        1. [Code](#code-28)
+        1. [Code](#code-27)
             1. [TBD](#tbd)
-        1. [Printed](#printed-23)
+        1. [Printed](#printed-24)
 
 <!-- /MarkdownTOC -->
 </details>
@@ -3330,18 +3329,26 @@ MC-2021_log_WT_repM_R2.fastq.gz
 
 MC-2021_Q_WT_repM_R1.fastq.gz  
 MC-2021_Q_WT_repM_R2.fastq.gz
+<br />
+<br />
 
 *I guess all of it...*
+<br />
+<br />
 
-*But to start with?*
-MC-2019_log_WT_repM_R1.fastq.gz  
-MC-2019_log_WT_repM_R2.fastq.gz
-
+*But to start with?*  
 MC-2019_Q_WT_repM_R1.fastq.gz  
 MC-2019_Q_WT_repM_R2.fastq.gz
 
+MC-2020_30C-a15_WT_rep1_R1.fastq.gz  
+MC-2020_30C-a15_WT_rep1_R2.fastq.gz  
+MC-2020_30C-a15_WT_rep2_R1.fastq.gz  
+MC-2020_30C-a15_WT_rep2_R2.fastq.gz
 
-
+MC-2020_nz_WT_rep1_R1.fastq.gz  
+MC-2020_nz_WT_rep1_R2.fastq.gz  
+MC-2020_nz_WT_rep2_R1.fastq.gz  
+MC-2020_nz_WT_rep2_R2.fastq.gz
 </details>
 <br />
 
@@ -3355,71 +3362,37 @@ MC-2019_Q_WT_repM_R2.fastq.gz
 ```bash
 #!/bin/bash
 
-#  Setting for which analysis to run: "Q", "G1", or "G2-M"
-analysis="Q"  #ARGUMENT  # echo "${analysis}"
-# analysis="G1"  #ARGUMENT  # echo "${analysis}"
-# analysis="G2-M"  #ARGUMENT  # echo "${analysis}"
+#  Initialize array of samples to work with
+unset initial && typeset -a initial
+initial+=( "MC-2019_Q_WT_repM" )
+initial+=( "MC-2020_30C-a15_WT_rep1" )
+initial+=( "MC-2020_30C-a15_WT_rep2" )
+initial+=( "MC-2020_nz_WT_rep1" )
+initial+=( "MC-2020_nz_WT_rep2" )
 
-#TEMPORARYAPPROACH
-#  Sub-setting for "G2-M" analysis: choose which replicate to use
-# [[ "${analysis}" == "G2-M" ]] && rep=1  #ARGUMENT
-# [[ "${analysis}" == "G2-M" ]] && rep=2  #ARGUMENT
-[[ ${analysis} != "G2-M" ]] && rep=NA  #ARGUMENT
+#  Initialize arrays of samples to merge
+unset to_merge && typeset -a to_merge
+to_merge+=( "MC-2020_30C-a15_WT" )
+to_merge+=( "MC-2020_nz_WT" )
 
-#  Setting for flag to run standard or rDNA processing, and variables for left-
-#+ and right-most positions to be considered for the rDNA locus on chrXII
-flag_rDNA=TRUE  #ARGUMENT  # echo "${flag_rDNA}"
+run_check=TRUE
+[[ "${run_check[@]}" == TRUE ]] &&
+    {
+        for i in "${initial[@]}"; do
+            ls -lhaFG "sym/${i}_R1.fastq.gz"
+            ls -lhaFG "sym/${i}_R2.fastq.gz"
+            echo ""
+        done
+    }
+
+#  Initialize variables for left- and right-most positions to be considered for
+#+ the rDNA locus on XII
 rDNA_pos_l=451526  #HARDCODED  # echo "${rDNA_pos_l}"
 rDNA_pos_r=468980  #HARDCODED  # echo "${rDNA_pos_r}"
 
-#  Initial setting for flag to *not* run pairtools merge
-flag_merge=FALSE  #HARDCODED  # echo "${flag_merge}"
-
 #  CPU and scratch storage settings
-threads="${SLURM_CPUS_ON_NODE}"  #ARGUMENT  # echo "${threads}"
+threads="8"  #ARGUMENT  # echo "${threads}"
 scratch="/fh/scratch/delete30/tsukiyama_t"  #ARGUMENT  # ., "${scratch}"
-
-#  Specify samples to analyze
-if [[ "${analysis}" == "Q" ]]; then
-    p_fq="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA493742"  # ., "${p_fq}"
-    f_pre="SRR7939018"  # ., "${p_fq}/${f_pre}"*
-    
-    flag_merge=FALSE
-elif [[ "${analysis}" == "G1" ]]; then
-    p_fq="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA636358"  # ., "${p_fq}"
-    f_pre="SRR11893107"  # ., "${p_fq}/${f_pre}"*
-
-    flag_merge=FALSE
-elif [[ "${analysis}" == "G2-M" ]]; then
-    #  If condition is met, then set flag to *run* pairtools merge
-    flag_merge=TRUE  #HARDCODED  # echo "${flag_merge}"
-    
-    #  Set path and file prefix information
-    p_fq="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/data/PRJNA636358"  # ., "${p_fq}"
-    
-    if [[ "${rep}" -eq 1 ]]; then
-        f_pre="SRR11893084"  # ., "${p_fq}/${f_pre}"*
-    elif [[ "${rep}" -eq 2 ]]; then
-        f_pre="SRR11893085"  # ., "${p_fq}/${f_pre}"*
-    fi
-    
-    #  Set up hash, indices (needed for replicate/merge logic below)
-    unset arr_merge; unset order
-    typeset -A arr_merge; typeset -a order
-    arr_merge["SRR11893084"]="SRR11893085"; order+=("SRR11893084")
-    arr_merge["SRR11893085"]="SRR11893084"; order+=("SRR11893085")
-
-    run_test=FALSE
-    [[ "${run_test}" == TRUE ]] &&
-        {
-            #  Return hash keys, values in order
-            for i in "${order[@]}"; do
-                echo "  key  ${i}"
-                echo "value  ${arr_merge[${i}]}"
-                echo ""
-            done
-        }
-fi
 
 print_test=TRUE  #ARGUMENT
 [[ "${print_test}" == TRUE ]] &&
@@ -3427,18 +3400,105 @@ print_test=TRUE  #ARGUMENT
         echo """
         General variables for workflow
         ==============================
-        analysis=${analysis}
-        flag_merge=${flag_merge}
-        flag_rDNA=${flag_rDNA}
         rDNA_pos_l=${rDNA_pos_l}
         rDNA_pos_r=${rDNA_pos_r}
         threads=${threads}
         scratch=${scratch}
-        p_fq=${p_fq}
-        f_pre=${f_pre}
-        rep=${rep}
         """
     }
+```
+</details>
+<br />
+
+<a id="printed-7"></a>
+###### Printed
+<details>
+<summary><i>Printed: Initialize "general" variables for workflow</i></summary>
+
+```txt
+❯ #  Initialize array of samples to work with
+
+
+❯ unset initial && typeset -a initial
+❯ initial+=( "MC-2019_Q_WT_repM" )
+❯ initial+=( "MC-2020_30C-a15_WT_rep1" )
+❯ initial+=( "MC-2020_30C-a15_WT_rep2" )
+❯ initial+=( "MC-2020_nz_WT_rep1" )
+❯ initial+=( "MC-2020_nz_WT_rep2" )
+
+
+❯ #  Initialize arrays of samples to merge
+
+
+❯ unset to_merge && typeset -a to_merge
+❯ to_merge+=( "MC-2020_30C-a15_WT" )
+❯ to_merge+=( "MC-2020_nz_WT" )
+
+
+❯ run_check=TRUE
+
+
+❯ [[ "${run_check[@]}" == TRUE ]] &&
+>     {
+>         for i in "${initial[@]}"; do
+>             ls -lhaFG "sym/${i}_R1.fastq.gz"
+>             ls -lhaFG "sym/${i}_R2.fastq.gz"
+>             echo ""
+>         done
+>     }
+lrwxrwxrwx 1 kalavatt 63 Aug  3 15:03 sym/MC-2019_Q_WT_repM_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA493742/SRR7939018_1.fastq.gz
+lrwxrwxrwx 1 kalavatt 63 Aug  3 15:03 sym/MC-2019_Q_WT_repM_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA493742/SRR7939018_2.fastq.gz
+
+lrwxrwxrwx 1 kalavatt 64 Aug  3 15:03 sym/MC-2020_30C-a15_WT_rep1_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893095_1.fastq.gz
+lrwxrwxrwx 1 kalavatt 64 Aug  3 15:03 sym/MC-2020_30C-a15_WT_rep1_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893095_2.fastq.gz
+
+lrwxrwxrwx 1 kalavatt 64 Aug  3 15:03 sym/MC-2020_30C-a15_WT_rep2_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893096_1.fastq.gz
+lrwxrwxrwx 1 kalavatt 64 Aug  3 15:03 sym/MC-2020_30C-a15_WT_rep2_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893096_2.fastq.gz
+
+lrwxrwxrwx 1 kalavatt 64 Aug  3 15:03 sym/MC-2020_nz_WT_rep1_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893084_1.fastq.gz
+lrwxrwxrwx 1 kalavatt 64 Aug  3 15:03 sym/MC-2020_nz_WT_rep1_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893084_2.fastq.gz
+
+lrwxrwxrwx 1 kalavatt 64 Aug  3 15:03 sym/MC-2020_nz_WT_rep2_R1.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893085_1.fastq.gz
+lrwxrwxrwx 1 kalavatt 64 Aug  3 15:03 sym/MC-2020_nz_WT_rep2_R2.fastq.gz -> /home/kalavatt/2023_rDNA_data/PRJNA636358/SRR11893085_2.fastq.gz
+
+
+❯ #  Initialize variables for left- and right-most positions to be considered for
+❯ #+ the rDNA locus on XII
+
+
+❯ rDNA_pos_l=451526  #HARDCODED  # echo "${rDNA_pos_l}"
+
+
+❯ rDNA_pos_r=468980  #HARDCODED  # echo "${rDNA_pos_r}"
+
+
+❯ #  CPU and scratch storage settings
+
+
+❯ threads="8"  #ARGUMENT  # echo "${threads}"
+
+
+❯ scratch="/fh/scratch/delete30/tsukiyama_t"  #ARGUMENT  # ., "${scratch}"
+
+
+❯ [[ "${print_test}" == TRUE ]] &&
+>     {
+>         echo """
+>         General variables for workflow
+>         ==============================
+>         rDNA_pos_l=${rDNA_pos_l}
+>         rDNA_pos_r=${rDNA_pos_r}
+>         threads=${threads}
+>         scratch=${scratch}
+>         """
+>     }
+
+        General variables for workflow
+        ==============================
+        rDNA_pos_l=451526
+        rDNA_pos_r=468980
+        threads=8
+        scratch=/fh/scratch/delete30/tsukiyama_t
 ```
 </details>
 <br />
@@ -3453,18 +3513,7 @@ print_test=TRUE  #ARGUMENT
 ```bash
 #!/bin/bash
 
-#  For atria, bwa mem
-d_trim="01_trim"  # ., "${d_trim}"
-
-a_fq_1="${p_fq}/${f_pre}_1.fastq.gz"  # ., "${a_fq_1}"
-a_fq_2="${p_fq}/${f_pre}_2.fastq.gz"  # ., "${a_fq_2}"
-a_afq_1="${d_trim}/${f_pre}_1.atria.fastq.gz"  # ., "${a_afq_1}"
-a_afq_2="${d_trim}/${f_pre}_2.atria.fastq.gz"  # ., "${a_afq_2}"
-
-d_bam="02_align"  # echo "${d_bam}"
-f_bam="${f_pre}.bam"  # echo "${f_bam}"
-a_bam="${d_bam}/${f_bam}"  # echo "${a_bam}"
-
+#  For alignment
 p_index="${HOME}/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/bwa"  # ., "${p_index}"
 f_index="S288C_R64-3-1.fa"  # ., "${p_index}/${f_index}"*
 a_index="${p_index}/${f_index}"  # ., "${a_index}"*
@@ -3474,259 +3523,241 @@ p_size="${HOME}/tsukiyamalab/kalavatt/genomes/Saccharomyces_cerevisiae/fasta-pro
 f_size="S288C_reference_sequence_R64-3-1_20210421.size"  # ., "${p_size}/${f_size}"
 a_size="${p_size}/${f_size}"  # ., "${a_size}"
 
-d_pairs="03_parse"  # echo "${d_pairs}"
-if [[ "${flag_rDNA}" == FALSE ]]; then
-    f_pre="${f_pre}.standard"  # echo "${f_pre}"
-    f_pairs="${f_pre}.txt.gz"  # echo "${f_pairs}"
-elif [[ "${flag_rDNA}" == TRUE ]]; then
-    f_pre="${f_pre}.keep-MM"  # echo "${f_pre}"
-    f_pairs="${f_pre}.txt.gz"  # echo "${f_pairs}"
-fi
-a_pairs="${d_pairs}/${f_pairs}"  # echo "${a_pairs}"
+assembly="S288C_R64-3-1"
 
-assembly="S288C_R64-3-1"  # echo "${assembly}"
-max_mismatch=0  #ARGUMENT  # echo "${max_mismatch}"
-if [[ "${flag_rDNA}" == FALSE ]]; then
-    min_mapq=1  # echo "${min_mapq}"
-elif [[ "${flag_rDNA}" == TRUE ]]; then
-    min_mapq=0  # echo "${min_mapq}"
-fi
+max_mismatch_std=3
+max_mismatch_rDNA=6
 
-d_stats="06_stats"  # echo "${d_stats}"
-f_stats="${f_pre}.stats.txt"  # echo "${f_stats}"
-a_stats="${d_stats}/${f_stats}"  # echo "${a_stats}"
-
-#  For pairtools sort
-d_sort="04_sort"  # echo "${d_sort}"
-f_sort="${f_pre}.sort.txt.gz"  # echo "${f_sort}"
-a_sort="${d_sort}/${f_sort}"  # echo "${a_sort}"
-
-#  For pairtools dedup
-d_dedup="05_dedup"  # echo "${d_dedup}"
-
-f_dedup_pre="${f_pre}.nodups"  # echo "${f_dedup_pre}"
-f_dup_pre="${f_pre}.dups"  # echo "${f_dup_pre}"
-f_unmap_pre="${f_pre}.unmapped"  # echo "${f_unmap_pre}"
-
-a_dedup_pre_pairs="${d_dedup}/${f_pre}.nodups.pairs.gz"  # echo "${a_dedup_pre_pairs}"
-a_dup_pre_pairs="${d_dedup}/${f_pre}.dups.pairs.gz"  # echo "${a_dup_pre_pairs}"
-a_unmap_pre_pairs="${d_dedup}/${f_pre}.unmapped.pairs.gz"  # echo "${a_unmap_pre_pairs}"
-
-f_dedup_stats="${f_pre}.dedup.stats.txt"  # echo "${f_dedup_stats}"
-a_dedup_stats="${d_stats}/${f_dedup_stats}"  # echo "${a_dedup_stats}"
-
-#  For subsequent calls to pairtools stats
-f_dedup_pre_pairs_stats="${f_dedup_pre}.stats.txt"  # echo "${f_dedup_pre_pairs_stats}"
-f_dup_pre_pairs_stats="${f_dup_pre}.stats.txt"  # echo "${f_dup_pre_pairs_stats}"
-f_unmap_pre_pairs_stats="${f_unmap_pre}.stats.txt"  # echo "${f_unmap_pre_pairs_stats}"
-
-a_dedup_pre_pairs_stats="${d_stats}/${f_dedup_pre_pairs_stats}"  # echo "${a_dedup_pre_pairs_stats}"
-a_dup_pre_pairs_stats="${d_stats}/${f_dup_pre_pairs_stats}"  # echo "${a_dup_pre_pairs_stats}"
-a_unmap_pre_pairs_stats="${d_stats}/${f_unmap_pre_pairs_stats}"  # echo "${a_unmap_pre_pairs_stats}"
+min_mapq_std=1
+min_mapq_rDNA=0
 
 #  For cooler cload pairs
-bin_initial=50  #ARGUMENT  # echo "${bin_initial}"
+bin_initial=50
 
-d_cload="07_cload"  # echo "${d_cload}"
-f_cload="${f_pre}.cload.cool"  # echo "${f_cload}"
-a_cload="${d_cload}/${f_cload}"  # echo "${a_cload}"
+#  Directories to store pipeline outfiles
+d_trim="01_trim"
+d_bam="02_align"
+d_pairs="03_parse"
+d_stats="06_stats"
+d_sort="04_sort"
+d_dedup="05_dedup"
+d_cload="07_cload"
+d_zoom="08_zoom"
 
-#  For cooler zoomify
-d_zoom="08_zoom"  # echo "${d_zoom}"
-f_zoom="${f_pre}.mcool"  # echo "${f_zoom}"
-a_zoom="${d_zoom}/${f_zoom}"  # echo "${a_zoom}"
+#  Get situated
+unset f_pre && typeset -a f_pre  # echo_test "${f_pre[@]}"
+
+unset a_fq_1 && typeset -a a_fq_1  # echo_test "${a_fq_1[@]}"
+unset a_fq_2 && typeset -a a_fq_2  # echo_test "${a_fq_2[@]}"
+
+#  01_trim
+unset a_afq_1 && typeset -a a_afq_1  # echo_test "${a_afq_1[@]}"
+unset a_afq_2 && typeset -a a_afq_2  # echo_test "${a_afq_2[@]}"
+
+#  02_bam
+unset a_bam && typeset -a a_bam  # echo_test "${a_bam[@]}"
+
+#  03_parse
+unset f_pre_std && typeset -a f_pre_std  # echo_test "${f_pre_std[@]}"
+unset f_pairs_std && typeset -a f_pairs_std  # echo_test "${f_pairs_std[@]}"
+unset a_pairs_std && typeset -a a_pairs_std  # echo_test "${a_pairs_std[@]}"
+
+unset f_pre_rDNA && typeset -a f_pre_rDNA  # echo_test "${f_pre_rDNA[@]}"
+unset f_pairs_rDNA && typeset -a f_pairs_rDNA  # echo_test "${f_pairs_rDNA[@]}"
+unset a_pairs_rDNA && typeset -a a_pairs_rDNA  # echo_test "${a_pairs_rDNA[@]}"
+
+#  06_stats
+unset f_stats && typeset -a f_stats  # echo_test "${f_stats[@]}"
+unset a_stats && typeset -a a_stats  # echo_test "${a_stats[@]}"
+
+#  04_sort
+unset f_sort && typeset -a f_sort  # echo_test "${f_sort[@]}"
+unset a_sort && typeset -a a_sort  # echo_test "${a_sort[@]}"
+
+#  05_dedup
+unset f_dedup_pre && typeset -a f_dedup_pre  # echo_test "${f_dedup_pre[@]}"
+unset a_dedup_pre_pairs && typeset -a a_dedup_pre_pairs  # echo_test "${a_dedup_pre_pairs[@]}"
+
+unset f_dup_pre && typeset -a f_dup_pre  # echo_test "${f_dup_pre[@]}"
+unset a_dup_pre_pairs && typeset -a a_dup_pre_pairs  # echo_test "${a_dup_pre_pairs[@]}"
+
+unset f_unmap_pre && typeset -a f_unmap_pre  # echo_test "${f_unmap_pre[@]}"
+unset a_unmap_pre_pairs && typeset -a a_unmap_pre_pairs  # echo_test "${a_unmap_pre_pairs[@]}"
+
+unset f_dedup_stats && typeset -a f_dedup_stats  # echo_test "${f_dedup_stats[@]}"
+unset a_dedup_stats && typeset -a a_dedup_stats  # echo_test "${a_dedup_stats[@]}"
+
+#  06_stats
+unset f_dedup_pre_pairs_stats && typeset -a f_dedup_pre_pairs_stats  # echo_test "${f_dedup_pre_pairs_stats[@]}"
+unset a_dedup_pre_pairs_stats && typeset -a a_dedup_pre_pairs_stats  # echo_test "${a_dedup_pre_pairs_stats[@]}"
+
+unset f_dup_pre_pairs_stats && typeset -a f_dup_pre_pairs_stats  # echo_test "${f_dup_pre_pairs_stats[@]}"
+unset a_dup_pre_pairs_stats && typeset -a a_dup_pre_pairs_stats  # echo_test "${a_dup_pre_pairs_stats[@]}"
+
+unset f_unmap_pre_pairs_stats && typeset -a f_unmap_pre_pairs_stats  # echo_test "${f_unmap_pre_pairs_stats[@]}"
+unset a_unmap_pre_pairs_stats && typeset -a a_unmap_pre_pairs_stats  # echo_test "${a_unmap_pre_pairs_stats[@]}"
+
+#  07_cload
+unset f_cload && typeset -a f_cload  # echo_test "${f_cload[@]}"
+unset a_cload && typeset -a a_cload  # echo_test "${a_cload[@]}"
+
+#  08_zoom
+unset f_zoom && typeset -a f_zoom  # echo_test "${f_zoom[@]}"
+unset a_zoom && typeset -a a_zoom  # echo_test "${a_zoom[@]}"
+
+#  Populate arrays
+for (( i = 0; i < "${#initial[@]}"; i++ )); do  #LATER
+    echo "${i}"
+
+    #  Get situated
+    f_pre+=( "${initial[${i}]}" )
+
+    a_fq_1+=( "sym/${f_pre[${i}]}_R1.fastq.gz" )
+    a_fq_2+=( "sym/${f_pre[${i}]}_R2.fastq.gz" )
+
+    #  01_trim
+    a_afq_1+=( "${d_trim}/${f_pre[${i}]}_1.atria.fastq.gz" )
+    a_afq_2+=( "${d_trim}/${f_pre[${i}]}_2.atria.fastq.gz" )
+
+    #  02_bam
+    a_bam+=( "${d_bam}/${f_pre[${i}]}.bam" )
+
+    #  03_parse
+    f_pre_std+=( "${f_pre[${i}]}.standard" )
+    f_pairs_std+=( "${f_pre_std[${i}]}.txt.gz" )
+    a_pairs_std+=( "${d_pairs}/${f_pairs_std[${i}]}" )
+
+    f_pre_rDNA+=( "${f_pre[${i}]}.keep-MM" )
+    f_pairs_rDNA+=( "${f_pre_rDNA[${i}]}.txt.gz" )
+    a_pairs_rDNA+=( "${d_pairs}/${f_pairs_rDNA[${i}]}" )
+
+    #  06_stats
+    f_stats+=( "${f_pre[${i}]}.stats.txt" )
+    a_stats+=( "${d_stats}/${f_stats[${i}]}" )
+
+    #  04_sort
+    f_sort+=( "${f_pre[${i}]}.sort.txt.gz" )
+    a_sort+=( "${d_sort}/${f_sort[${i}]}" )
+
+    #  05_dedup
+    f_dedup_pre+=( "${f_pre[${i}]}.nodups" )
+    a_dedup_pre_pairs+=( "${d_dedup}/${f_dedup_pre[${i}]}.pairs.gz" )
+    
+    f_dup_pre+=( "${f_pre[${i}]}.dups" )
+    a_dup_pre_pairs+=( "${d_dedup}/${f_dup_pre[${i}]}.pairs.gz" )
+    
+    f_unmap_pre+=( "${f_pre[${i}]}.unmapped" )
+    a_unmap_pre_pairs+=( "${d_dedup}/${f_unmap_pre[${i}]}.pairs.gz" )
+
+    f_dedup_stats+=( "${f_pre[${i}]}.dedup.stats.txt" )
+    a_dedup_stats+=( "${d_stats}/${f_dedup_stats[${i}]}" )
+
+    #  06_stats
+    f_dedup_pre_pairs_stats+=( "${f_dedup_pre[${i}]}.stats.txt" )
+    a_dedup_pre_pairs_stats+=( "${d_stats}/${f_dedup_pre_pairs_stats[${i}]}" )
+    
+    f_dup_pre_pairs_stats+=( "${f_dup_pre[${i}]}.stats.txt" )
+    a_dup_pre_pairs_stats+=( "${d_stats}/${f_dup_pre_pairs_stats[${i}]}" )
+    
+    f_unmap_pre_pairs_stats+=( "${f_unmap_pre[${i}]}.stats.txt" )
+    a_unmap_pre_pairs_stats+=( "${d_stats}/${f_unmap_pre_pairs_stats[${i}]}" )
+
+    #  07_cload
+    f_cload+=( "${f_pre[${i}]}.cload.cool" )
+    a_cload+=( "${d_cload}/${f_cload[${i}]}" )
+
+    #  08_zoom
+    f_zoom+=( "${f_pre[${i}]}.mcool" )
+    a_zoom+=( "${d_zoom}/${f_zoom[${i}]}" )
+done
 
 print_test=TRUE  #ARGUMENT
 [[ "${print_test}" == TRUE ]] &&
     {
-        echo """
-        Specific variables for workflow
-        ===============================
-        For atria, bwa mem
-        ------------------
-        d_trim=${d_trim}
-        a_fq_1=${a_fq_1}
-        a_fq_2=${a_fq_2}
-        a_afq_1=${a_afq_1}
-        a_afq_2=${a_afq_2}
-        
-        d_bam=${d_bam}
-        f_bam=${f_bam}
-        a_bam=${a_bam}
-        
-        p_index=${p_index}
-        f_index=${f_index}
-        a_index=${a_index}
-        
-        For pairtools parse2
-        --------------------
-        p_size=${p_size}
-        f_size=${f_size}
-        a_size=${a_size}
-        
-        d_pairs=${d_pairs}
-        f_pairs=${f_pairs}
-        a_pairs=${a_pairs}
-        
-        assembly=${assembly}
-        max_mismatch=${max_mismatch}
-        min_mapq=${min_mapq}
-        
-        d_stats=${d_stats}
-        f_stats=${f_stats}
-        a_stats=${a_stats}
-
-        For pairtools sort
-        ------------------
-        d_sort=${d_sort}
-        f_sort=${f_sort}
-        a_sort=${a_sort}
-
-        For pairtools dedup
-        -------------------
-        d_dedup=${d_dedup}
-        f_dedup_pre=${f_dedup_pre}
-        f_dup_pre=${f_dup_pre}
-        f_unmap_pre=${f_unmap_pre}
-        a_dedup_pre_pairs=${a_dedup_pre_pairs}
-        a_dup_pre_pairs=${a_dup_pre_pairs}
-        a_unmap_pre_pairs=${a_unmap_pre_pairs}
-        
-        f_dedup_stats=${f_dedup_stats}
-        a_dedup_stats=${a_dedup_stats}
-        
-        For subsequent calls to pairtools stats
-        ---------------------------------------
-        f_dedup_pre_pairs_stats=${f_dedup_pre_pairs_stats}
-        f_dup_pre_pairs_stats=${f_dup_pre_pairs_stats}
-        f_unmap_pre_pairs_stats=${f_unmap_pre_pairs_stats}
-        a_dedup_pre_pairs_stats=${a_dedup_pre_pairs_stats}
-        a_dup_pre_pairs_stats=${a_dup_pre_pairs_stats}
-        a_unmap_pre_pairs_stats=${a_unmap_pre_pairs_stats}
-        
-        For cooler cload pairs
-        ----------------------
-        bin_initial=${bin_initial}
-        d_cload=${d_cload}
-        f_cload=${f_cload}
-        a_cload=${a_cload}
-
-        For cooler zoomify
-        ------------------
-        d_zoom=${d_zoom}
-        f_zoom=${f_zoom}
-        a_zoom=${a_zoom}
-        """
-    }
-```
-</details>
-<br />
-
-<a id="if-applicable-then-run-logic-for-running-pairtools-merge"></a>
-##### If applicable, then run logic for running `pairtools merge`
-<a id="code-10"></a>
-###### Code
-<details>
-<summary><i>Code: If applicable, then run logic for running pairtools merge</i></summary>
-
-```bash
-#!/bin/bash
-
-[[ "${flag_merge}" == TRUE ]] &&
-    {
-        #  Check if ${f_pre} is present in hash ${arr_merge}
-        #+
-        #+ ${arr_merge[$f_pre]+present} evaluates to "present" if
-        #+ arr_merge[$f_pre] is set
-        if [[ "${arr_merge[$f_pre]+present}" == "present" ]]; then
-            # echo "arr_merge[\$f_pre] is in hash ${arr_merge}"
-            # echo "arr_merge[\$f_pre] is set to ${arr_merge[$f_pre]}"
+        for (( i = 0 ; i < "${#initial[@]}" ; i++ )); do
+            echo """
+            Specific variables for workflow
+            ===============================
+            For atria, bwa mem
+            ------------------
+            d_trim=${d_trim}
+            a_fq_1=${a_fq_1[${i}]}
+            a_fq_2=${a_fq_2[${i}]}
+            a_afq_1=${a_afq_1[${i}]}
+            a_afq_2=${a_afq_2[${i}]}
             
-            #TODO Logic for if >2, <2, etc.
-            if [[ "${#order[@]}" -eq 2 ]]; then
-                el_1=0  # echo "${el_1}"
-                el_2=1  # echo "${el_2}"
-            fi
-
-            #  For pairtools merge
-            name_1="${order[${el_1}]}"  # echo "${name_1}"
-            name_2="${order[${el_2}]}"  # echo "${name_2}"
-
-            post="nodups.pairs.gz"  # echo "${post}"
-            in_1="${d_dedup}/${name_1}.${post}"  # ., "${in_1}"
-            in_2="${d_dedup}/${name_2}.${post}"  # ., "${in_2}"
-
-            [[ -f "${in_1}" && -f "${in_2}" ]] ||
-                {
-                    echo "Warning: Infiles for pairtools merge not found; stopping the operations"
-                    return 1
-                }
-
-            d_merge="${d_dedup}"  # echo "${d_dedup}"
-            f_merge_pre="${name_1}-${name_2}"  # echo "${f_merge_pre}"
-            f_merge="${f_merge_pre}.${post}"  # echo "${f_merge}"
-            a_merge="${d_merge}/${f_merge}"  # echo "${a_merge}"
-
-            #  For pairtools stats
-            d_merge_stats="06_stats"  # echo "${d_merge_stats}"
-            f_merge_stats="${f_merge_pre}.stats.txt"  # echo "${f_merge_stats}"
-            a_merge_stats="${d_merge_stats}/${f_merge_stats}"  # echo "${a_merge_stats}"
-
-            #  For cooler cload pairs
-            d_merge_cload="07_cload"  # echo "${d_merge_cload}"
-            f_merge_cload="${f_merge_pre}.cload.cool"  # echo "${f_merge_cload}"
-            a_merge_cload="${d_merge_cload}/${f_merge_cload}"  # echo "${a_merge_cload}"
-
-            #  For cooler zoomify
-            d_merge_zoom="08_zoom"  # echo "${d_merge_zoom}"
-            f_merge_zoom="${f_merge_pre}.mcool"  # echo "${f_merge_zoom}"
-            a_merge_zoom="${d_merge_zoom}/${f_merge_zoom}"  # echo "${a_merge_zoom}"
-        else
-            #  Reset flag to FALSE
-            flag_merge=FALSE  # echo "${flag_merge}"
+            d_bam=${d_bam}
+            f_bam=${f_bam[${i}]}
+            a_bam=${a_bam[${i}]}
             
-            echo "Warning: arr_merge[\$f_pre] is not set; stopping the operations"
-            return 1
-        fi
-    }
+            p_index=${p_index}
+            f_index=${f_index}
+            a_index=${a_index}
+            
+            For pairtools parse2
+            --------------------
+            p_size=${p_size}
+            f_size=${f_size}
+            a_size=${a_size}
+            
+            d_pairs=${d_pairs}
+            f_pairs_std=${f_pairs_std[${i}]}
+            a_pairs_std=${a_pairs_std[${i}]}
+            f_pairs_rDNA=${f_pairs_rDNA[${i}]}
+            a_pairs_rDNA=${a_pairs_rDNA[${i}]}
 
-print_test=TRUE  #ARGUMENT
-[[ "${flag_merge}" == TRUE && "${print_test}" == TRUE ]] &&
-    {
-        echo """
-        Specific variables for merged .cool files
-        =========================================
-        For pairtools merge
-        -------------------
-        name_1=${name_1}
-        name_2=${name_2}
+            assembly=${assembly}
+            max_mismatch_std=${max_mismatch_std}
+            max_mismatch_rDNA=${max_mismatch_rDNA}
+            min_mapq_std=${min_mapq_std}
+            min_mapq_rDNA=${min_mapq_rDNA}
 
-        in_1=${in_1}
-        in_2=${in_2}
+            d_stats=${d_stats}
+            f_stats=${f_stats[${i}]}
+            a_stats=${a_stats[${i}]}
 
-        d_merge=${d_merge}
-        f_merge_pre=${f_merge_pre}
-        f_merge=${f_merge}
-        a_merge=${a_merge}
+            For pairtools sort
+            ------------------
+            d_sort=${d_sort}
+            f_sort=${f_sort[${i}]}
+            a_sort=${a_sort[${i}]}
 
-        For pairtools stats
-        -------------------
-        d_merge_stats=${d_merge_stats}
-        f_merge_stats=${f_merge_stats}
-        a_merge_stats=${a_merge_stats}
+            For pairtools dedup
+            -------------------
+            d_dedup=${d_dedup}
+            f_dedup_pre=${f_dedup_pre[${i}]}
+            f_dup_pre=${f_dup_pre[${i}]}
+            f_unmap_pre=${f_unmap_pre[${i}]}
+            a_dedup_pre_pairs=${a_dedup_pre_pairs[${i}]}
+            a_dup_pre_pairs=${a_dup_pre_pairs[${i}]}
+            a_unmap_pre_pairs=${a_unmap_pre_pairs[${i}]}
+            
+            f_dedup_stats=${f_dedup_stats[${i}]}
+            a_dedup_stats=${a_dedup_stats[${i}]}
+            
+            For subsequent calls to pairtools stats
+            ---------------------------------------
+            f_dedup_pre_pairs_stats=${f_dedup_pre_pairs_stats[${i}]}
+            f_dup_pre_pairs_stats=${f_dup_pre_pairs_stats[${i}]}
+            f_unmap_pre_pairs_stats=${f_unmap_pre_pairs_stats[${i}]}
+            a_dedup_pre_pairs_stats=${a_dedup_pre_pairs_stats[${i}]}
+            a_dup_pre_pairs_stats=${a_dup_pre_pairs_stats[${i}]}
+            a_unmap_pre_pairs_stats=${a_unmap_pre_pairs_stats[${i}]}
+            
+            For cooler cload pairs
+            ----------------------
+            bin_initial=${bin_initial}
+            d_cload=${d_cload}
+            f_cload=${f_cload[${i}]}
+            a_cload=${a_cload[${i}]}
 
-        For cooler cload pairs
-        ----------------------
-        d_merge_cload=${d_merge_cload}
-        f_merge_cload=${f_merge_cload}
-        a_merge_cload=${a_merge_cload}
-
-        For cooler zoomify
-        ------------------
-        d_merge_zoom=${d_merge_zoom}
-        f_merge_zoom=${f_merge_zoom}
-        a_merge_zoom=${a_merge_zoom}
-        """
+            For cooler zoomify
+            ------------------
+            d_zoom=${d_zoom}
+            f_zoom=${f_zoom[${i}]}
+            a_zoom=${a_zoom[${i}]}
+            """
+        done
     }
 ```
 </details>
@@ -3734,7 +3765,7 @@ print_test=TRUE  #ARGUMENT
 
 <a id="create-outdirectories-if-not-present"></a>
 ##### Create outdirectories if not present
-<a id="code-11"></a>
+<a id="code-10"></a>
 ###### Code
 <details>
 <summary><i>Code: Create outdirectories if not present</i></summary>
@@ -3756,7 +3787,7 @@ print_test=TRUE  #ARGUMENT
 
 <a id="1-trim-fastq-files"></a>
 ### 1. Trim fastq files
-<a id="code-12"></a>
+<a id="code-11"></a>
 #### Code
 <details>
 <summary><i>Code: 1. Trim fastq files</i></summary>
@@ -3805,7 +3836,7 @@ run=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-7"></a>
+<a id="printed-8"></a>
 #### Printed
 <details>
 <summary><i>Printed: 1. Trim fastq files</i></summary>
@@ -3878,7 +3909,7 @@ pigz 2.6
 
 <a id="2-align-datasets"></a>
 ### 2. Align datasets
-<a id="code-13"></a>
+<a id="code-12"></a>
 #### Code
 <details>
 <summary><i>Code: 2. Align datasets</i></summary>
@@ -3985,7 +4016,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-8"></a>
+<a id="printed-9"></a>
 #### Printed
 <details>
 <summary><i>Printed: 2. Align datasets</i></summary>
@@ -4078,7 +4109,7 @@ run=TRUE
 
 <a id="3-run-pairtools-parse"></a>
 ### 3. Run `pairtools parse`
-<a id="code-14"></a>
+<a id="code-13"></a>
 #### Code
 <details>
 <summary><i>Code: 3. Run pairtools parse</i></summary>
@@ -4267,7 +4298,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-9"></a>
+<a id="printed-10"></a>
 #### Printed
 <details>
 <summary><i>Printed: 3. Run pairtools parse</i></summary>
@@ -6323,7 +6354,7 @@ dist_freq/562341325+/++ 0
 
 <a id="4-run-pairtools-sort"></a>
 ### 4. Run `pairtools sort`
-<a id="code-15"></a>
+<a id="code-14"></a>
 #### Code
 <details>
 <summary><i>Code: 4. Run pairtools sort</i></summary>
@@ -6395,7 +6426,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-10"></a>
+<a id="printed-11"></a>
 #### Printed
 <details>
 <summary><i>Printed: 4. Run pairtools sort</i></summary>
@@ -7009,7 +7040,7 @@ SRR7939018.38300170 XVI 948034  XVI 1219    -   -   UU  1   R1-2    948034  1219
 
 <a id="5-run-pairtools-dedup-and-pairtools-split"></a>
 ### 5. Run `pairtools dedup` and `pairtools split`
-<a id="code-16"></a>
+<a id="code-15"></a>
 #### Code
 <details>
 <summary><i>Code: 5. Run pairtools dedup</i></summary>
@@ -7152,7 +7183,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-11"></a>
+<a id="printed-12"></a>
 #### Printed
 <details>
 <summary><i>Printed: 5. Run pairtools dedup</i></summary>
@@ -9960,7 +9991,7 @@ dist_freq/562341325+/++ 0
 
 <a id="x-run-pairtools-merge-if-applicable"></a>
 ### X. Run `pairtools merge` if applicable
-<a id="code-17"></a>
+<a id="code-16"></a>
 #### Code
 <details>
 <summary><i>Code: Run pairtools merge if applicable</i></summary>
@@ -10046,7 +10077,7 @@ run_check=TRUE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-12"></a>
+<a id="printed-13"></a>
 #### Printed
 <details>
 <summary><i>Printed: Run pairtools merge if applicable</i></summary>
@@ -10239,7 +10270,7 @@ drwxrws--- 3 kalavatt  619 Jul  8 14:45 ../
 
 <a id="x-run-pairtools-select-if-applicable"></a>
 ### X. Run `pairtools select` if applicable
-<a id="code-18"></a>
+<a id="code-17"></a>
 #### Code
 <details>
 <summary><i>Code: X. Run pairtools select if applicable</i></summary>
@@ -10259,7 +10290,7 @@ drwxrws--- 3 kalavatt  619 Jul  8 14:45 ../
 </details>
 <br />
 
-<a id="printed-13"></a>
+<a id="printed-14"></a>
 #### Printed
 <details>
 <summary><i>Printed: X. Run pairtools select</i></summary>
@@ -10378,7 +10409,7 @@ Options:
 ### X. Run "`standard-rDNA-complete`" processing if applicable
 <a id="a-exclude-rdna-associated-cis-and-trans-interactions-from-standardnodups-file"></a>
 #### A. Exclude rDNA-associated *cis* and *trans* interactions from "`standard.nodups`" file
-<a id="code-19"></a>
+<a id="code-18"></a>
 ##### Code
 <details>
 <summary><i>Code: A. Exclude rDNA-associated cis and trans interactions from "standard"</i></summary>
@@ -10481,7 +10512,7 @@ Options:
 </details>
 <br />
 
-<a id="printed-14"></a>
+<a id="printed-15"></a>
 ##### Printed
 <details>
 <summary><i>Printed: A. Exclude rDNA-associated cis and trans interactions from "standard"</i></summary>
@@ -10494,7 +10525,7 @@ Options:
 
 <a id="b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file"></a>
 #### B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file
-<a id="code-20"></a>
+<a id="code-19"></a>
 ##### Code
 <details>
 <summary><i>Code: B. Exclude all but rDNA-associated cis and trans interactions from "keep-MM.nodups" file</i></summary>
@@ -10569,7 +10600,7 @@ Options:
 </details>
 <br />
 
-<a id="printed-15"></a>
+<a id="printed-16"></a>
 ##### Printed
 <details>
 <summary><i>Printed: B. Exclude all but rDNA-associated cis and trans interactions from "keep-MM.nodups" file</i></summary>
@@ -10584,7 +10615,7 @@ Options:
 #### C. Re-header and merge the "`standard.nodups`" and "`keep-MM.nodups`" files
 ...and re-header the file
 
-<a id="code-21"></a>
+<a id="code-20"></a>
 ##### Code
 <details>
 <summary><i>Code: C. Re-header and merge the "standard.nodups" and "keep-MM.nodups" files</i></summary>
@@ -10842,7 +10873,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
 </details>
 <br />
 
-<a id="printed-16"></a>
+<a id="printed-17"></a>
 ##### Printed
 <details>
 <summary><i>Printed: C. Re-header and merge the "standard.nodups" and "keep-MM.nodups" files</i></summary>
@@ -11097,7 +11128,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
 ### 6. Run `pairtools stats`
 <a id="individual-pairs-files"></a>
 #### Individual pairs files
-<a id="code-22"></a>
+<a id="code-21"></a>
 ##### Code
 <details>
 <summary><i>Code: 6. Run pairtools stats</i></summary>
@@ -11153,7 +11184,7 @@ run_check=FALSE  #ARGUMENT
 </details>
 <br />
 
-<a id="printed-17"></a>
+<a id="printed-18"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 6. Run pairtools stats</i></summary>
@@ -12182,7 +12213,7 @@ chromsizes/Mito 85779
 
 <a id="merged-pairs-files"></a>
 #### Merged pairs files
-<a id="code-23"></a>
+<a id="code-22"></a>
 ##### Code
 <details>
 <summary><i>Code: 6. Run pairtools stats</i></summary>
@@ -12230,7 +12261,7 @@ run_check=TRUE
 </details>
 <br />
 
-<a id="printed-18"></a>
+<a id="printed-19"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 6. Run pairtools stats</i></summary>
@@ -12771,7 +12802,7 @@ chromsizes/XVI  948066
 ### 7. Load pairs to cooler
 <a id="individual-pairs-file"></a>
 #### Individual pairs file
-<a id="code-24"></a>
+<a id="code-23"></a>
 ##### Code
 <details>
 <summary><i>Code: 7. Load pairs to cooler</i></summary>
@@ -12813,7 +12844,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-19"></a>
+<a id="printed-20"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 7. Load pairs to cooler</i></summary>
@@ -12974,7 +13005,7 @@ INFO:cooler.create:Writing info
 
 <a id="merged-pairs-files-1"></a>
 #### Merged pairs files
-<a id="code-25"></a>
+<a id="code-24"></a>
 ##### Code
 <details>
 <summary><i>Code: 7. Load pairs to cooler</i></summary>
@@ -13011,7 +13042,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-20"></a>
+<a id="printed-21"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 7. Load pairs to cooler</i></summary>
@@ -13096,7 +13127,7 @@ INFO:cooler.create:Writing info
 ### 8. Generate a multi-resolution cooler by coarsening
 <a id="cools-from-individual-pairs-files"></a>
 #### Cools from individual pairs files
-<a id="code-26"></a>
+<a id="code-25"></a>
 ##### Code
 <details>
 <summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -13139,7 +13170,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-21"></a>
+<a id="printed-22"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -13561,7 +13592,7 @@ INFO:cooler.balance:variance is 7.734072057040814e-06
 
 <a id="cools-from-merged-pairs-files"></a>
 #### Cools from merged pairs files
-<a id="code-27"></a>
+<a id="code-26"></a>
 ##### Code
 <details>
 <summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -13601,7 +13632,7 @@ run=TRUE
 </details>
 <br />
 
-<a id="printed-22"></a>
+<a id="printed-23"></a>
 ##### Printed
 <details>
 <summary><i>Printed: 8. Generate a multi-resolution cooler by coarsening</i></summary>
@@ -13752,7 +13783,7 @@ INFO:cooler.cli.zoomify:Balancing zoom level with bin size 100
 
 <a id="9-ingest-files-for-higlass"></a>
 ### 9. Ingest files for HiGlass
-<a id="code-28"></a>
+<a id="code-27"></a>
 #### Code
 <details>
 <summary><i>Code: Ingest files for HiGlass</i></summary>
@@ -14242,7 +14273,7 @@ counter: 41000 1359
 </details>
 <br />
 
-<a id="printed-23"></a>
+<a id="printed-24"></a>
 #### Printed
 <details>
 <summary><i>Printed: Ingest files for HiGlass</i></summary>
