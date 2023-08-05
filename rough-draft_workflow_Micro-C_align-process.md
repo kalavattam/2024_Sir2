@@ -3597,86 +3597,86 @@ d_cload="07_cload"  # echo "${d_cload}"
  d_zoom="08_zoom"   # echo "${d_zoom}"
 
 #  Get situated
-  unset f_pre && typeset -a f_pre                # echo_test "${f_pre[@]}"
+unset                        f_pre && typeset -a f_pre                         # echo_test "${f_pre[@]}"
 
- unset a_fq_1 && typeset -a a_fq_1              # echo_test "${a_fq_1[@]}"
- unset a_fq_2 && typeset -a a_fq_2              # echo_test "${a_fq_2[@]}"
+unset                       a_fq_1 && typeset -a a_fq_1                        # echo_test "${a_fq_1[@]}"
+unset                       a_fq_2 && typeset -a a_fq_2                        # echo_test "${a_fq_2[@]}"
 
 #  01_trim
-unset a_afq_1 && typeset -a a_afq_1            # echo_test "${a_afq_1[@]}"
-unset a_afq_2 && typeset -a a_afq_2            # echo_test "${a_afq_2[@]}"
+unset                      a_afq_1 && typeset -a a_afq_1                       # echo_test "${a_afq_1[@]}"
+unset                      a_afq_2 && typeset -a a_afq_2                       # echo_test "${a_afq_2[@]}"
 
 #  02_bam
-  unset a_bam && typeset -a a_bam                # echo_test "${a_bam[@]}"
+unset                        a_bam && typeset -a a_bam                         # echo_test "${a_bam[@]}"
 
 #  03_parse2: standard
-  unset f_pre_std && typeset -a f_pre_std        # echo_test "${f_pre_std[@]}"
-unset f_pairs_std && typeset -a f_pairs_std    # echo_test "${f_pairs_std[@]}"
-unset a_pairs_std && typeset -a a_pairs_std    # echo_test "${a_pairs_std[@]}"
+unset                    f_pre_std && typeset -a f_pre_std                     # echo_test "${f_pre_std[@]}"
+unset                  f_pairs_std && typeset -a f_pairs_std                   # echo_test "${f_pairs_std[@]}"
+unset                  a_pairs_std && typeset -a a_pairs_std                   # echo_test "${a_pairs_std[@]}"
 
 #  03_parse2: rDNA
-  unset f_pre_rDNA && typeset -a f_pre_rDNA      # echo_test "${f_pre_rDNA[@]}"
-unset f_pairs_rDNA && typeset -a f_pairs_rDNA  # echo_test "${f_pairs_rDNA[@]}"
-unset a_pairs_rDNA && typeset -a a_pairs_rDNA  # echo_test "${a_pairs_rDNA[@]}"
+unset                   f_pre_rDNA && typeset -a f_pre_rDNA                    # echo_test "${f_pre_rDNA[@]}"
+unset                 f_pairs_rDNA && typeset -a f_pairs_rDNA                  # echo_test "${f_pairs_rDNA[@]}"
+unset                 a_pairs_rDNA && typeset -a a_pairs_rDNA                  # echo_test "${a_pairs_rDNA[@]}"
 
 #  06_stats: standard
- unset f_stats_std && typeset -a f_stats_std    # echo_test "${f_stats_std[@]}"
- unset a_stats_std && typeset -a a_stats_std    # echo_test "${a_stats_std[@]}"
+unset                  f_stats_std && typeset -a f_stats_std                   # echo_test "${f_stats_std[@]}"
+unset                  a_stats_std && typeset -a a_stats_std                   # echo_test "${a_stats_std[@]}"
 
 #  06_stats: rDNA
-unset f_stats_rDNA && typeset -a f_stats_rDNA  # echo_test "${f_stats_rDNA[@]}"
-unset a_stats_rDNA && typeset -a a_stats_rDNA  # echo_test "${a_stats_rDNA[@]}"
+unset                 f_stats_rDNA && typeset -a f_stats_rDNA                  # echo_test "${f_stats_rDNA[@]}"
+unset                 a_stats_rDNA && typeset -a a_stats_rDNA                  # echo_test "${a_stats_rDNA[@]}"
 
 #  04_sort: standard
-  unset f_sort_std && typeset -a f_sort_std      # echo_test "${f_sort_std[@]}"
-  unset a_sort_std && typeset -a a_sort_std      # echo_test "${a_sort_std[@]}"
+unset                   f_sort_std && typeset -a f_sort_std                    # echo_test "${f_sort_std[@]}"
+unset                   a_sort_std && typeset -a a_sort_std                    # echo_test "${a_sort_std[@]}"
 
 #  04_sort: rDNA
- unset f_sort_rDNA && typeset -a f_sort_rDNA    # echo_test "${f_sort_rDNA[@]}"
- unset a_sort_rDNA && typeset -a a_sort_rDNA    # echo_test "${a_sort_rDNA[@]}"
+unset                  f_sort_rDNA && typeset -a f_sort_rDNA                   # echo_test "${f_sort_rDNA[@]}"
+unset                  a_sort_rDNA && typeset -a a_sort_rDNA                   # echo_test "${a_sort_rDNA[@]}"
 
 #  05_dedup: standard
-       unset f_dedup_pre_std && typeset -a f_dedup_pre_std              # echo_test "${f_dedup_pre_std[@]}"
- unset a_dedup_pre_pairs_std && typeset -a a_dedup_pre_pairs_std  # echo_test "${a_dedup_pre_pairs_std[@]}"
+unset              f_dedup_pre_std && typeset -a f_dedup_pre_std               # echo_test "${f_dedup_pre_std[@]}"
+unset        a_dedup_pre_pairs_std && typeset -a a_dedup_pre_pairs_std         # echo_test "${a_dedup_pre_pairs_std[@]}"
 
-         unset f_dup_pre_std && typeset -a f_dup_pre_std                  # echo_test "${f_dup_pre_std[@]}"
-   unset a_dup_pre_pairs_std && typeset -a a_dup_pre_pairs_std      # echo_test "${a_dup_pre_pairs_std[@]}"
+unset                f_dup_pre_std && typeset -a f_dup_pre_std                 # echo_test "${f_dup_pre_std[@]}"
+unset          a_dup_pre_pairs_std && typeset -a a_dup_pre_pairs_std           # echo_test "${a_dup_pre_pairs_std[@]}"
 
-       unset f_unmap_pre_std && typeset -a f_unmap_pre_std              # echo_test "${f_unmap_pre_std[@]}"
- unset a_unmap_pre_pairs_std && typeset -a a_unmap_pre_pairs_std  # echo_test "${a_unmap_pre_pairs_std[@]}"
+unset              f_unmap_pre_std && typeset -a f_unmap_pre_std               # echo_test "${f_unmap_pre_std[@]}"
+unset        a_unmap_pre_pairs_std && typeset -a a_unmap_pre_pairs_std         # echo_test "${a_unmap_pre_pairs_std[@]}"
 
-     unset f_dedup_stats_std && typeset -a f_dedup_stats_std          # echo_test "${f_dedup_stats_std[@]}"
-     unset a_dedup_stats_std && typeset -a a_dedup_stats_std          # echo_test "${a_dedup_stats_std[@]}"
+unset            f_dedup_stats_std && typeset -a f_dedup_stats_std             # echo_test "${f_dedup_stats_std[@]}"
+unset            a_dedup_stats_std && typeset -a a_dedup_stats_std             # echo_test "${a_dedup_stats_std[@]}"
 
 #  05_dedup: rDNA
-      unset f_dedup_pre_rDNA && typeset -a f_dedup_pre_rDNA        # echo_test "${f_dedup_pre_rDNA[@]}"
-unset a_dedup_pre_pairs_rDNA && typeset -a a_dedup_pre_pairs_rDNA  # echo_test "${a_dedup_pre_pairs_rDNA[@]}"
+unset             f_dedup_pre_rDNA && typeset -a f_dedup_pre_rDNA              # echo_test "${f_dedup_pre_rDNA[@]}"
+unset       a_dedup_pre_pairs_rDNA && typeset -a a_dedup_pre_pairs_rDNA        # echo_test "${a_dedup_pre_pairs_rDNA[@]}"
 
-        unset f_dup_pre_rDNA && typeset -a f_dup_pre_rDNA            # echo_test "${f_dup_pre_rDNA[@]}"
-  unset a_dup_pre_pairs_rDNA && typeset -a a_dup_pre_pairs_rDNA      # echo_test "${a_dup_pre_pairs_rDNA[@]}"
+unset               f_dup_pre_rDNA && typeset -a f_dup_pre_rDNA                # echo_test "${f_dup_pre_rDNA[@]}"
+unset         a_dup_pre_pairs_rDNA && typeset -a a_dup_pre_pairs_rDNA          # echo_test "${a_dup_pre_pairs_rDNA[@]}"
 
-      unset f_unmap_pre_rDNA && typeset -a f_unmap_pre_rDNA        # echo_test "${f_unmap_pre_rDNA[@]}"
-unset a_unmap_pre_pairs_rDNA && typeset -a a_unmap_pre_pairs_rDNA  # echo_test "${a_unmap_pre_pairs_rDNA[@]}"
+unset             f_unmap_pre_rDNA && typeset -a f_unmap_pre_rDNA              # echo_test "${f_unmap_pre_rDNA[@]}"
+unset       a_unmap_pre_pairs_rDNA && typeset -a a_unmap_pre_pairs_rDNA        # echo_test "${a_unmap_pre_pairs_rDNA[@]}"
 
-    unset f_dedup_stats_rDNA && typeset -a f_dedup_stats_rDNA          # echo_test "${f_dedup_stats_rDNA[@]}"
-    unset a_dedup_stats_rDNA && typeset -a a_dedup_stats_rDNA          # echo_test "${a_dedup_stats_rDNA[@]}"
+unset           f_dedup_stats_rDNA && typeset -a f_dedup_stats_rDNA            # echo_test "${f_dedup_stats_rDNA[@]}"
+unset           a_dedup_stats_rDNA && typeset -a a_dedup_stats_rDNA            # echo_test "${a_dedup_stats_rDNA[@]}"
 
 #  06_stats: standard
- unset f_dedup_pre_pairs_stats_std && typeset -a f_dedup_pre_pairs_stats_std  # echo_test "${f_dedup_pre_pairs_stats[@]}"
- unset a_dedup_pre_pairs_stats_std && typeset -a a_dedup_pre_pairs_stats_std  # echo_test "${a_dedup_pre_pairs_stats[@]}"
+unset  f_dedup_pre_pairs_stats_std && typeset -a f_dedup_pre_pairs_stats_std   # echo_test "${f_dedup_pre_pairs_stats[@]}"
+unset  a_dedup_pre_pairs_stats_std && typeset -a a_dedup_pre_pairs_stats_std   # echo_test "${a_dedup_pre_pairs_stats[@]}"
 
-   unset f_dup_pre_pairs_stats_std && typeset -a f_dup_pre_pairs_stats_std    # echo_test "${f_dup_pre_pairs_stats[@]}"
-   unset a_dup_pre_pairs_stats_std && typeset -a a_dup_pre_pairs_stats_std    # echo_test "${a_dup_pre_pairs_stats[@]}"
+unset    f_dup_pre_pairs_stats_std && typeset -a f_dup_pre_pairs_stats_std     # echo_test "${f_dup_pre_pairs_stats[@]}"
+unset    a_dup_pre_pairs_stats_std && typeset -a a_dup_pre_pairs_stats_std     # echo_test "${a_dup_pre_pairs_stats[@]}"
 
- unset f_unmap_pre_pairs_stats_std && typeset -a f_unmap_pre_pairs_stats_std  # echo_test "${f_unmap_pre_pairs_stats[@]}"
- unset a_unmap_pre_pairs_stats_std && typeset -a a_unmap_pre_pairs_stats_std  # echo_test "${a_unmap_pre_pairs_stats[@]}"
+unset  f_unmap_pre_pairs_stats_std && typeset -a f_unmap_pre_pairs_stats_std   # echo_test "${f_unmap_pre_pairs_stats[@]}"
+unset  a_unmap_pre_pairs_stats_std && typeset -a a_unmap_pre_pairs_stats_std   # echo_test "${a_unmap_pre_pairs_stats[@]}"
 
 #  06_stats: rDNA
 unset f_dedup_pre_pairs_stats_rDNA && typeset -a f_dedup_pre_pairs_stats_rDNA  # echo_test "${f_dedup_pre_pairs_stats_rDNA[@]}"
 unset a_dedup_pre_pairs_stats_rDNA && typeset -a a_dedup_pre_pairs_stats_rDNA  # echo_test "${a_dedup_pre_pairs_stats_rDNA[@]}"
 
-  unset f_dup_pre_pairs_stats_rDNA && typeset -a f_dup_pre_pairs_stats_rDNA    # echo_test "${f_dup_pre_pairs_stats_rDNA[@]}"
-  unset a_dup_pre_pairs_stats_rDNA && typeset -a a_dup_pre_pairs_stats_rDNA    # echo_test "${a_dup_pre_pairs_stats_rDNA[@]}"
+unset   f_dup_pre_pairs_stats_rDNA && typeset -a f_dup_pre_pairs_stats_rDNA    # echo_test "${f_dup_pre_pairs_stats_rDNA[@]}"
+unset   a_dup_pre_pairs_stats_rDNA && typeset -a a_dup_pre_pairs_stats_rDNA    # echo_test "${a_dup_pre_pairs_stats_rDNA[@]}"
 
 unset f_unmap_pre_pairs_stats_rDNA && typeset -a f_unmap_pre_pairs_stats_rDNA  # echo_test "${f_unmap_pre_pairs_stats_rDNA[@]}"
 unset a_unmap_pre_pairs_stats_rDNA && typeset -a a_unmap_pre_pairs_stats_rDNA  # echo_test "${a_unmap_pre_pairs_stats_rDNA[@]}"
@@ -3686,8 +3686,8 @@ unset f_cload && typeset -a f_cload  # echo_test "${f_cload[@]}"
 unset a_cload && typeset -a a_cload  # echo_test "${a_cload[@]}"
 
 #  08_zoom
- unset f_zoom && typeset -a f_zoom    # echo_test "${f_zoom[@]}"
- unset a_zoom && typeset -a a_zoom    # echo_test "${a_zoom[@]}"
+ unset f_zoom && typeset -a f_zoom   # echo_test "${f_zoom[@]}"
+ unset a_zoom && typeset -a a_zoom   # echo_test "${a_zoom[@]}"
 
 #  Populate arrays
 for (( i = 0; i < "${#stem[@]}"; i++ )); do  #LATER
@@ -3828,8 +3828,7 @@ print_test=TRUE
                             d_index=${d_index}
                             f_index=${f_index}
                             a_index=${a_index}
-            """
-            echo """
+
             pairtools parse2
             --------------------------------------------------
                              d_size=${d_size}
@@ -3859,8 +3858,7 @@ print_test=TRUE
 
                         a_stats_std=${a_stats_std[${i}]}
                        a_stats_rDNA=${a_stats_rDNA[${i}]}
-            """
-            echo """
+
             pairtools sort
             --------------------------------------------------
                              d_sort=${d_sort}
@@ -3870,8 +3868,7 @@ print_test=TRUE
 
                          a_sort_std=${a_sort_std[${i}]}
                         a_sort_rDNA=${a_sort_rDNA[${i}]}
-            """
-            echo """
+
             pairtools dedup
             --------------------------------------------------
                                 d_dedup=${d_dedup}
@@ -3897,8 +3894,7 @@ print_test=TRUE
             
                      f_dedup_stats_rDNA=${f_dedup_stats_rDNA[${i}]}
                      a_dedup_stats_rDNA=${a_dedup_stats_rDNA[${i}]}
-            """
-            echo """
+
             pairtools stats
             --------------------------------------------------
              f_dedup_pre_pairs_stats_std=${f_dedup_pre_pairs_stats_std[${i}]}
@@ -3916,8 +3912,8 @@ print_test=TRUE
             a_dedup_pre_pairs_stats_rDNA=${a_dedup_pre_pairs_stats_rDNA[${i}]}
               a_dup_pre_pairs_stats_rDNA=${a_dup_pre_pairs_stats_rDNA[${i}]}
             a_unmap_pre_pairs_stats_rDNA=${a_unmap_pre_pairs_stats_rDNA[${i}]}
-            """
-            echo """
+
+            #TODO
             cooler cload pairs
             --------------------------------------------------
                         bin_initial=${bin_initial}
@@ -3998,8 +3994,8 @@ print_test=TRUE
                name_1+=( "${to_merge[${i}]}_rep1" )  # echo "${name_1[${i}]}"
                name_2+=( "${to_merge[${i}]}_rep2" )  # echo "${name_2[${i}]}"
 
-             in_1_std+=( "${d_dedup}/${name_1[${i}]}.standard-${max_mismatch_std}.${post}" )   # ., "${in_1_std[${i}]}"
-             in_2_std+=( "${d_dedup}/${name_2[${i}]}.standard-${max_mismatch_std}.${post}" )   # ., "${in_2_std[${i}]}"
+             in_1_std+=( "${d_dedup}/${name_1[${i}]}.standard-${max_mismatch_std}.${post}" )  # ., "${in_1_std[${i}]}"
+             in_2_std+=( "${d_dedup}/${name_2[${i}]}.standard-${max_mismatch_std}.${post}" )  # ., "${in_2_std[${i}]}"
 
             in_1_rDNA+=( "${d_dedup}/${name_1[${i}]}.keep-MM-${max_mismatch_rDNA}.${post}" )  # ., "${in_1_rDNA[${i}]}"
             in_2_rDNA+=( "${d_dedup}/${name_2[${i}]}.keep-MM-${max_mismatch_rDNA}.${post}" )  # ., "${in_2_rDNA[${i}]}"
@@ -11511,97 +11507,181 @@ drwxrws--- 3 kalavatt  619 Jul  8 14:45 ../
 ```bash
 #!/bin/bash
 
-[[ "${pro_comp}" == TRUE ]] &&
+# [[ "${pro_comp}" == TRUE ]] &&
+# {
+
+#  Initialize pertinent variables, arrays =====================================
+#TODO Move these variable and array initializations to Step #0
+
+#  Create a new array "${all[@]}" from "${stem[@]}" and, if
+#+ "${to_merge[@]}" is not empty, then append "${to_merge[@]}" elements
+#+ to "${all[@]}"
+post="nodups.pairs.gz"  # echo "${post}"  #DUPLICATE
+d_comp="05_dedup"       # echo "${d_comp}"
+
+unset                     all && typeset -a all
+unset all_dedup_pre_pairs_std && typeset -a all_dedup_pre_pairs_std
+
+unset          f_comp_std_pre && typeset -a f_comp_std_pre
+unset              f_comp_std && typeset -a f_comp_std
+unset              a_comp_std && typeset -a a_comp_std
+
+                             all+=( "${stem[@]}" )                           # echo_test "${all[@]}"                      # echo "${#all[@]}"
+
+for (( i = 0; i < ${#stem[@]}; i++ )); do
+        all_dedup_pre_pairs_std+=(
+            "${d_comp}/${stem[${i}]}.standard-${max_mismatch_std}.${post}"
+        )                                                                    # echo_test "${all_dedup_pre_pairs_std[@]}"  # echo "${#all_dedup_pre_pairs_std[@]}"
+done
+
+if [[ "${#to_merge[@]}" -ne 0 ]]; then
+    for (( i = 0; i < ${#to_merge[@]}; i++ )); do
+                            all+=( "${to_merge[${i}]}_repM" )                # echo_test "${all[@]}"                      # echo "${#all[@]}"
+        all_dedup_pre_pairs_std+=( "${a_merge_std[${i}]}" )                  # echo_test "${all_dedup_pre_pairs_std[@]}"  # echo "${#all_dedup_pre_pairs_std[@]}"
+    done
+fi
+
+for (( i = 0; i < ${#all[@]}; i++ )); do
+    f_comp_std_pre+=( "${all[${i}]}.standard-${max_mismatch_std}.no-rDNA" )  # echo_test "${f_comp_std_pre[@]}"
+        f_comp_std+=( "${f_comp_std_pre[${i}]}.${post}" )                    # echo_test "${f_comp_std[@]}"
+        a_comp_std+=( "${d_comp}/${f_comp_std[${i}]}" )                      # echo_test "${a_comp_std[@]}"
+done
+
+
+run_check=FALSE
+[[ "${run_check}" == TRUE ]] &&
     {
-        #TODO Move variable assignments and mkdir call to step #0
-        d_comp="0X_comp"  # echo "${d_comp}"
-        [[ ! -d "${d_comp}" ]] && mkdir -p "${d_comp}/err_out"
-        
-        f_comp_std_pre="${f_pre}-no-rDNA"  # echo "${f_comp_std_pre}"
-        f_comp_std_suf="$(
-            echo "${a_dedup_pre_pairs}" \
-                | sed "s:${d_dedup}\/${f_pre}\.::g"
-        )"  # echo "${f_comp_std_suf}"
-        f_comp_std="${f_comp_std_pre}.${f_comp_std_suf}"  # echo "${f_comp_std}"
-        a_comp_std="${d_comp}/${f_comp_std}"  # echo "${a_comp_std}"
+        echo_test "${all[@]}" && echo ""
+        echo_test "${all_dedup_pre_pairs_std[@]}" && echo ""
+        for i in "${all_dedup_pre_pairs_std[@]}"; do ., "${i}"; done
+        echo ""
 
-        #LOGIC
-        #       IF chrom1 != "XII" && chrom2 != "XII"                                 THEN print record
-        #+ ELSE IF chrom1 == "XII" && chrom2 != "XII" && pos1 != rDNA                 THEN print record
-        #+ ELSE IF chrom1 != "XII" && chrom2 == "XII" && pos2 != rDNA                 THEN print record
-        #+ ELSE IF chrom1 == "XII" && chrom2 == "XII" && pos1 != rDNA && pos2 != rDNA THEN print record
-        
-        print_test=TRUE
-        [[ "${print_test}" == TRUE ]] &&
-            {
-                echo """
-                [[ -f \"${f_comp_std}\" ]] && rm \"${f_comp_std}\"
-                zcat < \"${a_dedup_pre_pairs}\" \\
-                    | grep -v \"^#\" \\
-                    | awk \\
-                        -v chr=\"XII\" \\
-                        -v left=\"${rDNA_pos_l}\" \\
-                        -v right=\"${rDNA_pos_r}\" \\
-                        '{
-                            if (\$2 != chr && \$4 != chr) {  
-                                print \$0
-                            } else if ((\$2 == chr && \$4 != chr) && (\$11 < left || \$11 > right)) {
-                                print \$0
-                            } else if ((\$4 == chr && \$2 != chr) && (\$12 < left || \$12 > right)) {
-                                print \$0
-                            } else if (\$2 == chr && \$4 == chr && (\$11 < left || \$11 > right) && (\$12 < left || \$12 > right)) {
-                                print \$0
-                            }
-                        }' \\
-                    | pbgzip -c \\
-                        > \"${a_comp_std}\" \\
-                        2> >(tee -a echo \"${d_comp}/err_out/${f_comp_std_pre}.stderr.txt\" >&2)
-                """
-            }
-
-        run=TRUE
-        [[ "${run}" == TRUE ]] &&
-            {
-                [[ -f "${f_comp_std}" ]] && rm "${f_comp_std}"
-                zcat < "${a_dedup_pre_pairs}" \
-                    | grep -v "^#" \
-                    | awk \
-                        -v chr="XII" \
-                        -v left="${rDNA_pos_l}" \
-                        -v right="${rDNA_pos_r}" \
-                        '{
-                            if ($2 != chr && $4 != chr) {  
-                                print $0
-                            } else if (($2 == chr && $4 != chr) && ($11 < left || $11 > right)) {
-                                print $0
-                            } else if (($4 == chr && $2 != chr) && ($12 < left || $12 > right)) {
-                                print $0
-                            } else if ($2 == chr && $4 == chr && ($11 < left || $11 > right) && ($12 < left || $12 > right)) {
-                                print $0
-                            }
-                        }' \
-                    | pbgzip -c \
-                        > "${a_comp_std}" \
-                        2> >(tee -a echo "${d_comp}/err_out/${f_comp_std_pre}.stderr.txt" >&2)
-            }
-
-        run_check_manual_1=FALSE
-        [[ "${run_check_manual_1}" == TRUE && -f "${a_comp_std}" ]] &&
-            {
-                #  Manually check that any XII-associated records are not rDNA-associated
-                [[ -f "${a_comp_std/.gz/.txt}" ]] && rm "${a_comp_std/.gz/.txt}"
-                zcat < "${a_comp_std}" > "${a_comp_std/.gz/.txt}"
-
-                # rm "${standard_no_rDNA/.gz/.txt}"
-            }
-
-        run_check_manual_2=FALSE
-        [[ "${run_check_manual_2}" == TRUE && -f "${a_comp_std}" ]] &&
-            {
-                #  Less through the file
-                zcat < "${a_comp_std}" | less
-            }
+        echo_test "${f_comp_std_pre[@]}" && echo ""
+        echo_test "${f_comp_std[@]}" && echo ""
+        echo_test "${a_comp_std[@]}"
     }
+
+
+#  Exclude rDNA-associated cis and trans interactions =========================
+#LOGIC
+#       IF chrom1 != "XII" && chrom2 != "XII"                                 THEN print record
+#+ ELSE IF chrom1 == "XII" && chrom2 != "XII" && pos1 != rDNA                 THEN print record
+#+ ELSE IF chrom1 != "XII" && chrom2 == "XII" && pos2 != rDNA                 THEN print record
+#+ ELSE IF chrom1 == "XII" && chrom2 == "XII" && pos1 != rDNA && pos2 != rDNA THEN print record
+
+
+#  Run print tests -----------------------------------------------------------
+print_test=TRUE
+[[ "${print_test}" == TRUE ]] &&
+    {
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0
+            [[ -f "${all_dedup_pre_pairs_std[${i}]}" && ! -f "${a_comp_std[${i}]}" ]] &&
+                {
+                    job_name="exclude_rDNA.${f_comp_std_pre[${i}]}"  # echo "${job_name}"
+
+                    echo """
+                    #HEREDOC
+                    sbatch << EOF
+                    #!/bin/bash
+
+                    #SBATCH --job-name=\"${job_name}\"
+                    #SBATCH --nodes=1
+                    #SBATCH --cpus-per-task=1
+                    #SBATCH --error=\"${d_comp}/err_out/${job_name}.%A.rDNAerr.txt\"
+                    #SBATCH --output=\"${d_comp}/err_out/${job_name}.%A.rDNAout.txt\"
+
+                    zcat < \"${all_dedup_pre_pairs_std[${i}]}\" \\
+                        | grep -v \"^#\" \\
+                        | awk \\
+                            -v chr=\"XII\" \\
+                            -v left=\"${rDNA_pos_l}\" \\
+                            -v right=\"${rDNA_pos_r}\" \\
+                            '{
+                                if (\$2 != chr && \$4 != chr) {  
+                                    print \$0
+                                } else if ((\$2 == chr && \$4 != chr) && (\$11 < left || \$11 > right)) {
+                                    print \$0
+                                } else if ((\$4 == chr && \$2 != chr) && (\$12 < left || \$12 > right)) {
+                                    print \$0
+                                } else if (\$2 == chr && \$4 == chr && (\$11 < left || \$11 > right) && (\$12 < left || \$12 > right)) {
+                                    print \$0
+                                }
+                            }' \\
+                        | pbgzip -c \\
+                            > \"${a_comp_std[${i}]}\"
+                    EOF
+                    """
+                }
+        done
+    }
+
+
+#  Submit jobs to SLURM -------------------------------------------------------
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0
+            [[ -f "${all_dedup_pre_pairs_std[${i}]}" && ! -f "${a_comp_std[${i}]}" ]] &&
+                {
+                    job_name="exclude_rDNA.${f_comp_std_pre[${i}]}"  # echo "${job_name}"
+
+#HEREDOC
+sbatch << EOF
+#!/bin/bash
+
+#SBATCH --job-name="${job_name}"
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=1
+#SBATCH --error="${d_comp}/err_out/${job_name}.%A.rDNAerr.txt"
+#SBATCH --output="${d_comp}/err_out/${job_name}.%A.rDNAout.txt"
+
+zcat < "${all_dedup_pre_pairs_std[${i}]}" \
+    | grep -v "^#" \
+    | awk \
+        -v chr="XII" \
+        -v left="${rDNA_pos_l}" \
+        -v right="${rDNA_pos_r}" \
+        '{
+            if (\$2 != chr && \$4 != chr) {  
+                print \$0
+            } else if ((\$2 == chr && \$4 != chr) && (\$11 < left || \$11 > right)) {
+                print \$0
+            } else if ((\$4 == chr && \$2 != chr) && (\$12 < left || \$12 > right)) {
+                print \$0
+            } else if (\$2 == chr && \$4 == chr && (\$11 < left || \$11 > right) && (\$12 < left || \$12 > right)) {
+                print \$0
+            }
+        }' \
+    | pbgzip -c \
+        > "${a_comp_std[${i}]}"
+EOF
+                    sleep 0.25
+                }
+        done
+    }
+
+
+#  Run checks =================================================================
+run_check_manual_1=FALSE  #TODO Update/refactor
+[[ "${run_check_manual_1}" == TRUE && -f "${a_comp_std}" ]] &&
+    {
+        #  Manually check that any XII-associated records are not rDNA-associated
+        [[ -f "${a_comp_std/.gz/.txt}" ]] && rm "${a_comp_std/.gz/.txt}"
+        zcat < "${a_comp_std}" > "${a_comp_std/.gz/.txt}"
+
+        # rm "${standard_no_rDNA/.gz/.txt}"
+    }
+
+run_check_manual_2=FALSE  #TODO Update/refactor
+[[ "${run_check_manual_2}" == TRUE && -f "${a_comp_std}" ]] &&
+    {
+        #  Less through the file
+        zcat < "${a_comp_std}" | less
+    }
+
+# }
 ```
 </details>
 <br />
@@ -11627,69 +11707,140 @@ drwxrws--- 3 kalavatt  619 Jul  8 14:45 ../
 ```bash
 #!/bin/bash
 
-[[ "${flag_rDNA}" == FALSE ]] &&
+# [[ "${pro_comp}" == TRUE ]] &&
+# {
+
+#  Initialize pertinent variables, arrays =====================================
+#TODO Move these variable and array initializations to Step #0
+post="nodups.pairs.gz"  # echo "${post}"  #DUPLICATE
+d_comp="05_dedup"       # echo "${d_comp}"
+
+unset all_dedup_pre_pairs_rDNA && typeset -a all_dedup_pre_pairs_rDNA
+
+unset          f_comp_rDNA_pre && typeset -a f_comp_rDNA_pre
+unset              f_comp_rDNA && typeset -a f_comp_rDNA
+unset              a_comp_rDNA && typeset -a a_comp_rDNA
+
+for (( i = 0; i < ${#stem[@]}; i++ )); do
+        all_dedup_pre_pairs_rDNA+=(
+            "${d_comp}/${stem[${i}]}.keep-MM-${max_mismatch_rDNA}.${post}"
+        )                                                                       # echo_test "${all_dedup_pre_pairs_rDNA[@]}"  # echo "${#all_dedup_pre_pairs_rDNA[@]}"
+done
+
+if [[ "${#to_merge[@]}" -ne 0 ]]; then
+    for (( i = 0; i < ${#to_merge[@]}; i++ )); do
+        all_dedup_pre_pairs_rDNA+=( "${a_merge_rDNA[${i}]}" )                   # echo_test "${all_dedup_pre_pairs_rDNA[@]}"  # echo "${#all_dedup_pre_pairs_rDNA[@]}"
+    done
+fi
+
+for (( i = 0; i < ${#all[@]}; i++ )); do
+    f_comp_rDNA_pre+=( "${all[${i}]}.keep-MM-${max_mismatch_rDNA}.only-rDNA" )  # echo_test "${f_comp_rDNA_pre[@]}"
+        f_comp_rDNA+=( "${f_comp_rDNA_pre[${i}]}.${post}" )                     # echo_test "${f_comp_rDNA[@]}"
+        a_comp_rDNA+=( "${d_comp}/${f_comp_rDNA[${i}]}" )                       # echo_test "${a_comp_rDNA[@]}"
+done
+
+run_check=TRUE
+[[ "${run_check}" == TRUE ]] &&
     {
-        #TODO Move variable assignments and mkdir call to step #0
-        d_comp="0X_comp"  # ., "${d_comp}"
-        [[ ! -d "${d_comp}" ]] && mkdir -p "${d_comp}/err_out"
-        
-        f_comp_std_pre="${f_pre}-rDNA"  # echo "${f_comp_std_pre}"
-        f_comp_std_suf="${a_dedup_pre_pairs##"${d_dedup}/${f_pre}."}"  # echo "${f_comp_std_suf}"
-        f_comp_std="${f_comp_std_pre}.${f_comp_std_suf}"  # echo "${f_comp_std}"
-        a_comp_std="${d_comp}/${f_comp_std}"  # echo "${a_comp_std}"
+        echo_test "${all[@]}" && echo ""
+        echo_test "${all_dedup_pre_pairs_rDNA[@]}" && echo ""
+        for i in "${all_dedup_pre_pairs_rDNA[@]}"; do ., "${i}"; done
+        echo ""
 
-        #LOGIC
-        #     IF chrom1 == "XII" && pos1 >= rDNA left && pos1 <= rDNA right
-        #+ OR IF chrom2 == "XII" && pos2 >= rDNA left && pos2 <= rDNA right
-        #+  THEN print record
-
-        print_test=TRUE
-        [[
-            "${print_test}" == TRUE && \
-                -f "${a_dedup_pre_pairs}" && \
-                ! -f "${a_comp_std}"
-        ]] &&
-            {
-                echo """
-                zcat < \"${a_dedup_pre_pairs}\" \\
-                    | grep -v \"^#\" \\
-                    | awk \\
-                        -v chr=\"XII\" \\
-                        -v left=\"${rDNA_pos_l}\" \\
-                        -v right=\"${rDNA_pos_r}\" \\
-                        '( \\
-                            \$2 == chr && \$11 >= left && \$11 <= right \\
-                        ) || ( \\
-                            \$4 == chr && \$12 >= left && \$12 <= right \\
-                        )' \\
-                    | pbgzip -c \\
-                        > \"${a_comp_std}\"
-                    """
-            }
-
-        run=TRUE
-        [[
-            "${run}" == TRUE && \
-                -f "${a_dedup_pre_pairs}" && \
-                ! -f "${a_comp_std}"
-        ]] &&
-            {
-                zcat < "${a_dedup_pre_pairs}" \
-                    | grep -v "^#" \
-                    | awk \
-                        -v chr="XII" \
-                        -v left="${rDNA_pos_l}" \
-                        -v right="${rDNA_pos_r}" \
-                        '( \
-                            $2 == "XII" && $11 >= left && $11 <= right \
-                        ) || ( \
-                            $4 == "XII" && $12 >= left && $12 <= right \
-                        )' \
-                    | pbgzip -c \
-                        > "${a_comp_std}"
-            }
-
+        echo_test "${f_comp_rDNA_pre[@]}" && echo ""
+        echo_test "${f_comp_rDNA[@]}" && echo ""
+        echo_test "${a_comp_rDNA[@]}"
     }
+
+
+#  Exclude all but rDNA-associated cis and trans interactions =================
+#LOGIC
+#     IF chrom1 == "XII" && pos1 >= rDNA left && pos1 <= rDNA right
+#+ OR IF chrom2 == "XII" && pos2 >= rDNA left && pos2 <= rDNA right
+#+  THEN print record
+
+
+#  Run print tests -----------------------------------------------------------
+print_test=TRUE
+[[ "${print_test}" == TRUE ]] &&
+    {
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0
+            [[ -f "${all_dedup_pre_pairs_rDNA[${i}]}" && ! -f "${a_comp_rDNA[${i}]}" ]] &&
+                {
+                    job_name="retain_only_rDNA.${f_comp_rDNA_pre[${i}]}"  # echo "${job_name}"
+                    
+                    echo """
+                    #HEREDOC
+                    sbatch << EOF
+                    #!/bin/bash
+
+                    #SBATCH --job-name=\"${job_name}\"
+                    #SBATCH --nodes=1
+                    #SBATCH --cpus-per-task=1
+                    #SBATCH --error=\"${d_comp}/err_out/${job_name}.%A.rDNAerr.txt\"
+                    #SBATCH --output=\"${d_comp}/err_out/${job_name}.%A.rDNAout.txt\"
+
+                    zcat < \"${all_dedup_pre_pairs_rDNA[${i}]}\" \\
+                        | grep -v \"^#\" \\
+                        | awk \\
+                            -v chr=\"XII\" \\
+                            -v left=\"${rDNA_pos_l}\" \\
+                            -v right=\"${rDNA_pos_r}\" \\
+                            '( \\
+                                \$2 == chr && \$11 >= left && \$11 <= right \\
+                            ) || ( \\
+                                \$4 == chr && \$12 >= left && \$12 <= right \\
+                            )' \\
+                        | pbgzip -c \\
+                            > \"${a_comp_rDNA[${i}]}\"
+                    EOF
+                    """
+                }
+        done
+    }
+
+
+#  Submit the jobs to SLURM ---------------------------------------------------
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0
+            [[ -f "${all_dedup_pre_pairs_rDNA[${i}]}" && ! -f "${a_comp_rDNA[${i}]}" ]] &&
+                {
+                    job_name="retain_only_rDNA.${f_comp_rDNA_pre[${i}]}"  # echo "${job_name}"
+                    
+#HEREDOC
+sbatch << EOF
+#!/bin/bash
+
+#SBATCH --job-name="${job_name}"
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=1
+#SBATCH --error="${d_comp}/err_out/${job_name}.%A.rDNAerr.txt"
+#SBATCH --output="${d_comp}/err_out/${job_name}.%A.rDNAout.txt"
+
+zcat < "${all_dedup_pre_pairs_rDNA[${i}]}" \
+    | grep -v "^#" \
+    | awk \
+        -v chr="XII" \
+        -v left="${rDNA_pos_l}" \
+        -v right="${rDNA_pos_r}" \
+        '( \
+            \$2 == chr && \$11 >= left && \$11 <= right \
+        ) || ( \
+            \$4 == chr && \$12 >= left && \$12 <= right \
+        )' \
+    | pbgzip -c \
+        > "${a_comp_rDNA[${i}]}"
+EOF
+                    sleep 0.25
+                }
+        done
+    }
+
+# }
 ```
 </details>
 <br />
@@ -11717,19 +11868,31 @@ drwxrws--- 3 kalavatt  619 Jul  8 14:45 ../
 ```bash
 #!/bin/bash
 
-#TODO Move variable initialization to Step #0
-d_comp="0X_comp"  # ., "${d_comp}"
-suf="nodups.pairs.gz"  # echo "${suf}"
+# [[ "${pro_comp}" == TRUE ]] &&
+# {
 
-f_std="${f_pre%.*}.standard-no-rDNA.${suf}"  # echo "${f_std}"
-f_std_tmp="${f_pre%.*}.re-header-standard-no-rDNA.${suf}"  # echo "${f_std_tmp}"
-f_kp="${f_pre%.*}.keep-MM-rDNA.${suf}"  # echo "${f_kp}"
-f_kp_tmp="${f_pre%.*}.re-header-keep-MM-rDNA.${suf}"  # echo "${f_kp_tmp}"
+#TODO Move variable, array initializations to Step #0
+post="nodups.pairs.gz"  # echo "${post}"  #DUPLICATE
+d_comp="05_dedup"       # echo "${d_comp}"
 
-f_std_re="${f_pre%%.*}.standard.${suf}"  # echo "${f_re_std}"
-f_kp_re="${f_pre%%.*}.keep-MM.${suf}"  # echo "${f_re_kp}"
 
-f_rDNA="${f_pre%.*}.standard-rDNA.${suf}"  # echo "${f_rDNA}"
+echo_test "${a_comp_std[@]}"
+echo_test "${a_comp_rDNA[@]}"
+
+for i in "${a_comp_std[@]}"; do ., "${i}"; done
+for i in "${a_comp_rDNA[@]}"; do ., "${i}"; done
+
+#TODO Need to make the 
+
+f_std="${f_pre%.*}.standard-no-rDNA.${post}"  # echo "${f_std}"
+f_std_tmp="${f_pre%.*}.re-header-standard-no-rDNA.${post}"  # echo "${f_std_tmp}"
+f_kp="${f_pre%.*}.keep-MM-rDNA.${post}"  # echo "${f_kp}"
+f_kp_tmp="${f_pre%.*}.re-header-keep-MM-rDNA.${post}"  # echo "${f_kp_tmp}"
+
+f_std_re="${f_pre%%.*}.standard.${post}"  # echo "${f_re_std}"
+f_kp_re="${f_pre%%.*}.keep-MM.${post}"  # echo "${f_re_kp}"
+
+f_rDNA="${f_pre%.*}.standard-rDNA.${post}"  # echo "${f_rDNA}"
 
 a_std="${d_comp}/${f_std}"  # ., "${a_std}"
 a_std_tmp="${d_comp}/${f_std_tmp}"  # echo "${f_std_tmp}"
@@ -11740,9 +11903,9 @@ a_std_re="${d_dedup}/${f_re_std}"  # ., "${a_re_std}"
 a_kp_re="${d_dedup}/${f_re_kp}"  # ., "${a_re_kp}"
 
 a_rDNA="${d_comp}/${f_rDNA}"  # echo "${a_rDNA}"
-a_rDNA_tmp="${a_rDNA%%.*}.sorted-standard-rDNA.${suf}"  # echo "${a_rDNA_tmp}"
+a_rDNA_tmp="${a_rDNA%%.*}.sorted-standard-rDNA.${post}"  # echo "${a_rDNA_tmp}"
 
-f_rDNA_cload="$(echo "${f_rDNA}" | sed "s/${suf}/cload.cool/g")"  # echo "${f_rDNA_cload}"
+f_rDNA_cload="$(echo "${f_rDNA}" | sed "s/${post}/cload.cool/g")"  # echo "${f_rDNA_cload}"
 a_rDNA_cload="${d_comp}/${f_rDNA_cload}"  # echo "${a_rDNA_cload}"
 
 f_rDNA_zoom="$(echo "${f_rDNA_cload}" | sed "s/.cload.cool/.mcool/g")"  # echo "${f_rDNA_zoom}"
@@ -11760,7 +11923,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
                     --output \"${a_std_tmp}\" \\
                     --reference-file \"${a_std_re}\" \\
                         \"${a_std}\" \\
-                            2> >(tee -a \"${d_comp}/err_out/${f_std_tmp%.${suf}}.stderr.txt\")
+                            2> >(tee -a \"${d_comp}/err_out/${f_std_tmp%.${post}}.stderr.txt\")
 
                 #  Overwrite un-headered \"\${a_std}\" with re-headered \"\${a_std_tmp}\"
                 [[
@@ -11779,7 +11942,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
                     --output \"${a_kp_tmp}\" \\
                     --reference-file \"${a_kp_re}\" \\
                         \"${a_kp}\" \\
-                            2> >(tee -a \"${d_comp}/err_out/${f_kp_tmp%.${suf}}.stderr.txt\")
+                            2> >(tee -a \"${d_comp}/err_out/${f_kp_tmp%.${post}}.stderr.txt\")
 
                 #  Overwrite un-headered \"\${a_kp}\" with re-headered \"\${a_kp_tmp}\"
                 [[
@@ -11799,7 +11962,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
                     --output "${a_std_tmp}" \
                     --reference-file "${a_std_re}" \
                         "${a_std}" \
-                            2> >(tee -a "${d_comp}/err_out/${f_std_tmp%.${suf}}.stderr.txt")
+                            2> >(tee -a "${d_comp}/err_out/${f_std_tmp%.${post}}.stderr.txt")
 
                 #  Overwrite un-headered "${a_std}" with re-headered "${a_std_tmp}"
                 [[
@@ -11818,7 +11981,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
                     --output "${a_kp_tmp}" \
                     --reference-file "${a_kp_re}" \
                         "${a_kp}" \
-                            2> >(tee -a "${d_comp}/err_out/${f_kp_tmp%.${suf}}.stderr.txt")
+                            2> >(tee -a "${d_comp}/err_out/${f_kp_tmp%.${post}}.stderr.txt")
 
                 #  Overwrite un-headered "${a_kp}" with re-headered "${a_kp_tmp}"
                 [[
@@ -11844,7 +12007,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
                             --tmpdir \"${scratch}\" \\
                                 \"${a_kp}\" \\
                                 \"${a_std}\" \\
-                                    2> >(tee -a \"${d_comp}/err_out/${f_rDNA%.${suf}}.stderr.txt\")
+                                    2> >(tee -a \"${d_comp}/err_out/${f_rDNA%.${post}}.stderr.txt\")
                     }
                 """
 
@@ -11857,7 +12020,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
                             --tmpdir "${scratch}" \
                                 "${a_kp}" \
                                 "${a_std}" \
-                                    2> >(tee -a "${d_comp}/err_out/${f_rDNA%.${suf}}.stderr.txt")
+                                    2> >(tee -a "${d_comp}/err_out/${f_rDNA%.${post}}.stderr.txt")
                     }
 
                 #  Sorting ----------------------------------------------------
@@ -11870,7 +12033,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
                             --nproc \"${threads}\" \\
                             --tmpdir \"${scratch}\" \\
                             \"${a_rDNA}\" \\
-                                2> >(tee -a \"${d_comp}/err_out/${f_rDNA_tmp%.${suf}}.stderr.txt\" >&2)
+                                2> >(tee -a \"${d_comp}/err_out/${f_rDNA_tmp%.${post}}.stderr.txt\" >&2)
                     }
 
                 #  Overwrite unsorted \"\${a_rDNA}\" with sorted \"\${a_rDNA_tmp}\"
@@ -11894,7 +12057,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
                             --nproc "${threads}" \
                             --tmpdir "${scratch}" \
                             "${a_rDNA}" \
-                                2> >(tee -a "${d_comp}/err_out/${f_rDNA_tmp%.${suf}}.stderr.txt" >&2)
+                                2> >(tee -a "${d_comp}/err_out/${f_rDNA_tmp%.${post}}.stderr.txt" >&2)
                     }
 
                 #  Overwrite unsorted "${a_rDNA}" with sorted "${a_rDNA_tmp}"
@@ -11963,6 +12126,7 @@ a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"  # echo "${a_rDNA_zoom}"
             }
     }
 
+# }
 ```
 </details>
 <br />
