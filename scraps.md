@@ -1,6 +1,6 @@
 
-##### Miscellaneous
-###### Code
+## Miscellaneous
+### Code
 <details>
 <summary><i>Code: Miscellaneous</i></summary>
 
@@ -83,11 +83,12 @@ print_test=TRUE  #ARGUMENT
 ```
 </details>
 <br />
+<br />
 
 <a id="if-applicable-then-run-logic-for-running-pairtools-merge"></a>
-##### If applicable, then run logic for running `pairtools merge`
+## If applicable, then run logic for running `pairtools merge`
 <a id="code-10"></a>
-###### Code
+#### Code
 <details>
 <summary><i>Code: If applicable, then run logic for running pairtools merge</i></summary>
 
@@ -278,9 +279,10 @@ print_test=TRUE  #ARGUMENT
 ```
 </details>
 <br />
+<br />
 
-##### Temporary
-###### Code
+## Temporary
+### Code
 <details>
 <summary><i>Code: Temporary</i></summary>
 
@@ -343,5 +345,142 @@ print_test=TRUE  #ARGUMENT
         fi
     }
 ```
+</details>
+<br />
+
+<a id="x-run-pairtools-select-if-applicable"></a>
+## X. Run `pairtools select` if applicable
+<a id="code-21"></a>
+### Code
+<details>
+<summary><i>Code: X. Run pairtools select if applicable</i></summary>
+
+```bash
+#!/bin/bash
+
+[[ "${flag_rDNA}" == TRUE ]] &&
+    {
+        #  Check the documentation --------------------------------------------
+        check_documentation=TRUE
+        [[ ${check_documentation} == TRUE ]] && pairtools select --help
+
+        #PICKUPHERE
+    }
+```
+</details>
+<br />
+
+<a id="printed-15"></a>
+### Printed
+<details>
+<summary><i>Printed: X. Run pairtools select</i></summary>
+
+<a id="check-the-documentation-4"></a>
+#### Check the documentation
+<details>
+<summary><i>Printed: Check the documentation</i></summary>
+
+```txt
+❯         check_documentation=TRUE
+
+
+❯ [[ ${check_documentation} == TRUE ]] && pairtools select --help
+Usage: pairtools select [OPTIONS] CONDITION [PAIRS_PATH]
+
+  Select pairs according to some condition.
+
+  CONDITION : A Python expression; if it returns True, select the read pair.
+  Any column declared in the #columns line of the pairs header can be accessed
+  by its name. If the header lacks the #columns line, the columns are assumed
+  to follow the .pairs/.pairsam standard (readID, chrom1, chrom2, pos1, pos2,
+  strand1, strand2, pair_type). Finally, CONDITION has access to COLS list
+  which contains the string values of columns. In Bash, quote CONDITION with
+  single quotes, and use double quotes for string variables inside CONDITION.
+
+  PAIRS_PATH : input .pairs/.pairsam file. If the path ends with .gz or .lz4,
+  the input is decompressed by bgzip/lz4c. By default, the input is read from
+  stdin.
+
+  The following functions can be used in CONDITION besides the standard Python
+  functions:
+
+  - csv_match(x, csv) - True if variable x is contained in a list of comma-
+  separated values, e.g. csv_match(chrom1, 'chr1,chr2')
+
+  - wildcard_match(x, wildcard) - True if variable x matches a wildcard, e.g.
+  wildcard_match(pair_type, 'C*')
+
+  - regex_match(x, regex) - True if variable x matches a Python-flavor regex,
+  e.g. regex_match(chrom1, 'chr\d')
+
+  Examples:
+  pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU")'
+  pairtools select 'chrom1==chrom2'
+  pairtools select 'COLS[1]==COLS[3]'
+  pairtools select '(chrom1==chrom2) and (abs(pos1 - pos2) < 1e6)'
+  pairtools select '(chrom1=="!") and (chrom2!="!")'
+  pairtools select 'regex_match(chrom1, "chr\d+") and regex_match(chrom2, "chr\d+")'
+
+  pairtools select 'True' --chrom-subset mm9.reduced.chromsizes
+
+Options:
+  -o, --output TEXT               output file. If the path ends with .gz or
+                                  .lz4, the output is bgzip-/lz4c-compressed.
+                                  By default, the output is printed into
+                                  stdout.
+  --output-rest TEXT              output file for pairs of other types.  If
+                                  the path ends with .gz or .lz4, the output
+                                  is bgzip-/lz4c-compressed. By default, such
+                                  pairs are dropped.
+  --chrom-subset TEXT             A path to a chromosomes file (tab-separated,
+                                  1st column contains chromosome names)
+                                  containing a chromosome subset of interest.
+                                  If provided, additionally filter pairs with
+                                  both sides originating from the provided
+                                  subset of chromosomes. This operation
+                                  modifies the #chromosomes: and #chromsize:
+                                  header fields accordingly.
+  --startup-code TEXT             An auxiliary code to execute before
+                                  filtering. Use to define functions that can
+                                  be evaluated in the CONDITION statement
+  -t, --type-cast <TEXT TEXT>...  Cast a given column to a given type. By
+                                  default, only pos and mapq are cast to int,
+                                  other columns are kept as str. Provide as -t
+                                  <column_name> <type>, e.g. -t read_len1 int.
+                                  Multiple entries are allowed.
+  -r, --remove-columns TEXT       Comma-separated list of columns to be
+                                  removed, e.g.: readID,chrom1,pos1,chrom2,pos
+                                  2,strand1,strand2,pair_type,sam1,sam2,walk_p
+                                  air_index,walk_pair_type
+  --nproc-in INTEGER              Number of processes used by the auto-guessed
+                                  input decompressing command.  [default: 3]
+  --nproc-out INTEGER             Number of processes used by the auto-guessed
+                                  output compressing command.  [default: 8]
+  --cmd-in TEXT                   A command to decompress the input file. If
+                                  provided, fully overrides the auto-guessed
+                                  command. Does not work with stdin and
+                                  pairtools parse. Must read input from stdin
+                                  and print output into stdout. EXAMPLE:
+                                  pbgzip -dc -n 3
+  --cmd-out TEXT                  A command to compress the output file. If
+                                  provided, fully overrides the auto-guessed
+                                  command. Does not work with stdout. Must
+                                  read input from stdin and print output into
+                                  stdout. EXAMPLE: pbgzip -c -n 8
+  -h, --help                      Show this message and exit.
+```
+</details>
+<br />
+
+<a id="pairtools-select"></a>
+#### `pairtools select`
+<details>
+<summary><i>Printed: pairtools select</i></summary>
+
+```txt
+
+```
+</details>
+<br />
 </details>
 <br />
