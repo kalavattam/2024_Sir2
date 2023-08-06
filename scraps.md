@@ -348,6 +348,77 @@ print_test=TRUE  #ARGUMENT
 </details>
 <br />
 
+### Code
+<details>
+<summary><i>Code: Temporary</i></summary>
+
+```bash
+#!/bin/bash
+
+a_rDNA="${d_comp}/${f_rDNA}"                                            # echo "${a_rDNA}"
+a_rDNA_tmp="${a_rDNA%%.*}.sorted-standard-rDNA.${post}"                 # echo "${a_rDNA_tmp}"
+
+f_rDNA_cload="$(echo "${f_rDNA}" | sed "s/${post}/cload.cool/g")"       # echo "${f_rDNA_cload}"
+a_rDNA_cload="${d_comp}/${f_rDNA_cload}"                                # echo "${a_rDNA_cload}"
+
+f_rDNA_zoom="$(echo "${f_rDNA_cload}" | sed "s/.cload.cool/.mcool/g")"  # echo "${f_rDNA_zoom}"
+a_rDNA_zoom="${d_comp}/${f_rDNA_zoom}"                                  # echo "${a_rDNA_zoom}"
+
+
+                #  Loading pairs to cooler ------------------------------------
+                bin_initial=25  #TODO Make the change in Step #0 above
+                echo """
+                cooler cload pairs \\
+                    -c1 2 -p1 3 -c2 4 -p2 5 \\
+                    --assembly \"${assembly}\" \\
+                    \"${a_size}\":\"${bin_initial}\" \\
+                    \"${a_rDNA}\" \\
+                    \"${a_rDNA_cload}\" \\
+                        2> >(tee -a \"${d_comp}/err_out/${f_rDNA_cload%.cool}.stderr.txt\" >&2)
+                """
+
+                [[ -f "${a_rDNA}" && "${a_rDNA_cload}" ]] &&
+                    {
+                        cooler cload pairs \
+                            -c1 2 -p1 3 -c2 4 -p2 5 \
+                            --assembly "${assembly}" \
+                            "${a_size}":"${bin_initial}" \
+                            "${a_rDNA}" \
+                            "${a_rDNA_cload}" \
+                                2> >(tee -a "${d_comp}/err_out/${f_rDNA_cload%.cool}.stderr.txt" >&2)
+                    }
+
+
+                #  Coarsening matrix, then balancing resulting matrices -------
+                [[ -f "${a_rDNA_zoom}" ]] && rm "${a_rDNA_zoom}"
+                
+                echo """
+                cooler zoomify \\
+                    --out \"${a_rDNA_zoom}\" \\
+                    --nproc \"${threads}\" \\
+                    --resolutions 50,100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \\
+                    --balance \\
+                    --balance-args '--max-iters 2000' \\
+                    \"${a_rDNA_cload}\" \\
+                        2> >(tee -a \"${d_comp}/err_out/${f_rDNA_zoom%.mcool}.stderr.txt\" >&2)
+                """
+
+                cooler zoomify \
+                    --out "${a_rDNA_zoom}" \
+                    --nproc "${threads}" \
+                    --resolutions 50,100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \
+                    --balance \
+                    --balance-args '--max-iters 2000' \
+                    "${a_rDNA_cload}" \
+                        2> >(tee -a "${d_comp}/err_out/${f_rDNA_zoom%.mcool}.stderr.txt" >&2)
+            }
+    }
+
+# }
+```
+</details>
+<br />
+
 <a id="x-run-pairtools-select-if-applicable"></a>
 ## X. Run `pairtools select` if applicable
 <a id="code-21"></a>
@@ -484,3 +555,58 @@ Options:
 <br />
 </details>
 <br />
+
+Getting weird errors about noninteger columns when attempting to run cooler cload pairs&mdash;has to do with empty columns (seems like partial records)
+
+`#TOMORROW` Need to go through the files and find missing lines e.g.,
+```bash
+zcat MC-2019_Q_WT_repM.standard-rDNA-complete.nodups.pairs.gz \
+    | awk '{ if ($2 == "" || $3 == "" || $4 == "" || $5 == "") { print $0 } }'
+SRR7939018.700
+```
+
+```txt
+❯ zcat MC-2019_Q_WT_repM.standard-rDNA-complete.nodups.pairs.gz \
+>     | awk '{ if ($2 == "" || $3 == "" || $4 == "" || $5 == "") { print $0 } }'
+## pairs format v1.0.0
+#sorted: chr1-chr2-pos1-pos2
+#shape: whole matrix
+#genome_assembly: S288C_R64-3-1
+#chromsize: I 230218
+#chromsize: II 813184
+#chromsize: III 316620
+#chromsize: IV 1531933
+#chromsize: IX 439888
+#chromsize: Mito 85779
+#chromsize: V 576874
+#chromsize: VI 270161
+#chromsize: VII 1090940
+#chromsize: VIII 562643
+#chromsize: X 745751
+#chromsize: XI 666816
+#chromsize: XII 1078177
+#chromsize: XIII 924431
+#chromsize: XIV 784333
+#chromsize: XV 1091291
+#chromsize: XVI 948066
+#samheader: @SQ SN:I    LN:230218
+#samheader: @SQ SN:II   LN:813184
+#samheader: @SQ SN:III  LN:316620
+#samheader: @SQ SN:IV   LN:1531933
+#samheader: @SQ SN:V    LN:576874
+#samheader: @SQ SN:VI   LN:270161
+#samheader: @SQ SN:VII  LN:1090940
+#samheader: @SQ SN:VIII LN:562643
+#samheader: @SQ SN:IX   LN:439888
+#samheader: @SQ SN:X    LN:745751
+#samheader: @SQ SN:XI   LN:666816
+#samheader: @SQ SN:XII  LN:1078177
+#samheader: @SQ SN:XIII LN:924431
+#samheader: @SQ SN:XIV  LN:784333
+#samheader: @SQ SN:XV   LN:1091291
+#samheader: @SQ SN:XVI  LN:948066
+#samheader: @SQ SN:Mito LN:85779
+SRR7939018.700
+```
+
+Find at what point in the rough processing pipeline these errors are being introduced; then, determine whether to solve the issue at that point (ideal) or solve the issue at the current point (by, e.g., directly excising the problem lines)
