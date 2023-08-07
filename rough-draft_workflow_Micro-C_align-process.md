@@ -2615,7 +2615,7 @@ Executing transaction: done
 ```bash
 #!/bin/bash
 
-# tmux new -s mc
+# tmux new-ses -t mc
 # tmux a -t mc
 ```
 </details>
@@ -4129,32 +4129,32 @@ print_test=TRUE
 # post="nodups.pairs.gz"  # echo "${post}"  #DUPLICATE
 d_comp="05_dedup"       # echo "${d_comp}"
 
-unset                     all && typeset -a all
-unset all_dedup_pre_pairs_std && typeset -a all_dedup_pre_pairs_std
+unset                      all && typeset -a all
+unset  all_dedup_pre_pairs_std && typeset -a all_dedup_pre_pairs_std
 
-unset          f_comp_std_pre && typeset -a f_comp_std_pre
-unset              f_comp_std && typeset -a f_comp_std
-unset              a_comp_std && typeset -a a_comp_std
+unset           f_comp_std_pre && typeset -a f_comp_std_pre
+unset               f_comp_std && typeset -a f_comp_std
+unset               a_comp_std && typeset -a a_comp_std
 
-                             all+=( "${stem[@]}" )                           # echo_test "${all[@]}"                      # echo "${#all[@]}"
+                             all+=( "${stem[@]}" )                              # echo_test "${all[@]}"                      # echo "${#all[@]}"
 
 for (( i = 0; i < ${#stem[@]}; i++ )); do
         all_dedup_pre_pairs_std+=(
             "${d_comp}/${stem[${i}]}.standard-${max_mismatch_std}.${post}"
-        )                                                                    # echo_test "${all_dedup_pre_pairs_std[@]}"  # echo "${#all_dedup_pre_pairs_std[@]}"
+        )                                                                       # echo_test "${all_dedup_pre_pairs_std[@]}"  # echo "${#all_dedup_pre_pairs_std[@]}"
 done
 
 if [[ "${#to_merge[@]}" -ne 0 ]]; then
     for (( i = 0; i < ${#to_merge[@]}; i++ )); do
-                            all+=( "${to_merge[${i}]}_repM" )                # echo_test "${all[@]}"                      # echo "${#all[@]}"
-        all_dedup_pre_pairs_std+=( "${a_merge_std[${i}]}" )                  # echo_test "${all_dedup_pre_pairs_std[@]}"  # echo "${#all_dedup_pre_pairs_std[@]}"
+                            all+=( "${to_merge[${i}]}_repM" )                   # echo_test "${all[@]}"                      # echo "${#all[@]}"
+        all_dedup_pre_pairs_std+=( "${a_merge_std[${i}]}" )                     # echo_test "${all_dedup_pre_pairs_std[@]}"  # echo "${#all_dedup_pre_pairs_std[@]}"
     done
 fi
 
 for (( i = 0; i < ${#all[@]}; i++ )); do
-    f_comp_std_pre+=( "${all[${i}]}.standard-${max_mismatch_std}.no-rDNA" )  # echo_test "${f_comp_std_pre[@]}"
-        f_comp_std+=( "${f_comp_std_pre[${i}]}.${post}" )                    # echo_test "${f_comp_std[@]}"
-        a_comp_std+=( "${d_comp}/${f_comp_std[${i}]}" )                      # echo_test "${a_comp_std[@]}"
+    f_comp_std_pre+=( "${all[${i}]}.standard-${max_mismatch_std}.no-rDNA" )     # echo_test "${f_comp_std_pre[@]}"
+        f_comp_std+=( "${f_comp_std_pre[${i}]}.${post}" )                       # echo_test "${f_comp_std[@]}"
+        a_comp_std+=( "${d_comp}/${f_comp_std[${i}]}" )                         # echo_test "${a_comp_std[@]}"
 done
 
 
@@ -4185,11 +4185,11 @@ done
 
 
 #  X.C. -----------------------------------------------------------------------
-unset       a_comp_std_rhdr && typeset -a a_comp_std_rhdr
-unset      a_comp_rDNA_rhdr && typeset -a a_comp_rDNA_rhdr
-unset       a_comp_std_rDNA && typeset -a a_comp_std_rDNA
-unset  a_comp_std_rDNA_sort && typeset -a a_comp_std_rDNA_sort
-unset a_comp_std_rDNA_cload && typeset -a a_comp_std_rDNA_cload
+unset          a_comp_std_rhdr && typeset -a a_comp_std_rhdr
+unset         a_comp_rDNA_rhdr && typeset -a a_comp_rDNA_rhdr
+unset          a_comp_std_rDNA && typeset -a a_comp_std_rDNA
+unset     a_comp_std_rDNA_sort && typeset -a a_comp_std_rDNA_sort
+unset    a_comp_std_rDNA_cload && typeset -a a_comp_std_rDNA_cload
 
 for (( i = 0; i < ${#all[@]}; i++ )); do
     a_comp_std_rhdr+=(
@@ -4334,38 +4334,44 @@ print_test=TRUE
 [[ "${print_test}" == TRUE ]] &&
     {
         for (( i = 0; i < ${#stem[@]}; i++ )); do
-            # i=1
+            # i=0
 
-            [[ ! -f "${a_afq_1[${i}]}" && ! -f "${a_afq_2[${i}]}" ]] &&
+            [[
+                     -f "${a_fq_1[${i}]}" \
+                &&   -f "${a_fq_2[${i}]}" \
+                && ! -f "${a_afq_1[${i}]}" \
+                && ! -f "${a_afq_2[${i}]}"
+            ]] &&
                 {
                     job_name="${d_trim}.${stem[${i}]}"
 
-#HEREDOC
-echo """
-sbatch << EOF
-#!/bin/bash
+                    echo """
+                    #HEREDOC
+                    sbatch << EOF
+                    #!/bin/bash
 
-#SBATCH --job-name=${job_name}
-#SBATCH --nodes=1
-#SBATCH --cpus-per-task=${threads}
-#SBATCH --error="${d_trim}/err_out/${job_name}.%A.stderr.txt"
-#SBATCH --output="${d_trim}/err_out/${job_name}.%A.stdout.txt"
+                    #SBATCH --job-name=${job_name}
+                    #SBATCH --nodes=1
+                    #SBATCH --cpus-per-task=${threads}
+                    #SBATCH --error="${d_trim}/err_out/${job_name}.%A.stderr.txt"
+                    #SBATCH --output="${d_trim}/err_out/${job_name}.%A.stdout.txt"
 
-\"\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/src/Atria/app-3.2.2/bin/atria\" \\
-    -t \"${threads}\" \\
-    -r \"${a_fq_1[${i}]}\" \\
-    -R \"${a_fq_2[${i}]}\" \\
-    -o \"${d_trim}\" \\
-    --no-length-filtration
+                    \"\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/src/Atria/app-3.2.2/bin/atria\" \\
+                        -t \"${threads}\" \\
+                        -r \"${a_fq_1[${i}]}\" \\
+                        -R \"${a_fq_2[${i}]}\" \\
+                        -o \"${d_trim}\" \\
+                        --no-length-filtration
 
-#  Store logs in err_out/
-if compgen -G ${d_trim}/*.{log,log.json} > /dev/null; then
-    mv ${d_trim}/*.{log,log.json} "${d_trim}/err_out"
-fi
-EOF
-"""
+                    #  Store logs in err_out/
+                    if compgen -G ${d_trim}/*.{log,log.json} > /dev/null; then
+                        mv ${d_trim}/*.{log,log.json} "${d_trim}/err_out"
+                    fi
+                    EOF
+                    """
                 } ||
                 echo "Trimmed fastqs exist; skipping \"Step #1: Trim fastq files\""
+                #TODO Update this message
         done
     }
 
@@ -4377,7 +4383,12 @@ run=TRUE
         for (( i = 0; i < ${#stem[@]}; i++ )); do
             # i=0
 
-            [[ ! -f "${a_afq_1[${i}]}" && ! -f "${a_afq_2[${i}]}" ]] &&
+            [[
+                     -f "${a_fq_1[${i}]}" \
+                &&   -f "${a_fq_2[${i}]}" \
+                && ! -f "${a_afq_1[${i}]}" \
+                && ! -f "${a_afq_2[${i}]}"
+            ]] &&
                 {                    
                     job_name="${d_trim}.${stem[${i}]}"
 
@@ -4405,10 +4416,12 @@ fi
 EOF
                 } ||
                 echo "Trimmed fastqs exist; skipping \"Step #1: Trim fastq files\""
+                #TODO Update this message
         done
     }
 
-#TODO Get rid of compgen and mv globs
+#TODO 1/2 Get rid of globs associated compgen and mv, i.e., be explicit about
+#TODO 2/2 the files to check and move
 ```
 </details>
 <br />
@@ -9078,7 +9091,8 @@ run_check=FALSE
                 --help
     }
 
-#  Work for quick, rough-draft assessments
+
+#  Load mcool files: This is work for quick, rough-draft assessments ----------
 rough_Q=FALSE
 [[ "${rough_Q}" == TRUE ]] &&
     {
@@ -9152,7 +9166,96 @@ rough_Q_rDNA=TRUE
         # curl http://localhost:8888/api/v1/tilesets/
     }
 
-#  Work, 2023-0713
+
+#  Work, 2023-0807 ------------------------------------------------------------
+conda activate chromatin_env
+
+#  Initialize function for ingesting mcool files
+ingest_mcool() {
+    docker exec higlass-container \
+            python higlass-server/manage.py ingest_tileset \
+                --filename "/data/${1}" \
+                --filetype cooler \
+                --datatype matrix
+}
+
+
+aggregate_bed() {
+    clodius aggregate bedfile \
+        --assembly "sacCer3" \
+        --output-file "${1/bed/db}" \
+        --chromsizes-filename "${2:-S288C_reference_sequence_R64-3-1_20210421.size}" \
+        "${1}"
+}
+
+
+ingest_bed() {
+    docker exec higlass-container \
+        python higlass-server/manage.py ingest_tileset \
+           --filename "/data/${1}" \
+           --filetype beddb \
+           --datatype bedlike \
+           --coordSystem sacCer3
+}
+
+
+export -f load_mcool
+export -f aggregate_bed
+export -f ingest_bed
+
+
+#  Ingest "updated" mcool files
+updated_Q=FALSE
+updated_G2M=FALSE
+updated_G1=FALSE
+[[ "${updated_Q}" == TRUE ]] \
+    && ingest_mcool MC-2019_Q_WT_repM.standard-rDNA-complete.mcool
+[[ "${updated_G2M}" == TRUE ]] \
+    && ingest_mcool MC-2020_nz_WT_repM.standard-rDNA-complete.mcool
+[[ "${updated_G1}" == TRUE ]] \
+    && ingest_mcool MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mcool
+
+
+#  Aggregate and ingest gene track file
+agg_rep_coding_ncRNA=FALSE
+[[ "${agg_rep_coding_ncRNA}" == TRUE ]] \
+    && aggregate_bed Greenlaw-et-al_representative-coding-ncRNA-transcriptome.bed
+
+ing_rep_coding_ncRNA=FALSE
+[[ "${ing_rep_coding_ncRNA}" == TRUE ]] \
+    && ingest_bed Greenlaw-et-al_representative-coding-ncRNA-transcriptome.db
+    #ACCIDENT #DELETE #TODO
+    # && ingest_bed Greenlaw-et-al_representative-coding-ncRNA-transcriptome.bed
+
+agg_rep_coding_non_pancRNA=FALSE
+[[ "${agg_rep_coding_non_pancRNA}" == TRUE ]] \
+    && aggregate_bed Greenlaw-et-al_representative-coding-non-pa-ncRNA-transcriptome.bed
+
+ing_rep_coding_non_pancRNA=FALSE
+[[ "${ing_rep_coding_non_pancRNA}" == TRUE ]] \
+    && ingest_bed Greenlaw-et-al_representative-coding-non-pa-ncRNA-transcriptome.db
+
+agg_rep_coding_noncoding=FALSE
+[[ "${agg_rep_coding_noncoding}" == TRUE ]] \
+    && aggregate_bed Greenlaw-et-al_representative-non-coding-transcriptome.bed
+
+ing_rep_coding_noncoding=FALSE
+[[ "${ing_rep_coding_noncoding}" == TRUE ]] \
+    && ingest_bed Greenlaw-et-al_representative-non-coding-transcriptome.db
+
+agg_S_cerevisiae_gene=TRUE
+[[ "${agg_S_cerevisiae_gene}" == TRUE ]] \
+    && aggregate_bed Saccharomyces_cerevisiae.R64-1-1.108.gene.bed
+
+ing_S_cerevisiae_gene=TRUE
+[[ "${ing_S_cerevisiae_gene}" == TRUE ]] \
+    && ingest_bed Saccharomyces_cerevisiae.R64-1-1.108.gene.db
+
+run_check=TRUE
+[[ "${run_check}" == TRUE ]] && curl http://localhost:8888/api/v1/tilesets/
+
+
+#  Work, 2023-0713, 2023-0807 -------------------------------------------------
 docker exec higlass-container \
     python higlass-server/manage.py --help
 
@@ -9204,6 +9307,11 @@ cat Saccharomyces_cerevisiae.R64-1-1.108.gtf \
     | awk '{ if ($0 ~ "transcript_id") print $0; else print $0" transcript_id \"\";"; }' \
     | gtf2bed - \
         > Saccharomyces_cerevisiae.R64-1-1.108.bed
+
+#IMPORTANT (2023-0807)
+cat Saccharomyces_cerevisiae.R64-1-1.108.bed \
+    | awk '{ if ($8 ~ "gene") { print $0 } }' \
+        > Saccharomyces_cerevisiae.R64-1-1.108.gene.bed
 
 cat Saccharomyces_cerevisiae.R64-1-1.108.bed | head
 

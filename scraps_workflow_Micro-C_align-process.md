@@ -50,8 +50,8 @@ elif [[ "${analysis}" == "G2-M" ]]; then
     #  Set up hash, indices (needed for replicate/merge logic below)
     unset arr_merge; unset order
     typeset -A arr_merge; typeset -a order
-    arr_merge["SRR11893084"]="SRR11893085"; order+=("SRR11893084")
-    arr_merge["SRR11893085"]="SRR11893084"; order+=("SRR11893085")
+    arr_merge["SRR11893084"]="SRR11893085"; order+=( "SRR11893084" )
+    arr_merge["SRR11893085"]="SRR11893084"; order+=( "SRR11893085" )
 
     run_test=FALSE
     [[ "${run_test}" == TRUE ]] &&
