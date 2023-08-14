@@ -8,8 +8,20 @@
 <!-- MarkdownTOC -->
 
 1. [Install `docker-4dn-hic`](#install-docker-4dn-hic)
-    1. [TBD](#tbd)
-    1. [TBD](#tbd-1)
+    1. [Clone the GitHub repository](#clone-the-github-repository)
+        1. [Code](#code)
+        1. [Printed](#printed)
+    1. [Run the image, examine the contents](#run-the-image-examine-the-contents)
+        1. [Code](#code-1)
+        1. [Printed](#printed-1)
+    1. [Install newer version, delete the older version](#install-newer-version-delete-the-older-version)
+        1. [Code](#code-2)
+        1. [Printed](#printed-2)
+    1. [Run `run-list.sh`](#run-run-listsh)
+        1. [Code](#code-3)
+    1. [Clone GitHub repo](#clone-github-repo)
+        1. [Code](#code-4)
+        1. [Printed](#printed-3)
 
 <!-- /MarkdownTOC -->
 </details>
@@ -17,8 +29,10 @@
 
 <a id="install-docker-4dn-hic"></a>
 ## Install `docker-4dn-hic`
-<a id="tbd"></a>
-### TBD
+<a id="clone-the-github-repository"></a>
+### Clone the GitHub repository
+<a id="code"></a>
+#### Code
 <details>
 <summary><i>Code: Clone the GitHub repository</i></summary>
 
@@ -35,11 +49,12 @@ cd ~/singularity-docker-etc
 singularity build 4dn-hic.sif docker://duplexa/4dn-hic:latest
 
 singularity build 4dn-hic-v43.sif docker://duplexa/4dn-hic:v43
-
 ```
 </details>
 <br />
 
+<a id="printed"></a>
+#### Printed
 <details>
 <summary><i>Printed: Clone the GitHub repository</i></summary>
 
@@ -186,12 +201,15 @@ Storing signatures
 </details>
 <br />
 
+<a id="run-the-image-examine-the-contents"></a>
+### Run the image, examine the contents
+<a id="code-1"></a>
+#### Code
 <details>
-<summary><i>Code: </i></summary>
+<summary><i>Code: Run the image, examine the contents</i></summary>
 
 ```bash
 #!/bin/bash
-#DONTRUN #CONTINUE
 
 cd ..
 
@@ -206,13 +224,13 @@ singularity shell \
 ```
 </details>
 <br />
+
+<a id="printed-1"></a>
+#### Printed
 <details>
-<summary><i>Within the Singularity image</i></summary>
+<summary><i>Printed: Run the image, examine the contents</i></summary>
 
 ```txt
-#!/bin/bash
-#DONTRUN #CONTINUE
-
 Singularity> pwd
 /home/kalavatt
 
@@ -463,14 +481,15 @@ exit
 </details>
 <br />
 
-<a id="tbd-1"></a>
-### TBD
+<a id="install-newer-version-delete-the-older-version"></a>
+### Install newer version, delete the older version
+<a id="code-2"></a>
+#### Code
 <details>
 <summary><i>Code: Install newer version, delete the older version</i></summary>
 
 ```bash
 #!/bin/bash
-#DONTRUN #CONTINUE
 
 singularity build 4dn-hic-v43.sif docker://duplexa/4dn-hic:v43
 
@@ -479,8 +498,10 @@ rm 4dn-hic.sif
 </details>
 <br />
 
+<a id="printed-2"></a>
+#### Printed
 <details>
-<summary><i>Printed: Install newer version</i></summary>
+<summary><i>Printed: Install newer version, delete the older version</i></summary>
 
 ```txt
 ❯ singularity build 4dn-hic-v43.sif docker://duplexa/4dn-hic:v43
@@ -615,12 +636,15 @@ INFO:    Build complete: 4dn-hic-v43.sif
 </details>
 <br />
 
+<a id="run-run-listsh"></a>
+### Run `run-list.sh`
+<a id="code-3"></a>
+#### Code
 <details>
-<summary><i>Code: </i></summary>
+<summary><i>Code: Run run-list.sh</i></summary>
 
 ```bash
 #!/bin/bash
-#DONTRUN #CONTINUE
 
 cd "${HOME}"
 
@@ -631,13 +655,15 @@ singularity exec \
 </details>
 <br />
 
-
+<a id="clone-github-repo"></a>
+### Clone GitHub repo
+<a id="code-4"></a>
+#### Code
 <details>
 <summary><i>Code: Clone GitHub repo</i></summary>
 
 ```bash
 #!/bin/bash
-#DONTRUN #CONTINUE
 
 cd ~/tsukiyamalab/kalavatt/2023_rDNA/software
 
@@ -646,6 +672,8 @@ git clone https://github.com/4dn-dcic/docker-4dn-hic
 </details>
 <br />
 
+<a id="printed-3"></a>
+#### Printed
 <details>
 <summary><i>Printed: Clone GitHub repo</i></summary>
 

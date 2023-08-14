@@ -6164,7 +6164,13 @@ INFO:cooler.cli.zoomify:Balancing zoom level with bin size 100
 <br />
 
 ## To report...?
+### Printed
+<details>
+<summary><i>Printed</i></summary>
+
 ```txt
+#TODO Report this bug later
+
 ❯ cat cload.MC-2020_nz_WT_repM.standard-rDNA-complete.25524134.stderr.txt
 Traceback (most recent call last):
   File "pandas/_libs/parsers.pyx", line 1129, in pandas._libs.parsers.TextReader._convert_tokens
@@ -6281,5 +6287,5 @@ ValueError: cannot convert float NaN to integer
 SRR11893084.12257474    II      451591  XII     80464   +       -       UU      1       R2      451591  80464   451685  80395   60      60
 ```
 
-TODO Report this bug later
-
+</details>
+<br />
