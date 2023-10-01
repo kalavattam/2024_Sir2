@@ -115,7 +115,7 @@ drwxrws---  2 kalavatt 1.2K Aug  6 17:20 err_out/
 
 We currently don't have Sarah's unmerged biological replicates for the Q data, and they're not available via public data repositories; however, they remember that they were amidst Sarah's files on [Motuz](https://motuz.fredhutch.org/login).
 
-- [ ] Get and process them
+- [ ] Get and process them `#MAYBE`
 - [ ] Consider MDS projections of Q, G1, G2/M biological replicates for all interactions and only rDNA interactions `#MAYBE`
 </details>
 <br />
@@ -137,6 +137,7 @@ cooler attrs ${f_cool}
 cooler tree ${f_cool}
 cooler info ${f_cool}::/resolutions/6400
 
+#  Check that there are interactions associated with example regions
 # cooler dump ${f_cool}::/resolutions/6400 -r "I:100000-200000" | head
 ```
 </details>
@@ -999,5 +1000,696 @@ options:
 ```
 
 More details [here](https://fan-c.readthedocs.io/en/latest/fanc-executable/fanc-analyse-hic/comparisons.html).
+</details>
+<br />
+<br />
+
+## Set up virtual environment for analyses with `HiCExplorer`
+### Code
+<details>
+<summary><i>Code: Set up virtual environment for analyses with `HiCExplorer`</i></summary>
+
+```bash
+#!/bin/bash
+
+env_name="hicexplorer_env"
+install_env=TRUE
+if [[ "${install_env}" == TRUE ]]; then
+    mamba create \
+        -n ${env_name} \
+        hicexplorer=3.7.2=pyhdfd78af_1 \
+        -c conda-forge \
+        -c bioconda
+    
+    source activate ${env_name}
+    mamba install -c bioconda rename
+fi
+
+conda remove -n hicexplorer_env --all
+
+```
+</details>
+<br />
+
+### Printed
+<details>
+<summary><i>Printed: Set up virtual environment for analyses with `HiCExplorer`</i></summary>
+
+```txt
+❯ mamba create \
+>     -n ${env_name} \
+>     hicexplorer=3.7.2=pyhdfd78af_1 \
+>     -c conda-forge \
+>     -c bioconda
+
+                  __    __    __    __
+                 /  \  /  \  /  \  /  \
+                /    \/    \/    \/    \
+███████████████/  /██/  /██/  /██/  /████████████████████████
+              /  / \   / \   / \   / \  \____
+             /  /   \_/   \_/   \_/   \    o \__,
+            / _/                       \_____/  `
+            |/
+        ███╗   ███╗ █████╗ ███╗   ███╗██████╗  █████╗
+        ████╗ ████║██╔══██╗████╗ ████║██╔══██╗██╔══██╗
+        ██╔████╔██║███████║██╔████╔██║██████╔╝███████║
+        ██║╚██╔╝██║██╔══██║██║╚██╔╝██║██╔══██╗██╔══██║
+        ██║ ╚═╝ ██║██║  ██║██║ ╚═╝ ██║██████╔╝██║  ██║
+        ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝
+
+        mamba (1.3.1) supported by @QuantStack
+
+        GitHub:  https://github.com/mamba-org/mamba
+        Twitter: https://twitter.com/QuantStack
+
+█████████████████████████████████████████████████████████████
+
+
+Looking for: ['hicexplorer==3.7.2=pyhdfd78af_1']
+
+conda-forge/linux-64                                        Using cache
+conda-forge/noarch                                          Using cache
+bioconda/linux-64                                           Using cache
+bioconda/noarch                                             Using cache
+pkgs/main/linux-64                                            No change
+pkgs/main/noarch                                              No change
+pkgs/r/linux-64                                               No change
+pkgs/r/noarch                                                 No change
+Transaction
+
+  Prefix: /home/kalavatt/miniconda3/envs/hicexplorer_env
+
+  Updating specs:
+
+   - hicexplorer==3.7.2=pyhdfd78af_1
+
+
+  Package                               Version  Build                    Channel                    Size
+───────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Install:
+───────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  + _libgcc_mutex                           0.1  conda_forge              conda-forge/linux-64     Cached
+  + _openmp_mutex                           4.5  2_gnu                    conda-forge/linux-64     Cached
+  + argcomplete                           3.1.2  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + argh                                 0.29.4  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + asciitree                             0.3.3  py_2                     conda-forge/noarch       Cached
+  + asttokens                             2.4.0  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + atk-1.0                              2.38.0  hd4edc92_1               conda-forge/linux-64     Cached
+  + aws-c-auth                            0.7.4  hc8144f4_1               conda-forge/linux-64     Cached
+  + aws-c-cal                             0.6.2  h09139f6_2               conda-forge/linux-64     Cached
+  + aws-c-common                          0.9.3  hd590300_0               conda-forge/linux-64     Cached
+  + aws-c-compression                    0.2.17  h184a658_3               conda-forge/linux-64     Cached
+  + aws-c-event-stream                    0.3.2  hd6ebb48_1               conda-forge/linux-64     Cached
+  + aws-c-http                           0.7.13  hc690213_1               conda-forge/linux-64     Cached
+  + aws-c-io                            0.13.32  h89a0be2_4               conda-forge/linux-64     Cached
+  + aws-c-mqtt                            0.9.6  h32970c0_2               conda-forge/linux-64     Cached
+  + aws-c-s3                             0.3.17  hb5e3142_3               conda-forge/linux-64     Cached
+  + aws-c-sdkutils                       0.1.12  h184a658_2               conda-forge/linux-64     Cached
+  + aws-checksums                        0.1.17  h184a658_2               conda-forge/linux-64     Cached
+  + aws-crt-cpp                          0.23.1  h94c364a_5               conda-forge/linux-64     Cached
+  + aws-sdk-cpp                        1.11.156  h6600424_3               conda-forge/linux-64     Cached
+  + backcall                              0.2.0  pyh9f0ad1d_0             conda-forge/noarch       Cached
+  + backports                               1.0  pyhd8ed1ab_3             conda-forge/noarch       Cached
+  + backports.functools_lru_cache         1.6.5  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + bedtools                             2.31.0  hf5e1c6e_3               bioconda/linux-64        Cached
+  + biopython                              1.81  py310h1fa729e_0          conda-forge/linux-64     Cached
+  + blosc                                1.21.5  h0f2a231_0               conda-forge/linux-64     Cached
+  + bokeh                                 3.2.2  pyhd8ed1ab_0             conda-forge/noarch          5MB
+  + brotli                                1.1.0  hd590300_1               conda-forge/linux-64     Cached
+  + brotli-bin                            1.1.0  hd590300_1               conda-forge/linux-64     Cached
+  + brotli-python                         1.1.0  py310hc6cd4ac_1          conda-forge/linux-64      349kB
+  + bx-python                            0.10.0  py310h551a815_0          bioconda/linux-64           1MB
+  + bzip2                                 1.0.8  h7f98852_4               conda-forge/linux-64     Cached
+  + c-ares                               1.19.1  hd590300_0               conda-forge/linux-64     Cached
+  + c-blosc2                             2.10.2  hb4ffafa_0               conda-forge/linux-64     Cached
+  + ca-certificates                   2023.7.22  hbcca054_0               conda-forge/linux-64     Cached
+  + cached-property                       1.5.2  hd8ed1ab_1               conda-forge/noarch       Cached
+  + cached_property                       1.5.2  pyha770c72_1             conda-forge/noarch       Cached
+  + cairo                                1.16.0  h0c91306_1017            conda-forge/linux-64     Cached
+  + certifi                           2023.7.22  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + cleanlab                              2.5.0  pyhd8ed1ab_0             conda-forge/noarch        187kB
+  + click                                 8.1.7  unix_pyh707e725_0        conda-forge/noarch       Cached
+  + cloudpickle                           2.2.1  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + colorama                              0.4.6  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + comm                                  0.1.4  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + contourpy                             1.1.1  py310hd41b1e2_1          conda-forge/linux-64      224kB
+  + cooler                                0.9.3  pyhdfd78af_0             bioconda/noarch          Cached
+  + cycler                               0.11.0  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + cytoolz                              0.12.2  py310h2372a71_1          conda-forge/linux-64      368kB
+  + dask                               2023.9.3  pyhd8ed1ab_0             conda-forge/noarch          7kB
+  + dask-core                          2023.9.3  pyhd8ed1ab_0             conda-forge/noarch        858kB
+  + debugpy                               1.8.0  py310hc6cd4ac_1          conda-forge/linux-64        2MB
+  + decorator                             5.1.1  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + dill                                  0.3.7  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + distributed                        2023.9.3  pyhd8ed1ab_0             conda-forge/noarch        784kB
+  + eigen                                 3.4.0  h00ab1b0_0               conda-forge/linux-64     Cached
+  + exceptiongroup                        1.1.3  pyhd8ed1ab_0             conda-forge/noarch         19kB
+  + executing                             1.2.0  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + expat                                 2.5.0  hcb278e6_1               conda-forge/linux-64     Cached
+  + fit_nbinom                              1.1  pyh864c0ab_2             bioconda/noarch          Cached
+  + font-ttf-dejavu-sans-mono              2.37  hab24e00_0               conda-forge/noarch       Cached
+  + font-ttf-inconsolata                  3.000  h77eed37_0               conda-forge/noarch       Cached
+  + font-ttf-source-code-pro              2.038  h77eed37_0               conda-forge/noarch       Cached
+  + font-ttf-ubuntu                        0.83  hab24e00_0               conda-forge/noarch       Cached
+  + fontconfig                           2.14.2  h14ed4e7_0               conda-forge/linux-64     Cached
+  + fonts-conda-ecosystem                     1  0                        conda-forge/noarch       Cached
+  + fonts-conda-forge                         1  0                        conda-forge/noarch       Cached
+  + fonttools                            4.43.0  py310h2372a71_0          conda-forge/linux-64        2MB
+  + freetype                             2.12.1  h267a509_2               conda-forge/linux-64     Cached
+  + fribidi                              1.0.10  h36c2ea0_0               conda-forge/linux-64     Cached
+  + fsspec                             2023.9.2  pyh1a96a4e_0             conda-forge/noarch       Cached
+  + future                               0.18.3  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + gdk-pixbuf                          2.42.10  h6c15284_3               conda-forge/linux-64     Cached
+  + gettext                              0.21.1  h27087fc_0               conda-forge/linux-64     Cached
+  + gffutils                               0.12  pyh7cba7a3_0             bioconda/noarch          Cached
+  + gflags                                2.2.2  he1b5a44_1004            conda-forge/linux-64     Cached
+  + giflib                                5.2.1  h0b41bf4_3               conda-forge/linux-64     Cached
+  + glog                                  0.6.0  h6f12383_0               conda-forge/linux-64     Cached
+  + graphite2                            1.3.13  h58526e2_1001            conda-forge/linux-64     Cached
+  + graphviz                              8.1.0  h28d9a01_0               conda-forge/linux-64     Cached
+  + gtk2                                2.24.33  h90689f9_2               conda-forge/linux-64     Cached
+  + gts                                   0.7.6  h977cf35_4               conda-forge/linux-64     Cached
+  + h5py                                  3.9.0  nompi_py310ha2ad45a_103  conda-forge/linux-64        1MB
+  + harfbuzz                              8.2.1  h3d44ed6_0               conda-forge/linux-64     Cached
+  + hdf5                                 1.14.2  nompi_h4f84152_100       conda-forge/linux-64     Cached
+  + hic2cool                              0.8.3  pyh864c0ab_2             bioconda/noarch          Cached
+  + hicexplorer                           3.7.2  pyhdfd78af_1             bioconda/noarch             2MB
+  + hicmatrix                                17  pyhdfd78af_0             bioconda/noarch          Cached
+  + htslib                                 1.18  h81da01d_0               bioconda/linux-64        Cached
+  + hyperopt                              0.2.7  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + icu                                    73.2  h59595ed_0               conda-forge/linux-64     Cached
+  + imbalanced-learn                     0.11.0  pyhd8ed1ab_0             conda-forge/noarch        141kB
+  + importlib-metadata                    6.8.0  pyha770c72_0             conda-forge/noarch       Cached
+  + importlib_metadata                    6.8.0  hd8ed1ab_0               conda-forge/noarch       Cached
+  + intervaltree                          3.1.0  pyhd8ed1ab_1             conda-forge/noarch       Cached
+  + ipykernel                            6.25.2  pyh2140261_0             conda-forge/noarch       Cached
+  + ipython                              8.16.0  pyh0d859eb_0             conda-forge/noarch        590kB
+  + jedi                                 0.19.0  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + jinja2                                3.1.2  pyhd8ed1ab_1             conda-forge/noarch       Cached
+  + joblib                                1.3.2  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + jupyter_client                        8.3.1  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + jupyter_core                          5.3.2  py310hff52083_0          conda-forge/linux-64       79kB
+  + keyutils                              1.6.1  h166bdaf_0               conda-forge/linux-64     Cached
+  + kiwisolver                            1.4.5  py310hd41b1e2_1          conda-forge/linux-64       73kB
+  + krb5                                 1.21.2  h659d440_0               conda-forge/linux-64     Cached
+  + krbalancing                           0.0.5  py310h0dbaff4_7          bioconda/linux-64         120kB
+  + lcms2                                  2.15  h7f713cb_2               conda-forge/linux-64     Cached
+  + ld_impl_linux-64                       2.40  h41732ed_0               conda-forge/linux-64     Cached
+  + lerc                                  4.0.0  h27087fc_0               conda-forge/linux-64     Cached
+  + libabseil                        20230802.1  cxx17_h59595ed_0         conda-forge/linux-64     Cached
+  + libaec                                1.1.1  h59595ed_0               conda-forge/linux-64     Cached
+  + libarrow                             13.0.0  h1935d02_5_cpu           conda-forge/linux-64     Cached
+  + libblas                               3.9.0  18_linux64_openblas      conda-forge/linux-64     Cached
+  + libbrotlicommon                       1.1.0  hd590300_1               conda-forge/linux-64     Cached
+  + libbrotlidec                          1.1.0  hd590300_1               conda-forge/linux-64     Cached
+  + libbrotlienc                          1.1.0  hd590300_1               conda-forge/linux-64     Cached
+  + libcblas                              3.9.0  18_linux64_openblas      conda-forge/linux-64     Cached
+  + libcrc32c                             1.1.2  h9c3ff4c_0               conda-forge/linux-64     Cached
+  + libcurl                               8.3.0  hca28451_0               conda-forge/linux-64     Cached
+  + libdeflate                             1.18  h0b41bf4_0               conda-forge/linux-64     Cached
+  + libedit                        3.1.20191231  he28a2e2_2               conda-forge/linux-64     Cached
+  + libev                                  4.33  h516909a_1               conda-forge/linux-64     Cached
+  + libevent                             2.1.12  hf998b51_1               conda-forge/linux-64     Cached
+  + libexpat                              2.5.0  hcb278e6_1               conda-forge/linux-64     Cached
+  + libffi                                3.4.2  h7f98852_5               conda-forge/linux-64     Cached
+  + libgcc-ng                            13.2.0  h807b86a_2               conda-forge/linux-64     Cached
+  + libgd                                 2.3.3  he9388d3_8               conda-forge/linux-64     Cached
+  + libgfortran-ng                       13.2.0  h69a702a_2               conda-forge/linux-64     Cached
+  + libgfortran5                         13.2.0  ha4646dd_2               conda-forge/linux-64     Cached
+  + libglib                              2.78.0  hebfc3b9_0               conda-forge/linux-64     Cached
+  + libgomp                              13.2.0  h807b86a_2               conda-forge/linux-64     Cached
+  + libgoogle-cloud                      2.12.0  h8d7e28b_2               conda-forge/linux-64     Cached
+  + libgrpc                              1.57.0  ha4d0f93_1               conda-forge/linux-64     Cached
+  + libiconv                               1.17  h166bdaf_0               conda-forge/linux-64     Cached
+  + libjpeg-turbo                       2.1.5.1  hd590300_1               conda-forge/linux-64     Cached
+  + liblapack                             3.9.0  18_linux64_openblas      conda-forge/linux-64     Cached
+  + libnghttp2                           1.52.0  h61bc06f_0               conda-forge/linux-64     Cached
+  + libnsl                                2.0.0  hd590300_1               conda-forge/linux-64     Cached
+  + libnuma                              2.0.16  h0b41bf4_1               conda-forge/linux-64     Cached
+  + libopenblas                          0.3.24  pthreads_h413a1c8_0      conda-forge/linux-64     Cached
+  + libpng                               1.6.39  h753d276_0               conda-forge/linux-64     Cached
+  + libprotobuf                          4.23.4  hf27288f_6               conda-forge/linux-64     Cached
+  + librsvg                              2.56.3  h98fae49_0               conda-forge/linux-64     Cached
+  + libsodium                            1.0.18  h36c2ea0_1               conda-forge/linux-64     Cached
+  + libsqlite                            3.43.0  h2797004_0               conda-forge/linux-64     Cached
+  + libssh2                              1.11.0  h0841786_0               conda-forge/linux-64     Cached
+  + libstdcxx-ng                         13.2.0  h7e041cc_2               conda-forge/linux-64     Cached
+  + libthrift                            0.19.0  hb90f79a_1               conda-forge/linux-64     Cached
+  + libtiff                               4.6.0  h8b53f26_0               conda-forge/linux-64     Cached
+  + libtool                               2.4.7  h27087fc_0               conda-forge/linux-64     Cached
+  + libutf8proc                           2.8.0  h166bdaf_0               conda-forge/linux-64     Cached
+  + libuuid                              2.38.1  h0b41bf4_0               conda-forge/linux-64     Cached
+  + libwebp                               1.3.2  hdffd6e0_0               conda-forge/linux-64     Cached
+  + libwebp-base                          1.3.2  hd590300_0               conda-forge/linux-64     Cached
+  + libxcb                                 1.15  h0b41bf4_0               conda-forge/linux-64     Cached
+  + libxml2                              2.11.5  h232c23b_1               conda-forge/linux-64     Cached
+  + libzlib                              1.2.13  hd590300_5               conda-forge/linux-64     Cached
+  + locket                                1.0.0  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + lz4                                   4.3.2  py310h350c4a5_1          conda-forge/linux-64       37kB
+  + lz4-c                                 1.9.4  hcb278e6_0               conda-forge/linux-64     Cached
+  + lzo                                    2.10  h516909a_1000            conda-forge/linux-64     Cached
+  + markupsafe                            2.1.3  py310h2372a71_1          conda-forge/linux-64       24kB
+  + matplotlib-base                       3.6.2  py310h8d5ebf3_0          conda-forge/linux-64        8MB
+  + matplotlib-inline                     0.1.6  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + msgpack-python                        1.0.6  py310hd41b1e2_0          conda-forge/linux-64      197kB
+  + multiprocess                        0.70.15  py310h2372a71_1          conda-forge/linux-64      243kB
+  + munkres                               1.1.4  pyh9f0ad1d_0             conda-forge/noarch       Cached
+  + ncurses                                 6.4  hcb278e6_0               conda-forge/linux-64     Cached
+  + nest-asyncio                          1.5.6  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + networkx                                3.1  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + nomkl                                   1.0  h5ca1d4c_0               conda-forge/noarch       Cached
+  + numexpr                               2.8.7  py310hcc13569_100        conda-forge/linux-64      133kB
+  + numpy                                1.26.0  py310hb13e2d6_0          conda-forge/linux-64        7MB
+  + openjpeg                              2.5.0  h488ebb8_3               conda-forge/linux-64     Cached
+  + openssl                               3.1.3  hd590300_0               conda-forge/linux-64     Cached
+  + orc                                   1.9.0  h52d3b3c_2               conda-forge/linux-64     Cached
+  + packaging                              23.1  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + pairix                                0.3.7  py310h83093d7_5          bioconda/linux-64        Cached
+  + pandas                                2.1.1  py310hcc13569_1          conda-forge/linux-64       12MB
+  + pango                               1.50.14  ha41ecd1_2               conda-forge/linux-64     Cached
+  + parso                                 0.8.3  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + partd                                 1.4.1  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + pcre2                                 10.40  hc3806b6_0               conda-forge/linux-64     Cached
+  + pexpect                               4.8.0  pyh1a96a4e_2             conda-forge/noarch       Cached
+  + pickleshare                           0.7.5  py_1003                  conda-forge/noarch       Cached
+  + pillow                               10.0.1  py310h29da1c1_1          conda-forge/linux-64       46MB
+  + pip                                  23.2.1  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + pixman                               0.42.2  h59595ed_0               conda-forge/linux-64     Cached
+  + platformdirs                         3.10.0  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + prompt-toolkit                       3.0.39  pyha770c72_0             conda-forge/noarch       Cached
+  + prompt_toolkit                       3.0.39  hd8ed1ab_0               conda-forge/noarch       Cached
+  + psutil                                5.9.5  py310h2372a71_1          conda-forge/linux-64      361kB
+  + pthread-stubs                           0.4  h36c2ea0_1001            conda-forge/linux-64     Cached
+  + ptyprocess                            0.7.0  pyhd3deb0d_0             conda-forge/noarch       Cached
+  + pure_eval                             0.2.2  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + py-cpuinfo                            9.0.0  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + py4j                               0.10.9.7  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + pyarrow                              13.0.0  py310hf9e7431_5_cpu      conda-forge/linux-64        4MB
+  + pybedtools                            0.9.1  py310h2b6aa90_0          bioconda/linux-64          13MB
+  + pybigwig                             0.3.22  py310h79000e5_1          bioconda/linux-64          91kB
+  + pybind11                             2.11.1  py310hd41b1e2_2          conda-forge/linux-64      184kB
+  + pybind11-global                      2.11.1  py310hd41b1e2_2          conda-forge/linux-64      172kB
+  + pyfaidx                             0.7.2.2  pyhdfd78af_0             bioconda/noarch          Cached
+  + pygenometracks                          3.8  pyhdfd78af_0             bioconda/noarch          Cached
+  + pygments                             2.16.1  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + pyparsing                             3.1.1  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + pysam                                0.21.0  py310h41dec4a_1          bioconda/linux-64        Cached
+  + pysocks                               1.7.1  pyha2e5f31_6             conda-forge/noarch       Cached
+  + pytables                              3.8.0  py310h374b01c_3          conda-forge/linux-64        2MB
+  + python                              3.10.12  hd12c33a_0_cpython       conda-forge/linux-64     Cached
+  + python-dateutil                       2.8.2  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + python-graphviz                      0.20.1  pyh22cad53_0             conda-forge/noarch       Cached
+  + python-tzdata                        2023.3  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + python_abi                             3.10  4_cp310                  conda-forge/linux-64        6kB
+  + pytz                           2023.3.post1  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + pyvcf3                                1.0.3  pyhdfd78af_0             bioconda/noarch          Cached
+  + pyyaml                                6.0.1  py310h2372a71_1          conda-forge/linux-64      171kB
+  + pyzmq                                25.1.1  py310h5bbb5d0_1          conda-forge/linux-64      457kB
+  + rdma-core                              28.9  h59595ed_1               conda-forge/linux-64     Cached
+  + re2                              2023.03.02  h8c504da_0               conda-forge/linux-64     Cached
+  + readline                                8.2  h8228510_1               conda-forge/linux-64     Cached
+  + s2n                                  1.3.51  h06160fa_0               conda-forge/linux-64     Cached
+  + scikit-learn                          1.3.1  py310h1fdf081_0          conda-forge/linux-64        8MB
+  + scipy                                1.11.3  py310hb13e2d6_0          conda-forge/linux-64       16MB
+  + setuptools                           68.2.2  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + simplejson                           3.19.1  py310h2372a71_1          conda-forge/linux-64      109kB
+  + six                                  1.16.0  pyh6c4a22f_0             conda-forge/noarch       Cached
+  + snappy                               1.1.10  h9fff704_0               conda-forge/linux-64     Cached
+  + sortedcontainers                      2.4.0  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + stack_data                            0.6.2  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + tblib                                 2.0.0  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + termcolor                             2.3.0  pyhd8ed1ab_0             conda-forge/noarch         12kB
+  + threadpoolctl                         3.2.0  pyha21a80b_0             conda-forge/noarch       Cached
+  + tk                                   8.6.13  h2797004_0               conda-forge/linux-64     Cached
+  + toolz                                0.12.0  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + tornado                               6.3.3  py310h2372a71_1          conda-forge/linux-64      642kB
+  + tqdm                                 4.66.1  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + traitlets                            5.10.1  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + typing-extensions                     4.8.0  hd8ed1ab_0               conda-forge/noarch       Cached
+  + typing_extensions                     4.8.0  pyha770c72_0             conda-forge/noarch       Cached
+  + tzdata                                2023c  h71feb2d_0               conda-forge/noarch       Cached
+  + ucx                                  1.14.1  h64cca9d_5               conda-forge/linux-64     Cached
+  + unicodedata2                         15.1.0  py310h2372a71_0          conda-forge/linux-64      374kB
+  + unidecode                             1.3.7  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + urllib3                               2.0.5  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + wcwidth                               0.2.7  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + wheel                                0.41.2  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + xorg-kbproto                          1.0.7  h7f98852_1002            conda-forge/linux-64     Cached
+  + xorg-libice                           1.1.1  hd590300_0               conda-forge/linux-64     Cached
+  + xorg-libsm                            1.2.4  h7391055_0               conda-forge/linux-64     Cached
+  + xorg-libx11                           1.8.6  h8ee46fc_0               conda-forge/linux-64     Cached
+  + xorg-libxau                          1.0.11  hd590300_0               conda-forge/linux-64     Cached
+  + xorg-libxdmcp                         1.1.3  h7f98852_0               conda-forge/linux-64     Cached
+  + xorg-libxext                          1.3.4  h0b41bf4_2               conda-forge/linux-64     Cached
+  + xorg-libxrender                      0.9.11  hd590300_0               conda-forge/linux-64     Cached
+  + xorg-renderproto                     0.11.1  h7f98852_1002            conda-forge/linux-64     Cached
+  + xorg-xextproto                        7.3.0  h0b41bf4_1003            conda-forge/linux-64     Cached
+  + xorg-xproto                          7.0.31  h7f98852_1007            conda-forge/linux-64     Cached
+  + xyzservices                        2023.7.0  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + xz                                    5.2.6  h166bdaf_0               conda-forge/linux-64     Cached
+  + yaml                                  0.2.5  h7f98852_2               conda-forge/linux-64     Cached
+  + zeromq                                4.3.4  h9c3ff4c_1               conda-forge/linux-64     Cached
+  + zict                                  3.0.0  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + zipp                                 3.17.0  pyhd8ed1ab_0             conda-forge/noarch       Cached
+  + zlib                                 1.2.13  hd590300_5               conda-forge/linux-64     Cached
+  + zlib-ng                               2.0.7  h0b41bf4_0               conda-forge/linux-64     Cached
+  + zstd                                  1.5.5  hfc55251_0               conda-forge/linux-64     Cached
+
+  Summary:
+
+  Install: 266 packages
+
+  Total download: 138MB
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+Confirm changes: [Y/n] Y
+termcolor                                           11.8kB @ 143.3kB/s  0.1s
+python_abi                                           6.4kB @  55.6kB/s  0.1s
+exceptiongroup                                      19.3kB @ 166.3kB/s  0.1s
+msgpack-python                                     197.1kB @   1.7MB/s  0.0s
+psutil                                             361.3kB @   1.3MB/s  0.2s
+ipython                                            589.9kB @   2.1MB/s  0.3s
+pybind11-global                                    171.8kB @ 602.7kB/s  0.2s
+unicodedata2                                       374.1kB @   1.3MB/s  0.3s
+pyzmq                                              456.6kB @   1.6MB/s  0.2s
+jupyter_core                                        78.6kB @ 172.7kB/s  0.4s
+numexpr                                            133.2kB @ 207.5kB/s  0.4s
+contourpy                                          223.8kB @ 347.9kB/s  0.4s
+bx-python                                            1.2MB @   1.8MB/s  0.4s
+dask-core                                          858.1kB @   1.1MB/s  0.4s
+imbalanced-learn                                   141.1kB @ 163.0kB/s  0.4s
+cleanlab                                           186.5kB @ 196.1kB/s  0.4s
+matplotlib-base                                      7.9MB @   7.5MB/s  0.8s
+tornado                                            641.6kB @ 467.5kB/s  0.3s
+pyyaml                                             170.6kB @ 123.8kB/s  0.3s
+bokeh                                                5.3MB @   3.9MB/s  0.7s
+debugpy                                              2.4MB @   1.7MB/s  0.4s
+h5py                                                 1.2MB @ 821.2kB/s  0.1s
+pyarrow                                              4.0MB @   2.3MB/s  0.7s
+krbalancing                                        119.8kB @  60.8kB/s  0.7s
+multiprocess                                       243.0kB @ 100.5kB/s  0.3s
+pybedtools                                          12.7MB @   4.7MB/s  1.3s
+scipy                                               15.6MB @   5.7MB/s  1.4s
+pytables                                             2.0MB @ 717.7kB/s  0.3s
+distributed                                        783.6kB @ 284.3kB/s  0.1s
+numpy                                                6.9MB @   2.5MB/s  1.0s
+markupsafe                                          24.1kB @   6.9kB/s  0.7s
+brotli-python                                      349.4kB @ 100.3kB/s  0.7s
+cytoolz                                            368.1kB @ 105.5kB/s  0.7s
+hicexplorer                                          1.9MB @ 539.0kB/s  0.8s
+lz4                                                 37.1kB @   9.7kB/s  0.4s
+kiwisolver                                          73.1kB @  17.0kB/s  1.0s
+fonttools                                            2.2MB @ 517.3kB/s  1.0s
+pybind11                                           183.7kB @  40.9kB/s  0.7s
+simplejson                                         109.0kB @  24.2kB/s  0.2s
+pybigwig                                            90.7kB @  17.5kB/s  0.9s
+dask                                                 7.5kB @   1.4kB/s  0.9s
+pandas                                              12.4MB @   2.1MB/s  2.1s
+scikit-learn                                         8.4MB @   1.4MB/s  1.4s
+pillow                                              46.4MB @   7.5MB/s  4.9s
+
+Downloading and Extracting Packages
+
+Preparing transaction: done
+Verifying transaction: done
+```
+</details>
+<br />
+<br />
+
+## Learn to use `hicexplorer`, draw some preliminary plots
+### Code
+<details>
+<summary><i>Code: Learn to use `hicexplorer`, draw some preliminary plots</i></summary>
+
+```bash
+#!/bin/bash
+
+#  See below for useful pertinent help messages
+check_help_messages=FALSE
+[[ ${check_help_messages} == TRUE ]] &&
+    {
+        hicCompareMatrices --help
+        hicPlotMatrix --help
+        hicPlotViewpoint --help
+    }
+
+
+[[ ${CONDA_DEFAULT_ENV} != base ]] && conda deactivate || true
+source activate hicexplorer_env
+
+[[ "$(pwd)" != "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process" ]] &&
+    cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process" ||
+    true
+
+[[ ! -d mats ]] && mkdir mats || true
+[[ ! -d mats/2023-1001_init ]] && mkdir mats/2023-1001_init || true
+
+[[ ! -d pngs ]] && mkdir pngs || true
+[[ ! -d pngs/2023-1001_init ]] && mkdir pngs/2023-1001_init || true
+
+res=6400
+
+f_Q=08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool
+f_1=08_zoom/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mcool
+f_2=08_zoom/MC-2020_nz_WT_repM.standard-rDNA-complete.mcool
+d_out=mats/2023-1001_init
+m_Q2="log2_Q-over-G2_${res}"
+
+check_command=TRUE
+[[ ${check_command} == TRUE ]] &&
+    {
+        echo """
+        hicCompareMatrices \\
+            --operation log2ratio \\
+            --matrices \\
+                ${f_Q}::/resolutions/${res} \\
+                ${f_2}::/resolutions/${res} \\
+            --outFileName ${d_out}/${m_Q2}.h5
+
+        hicCompareMatrices \\
+            --operation log2ratio \\
+            --matrices \\
+                ${f_Q}::/resolutions/${res} \\
+                ${f_2}::/resolutions/${res} \\
+            --noNorm \\
+            --outFileName ${d_out}/${m_Q2}.no-norm.h5
+        """
+    } || true
+
+run_command=TRUE
+[[ ${run_command} == TRUE ]] &&
+    {
+        hicCompareMatrices \
+            --operation log2ratio \
+            --matrices \
+                ${f_Q}::/resolutions/${res} \
+                ${f_2}::/resolutions/${res} \
+            --outFileName ${d_out}/${m_Q2}.h5
+
+        hicCompareMatrices \
+            --operation log2ratio \
+            --matrices \
+                ${f_Q}::/resolutions/${res} \
+                ${f_2}::/resolutions/${res} \
+            --noNorm \
+            --outFileName ${d_out}/${m_Q2}.no-norm.h5
+    }
+
+ls -lhaFG ${d_out}/
+
+ in=mats/2023-1001_init/${m_Q2}.h5  # ., "${in}"
+out=pngs/2023-1001_init/${m_Q2}.png
+
+check_command=TRUE
+[[ ${check_command} == TRUE ]] &&
+    {
+        echo """
+        hicPlotMatrix \\
+            --matrix ${in} \\
+            --outFileName ${out} \\
+            --chromosomeOrder
+        """
+    } || true
+
+# usage: hicPlotMatrix --matrix MATRIX --outFileName OUTFILENAME [--title TITLE] [--scoreName SCORENAME] [--perChromosome] [--clearMaskedBins]
+#                      [--chromosomeOrder CHROMOSOMEORDER [CHROMOSOMEORDER ...]] [--region REGION] [--region2 REGION2] [--log1p] [--log] [--colorMap COLORMAP] [--vMin VMIN]
+#                      [--vMax VMAX] [--dpi DPI] [--bigwig BIGWIG [BIGWIG ...]] [--bigwigAdditionalVerticalAxis] [--vMinBigwig VMINBIGWIG] [--vMaxBigwig VMAXBIGWIG]
+#                      [--flipBigwigSign] [--scaleFactorBigwig SCALEFACTORBIGWIG] [--fontsize FONTSIZE] [--rotationX ROTATIONX] [--rotationY ROTATIONY]
+#                      [--increaseFigureWidth INCREASEFIGUREWIDTH] [--increaseFigureHeight INCREASEFIGUREHEIGHT] [--loops LOOPS] [--help] [--version]
+
+# Creates a heatmap of a Hi-C matrix.
+
+# Required arguments:
+#   --matrix MATRIX, -m MATRIX
+#                         Path of the Hi-C matrix to plot.
+#   --outFileName OUTFILENAME, -out OUTFILENAME
+#                         File name to save the image.
+
+# Optional arguments:
+#   --title TITLE, -t TITLE
+#                         Plot title.
+#   --scoreName SCORENAME, -s SCORENAME
+#                         Score name label for the heatmap legend.
+#   --perChromosome       Instead of plotting the whole matrix, each chromosome is plotted next to the other. This parameter is not compatible with --region.
+#   --clearMaskedBins     If set, masked bins are removed from the matrix and the nearest bins are extended to cover the empty space instead of plotting black lines.
+#   --chromosomeOrder CHROMOSOMEORDER [CHROMOSOMEORDER ...]
+#                         Chromosomes and order in which the chromosomes should be plotted. This option overrides --region and --region2.
+#   --region REGION       Plot only this region. The format is chr:start-end The plotted region contains the main diagonal and is symmetric unless --region2 is given.
+#   --region2 REGION2     If given, then only the region defined by --region and --region2 is given. The format is the same as --region1.
+#   --log1p               Plot the log1p of the matrix values.
+#   --log                 Plot the *MINUS* log of the matrix values.
+#   --colorMap COLORMAP   Color map to use for the heatmap. Available values can be seen here: http://matplotlib.org/examples/color/colormaps_reference.html (Default: RdYlBu_r).
+#   --vMin VMIN           Minimum score value.
+#   --vMax VMAX           Maximum score value.
+#   --dpi DPI             Resolution for the image in case theoutput is a raster graphics image (e.g png, jpg) (Default: 72).
+#   --bigwig BIGWIG [BIGWIG ...]
+#                         Bigwig file to plot below the matrix. This can for example be used to visualize A/B compartments or ChIP-seq data.
+#   --bigwigAdditionalVerticalAxis
+#                         Add an additional axis to determine the values of a bigwig file in 2D better.
+#   --vMinBigwig VMINBIGWIG
+#                         Minimum score value for bigwig.
+#   --vMaxBigwig VMAXBIGWIG
+#                         Maximum score value for bigwig
+#   --flipBigwigSign      The sign of the bigwig values are flipped. Useful if hicPCA gives inverted values.
+#   --scaleFactorBigwig SCALEFACTORBIGWIG
+#                         Scale the values of a bigwig file by the given factor (Default: 1.0).
+#   --fontsize FONTSIZE   Fontsize in the plot for x and y axis (Default: 10).
+#   --rotationX ROTATIONX
+#                         Rotation in degrees for the labels of x axis (Default: 0).
+#   --rotationY ROTATIONY
+#                         Rotation in degrees for the labels of y axis (Default: 0).
+#   --increaseFigureWidth INCREASEFIGUREWIDTH
+#                         Plotting additional bigwig tracks can cause compression in x or y direction of the heatmap. Set this factor to a value unequal to 0 to correct this
+#                         (Default: 0.5).
+#   --increaseFigureHeight INCREASEFIGUREHEIGHT
+#                         Plotting additional bigwig tracks can cause compression in x or y direction of the heatmap. Set this factor to a value unequal to 0 to correct this
+#                         (Default: 0.5).
+#   --loops LOOPS         Bedgraph file to plot detected long range contacts from hicDetectLoops.
+#   --help, -h            show this help message and exit
+#   --version             show program's version number and exit
+```
+</details>
+<br />
+
+### Printed
+<details>
+<summary><i>Printed: </i></summary>
+
+```txt
+...
+
+
+❯ [[ ${check_command} == TRUE ]] &&
+>     {
+>         echo """
+>         hicCompareMatrices \\
+>             --operation log2ratio \\
+>             --matrices \\
+>                 ${f_Q}::/resolutions/${res} \\
+>                 ${f_2}::/resolutions/${res} \\
+>             --outFileName ${d_out}/${m_Q2}.h5
+>         """
+>     } || true
+
+        hicCompareMatrices \
+            --operation log2ratio \
+            --matrices \
+                08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool::/resolutions/6400 \
+                08_zoom/MC-2020_nz_WT_repM.standard-rDNA-complete.mcool::/resolutions/6400 \
+            --outFileName mats/2023-1001_init/log2_Q-over-G2_6400.h5
+```
+</details>
+<br />
+
+### Help
+<details>
+<summary><i>Help: Learn to use `fanc compare`, draw some preliminary plots</i></summary>
+
+```txt
+❯ hicCompareMatrices --help
+usage: hicCompareMatrices --matrices matrix.h5 matrix.h5 --outFileName OUTFILENAME [--operation {diff,ratio,log2ratio}] [--help] [--version]
+
+Takes two matrices as input, normalizes them and applies the given operation. To normalize the matrices each element is divided by the sum of the matrix.
+
+Required arguments:
+  --matrices matrix.h5 matrix.h5, -m matrix.h5 matrix.h5
+                        Name of the matrices in .h5 format to use, separated by a space. (default: None)
+  --outFileName OUTFILENAME, -o OUTFILENAME
+                        File name to save the resulting matrix. The output is also a .h5 file. (default: None)
+
+Optional arguments:
+  --operation {diff,ratio,log2ratio}
+                        Operation to apply to the matrices (Default: log2ratio).
+  --help, -h            show this help message and exit
+  --version             show program's version number and exit
+```
+
+```txt
+❯ hicPlotMatrix --help
+usage: hicPlotMatrix --matrix MATRIX --outFileName OUTFILENAME [--title TITLE] [--scoreName SCORENAME] [--perChromosome] [--clearMaskedBins]
+                     [--chromosomeOrder CHROMOSOMEORDER [CHROMOSOMEORDER ...]] [--region REGION] [--region2 REGION2] [--log1p] [--log] [--colorMap COLORMAP] [--vMin VMIN]
+                     [--vMax VMAX] [--dpi DPI] [--bigwig BIGWIG [BIGWIG ...]] [--bigwigAdditionalVerticalAxis] [--vMinBigwig VMINBIGWIG] [--vMaxBigwig VMAXBIGWIG]
+                     [--flipBigwigSign] [--scaleFactorBigwig SCALEFACTORBIGWIG] [--fontsize FONTSIZE] [--rotationX ROTATIONX] [--rotationY ROTATIONY]
+                     [--increaseFigureWidth INCREASEFIGUREWIDTH] [--increaseFigureHeight INCREASEFIGUREHEIGHT] [--loops LOOPS] [--help] [--version]
+
+Creates a heatmap of a Hi-C matrix.
+
+Required arguments:
+  --matrix MATRIX, -m MATRIX
+                        Path of the Hi-C matrix to plot.
+  --outFileName OUTFILENAME, -out OUTFILENAME
+                        File name to save the image.
+
+Optional arguments:
+  --title TITLE, -t TITLE
+                        Plot title.
+  --scoreName SCORENAME, -s SCORENAME
+                        Score name label for the heatmap legend.
+  --perChromosome       Instead of plotting the whole matrix, each chromosome is plotted next to the other. This parameter is not compatible with --region.
+  --clearMaskedBins     If set, masked bins are removed from the matrix and the nearest bins are extended to cover the empty space instead of plotting black lines.
+  --chromosomeOrder CHROMOSOMEORDER [CHROMOSOMEORDER ...]
+                        Chromosomes and order in which the chromosomes should be plotted. This option overrides --region and --region2.
+  --region REGION       Plot only this region. The format is chr:start-end The plotted region contains the main diagonal and is symmetric unless --region2 is given.
+  --region2 REGION2     If given, then only the region defined by --region and --region2 is given. The format is the same as --region1.
+  --log1p               Plot the log1p of the matrix values.
+  --log                 Plot the *MINUS* log of the matrix values.
+  --colorMap COLORMAP   Color map to use for the heatmap. Available values can be seen here: http://matplotlib.org/examples/color/colormaps_reference.html (Default: RdYlBu_r).
+  --vMin VMIN           Minimum score value.
+  --vMax VMAX           Maximum score value.
+  --dpi DPI             Resolution for the image in case theoutput is a raster graphics image (e.g png, jpg) (Default: 72).
+  --bigwig BIGWIG [BIGWIG ...]
+                        Bigwig file to plot below the matrix. This can for example be used to visualize A/B compartments or ChIP-seq data.
+  --bigwigAdditionalVerticalAxis
+                        Add an additional axis to determine the values of a bigwig file in 2D better.
+  --vMinBigwig VMINBIGWIG
+                        Minimum score value for bigwig.
+  --vMaxBigwig VMAXBIGWIG
+                        Maximum score value for bigwig
+  --flipBigwigSign      The sign of the bigwig values are flipped. Useful if hicPCA gives inverted values.
+  --scaleFactorBigwig SCALEFACTORBIGWIG
+                        Scale the values of a bigwig file by the given factor (Default: 1.0).
+  --fontsize FONTSIZE   Fontsize in the plot for x and y axis (Default: 10).
+  --rotationX ROTATIONX
+                        Rotation in degrees for the labels of x axis (Default: 0).
+  --rotationY ROTATIONY
+                        Rotation in degrees for the labels of y axis (Default: 0).
+  --increaseFigureWidth INCREASEFIGUREWIDTH
+                        Plotting additional bigwig tracks can cause compression in x or y direction of the heatmap. Set this factor to a value unequal to 0 to correct this
+                        (Default: 0.5).
+  --increaseFigureHeight INCREASEFIGUREHEIGHT
+                        Plotting additional bigwig tracks can cause compression in x or y direction of the heatmap. Set this factor to a value unequal to 0 to correct this
+                        (Default: 0.5).
+  --loops LOOPS         Bedgraph file to plot detected long range contacts from hicDetectLoops.
+  --help, -h            show this help message and exit
+  --version             show program's version number and exit
+```
+
+```txt
+
+```
 </details>
 <br />
