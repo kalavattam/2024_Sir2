@@ -1023,10 +1023,9 @@ if [[ "${install_env}" == TRUE ]]; then
     
     source activate ${env_name}
     mamba install -c bioconda rename
+    
+    # conda remove -n hicexplorer_env --all
 fi
-
-conda remove -n hicexplorer_env --all
-
 ```
 </details>
 <br />
@@ -1415,6 +1414,93 @@ Downloading and Extracting Packages
 
 Preparing transaction: done
 Verifying transaction: done
+Executing transaction: done
+
+To activate this environment, use
+
+     $ mamba activate hicexplorer_env
+
+To deactivate an active environment, use
+
+     $ mamba deactivate
+
+
+❯ mamba install -c bioconda rename
+
+                  __    __    __    __
+                 /  \  /  \  /  \  /  \
+                /    \/    \/    \/    \
+███████████████/  /██/  /██/  /██/  /████████████████████████
+              /  / \   / \   / \   / \  \____
+             /  /   \_/   \_/   \_/   \    o \__,
+            / _/                       \_____/  `
+            |/
+        ███╗   ███╗ █████╗ ███╗   ███╗██████╗  █████╗
+        ████╗ ████║██╔══██╗████╗ ████║██╔══██╗██╔══██╗
+        ██╔████╔██║███████║██╔████╔██║██████╔╝███████║
+        ██║╚██╔╝██║██╔══██║██║╚██╔╝██║██╔══██╗██╔══██║
+        ██║ ╚═╝ ██║██║  ██║██║ ╚═╝ ██║██████╔╝██║  ██║
+        ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝
+
+        mamba (1.3.1) supported by @QuantStack
+
+        GitHub:  https://github.com/mamba-org/mamba
+        Twitter: https://twitter.com/QuantStack
+
+█████████████████████████████████████████████████████████████
+
+
+Looking for: ['rename']
+
+bioconda/linux-64                                           Using cache
+bioconda/noarch                                             Using cache
+conda-forge/linux-64                                        Using cache
+conda-forge/noarch                                          Using cache
+pkgs/main/linux-64                                            No change
+pkgs/main/noarch                                              No change
+pkgs/r/linux-64                                               No change
+pkgs/r/noarch                                                 No change
+
+Pinned packages:
+  - python 3.10.*
+
+
+Transaction
+
+  Prefix: /home/kalavatt/miniconda3/envs/hicexplorer_env
+
+  Updating specs:
+
+   - rename
+   - ca-certificates
+   - certifi
+   - openssl
+
+
+  Package   Version  Build             Channel                    Size
+────────────────────────────────────────────────────────────────────────
+  Install:
+────────────────────────────────────────────────────────────────────────
+
+  + perl     5.32.1  4_hd590300_perl5  conda-forge/linux-64     Cached
+  + rename    1.601  hdfd78af_1        bioconda/noarch          Cached
+
+  Summary:
+
+  Install: 2 packages
+
+  Total download: 0 B
+
+────────────────────────────────────────────────────────────────────────
+
+
+Confirm changes: [Y/n] Y
+
+Downloading and Extracting Packages
+
+Preparing transaction: done
+Verifying transaction: done
+Executing transaction: done
 ```
 </details>
 <br />
