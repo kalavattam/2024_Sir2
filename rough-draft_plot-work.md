@@ -1,6 +1,51 @@
 
+`#rough-draft_plot-work.md`
+<br />
+<br />
+
+<details>
+<summary><b><font size="+2"><i>Table of contents</i></font></b></summary>
+<!-- MarkdownTOC -->
+
+1. [Review what files we have with what resolutions](#review-what-files-we-have-with-what-resolutions)
+  1. [On the files as described in `work_download-data.md`](#on-the-files-as-described-in-work_download-datamd)
+    1. [Notes](#notes)
+  1. [On the files in `2023-0307_work_Micro-C_align-process`](#on-the-files-in-2023-0307_work_micro-c_align-process)
+    1. [Code](#code)
+    1. [Printed](#printed)
+    1. [Notes](#notes-1)
+  1. [What are the resolutions associated with the files in `2023-0307_work_Micro-C_align-process/08_zoom`?](#what-are-the-resolutions-associated-with-the-files-in-2023-0307_work_micro-c_align-process08_zoom)
+    1. [Code](#code-1)
+    1. [Printed](#printed-1)
+1. [Set up virtual environment for analyses with `FAN-C`](#set-up-virtual-environment-for-analyses-with-fan-c)
+  1. [Code](#code-2)
+  1. [Printed](#printed-2)
+1. [Learn to use `fanc compare`, draw some preliminary plots](#learn-to-use-fanc-compare-draw-some-preliminary-plots)
+  1. [Code](#code-3)
+  1. [Printed](#printed-3)
+  1. [Help](#help)
+1. [Set up virtual environment for analyses with `HiCExplorer`](#set-up-virtual-environment-for-analyses-with-hicexplorer)
+  1. [Code](#code-4)
+  1. [Printed](#printed-4)
+1. [Learn to use `hicexplorer`, draw some preliminary plots](#learn-to-use-hicexplorer-draw-some-preliminary-plots)
+  1. [Take the log2 ratio of Q over G2](#take-the-log2-ratio-of-q-over-g2)
+    1. [Code](#code-5)
+  1. [Take the log2 ratio of Q over G1](#take-the-log2-ratio-of-q-over-g1)
+    1. [Code](#code-6)
+  1. [Take the log2 ratio of G2 over G1](#take-the-log2-ratio-of-g2-over-g1)
+    1. [Code](#code-7)
+  1. [Help](#help-1)
+
+<!-- /MarkdownTOC -->
+</details>
+<br />
+<br />
+
+<a id="review-what-files-we-have-with-what-resolutions"></a>
 ## Review what files we have with what resolutions
+<a id="on-the-files-as-described-in-work_download-datamd"></a>
 ### On the files as described in `work_download-data.md`
+<a id="notes"></a>
 #### Notes
 <details>
 <summary><i>Notes: On the files as described in `work_download-data.md`</i></summary>
@@ -65,7 +110,9 @@ SRR11893114="MC_23C-a120_WT_rep0"
 </details>
 <br />
 
+<a id="on-the-files-in-2023-0307_work_micro-c_align-process"></a>
 ### On the files in `2023-0307_work_Micro-C_align-process`
+<a id="code"></a>
 #### Code
 <details>
 <summary><i>Code: On the files in `2023-0307_work_Micro-C_align-process`</i></summary>
@@ -82,6 +129,7 @@ ls -lhaFG 08_zoom/
 </details>
 <br />
 
+<a id="printed"></a>
 #### Printed
 <details>
 <summary><i>Printed: On the files in `2023-0307_work_Micro-C_align-process`</i></summary>
@@ -108,6 +156,7 @@ drwxrws---  2 kalavatt 1.2K Aug  6 17:20 err_out/
 </details>
 <br />
 
+<a id="notes-1"></a>
 #### Notes
 <details>
 <summary><i>Notes: On the files in `2023-0307_work_Micro-C_align-process`</i></summary>
@@ -120,7 +169,9 @@ We currently don't have Sarah's unmerged biological replicates for the Q data, a
 </details>
 <br />
 
+<a id="what-are-the-resolutions-associated-with-the-files-in-2023-0307_work_micro-c_align-process08_zoom"></a>
 ### What are the resolutions associated with the files in `2023-0307_work_Micro-C_align-process/08_zoom`?
+<a id="code-1"></a>
 #### Code
 <details>
 <summary><i>Code: What are the resolutions associated with the files in `2023-0307_work_Micro-C_align-process/08_zoom`?</i></summary>
@@ -143,6 +194,7 @@ cooler info ${f_cool}::/resolutions/6400
 </details>
 <br />
 
+<a id="printed-1"></a>
 #### Printed
 <details>
 <summary><i>Printed: What are the resolutions associated with the files in `2023-0307_work_Micro-C_align-process/08_zoom`?</i></summary>
@@ -193,7 +245,9 @@ cooler info ${f_cool}::/resolutions/6400
 <br />
 <br />
 
+<a id="set-up-virtual-environment-for-analyses-with-fan-c"></a>
 ## Set up virtual environment for analyses with `FAN-C`
+<a id="code-2"></a>
 ### Code
 <details>
 <summary><i>Code: Set up virtual environment for analyses with `FAN-C`</i></summary>
@@ -226,6 +280,7 @@ fi
 </details>
 <br />
 
+<a id="printed-2"></a>
 ### Printed
 <details>
 <summary><i>Printed: Set up virtual environment for analyses with `FAN-C`</i></summary>
@@ -742,7 +797,9 @@ Successfully installed Deprecated-1.2.14 PyWavelets-1.4.1 PyYAML-6.0.1 asciitree
 <br />
 <br />
 
+<a id="learn-to-use-fanc-compare-draw-some-preliminary-plots"></a>
 ## Learn to use `fanc compare`, draw some preliminary plots
+<a id="code-3"></a>
 ### Code
 <details>
 <summary><i>Code: Learn to use `fanc compare`, draw some preliminary plots</i></summary>
@@ -818,32 +875,26 @@ check_command=TRUE
         """
     } || true
 
-
-    -vvv \
-
-fancplot \
-    -o "test.pdf" \
-    XII:100000-200000 \
-    -p square \
-    -vmin 0 -vmax 0.1 \
-    --title "6400 bp, XII:100000-200000" \
-    -c Reds \
-    08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool@6400
-
-    "${f_Q}@${res}"
-
+#  Awaiting a response from author of FAN-C before continuing work
 run_command=TRUE
 [[ ${run_command} == TRUE ]] &&
     {
+        fancplot \
+            -o "test.pdf" \
+            XII:100000-200000 \
+            -p square \
+            -vmin 0 -vmax 0.1 \
+            --title "6400 bp, XII:100000-200000" \
+            -c Reds \
+            "${f_Q}@${res}"
+            # 08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool@6400
 
     } || true
-
-ls mats/2023-0929_init
-ls pngs/2023-0929_init
 ```
 </details>
 <br />
 
+<a id="printed-3"></a>
 ### Printed
 <details>
 <summary><i>Printed: Learn to use `fanc compare`, draw some preliminary plots</i></summary>
@@ -964,6 +1015,7 @@ drwxrws--- 3 kalavatt  32 Sep 29 12:00 ../
 </details>
 <br />
 
+<a id="help"></a>
 ### Help
 <details>
 <summary><i>Help: </i></summary>
@@ -1004,7 +1056,9 @@ More details [here](https://fan-c.readthedocs.io/en/latest/fanc-executable/fanc-
 <br />
 <br />
 
+<a id="set-up-virtual-environment-for-analyses-with-hicexplorer"></a>
 ## Set up virtual environment for analyses with `HiCExplorer`
+<a id="code-4"></a>
 ### Code
 <details>
 <summary><i>Code: Set up virtual environment for analyses with `HiCExplorer`</i></summary>
@@ -1030,6 +1084,7 @@ fi
 </details>
 <br />
 
+<a id="printed-4"></a>
 ### Printed
 <details>
 <summary><i>Printed: Set up virtual environment for analyses with `HiCExplorer`</i></summary>
@@ -1506,16 +1561,20 @@ Executing transaction: done
 <br />
 <br />
 
+<a id="learn-to-use-hicexplorer-draw-some-preliminary-plots"></a>
 ## Learn to use `hicexplorer`, draw some preliminary plots
-### Code
+<a id="take-the-log2-ratio-of-q-over-g2"></a>
+### Take the log2 ratio of Q over G2
+<a id="code-5"></a>
+#### Code
 <details>
-<summary><i>Code: Learn to use `hicexplorer`, draw some preliminary plots</i></summary>
+<summary><i>Code: Take the log2 ratio of Q over G2</i></summary>
 
 ```bash
 #!/bin/bash
 
 #  See below for useful pertinent help messages
-check_help_messages=FALSE
+check_help_messages=TRUE
 [[ ${check_help_messages} == TRUE ]] &&
     {
         hicCompareMatrices --help
@@ -1537,13 +1596,27 @@ source activate hicexplorer_env
 [[ ! -d pngs ]] && mkdir pngs || true
 [[ ! -d pngs/2023-1001_init ]] && mkdir pngs/2023-1001_init || true
 
-res=6400
+  f_Q="08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool"
+  f_1="08_zoom/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mcool"
+  f_2="08_zoom/MC-2020_nz_WT_repM.standard-rDNA-complete.mcool"
+d_out="mats/2023-1001_init"
+ m_Q2="log2_Q-over-G2_${res}"
+  res=50
+  ext="cool"
 
-f_Q=08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool
-f_1=08_zoom/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mcool
-f_2=08_zoom/MC-2020_nz_WT_repM.standard-rDNA-complete.mcool
-d_out=mats/2023-1001_init
-m_Q2="log2_Q-over-G2_${res}"
+check_variables=TRUE
+[[ ${check_variables} == TRUE ]] &&
+    {
+        echo """
+          f_Q  ${f_Q}
+          f_1  ${f_1}
+          f_2  ${f_2}
+        d_out  ${d_out}
+         m_Q2  ${m_Q2}
+          res  ${res}
+          ext  ${ext}
+        """
+    } || true
 
 check_command=TRUE
 [[ ${check_command} == TRUE ]] &&
@@ -1554,7 +1627,7 @@ check_command=TRUE
             --matrices \\
                 ${f_Q}::/resolutions/${res} \\
                 ${f_2}::/resolutions/${res} \\
-            --outFileName ${d_out}/${m_Q2}.h5
+            --outFileName ${d_out}/${m_Q2}.${ext}
 
         hicCompareMatrices \\
             --operation log2ratio \\
@@ -1562,7 +1635,7 @@ check_command=TRUE
                 ${f_Q}::/resolutions/${res} \\
                 ${f_2}::/resolutions/${res} \\
             --noNorm \\
-            --outFileName ${d_out}/${m_Q2}.no-norm.h5
+            --outFileName ${d_out}/${m_Q2}.no-norm.${ext}
         """
     } || true
 
@@ -1574,7 +1647,7 @@ run_command=TRUE
             --matrices \
                 ${f_Q}::/resolutions/${res} \
                 ${f_2}::/resolutions/${res} \
-            --outFileName ${d_out}/${m_Q2}.h5
+            --outFileName ${d_out}/${m_Q2}.${ext}
 
         hicCompareMatrices \
             --operation log2ratio \
@@ -1582,122 +1655,310 @@ run_command=TRUE
                 ${f_Q}::/resolutions/${res} \
                 ${f_2}::/resolutions/${res} \
             --noNorm \
-            --outFileName ${d_out}/${m_Q2}.no-norm.h5
-    }
+            --outFileName ${d_out}/${m_Q2}.no-norm.${ext}
+    } || true
 
-ls -lhaFG ${d_out}/
+ls -lhaFG ${d_out}/${m_Q2}*
 
- in=mats/2023-1001_init/${m_Q2}.h5  # ., "${in}"
-out=pngs/2023-1001_init/${m_Q2}.png
+ in=mats/2023-1001_init/${m_Q2}  # ., ${in}.cool
+out=pngs/2023-1001_init/${m_Q2}  # echo "${png}"
+chr="XII"
+
+check_variables=TRUE
+[[ ${check_variables} == TRUE ]] &&
+    {
+        echo """
+         in  ${in}
+        out  ${out}
+        chr  ${chr}
+        """
+    } || true
+
+check_commands=TRUE
+[[ ${check_commands} == TRUE ]] &&
+    {
+        echo """
+        hicPlotMatrix \\
+            --matrix ${in}.cool \\
+            --outFileName ${out}.png \\
+            --chromosomeOrder ${chr} \\
+            --region ${chr}:451400-461000 \\
+            --dpi 300 \\
+            --colorMap coolwarm \\
+            --vMin \"-4.0\" \\
+            --vMax \"4.0\"
+        """
+    } || true
+
+run_commands=TRUE
+[[ ${run_commands} == TRUE ]] &&
+    {
+        hicPlotMatrix \
+            --matrix ${in}.cool \
+            --outFileName ${out}.${chr}-451400-461000.col-cent.png \
+            --region ${chr}:451400-461000 \
+            --dpi 300 \
+            --colorMap coolwarm \
+            --vMin "-4.0" \
+            --vMax "4.0"
+    } || true
+```
+</details>
+<br />
+
+<a id="take-the-log2-ratio-of-q-over-g1"></a>
+### Take the log2 ratio of Q over G1
+<a id="code-6"></a>
+#### Code
+<details>
+<summary><i>Code: Take the log2 ratio of Q over G1</i></summary>
+
+```bash
+#!/bin/bash
+
+  f_Q="08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool"
+  f_1="08_zoom/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mcool"
+  f_2="08_zoom/MC-2020_nz_WT_repM.standard-rDNA-complete.mcool"
+d_out="mats/2023-1001_init"
+ m_Q1="log2_Q-over-G1_${res}"
+  res=50
+  ext="cool"
+
+check_variables=TRUE
+[[ ${check_variables} == TRUE ]] &&
+    {
+        echo """
+          f_Q  ${f_Q}
+          f_1  ${f_1}
+          f_2  ${f_2}
+        d_out  ${d_out}
+         m_Q1  ${m_Q1}
+          res  ${res}
+          ext  ${ext}
+        """
+    } || true
 
 check_command=TRUE
 [[ ${check_command} == TRUE ]] &&
     {
         echo """
-        hicPlotMatrix \\
-            --matrix ${in} \\
-            --outFileName ${out} \\
-            --chromosomeOrder
+        hicCompareMatrices \\
+            --operation log2ratio \\
+            --matrices \\
+                ${f_Q}::/resolutions/${res} \\
+                ${f_1}::/resolutions/${res} \\
+            --outFileName ${d_out}/${m_Q1}.${ext}
+
+        hicCompareMatrices \\
+            --operation log2ratio \\
+            --matrices \\
+                ${f_Q}::/resolutions/${res} \\
+                ${f_1}::/resolutions/${res} \\
+            --noNorm \\
+            --outFileName ${d_out}/${m_Q1}.no-norm.${ext}
         """
     } || true
 
-# usage: hicPlotMatrix --matrix MATRIX --outFileName OUTFILENAME [--title TITLE] [--scoreName SCORENAME] [--perChromosome] [--clearMaskedBins]
-#                      [--chromosomeOrder CHROMOSOMEORDER [CHROMOSOMEORDER ...]] [--region REGION] [--region2 REGION2] [--log1p] [--log] [--colorMap COLORMAP] [--vMin VMIN]
-#                      [--vMax VMAX] [--dpi DPI] [--bigwig BIGWIG [BIGWIG ...]] [--bigwigAdditionalVerticalAxis] [--vMinBigwig VMINBIGWIG] [--vMaxBigwig VMAXBIGWIG]
-#                      [--flipBigwigSign] [--scaleFactorBigwig SCALEFACTORBIGWIG] [--fontsize FONTSIZE] [--rotationX ROTATIONX] [--rotationY ROTATIONY]
-#                      [--increaseFigureWidth INCREASEFIGUREWIDTH] [--increaseFigureHeight INCREASEFIGUREHEIGHT] [--loops LOOPS] [--help] [--version]
-
-# Creates a heatmap of a Hi-C matrix.
-
-# Required arguments:
-#   --matrix MATRIX, -m MATRIX
-#                         Path of the Hi-C matrix to plot.
-#   --outFileName OUTFILENAME, -out OUTFILENAME
-#                         File name to save the image.
-
-# Optional arguments:
-#   --title TITLE, -t TITLE
-#                         Plot title.
-#   --scoreName SCORENAME, -s SCORENAME
-#                         Score name label for the heatmap legend.
-#   --perChromosome       Instead of plotting the whole matrix, each chromosome is plotted next to the other. This parameter is not compatible with --region.
-#   --clearMaskedBins     If set, masked bins are removed from the matrix and the nearest bins are extended to cover the empty space instead of plotting black lines.
-#   --chromosomeOrder CHROMOSOMEORDER [CHROMOSOMEORDER ...]
-#                         Chromosomes and order in which the chromosomes should be plotted. This option overrides --region and --region2.
-#   --region REGION       Plot only this region. The format is chr:start-end The plotted region contains the main diagonal and is symmetric unless --region2 is given.
-#   --region2 REGION2     If given, then only the region defined by --region and --region2 is given. The format is the same as --region1.
-#   --log1p               Plot the log1p of the matrix values.
-#   --log                 Plot the *MINUS* log of the matrix values.
-#   --colorMap COLORMAP   Color map to use for the heatmap. Available values can be seen here: http://matplotlib.org/examples/color/colormaps_reference.html (Default: RdYlBu_r).
-#   --vMin VMIN           Minimum score value.
-#   --vMax VMAX           Maximum score value.
-#   --dpi DPI             Resolution for the image in case theoutput is a raster graphics image (e.g png, jpg) (Default: 72).
-#   --bigwig BIGWIG [BIGWIG ...]
-#                         Bigwig file to plot below the matrix. This can for example be used to visualize A/B compartments or ChIP-seq data.
-#   --bigwigAdditionalVerticalAxis
-#                         Add an additional axis to determine the values of a bigwig file in 2D better.
-#   --vMinBigwig VMINBIGWIG
-#                         Minimum score value for bigwig.
-#   --vMaxBigwig VMAXBIGWIG
-#                         Maximum score value for bigwig
-#   --flipBigwigSign      The sign of the bigwig values are flipped. Useful if hicPCA gives inverted values.
-#   --scaleFactorBigwig SCALEFACTORBIGWIG
-#                         Scale the values of a bigwig file by the given factor (Default: 1.0).
-#   --fontsize FONTSIZE   Fontsize in the plot for x and y axis (Default: 10).
-#   --rotationX ROTATIONX
-#                         Rotation in degrees for the labels of x axis (Default: 0).
-#   --rotationY ROTATIONY
-#                         Rotation in degrees for the labels of y axis (Default: 0).
-#   --increaseFigureWidth INCREASEFIGUREWIDTH
-#                         Plotting additional bigwig tracks can cause compression in x or y direction of the heatmap. Set this factor to a value unequal to 0 to correct this
-#                         (Default: 0.5).
-#   --increaseFigureHeight INCREASEFIGUREHEIGHT
-#                         Plotting additional bigwig tracks can cause compression in x or y direction of the heatmap. Set this factor to a value unequal to 0 to correct this
-#                         (Default: 0.5).
-#   --loops LOOPS         Bedgraph file to plot detected long range contacts from hicDetectLoops.
-#   --help, -h            show this help message and exit
-#   --version             show program's version number and exit
-```
-</details>
-<br />
-
-### Printed
-<details>
-<summary><i>Printed: </i></summary>
-
-```txt
-...
-
-
-❯ [[ ${check_command} == TRUE ]] &&
->     {
->         echo """
->         hicCompareMatrices \\
->             --operation log2ratio \\
->             --matrices \\
->                 ${f_Q}::/resolutions/${res} \\
->                 ${f_2}::/resolutions/${res} \\
->             --outFileName ${d_out}/${m_Q2}.h5
->         """
->     } || true
+run_command=TRUE
+[[ ${run_command} == TRUE ]] &&
+    {
+        hicCompareMatrices \
+            --operation log2ratio \
+            --matrices \
+                ${f_Q}::/resolutions/${res} \
+                ${f_1}::/resolutions/${res} \
+            --outFileName ${d_out}/${m_Q1}.${ext}
 
         hicCompareMatrices \
             --operation log2ratio \
             --matrices \
-                08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool::/resolutions/6400 \
-                08_zoom/MC-2020_nz_WT_repM.standard-rDNA-complete.mcool::/resolutions/6400 \
-            --outFileName mats/2023-1001_init/log2_Q-over-G2_6400.h5
+                ${f_Q}::/resolutions/${res} \
+                ${f_1}::/resolutions/${res} \
+            --noNorm \
+            --outFileName ${d_out}/${m_Q1}.no-norm.${ext}
+    } || true
+
+ls -lhaFG ${d_out}/${m_Q1}*
+
+ in=mats/2023-1001_init/${m_Q1}  # ., ${in}.cool
+out=pngs/2023-1001_init/${m_Q1}  # echo "${png}"
+chr="XII"
+
+check_variables=TRUE
+[[ ${check_variables} == TRUE ]] &&
+    {
+        echo """
+         in  ${in}
+        out  ${out}
+        chr  ${chr}
+        """
+    } || true
+
+check_commands=TRUE
+[[ ${check_commands} == TRUE ]] &&
+    {
+        echo """
+        hicPlotMatrix \\
+            --matrix ${in}.cool \\
+            --outFileName ${out}.png \\
+            --chromosomeOrder ${chr} \\
+            --region ${chr}:451400-461000 \\
+            --dpi 300 \\
+            --colorMap coolwarm \\
+            --vMin \"-4.0\" \\
+            --vMax \"4.0\"
+        """
+    } || true
+
+run_commands=TRUE
+[[ ${run_commands} == TRUE ]] &&
+    {
+        hicPlotMatrix \
+            --matrix ${in}.cool \
+            --outFileName ${out}.${chr}-451400-461000.col-cent.png \
+            --region ${chr}:451400-461000 \
+            --dpi 300 \
+            --colorMap coolwarm \
+            --vMin "-4.0" \
+            --vMax "4.0"
+    } || true
 ```
 </details>
 <br />
 
+<a id="take-the-log2-ratio-of-g2-over-g1"></a>
+### Take the log2 ratio of G2 over G1
+<a id="code-7"></a>
+#### Code
+<details>
+<summary><i>Code: Take the log2 ratio of G2 over G1</i></summary>
+
+```bash
+#!/bin/bash
+
+  f_Q="08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool"
+  f_1="08_zoom/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mcool"
+  f_2="08_zoom/MC-2020_nz_WT_repM.standard-rDNA-complete.mcool"
+d_out="mats/2023-1001_init"
+ m_21="log2_G2-over-G1_${res}"
+  res=50
+  ext="cool"
+
+check_variables=TRUE
+[[ ${check_variables} == TRUE ]] &&
+    {
+        echo """
+          f_Q  ${f_Q}
+          f_1  ${f_1}
+          f_2  ${f_2}
+        d_out  ${d_out}
+         m_21  ${m_21}
+          res  ${res}
+          ext  ${ext}
+        """
+    } || true
+
+check_command=TRUE
+[[ ${check_command} == TRUE ]] &&
+    {
+        echo """
+        hicCompareMatrices \\
+            --operation log2ratio \\
+            --matrices \\
+                ${f_2}::/resolutions/${res} \\
+                ${f_1}::/resolutions/${res} \\
+            --outFileName ${d_out}/${m_21}.${ext}
+
+        hicCompareMatrices \\
+            --operation log2ratio \\
+            --matrices \\
+                ${f_2}::/resolutions/${res} \\
+                ${f_1}::/resolutions/${res} \\
+            --noNorm \\
+            --outFileName ${d_out}/${m_21}.no-norm.${ext}
+        """
+    } || true
+
+run_command=TRUE
+[[ ${run_command} == TRUE ]] &&
+    {
+        hicCompareMatrices \
+            --operation log2ratio \
+            --matrices \
+                ${f_2}::/resolutions/${res} \
+                ${f_1}::/resolutions/${res} \
+            --outFileName ${d_out}/${m_21}.${ext}
+
+        hicCompareMatrices \
+            --operation log2ratio \
+            --matrices \
+                ${f_2}::/resolutions/${res} \
+                ${f_1}::/resolutions/${res} \
+            --noNorm \
+            --outFileName ${d_out}/${m_21}.no-norm.${ext}
+    } || true
+
+ls -lhaFG ${d_out}/${m_21}*
+
+ in=mats/2023-1001_init/${m_21}  # ., ${in}.cool
+out=pngs/2023-1001_init/${m_21}  # echo "${png}"
+chr="XII"
+
+check_variables=TRUE
+[[ ${check_variables} == TRUE ]] &&
+    {
+        echo """
+         in  ${in}
+        out  ${out}
+        chr  ${chr}
+        """
+    } || true
+
+check_commands=TRUE
+[[ ${check_commands} == TRUE ]] &&
+    {
+        echo """
+        hicPlotMatrix \\
+            --matrix ${in}.cool \\
+            --outFileName ${out}.png \\
+            --chromosomeOrder ${chr} \\
+            --region ${chr}:451400-461000 \\
+            --dpi 300 \\
+            --colorMap coolwarm \\
+            --vMin \"-2.0\" \\
+            --vMax \"2.0\"
+        """
+    } || true
+
+run_commands=TRUE
+[[ ${run_commands} == TRUE ]] &&
+    {
+        hicPlotMatrix \
+            --matrix ${in}.cool \
+            --outFileName ${out}.${chr}-451400-461000.col-cent.png \
+            --region ${chr}:451400-461000 \
+            --dpi 300 \
+            --colorMap coolwarm \
+            --vMin "-2.0" \
+            --vMax "2.0"
+    } || true
+```
+</details>
+<br />
+
+<a id="help-1"></a>
 ### Help
 <details>
-<summary><i>Help: Learn to use `fanc compare`, draw some preliminary plots</i></summary>
+<summary><i>Help: Learn to use `hicexplorer`, draw some preliminary plots</i></summary>
 
 ```txt
-❯ hicCompareMatrices --help
-usage: hicCompareMatrices --matrices matrix.h5 matrix.h5 --outFileName OUTFILENAME [--operation {diff,ratio,log2ratio}] [--help] [--version]
+❯ [[ ${check_help_messages} == TRUE ]] &&
+>     {
+>         hicCompareMatrices --help
+>         hicPlotMatrix --help
+>         hicPlotViewpoint --help
+>     }
+usage: hicCompareMatrices --matrices matrix.h5 matrix.h5 --outFileName OUTFILENAME [--operation {diff,ratio,log2ratio}] [--noNorm] [--help] [--version]
 
 Takes two matrices as input, normalizes them and applies the given operation. To normalize the matrices each element is divided by the sum of the matrix.
 
@@ -1710,17 +1971,16 @@ Required arguments:
 Optional arguments:
   --operation {diff,ratio,log2ratio}
                         Operation to apply to the matrices (Default: log2ratio).
+  --noNorm              Do not apply normalisation before computing the operation (Default: False). (default: False)
   --help, -h            show this help message and exit
   --version             show program's version number and exit
-```
 
-```txt
-❯ hicPlotMatrix --help
+
 usage: hicPlotMatrix --matrix MATRIX --outFileName OUTFILENAME [--title TITLE] [--scoreName SCORENAME] [--perChromosome] [--clearMaskedBins]
-                     [--chromosomeOrder CHROMOSOMEORDER [CHROMOSOMEORDER ...]] [--region REGION] [--region2 REGION2] [--log1p] [--log] [--colorMap COLORMAP] [--vMin VMIN]
-                     [--vMax VMAX] [--dpi DPI] [--bigwig BIGWIG [BIGWIG ...]] [--bigwigAdditionalVerticalAxis] [--vMinBigwig VMINBIGWIG] [--vMaxBigwig VMAXBIGWIG]
-                     [--flipBigwigSign] [--scaleFactorBigwig SCALEFACTORBIGWIG] [--fontsize FONTSIZE] [--rotationX ROTATIONX] [--rotationY ROTATIONY]
-                     [--increaseFigureWidth INCREASEFIGUREWIDTH] [--increaseFigureHeight INCREASEFIGUREHEIGHT] [--loops LOOPS] [--help] [--version]
+                     [--chromosomeOrder CHROMOSOMEORDER [CHROMOSOMEORDER ...]] [--region REGION] [--region2 REGION2] [--log1p] [--log] [--colorMap COLORMAP] [--vMin VMIN] [--vMax VMAX]
+                     [--dpi DPI] [--bigwig BIGWIG [BIGWIG ...]] [--bigwigAdditionalVerticalAxis] [--vMinBigwig VMINBIGWIG] [--vMaxBigwig VMAXBIGWIG] [--flipBigwigSign]
+                     [--scaleFactorBigwig SCALEFACTORBIGWIG] [--fontsize FONTSIZE] [--rotationX ROTATIONX] [--rotationY ROTATIONY] [--increaseFigureWidth INCREASEFIGUREWIDTH]
+                     [--increaseFigureHeight INCREASEFIGUREHEIGHT] [--loops LOOPS] [--loopLargeRegionsOperation {first,last,center}] [--tads TADS] [--help] [--version]
 
 Creates a heatmap of a Hi-C matrix.
 
@@ -1764,18 +2024,40 @@ Optional arguments:
   --rotationY ROTATIONY
                         Rotation in degrees for the labels of y axis (Default: 0).
   --increaseFigureWidth INCREASEFIGUREWIDTH
-                        Plotting additional bigwig tracks can cause compression in x or y direction of the heatmap. Set this factor to a value unequal to 0 to correct this
-                        (Default: 0.5).
+                        Plotting additional bigwig tracks can cause compression in x or y direction of the heatmap. Set this factor to a value unequal to 0 to correct this (Default: 0.5).
   --increaseFigureHeight INCREASEFIGUREHEIGHT
-                        Plotting additional bigwig tracks can cause compression in x or y direction of the heatmap. Set this factor to a value unequal to 0 to correct this
-                        (Default: 0.5).
+                        Plotting additional bigwig tracks can cause compression in x or y direction of the heatmap. Set this factor to a value unequal to 0 to correct this (Default: 0.5).
   --loops LOOPS         Bedgraph file to plot detected long range contacts from hicDetectLoops.
+  --loopLargeRegionsOperation {first,last,center}
+                        If a given coordinate in the bed file is larger than a bin of the input matrix, by default only the first bin is taken into account. However there are more
+                        possibilities to handel such a case. Users can ask for the last bin or for center of the region.
+  --tads TADS           Bedgraph file to plot detected tads
   --help, -h            show this help message and exit
   --version             show program's version number and exit
-```
 
-```txt
 
+usage: hicPlotViewpoint --matrix MATRIX [MATRIX ...] --region REGION --outFileName OUTFILENAME --referencePoint REFERENCEPOINT [--chromosome CHROMOSOME]
+                        [--interactionOutFileName INTERACTIONOUTFILENAME] [--dpi DPI] [--version] [--help]
+
+Plots the number of interactions around a given reference point in a region.
+
+Required arguments:
+  --matrix MATRIX [MATRIX ...], -m MATRIX [MATRIX ...]
+                        Hi-C matrix to plot.
+  --region REGION       The format is chr:start-end.
+  --outFileName OUTFILENAME, -o OUTFILENAME
+                        File name of the image to save.
+  --referencePoint REFERENCEPOINT, -rp REFERENCEPOINT
+                        Reference point. Needs to be in the format: 'chr:100' for a single reference point or 'chr:100-200' for a reference region.
+
+Optional arguments:
+  --chromosome CHROMOSOME, -C CHROMOSOME
+                        Optional parameter: Only show results for this chromosome.
+  --interactionOutFileName INTERACTIONOUTFILENAME, -i INTERACTIONOUTFILENAME
+                        Optional parameter: If set, a bedgraph file with all interaction will be created.
+  --dpi DPI             Optional parameter: Resolution for the image in case theouput is a raster graphics image (e.g png, jpg) (Default: 300).
+  --version             show program's version number and exit
+  --help, -h            show this help message and exit
 ```
 </details>
 <br />
