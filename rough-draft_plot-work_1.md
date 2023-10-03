@@ -1,5 +1,5 @@
 
-`#rough-draft_plot-work.md`
+`#rough-draft_plot-work_1.md`
 <br />
 <br />
 
@@ -8,33 +8,34 @@
 <!-- MarkdownTOC -->
 
 1. [Review what files we have with what resolutions](#review-what-files-we-have-with-what-resolutions)
-  1. [On the files as described in `work_download-data.md`](#on-the-files-as-described-in-work_download-datamd)
-    1. [Notes](#notes)
-  1. [On the files in `2023-0307_work_Micro-C_align-process`](#on-the-files-in-2023-0307_work_micro-c_align-process)
-    1. [Code](#code)
-    1. [Printed](#printed)
-    1. [Notes](#notes-1)
-  1. [What are the resolutions associated with the files in `2023-0307_work_Micro-C_align-process/08_zoom`?](#what-are-the-resolutions-associated-with-the-files-in-2023-0307_work_micro-c_align-process08_zoom)
-    1. [Code](#code-1)
-    1. [Printed](#printed-1)
+    1. [On the files as described in `work_download-data.md`](#on-the-files-as-described-in-work_download-datamd)
+        1. [Notes](#notes)
+    1. [On the files in `2023-0307_work_Micro-C_align-process`](#on-the-files-in-2023-0307_work_micro-c_align-process)
+        1. [Code](#code)
+        1. [Printed](#printed)
+        1. [Notes](#notes-1)
+    1. [What are the resolutions associated with the files in `2023-0307_work_Micro-C_align-process/08_zoom`?](#what-are-the-resolutions-associated-with-the-files-in-2023-0307_work_micro-c_align-process08_zoom)
+        1. [Code](#code-1)
+        1. [Printed](#printed-1)
 1. [Set up virtual environment for analyses with `FAN-C`](#set-up-virtual-environment-for-analyses-with-fan-c)
-  1. [Code](#code-2)
-  1. [Printed](#printed-2)
+    1. [Code](#code-2)
+    1. [Printed](#printed-2)
 1. [Learn to use `fanc compare`, draw some preliminary plots](#learn-to-use-fanc-compare-draw-some-preliminary-plots)
-  1. [Code](#code-3)
-  1. [Printed](#printed-3)
-  1. [Help](#help)
+    1. [Code](#code-3)
+    1. [Printed](#printed-3)
+    1. [Help](#help)
 1. [Set up virtual environment for analyses with `HiCExplorer`](#set-up-virtual-environment-for-analyses-with-hicexplorer)
-  1. [Code](#code-4)
-  1. [Printed](#printed-4)
+    1. [Code](#code-4)
+    1. [Printed](#printed-4)
 1. [Learn to use `hicexplorer`, draw some preliminary plots](#learn-to-use-hicexplorer-draw-some-preliminary-plots)
-  1. [Take the log2 ratio of Q over G2](#take-the-log2-ratio-of-q-over-g2)
-    1. [Code](#code-5)
-  1. [Take the log2 ratio of Q over G1](#take-the-log2-ratio-of-q-over-g1)
-    1. [Code](#code-6)
-  1. [Take the log2 ratio of G2 over G1](#take-the-log2-ratio-of-g2-over-g1)
-    1. [Code](#code-7)
-  1. [Help](#help-1)
+    1. [Take the log2 ratio of Q over G2](#take-the-log2-ratio-of-q-over-g2)
+        1. [Code](#code-5)
+    1. [Take the log2 ratio of Q over G1](#take-the-log2-ratio-of-q-over-g1)
+        1. [Code](#code-6)
+    1. [Take the log2 ratio of G2 over G1](#take-the-log2-ratio-of-g2-over-g1)
+        1. [Code](#code-7)
+    1. [Help](#help-1)
+    1. [Notes](#notes-2)
 
 <!-- /MarkdownTOC -->
 </details>
@@ -876,6 +877,8 @@ check_command=TRUE
     } || true
 
 #  Awaiting a response from author of FAN-C before continuing work
+#+ For more details on the errors encountered (etc.), see the following URL:
+#+ github.com/vaquerizaslab/fanc/issues/170
 run_command=TRUE
 [[ ${run_command} == TRUE ]] &&
     {
@@ -888,7 +891,6 @@ run_command=TRUE
             -c Reds \
             "${f_Q}@${res}"
             # 08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool@6400
-
     } || true
 ```
 </details>
@@ -1010,7 +1012,7 @@ drwxrws--- 3 kalavatt  32 Sep 29 12:00 ../
 ❯ out=pngs/2023-0929_init/${m_Q2}.png
 
 
-
+...
 ```
 </details>
 <br />
@@ -1018,7 +1020,7 @@ drwxrws--- 3 kalavatt  32 Sep 29 12:00 ../
 <a id="help"></a>
 ### Help
 <details>
-<summary><i>Help: </i></summary>
+<summary><i>Help: Learn to use `fanc compare`, draw some preliminary plots</i></summary>
 
 ```txt
 ❯ fanc compare --help
@@ -2059,5 +2061,19 @@ Optional arguments:
   --version             show program's version number and exit
   --help, -h            show this help message and exit
 ```
+</details>
+<br />
+
+<a id="notes-2"></a>
+### Notes
+<details>
+<summary><i>Notes: Learn to use `hicexplorer`, draw some preliminary plots</i></summary>
+<br />
+
+`2023-1002`: `HiCExplorer` plots (of a portion of the rDNA locus) are inconsistent with the `HiGlass` plots supplied to CC, which show a much stronger local increase in far-*cis* interactions in Q versus G1 and Q versus G2, together with a local decrease in Q near-*cis* interactions compared to the other two states.
+
+Not sure if `HiCExplorer` is including the ICE weighting information. `#NEXTSTEP` Will set up [`GENOVA`](https://github.com/robinweide/GENOVA) `R` software for this work; `GENOVA` enables the choice to use balanced or unbalanced contacts with cool files (and `GENOVA` makes it easy to plot virtual 4C plots as well as genome-wide observed-over-expected plots too).
+
+Also, still haven't heard back from anyone involved with `FANC` regarding [the issue encountered (see above)](https://github.com/vaquerizaslab/fanc/issues/170).
 </details>
 <br />
