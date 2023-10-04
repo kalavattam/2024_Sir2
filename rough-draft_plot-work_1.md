@@ -18,22 +18,26 @@
         1. [Code](#code-1)
         1. [Printed](#printed-1)
 1. [Set up virtual environment for analyses with `FAN-C`](#set-up-virtual-environment-for-analyses-with-fan-c)
-    1. [Code](#code-2)
-    1. [Printed](#printed-2)
+    1. [Attempt #1](#attempt-1)
+        1. [Code](#code-2)
+        1. [Printed](#printed-2)
+    1. [Attempt #2](#attempt-2)
+        1. [Code](#code-3)
+        1. [Printed](#printed-3)
 1. [Learn to use `fanc compare`, draw some preliminary plots](#learn-to-use-fanc-compare-draw-some-preliminary-plots)
-    1. [Code](#code-3)
-    1. [Printed](#printed-3)
-    1. [Help](#help)
-1. [Set up virtual environment for analyses with `HiCExplorer`](#set-up-virtual-environment-for-analyses-with-hicexplorer)
     1. [Code](#code-4)
     1. [Printed](#printed-4)
+    1. [Help](#help)
+1. [Set up virtual environment for analyses with `HiCExplorer`](#set-up-virtual-environment-for-analyses-with-hicexplorer)
+    1. [Code](#code-5)
+    1. [Printed](#printed-5)
 1. [Learn to use `hicexplorer`, draw some preliminary plots](#learn-to-use-hicexplorer-draw-some-preliminary-plots)
     1. [Take the log2 ratio of Q over G2](#take-the-log2-ratio-of-q-over-g2)
-        1. [Code](#code-5)
-    1. [Take the log2 ratio of Q over G1](#take-the-log2-ratio-of-q-over-g1)
         1. [Code](#code-6)
-    1. [Take the log2 ratio of G2 over G1](#take-the-log2-ratio-of-g2-over-g1)
+    1. [Take the log2 ratio of Q over G1](#take-the-log2-ratio-of-q-over-g1)
         1. [Code](#code-7)
+    1. [Take the log2 ratio of G2 over G1](#take-the-log2-ratio-of-g2-over-g1)
+        1. [Code](#code-8)
     1. [Help](#help-1)
     1. [Notes](#notes-2)
 
@@ -248,10 +252,12 @@ cooler info ${f_cool}::/resolutions/6400
 
 <a id="set-up-virtual-environment-for-analyses-with-fan-c"></a>
 ## Set up virtual environment for analyses with `FAN-C`
+<a id="attempt-1"></a>
+### Attempt #1
 <a id="code-2"></a>
-### Code
+#### Code
 <details>
-<summary><i>Code: Set up virtual environment for analyses with `FAN-C`</i></summary>
+<summary><i>Code: Set up virtual environment for analyses with `FAN-C`: Attempt #1</i></summary>
 
 ```bash
 #!/bin/bash
@@ -282,9 +288,9 @@ fi
 <br />
 
 <a id="printed-2"></a>
-### Printed
+#### Printed
 <details>
-<summary><i>Printed: Set up virtual environment for analyses with `FAN-C`</i></summary>
+<summary><i>Printed: Set up virtual environment for analyses with `FAN-C`: Attempt #1</i></summary>
 
 ```txt
 ❯ env_name="fanc_env"
@@ -796,11 +802,494 @@ Successfully installed Deprecated-1.2.14 PyWavelets-1.4.1 PyYAML-6.0.1 asciitree
 ```
 </details>
 <br />
+
+<a id="attempt-2"></a>
+### Attempt #2
+<a id="code-3"></a>
+#### Code
+<details>
+<summary><i>Code: Set up virtual environment for analyses with `FAN-C`: Attempt #2</i></summary>
+
+```bash
+#!/bin/bash
+
+env_name="fanc_pip_env"
+install_env=TRUE
+if [[ "${install_env}" == TRUE ]]; then
+    mamba create \
+        -n ${env_name} \
+        -c conda-forge \
+        -c bioconda \
+            parallel \
+            pip \
+            python==3.11 \
+            rename
+    
+    source activate ${env_name}
+
+    [[ $(pwd) != "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/src/" ]] &&
+        cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/src/" ||
+        true
+
+    #  If present, then remove fanc/ directory from Attempt #1
+    [[ -d fanc/ ]] && rm -r fanc/ || true
+
+    #  If not present in src/, then download fanc-0.9.27.tar.gz
+    # [[ ! -f fanc-0.9.27.tar.gz ]] &&
+    #     {
+    #         curl \
+    #             https://github.com/vaquerizaslab/fanc/files/12698221/fanc-0.9.27.tar.gz \
+    #                 > fanc-0.9.27.tar.gz
+    #     } || true
+
+    #  Instead, copy the tarball into src/ manually, then use pip to install it
+    pip install fanc-0.9.27.tar.gz
+
+    check_installation=TRUE
+    [[ ${check_installation} == TRUE ]] &&
+        {
+            which fanc
+            fanc --version
+        }
+fi
+
+#  Remove the installation from Attempt #1
+# conda info -e
+# conda remove --name fanc_env --all
+```
+</details>
+<br />
+
+<a id="printed-3"></a>
+#### Printed
+<details>
+<summary><i>Printed: Set up virtual environment for analyses with `FAN-C`: Attempt #2</i></summary>
+
+```txt
+❯ env_name="fanc_pip_env"
+❯ mamba create \
+>     -n ${env_name} \
+>     -c conda-forge \
+>     -c bioconda \
+>         parallel \
+>         pip \
+>         python==3.11 \
+>         rename
+
+                  __    __    __    __
+                 /  \  /  \  /  \  /  \
+                /    \/    \/    \/    \
+███████████████/  /██/  /██/  /██/  /████████████████████████
+              /  / \   / \   / \   / \  \____
+             /  /   \_/   \_/   \_/   \    o \__,
+            / _/                       \_____/  `
+            |/
+        ███╗   ███╗ █████╗ ███╗   ███╗██████╗  █████╗
+        ████╗ ████║██╔══██╗████╗ ████║██╔══██╗██╔══██╗
+        ██╔████╔██║███████║██╔████╔██║██████╔╝███████║
+        ██║╚██╔╝██║██╔══██║██║╚██╔╝██║██╔══██╗██╔══██║
+        ██║ ╚═╝ ██║██║  ██║██║ ╚═╝ ██║██████╔╝██║  ██║
+        ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝
+
+        mamba (1.3.1) supported by @QuantStack
+
+        GitHub:  https://github.com/mamba-org/mamba
+        Twitter: https://twitter.com/QuantStack
+
+█████████████████████████████████████████████████████████████
+
+
+Looking for: ['parallel', 'pip', 'python==3.11', 'rename']
+
+bioconda/noarch                                      4.7MB @   4.1MB/s  1.3s
+bioconda/linux-64                                    5.2MB @   3.4MB/s  1.7s
+pkgs/r/linux-64                                               No change
+pkgs/main/linux-64                                   6.1MB @   3.6MB/s  1.9s
+pkgs/r/noarch                                                 No change
+pkgs/main/noarch                                              No change
+conda-forge/noarch                                  14.0MB @   6.6MB/s  2.5s
+conda-forge/linux-64                                34.5MB @   6.0MB/s  6.3s
+Transaction
+
+  Prefix: /home/kalavatt/miniconda3/envs/fanc_pip_env
+
+  Updating specs:
+
+   - parallel
+   - pip
+   - python==3.11
+   - rename
+
+
+  Package               Version  Build               Channel                    Size
+──────────────────────────────────────────────────────────────────────────────────────
+  Install:
+──────────────────────────────────────────────────────────────────────────────────────
+
+  + _libgcc_mutex           0.1  conda_forge         conda-forge/linux-64     Cached
+  + _openmp_mutex           4.5  2_gnu               conda-forge/linux-64     Cached
+  + bzip2                 1.0.8  h7f98852_4          conda-forge/linux-64     Cached
+  + ca-certificates   2023.7.22  hbcca054_0          conda-forge/linux-64     Cached
+  + ld_impl_linux-64       2.40  h41732ed_0          conda-forge/linux-64     Cached
+  + libffi                3.4.2  h7f98852_5          conda-forge/linux-64     Cached
+  + libgcc-ng            13.2.0  h807b86a_2          conda-forge/linux-64     Cached
+  + libgomp              13.2.0  h807b86a_2          conda-forge/linux-64     Cached
+  + libnsl                2.0.0  hd590300_1          conda-forge/linux-64     Cached
+  + libsqlite            3.43.0  h2797004_0          conda-forge/linux-64     Cached
+  + libuuid              2.38.1  h0b41bf4_0          conda-forge/linux-64     Cached
+  + libzlib              1.2.13  hd590300_5          conda-forge/linux-64     Cached
+  + ncurses                 6.4  hcb278e6_0          conda-forge/linux-64     Cached
+  + openssl               3.1.3  hd590300_0          conda-forge/linux-64     Cached
+  + parallel           20230922  ha770c72_0          conda-forge/linux-64     Cached
+  + perl                 5.32.1  4_hd590300_perl5    conda-forge/linux-64     Cached
+  + pip                  23.2.1  pyhd8ed1ab_0        conda-forge/noarch       Cached
+  + python               3.11.0  he550d4f_1_cpython  conda-forge/linux-64     Cached
+  + readline                8.2  h8228510_1          conda-forge/linux-64     Cached
+  + rename                1.601  hdfd78af_1          bioconda/noarch          Cached
+  + setuptools           68.2.2  pyhd8ed1ab_0        conda-forge/noarch       Cached
+  + tk                   8.6.13  h2797004_0          conda-forge/linux-64     Cached
+  + tzdata                2023c  h71feb2d_0          conda-forge/noarch       Cached
+  + wheel                0.41.2  pyhd8ed1ab_0        conda-forge/noarch       Cached
+  + xz                    5.2.6  h166bdaf_0          conda-forge/linux-64     Cached
+
+  Summary:
+
+  Install: 25 packages
+
+  Total download: 0 B
+
+──────────────────────────────────────────────────────────────────────────────────────
+
+
+Confirm changes: [Y/n] Y
+
+Downloading and Extracting Packages
+
+Preparing transaction: done
+Verifying transaction: done
+Executing transaction: done
+
+To activate this environment, use
+
+     $ mamba activate fanc_pip_env
+
+To deactivate an active environment, use
+
+     $ mamba deactivate
+
+
+❯ source activate ${env_name}
+
+
+❯ [[ $(pwd) != "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/src/" ]] &&
+>     cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/src/" ||
+>     true
+
+
+❯ pip install fanc-0.9.27.tar.gz
+Processing ./fanc-0.9.27.tar.gz
+  Preparing metadata (setup.py) ... done
+Collecting numpy>=1.16.0 (from fanc==0.9.27)
+  Obtaining dependency information for numpy>=1.16.0 from https://files.pythonhosted.org/packages/c4/36/161e2f8110f8c49e59f6107bd6da4257d30aff9f06373d0471811f73dcc5/numpy-1.26.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached numpy-1.26.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (58 kB)
+Collecting scipy (from fanc==0.9.27)
+  Obtaining dependency information for scipy from https://files.pythonhosted.org/packages/ef/1b/7538792254aec6850657d5b940fd05fe60582af829ffe40d6c054f065f34/scipy-1.11.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached scipy-1.11.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (60 kB)
+Collecting pillow (from fanc==0.9.27)
+  Obtaining dependency information for pillow from https://files.pythonhosted.org/packages/c6/43/f2f31fd9d8282ac9724f5f2b6534ffd556dc7b67b64f239167e175e5b5c5/Pillow-10.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached Pillow-10.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.5 kB)
+Collecting matplotlib>=3.1.0 (from fanc==0.9.27)
+  Obtaining dependency information for matplotlib>=3.1.0 from https://files.pythonhosted.org/packages/65/5b/3b8fd7d66043f0638a35fa650570cbe69efd42fe169e5024f9307598b47e/matplotlib-3.8.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached matplotlib-3.8.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.8 kB)
+Collecting pandas>=0.15.0 (from fanc==0.9.27)
+  Obtaining dependency information for pandas>=0.15.0 from https://files.pythonhosted.org/packages/de/ce/b5d9c7ce1aaf9023b823c81932a50cd5e8f407198a696b0d1c6025a40b03/pandas-2.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached pandas-2.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (18 kB)
+Collecting pysam>=0.9.1 (from fanc==0.9.27)
+  Using cached pysam-0.21.0-cp311-cp311-manylinux_2_24_x86_64.whl (20.1 MB)
+Collecting biopython (from fanc==0.9.27)
+  Using cached biopython-1.81-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.1 MB)
+Collecting pytest (from fanc==0.9.27)
+  Obtaining dependency information for pytest from https://files.pythonhosted.org/packages/df/d0/e192c4275aecabf74faa1aacd75ef700091913236ec78b1a98f62a2412ee/pytest-7.4.2-py3-none-any.whl.metadata
+  Using cached pytest-7.4.2-py3-none-any.whl.metadata (7.9 kB)
+Collecting msgpack>=1.0.0 (from fanc==0.9.27)
+  Obtaining dependency information for msgpack>=1.0.0 from https://files.pythonhosted.org/packages/df/09/dee50913ba5cc047f7fd7162f09453a676e7935c84b3bf3a398e12108677/msgpack-1.0.7-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached msgpack-1.0.7-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.1 kB)
+Collecting msgpack-numpy>=0.4.6.1 (from fanc==0.9.27)
+  Using cached msgpack_numpy-0.4.8-py2.py3-none-any.whl (6.9 kB)
+Collecting scikit-learn (from fanc==0.9.27)
+  Obtaining dependency information for scikit-learn from https://files.pythonhosted.org/packages/8f/87/5969092159207f583481ad80a03f09e2d4af1ebd197f4530ca4e906c947e/scikit_learn-1.3.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached scikit_learn-1.3.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (11 kB)
+Collecting progressbar2 (from fanc==0.9.27)
+  Using cached progressbar2-4.2.0-py2.py3-none-any.whl (27 kB)
+Collecting pybedtools (from fanc==0.9.27)
+  Using cached pybedtools-0.9.1-cp311-cp311-linux_x86_64.whl
+Collecting pyBigWig (from fanc==0.9.27)
+  Using cached pyBigWig-0.3.22-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (213 kB)
+Collecting PyYAML>=5.1 (from fanc==0.9.27)
+  Obtaining dependency information for PyYAML>=5.1 from https://files.pythonhosted.org/packages/7b/5e/efd033ab7199a0b2044dab3b9f7a4f6670e6a52c089de572e928d2873b06/PyYAML-6.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached PyYAML-6.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.1 kB)
+Collecting tables>=3.5.1 (from fanc==0.9.27)
+  Using cached tables-3.8.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (6.5 MB)
+Collecting seaborn (from fanc==0.9.27)
+  Obtaining dependency information for seaborn from https://files.pythonhosted.org/packages/7b/e5/83fcd7e9db036c179e0352bfcd20f81d728197a16f883e7b90307a88e65e/seaborn-0.13.0-py3-none-any.whl.metadata
+  Downloading seaborn-0.13.0-py3-none-any.whl.metadata (5.3 kB)
+Collecting future (from fanc==0.9.27)
+  Using cached future-0.18.3-py3-none-any.whl
+Collecting gridmap>=0.14.0 (from fanc==0.9.27)
+  Using cached gridmap-0.15.0-py3-none-any.whl
+Collecting intervaltree (from fanc==0.9.27)
+  Using cached intervaltree-3.1.0-py2.py3-none-any.whl
+Collecting genomic_regions>=0.0.10 (from fanc==0.9.27)
+  Using cached genomic_regions-0.0.10-py3-none-any.whl
+Collecting scikit-image>=0.15.0 (from fanc==0.9.27)
+  Obtaining dependency information for scikit-image>=0.15.0 from https://files.pythonhosted.org/packages/d4/34/e27bf2bfe7b52b884b49bd71ea91ff81e4737246735ee5ea383314c31876/scikit_image-0.22.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Downloading scikit_image-0.22.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (13 kB)
+Collecting cooler>=0.8.0 (from fanc==0.9.27)
+  Obtaining dependency information for cooler>=0.8.0 from https://files.pythonhosted.org/packages/92/32/42e54d16653343108a3af8ec442ca61055e81586217e3183a97473b5e391/cooler-0.9.3-py3-none-any.whl.metadata
+  Using cached cooler-0.9.3-py3-none-any.whl.metadata (8.2 kB)
+Collecting h5py (from fanc==0.9.27)
+  Obtaining dependency information for h5py from https://files.pythonhosted.org/packages/a7/d9/ac660616671e30d70c091e46ed4fdc50df48ca79b1ac99df5499a45de128/h5py-3.9.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached h5py-3.9.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.5 kB)
+Collecting Deprecated (from fanc==0.9.27)
+  Obtaining dependency information for Deprecated from https://files.pythonhosted.org/packages/20/8d/778b7d51b981a96554f29136cd59ca7880bf58094338085bcf2a979a0e6a/Deprecated-1.2.14-py2.py3-none-any.whl.metadata
+  Using cached Deprecated-1.2.14-py2.py3-none-any.whl.metadata (5.4 kB)
+Collecting asciitree (from cooler>=0.8.0->fanc==0.9.27)
+  Using cached asciitree-0.3.3-py3-none-any.whl
+Collecting click>=7 (from cooler>=0.8.0->fanc==0.9.27)
+  Obtaining dependency information for click>=7 from https://files.pythonhosted.org/packages/00/2e/d53fa4befbf2cfa713304affc7ca780ce4fc1fd8710527771b58311a3229/click-8.1.7-py3-none-any.whl.metadata
+  Using cached click-8.1.7-py3-none-any.whl.metadata (3.0 kB)
+Collecting cytoolz (from cooler>=0.8.0->fanc==0.9.27)
+  Obtaining dependency information for cytoolz from https://files.pythonhosted.org/packages/bc/c4/263774e624e3321575b04536da3d1026a4913cc57140ad2ab13a42f3dd74/cytoolz-0.12.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached cytoolz-0.12.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.5 kB)
+Collecting multiprocess (from cooler>=0.8.0->fanc==0.9.27)
+  Obtaining dependency information for multiprocess from https://files.pythonhosted.org/packages/e7/41/96ac938770ba6e7d5ae1d8c9cafebac54b413549042c6260f0d0a6ec6622/multiprocess-0.70.15-py311-none-any.whl.metadata
+  Using cached multiprocess-0.70.15-py311-none-any.whl.metadata (7.2 kB)
+Collecting pyfaidx (from cooler>=0.8.0->fanc==0.9.27)
+  Obtaining dependency information for pyfaidx from https://files.pythonhosted.org/packages/83/bf/269e9b3a18dfda8a22a2d76decf98725f28ff930bd449f87a194625ba913/pyfaidx-0.7.2.2-py3-none-any.whl.metadata
+  Using cached pyfaidx-0.7.2.2-py3-none-any.whl.metadata (25 kB)
+Collecting simplejson (from cooler>=0.8.0->fanc==0.9.27)
+  Using cached simplejson-3.19.1-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (144 kB)
+Collecting cloudpickle (from gridmap>=0.14.0->fanc==0.9.27)
+  Using cached cloudpickle-2.2.1-py3-none-any.whl (25 kB)
+Collecting drmaa (from gridmap>=0.14.0->fanc==0.9.27)
+  Using cached drmaa-0.7.9-py2.py3-none-any.whl
+Collecting psutil>=2.0.0 (from gridmap>=0.14.0->fanc==0.9.27)
+  Using cached psutil-5.9.5-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (282 kB)
+Collecting pyzmq (from gridmap>=0.14.0->fanc==0.9.27)
+  Obtaining dependency information for pyzmq from https://files.pythonhosted.org/packages/7a/3b/a4ad590411a582254c188dd2a0df1404004edf9923672a6063c87a6eaf69/pyzmq-25.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached pyzmq-25.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+Collecting contourpy>=1.0.1 (from matplotlib>=3.1.0->fanc==0.9.27)
+  Obtaining dependency information for contourpy>=1.0.1 from https://files.pythonhosted.org/packages/b7/f6/78f60fa0b6ae64971178e2542e8b3ad3ba5f4f379b918ab7b18038a3f897/contourpy-1.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached contourpy-1.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.9 kB)
+Collecting cycler>=0.10 (from matplotlib>=3.1.0->fanc==0.9.27)
+  Obtaining dependency information for cycler>=0.10 from https://files.pythonhosted.org/packages/2b/b3/70c33027c4918c10ccf176014b38f8b91cb18ac018a78854543a4fc72609/cycler-0.12.0-py3-none-any.whl.metadata
+  Using cached cycler-0.12.0-py3-none-any.whl.metadata (3.8 kB)
+Collecting fonttools>=4.22.0 (from matplotlib>=3.1.0->fanc==0.9.27)
+  Obtaining dependency information for fonttools>=4.22.0 from https://files.pythonhosted.org/packages/ca/3b/9554bcd5005f994ab65e8238c713e62ddfd30e1d003a0b8e77193a0c2356/fonttools-4.43.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached fonttools-4.43.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (151 kB)
+Collecting kiwisolver>=1.0.1 (from matplotlib>=3.1.0->fanc==0.9.27)
+  Obtaining dependency information for kiwisolver>=1.0.1 from https://files.pythonhosted.org/packages/17/ba/17a706b232308e65f57deeccae503c268292e6a091313f6ce833a23093ea/kiwisolver-1.4.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached kiwisolver-1.4.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.4 kB)
+Collecting packaging>=20.0 (from matplotlib>=3.1.0->fanc==0.9.27)
+  Obtaining dependency information for packaging>=20.0 from https://files.pythonhosted.org/packages/ec/1a/610693ac4ee14fcdf2d9bf3c493370e4f2ef7ae2e19217d7a237ff42367d/packaging-23.2-py3-none-any.whl.metadata
+  Downloading packaging-23.2-py3-none-any.whl.metadata (3.2 kB)
+Collecting pyparsing>=2.3.1 (from matplotlib>=3.1.0->fanc==0.9.27)
+  Obtaining dependency information for pyparsing>=2.3.1 from https://files.pythonhosted.org/packages/39/92/8486ede85fcc088f1b3dba4ce92dd29d126fd96b0008ea213167940a2475/pyparsing-3.1.1-py3-none-any.whl.metadata
+  Using cached pyparsing-3.1.1-py3-none-any.whl.metadata (5.1 kB)
+Collecting python-dateutil>=2.7 (from matplotlib>=3.1.0->fanc==0.9.27)
+  Using cached python_dateutil-2.8.2-py2.py3-none-any.whl (247 kB)
+Collecting pytz>=2020.1 (from pandas>=0.15.0->fanc==0.9.27)
+  Obtaining dependency information for pytz>=2020.1 from https://files.pythonhosted.org/packages/32/4d/aaf7eff5deb402fd9a24a1449a8119f00d74ae9c2efa79f8ef9994261fc2/pytz-2023.3.post1-py2.py3-none-any.whl.metadata
+  Using cached pytz-2023.3.post1-py2.py3-none-any.whl.metadata (22 kB)
+Collecting tzdata>=2022.1 (from pandas>=0.15.0->fanc==0.9.27)
+  Using cached tzdata-2023.3-py2.py3-none-any.whl (341 kB)
+Collecting six (from pybedtools->fanc==0.9.27)
+  Using cached six-1.16.0-py2.py3-none-any.whl (11 kB)
+Collecting cython (from pysam>=0.9.1->fanc==0.9.27)
+  Obtaining dependency information for cython from https://files.pythonhosted.org/packages/d9/fc/3a49ab49ae556b7d644a2d3082f01082bb902befe3e398f11d675d6c2ad0/Cython-3.0.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached Cython-3.0.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (3.1 kB)
+Collecting networkx>=2.8 (from scikit-image>=0.15.0->fanc==0.9.27)
+  Using cached networkx-3.1-py3-none-any.whl (2.1 MB)
+Collecting imageio>=2.27 (from scikit-image>=0.15.0->fanc==0.9.27)
+  Obtaining dependency information for imageio>=2.27 from https://files.pythonhosted.org/packages/f6/37/e21e6f38b93878ba80302e95b8ccd4718d80f0c53055ccae343e606b1e2d/imageio-2.31.5-py3-none-any.whl.metadata
+  Downloading imageio-2.31.5-py3-none-any.whl.metadata (4.6 kB)
+Collecting tifffile>=2022.8.12 (from scikit-image>=0.15.0->fanc==0.9.27)
+  Obtaining dependency information for tifffile>=2022.8.12 from https://files.pythonhosted.org/packages/f5/72/68ea763b5f3e3d9871492683059ed4724fd700dbe54aa03cdda7a9692129/tifffile-2023.9.26-py3-none-any.whl.metadata
+  Using cached tifffile-2023.9.26-py3-none-any.whl.metadata (30 kB)
+Collecting lazy_loader>=0.3 (from scikit-image>=0.15.0->fanc==0.9.27)
+  Obtaining dependency information for lazy_loader>=0.3 from https://files.pythonhosted.org/packages/a1/c3/65b3814e155836acacf720e5be3b5757130346670ac454fee29d3eda1381/lazy_loader-0.3-py3-none-any.whl.metadata
+  Using cached lazy_loader-0.3-py3-none-any.whl.metadata (4.3 kB)
+Collecting numexpr>=2.6.2 (from tables>=3.5.1->fanc==0.9.27)
+  Obtaining dependency information for numexpr>=2.6.2 from https://files.pythonhosted.org/packages/6a/3e/fa33d67bc4f5ee05f5bc2ce65fd1a796211f0b759cec3f60ded2763013b9/numexpr-2.8.7-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata
+  Using cached numexpr-2.8.7-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (8.7 kB)
+Collecting blosc2~=2.0.0 (from tables>=3.5.1->fanc==0.9.27)
+  Using cached blosc2-2.0.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.9 MB)
+Collecting py-cpuinfo (from tables>=3.5.1->fanc==0.9.27)
+  Using cached py_cpuinfo-9.0.0-py3-none-any.whl (22 kB)
+Collecting wrapt<2,>=1.10 (from Deprecated->fanc==0.9.27)
+  Using cached wrapt-1.15.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (78 kB)
+Collecting sortedcontainers<3.0,>=2.0 (from intervaltree->fanc==0.9.27)
+  Using cached sortedcontainers-2.4.0-py2.py3-none-any.whl (29 kB)
+Collecting python-utils>=3.0.0 (from progressbar2->fanc==0.9.27)
+  Obtaining dependency information for python-utils>=3.0.0 from https://files.pythonhosted.org/packages/f0/7b/e83e7b184e53530abe064b237a3731c738d3cb59f4201f3ce1a4ec0efe6f/python_utils-3.8.1-py2.py3-none-any.whl.metadata
+  Using cached python_utils-3.8.1-py2.py3-none-any.whl.metadata (9.7 kB)
+Collecting iniconfig (from pytest->fanc==0.9.27)
+  Using cached iniconfig-2.0.0-py3-none-any.whl (5.9 kB)
+Collecting pluggy<2.0,>=0.12 (from pytest->fanc==0.9.27)
+  Obtaining dependency information for pluggy<2.0,>=0.12 from https://files.pythonhosted.org/packages/05/b8/42ed91898d4784546c5f06c60506400548db3f7a4b3fb441cba4e5c17952/pluggy-1.3.0-py3-none-any.whl.metadata
+  Using cached pluggy-1.3.0-py3-none-any.whl.metadata (4.3 kB)
+Collecting joblib>=1.1.1 (from scikit-learn->fanc==0.9.27)
+  Obtaining dependency information for joblib>=1.1.1 from https://files.pythonhosted.org/packages/10/40/d551139c85db202f1f384ba8bcf96aca2f329440a844f924c8a0040b6d02/joblib-1.3.2-py3-none-any.whl.metadata
+  Using cached joblib-1.3.2-py3-none-any.whl.metadata (5.4 kB)
+Collecting threadpoolctl>=2.0.0 (from scikit-learn->fanc==0.9.27)
+  Obtaining dependency information for threadpoolctl>=2.0.0 from https://files.pythonhosted.org/packages/81/12/fd4dea011af9d69e1cad05c75f3f7202cdcbeac9b712eea58ca779a72865/threadpoolctl-3.2.0-py3-none-any.whl.metadata
+  Using cached threadpoolctl-3.2.0-py3-none-any.whl.metadata (10.0 kB)
+Collecting typing-extensions>3.10.0.2 (from python-utils>=3.0.0->progressbar2->fanc==0.9.27)
+  Obtaining dependency information for typing-extensions>3.10.0.2 from https://files.pythonhosted.org/packages/24/21/7d397a4b7934ff4028987914ac1044d3b7d52712f30e2ac7a2ae5bc86dd0/typing_extensions-4.8.0-py3-none-any.whl.metadata
+  Using cached typing_extensions-4.8.0-py3-none-any.whl.metadata (3.0 kB)
+Collecting toolz>=0.8.0 (from cytoolz->cooler>=0.8.0->fanc==0.9.27)
+  Using cached toolz-0.12.0-py3-none-any.whl (55 kB)
+Collecting dill>=0.3.7 (from multiprocess->cooler>=0.8.0->fanc==0.9.27)
+  Obtaining dependency information for dill>=0.3.7 from https://files.pythonhosted.org/packages/f5/3a/74a29b11cf2cdfcd6ba89c0cecd70b37cd1ba7b77978ce611eb7a146a832/dill-0.3.7-py3-none-any.whl.metadata
+  Using cached dill-0.3.7-py3-none-any.whl.metadata (9.9 kB)
+Requirement already satisfied: setuptools in /home/kalavatt/miniconda3/envs/fanc_pip_env/lib/python3.11/site-packages (from pyfaidx->cooler>=0.8.0->fanc==0.9.27) (68.2.2)
+Collecting importlib-metadata (from pyfaidx->cooler>=0.8.0->fanc==0.9.27)
+  Obtaining dependency information for importlib-metadata from https://files.pythonhosted.org/packages/cc/37/db7ba97e676af155f5fcb1a35466f446eadc9104e25b83366e8088c9c926/importlib_metadata-6.8.0-py3-none-any.whl.metadata
+  Using cached importlib_metadata-6.8.0-py3-none-any.whl.metadata (5.1 kB)
+Collecting zipp>=0.5 (from importlib-metadata->pyfaidx->cooler>=0.8.0->fanc==0.9.27)
+  Obtaining dependency information for zipp>=0.5 from https://files.pythonhosted.org/packages/d9/66/48866fc6b158c81cc2bfecc04c480f105c6040e8b077bc54c634b4a67926/zipp-3.17.0-py3-none-any.whl.metadata
+  Using cached zipp-3.17.0-py3-none-any.whl.metadata (3.7 kB)
+Using cached cooler-0.9.3-py3-none-any.whl (103 kB)
+Using cached h5py-3.9.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (4.8 MB)
+Using cached matplotlib-3.8.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (11.6 MB)
+Using cached msgpack-1.0.7-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (557 kB)
+Using cached numpy-1.26.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (18.2 MB)
+Using cached pandas-2.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (12.2 MB)
+Using cached Pillow-10.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.5 MB)
+Using cached PyYAML-6.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (757 kB)
+Downloading scikit_image-0.22.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (14.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 14.7/14.7 MB 11.1 MB/s eta 0:00:00
+Using cached scipy-1.11.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (36.4 MB)
+Using cached Deprecated-1.2.14-py2.py3-none-any.whl (9.6 kB)
+Using cached pytest-7.4.2-py3-none-any.whl (324 kB)
+Using cached scikit_learn-1.3.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (10.9 MB)
+Downloading seaborn-0.13.0-py3-none-any.whl (294 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 294.6/294.6 kB 10.4 MB/s eta 0:00:00
+Using cached click-8.1.7-py3-none-any.whl (97 kB)
+Using cached contourpy-1.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (302 kB)
+Using cached cycler-0.12.0-py3-none-any.whl (8.2 kB)
+Using cached Cython-3.0.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.6 MB)
+Using cached fonttools-4.43.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (4.9 MB)
+Downloading imageio-2.31.5-py3-none-any.whl (313 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 313.2/313.2 kB 9.8 MB/s eta 0:00:00
+Using cached joblib-1.3.2-py3-none-any.whl (302 kB)
+Using cached kiwisolver-1.4.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.4 MB)
+Using cached lazy_loader-0.3-py3-none-any.whl (9.1 kB)
+Using cached numexpr-2.8.7-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (386 kB)
+Downloading packaging-23.2-py3-none-any.whl (53 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 53.0/53.0 kB 3.0 MB/s eta 0:00:00
+Using cached pluggy-1.3.0-py3-none-any.whl (18 kB)
+Using cached pyparsing-3.1.1-py3-none-any.whl (103 kB)
+Using cached python_utils-3.8.1-py2.py3-none-any.whl (27 kB)
+Using cached pytz-2023.3.post1-py2.py3-none-any.whl (502 kB)
+Using cached threadpoolctl-3.2.0-py3-none-any.whl (15 kB)
+Using cached tifffile-2023.9.26-py3-none-any.whl (222 kB)
+Using cached cytoolz-0.12.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+Using cached multiprocess-0.70.15-py311-none-any.whl (135 kB)
+Using cached pyfaidx-0.7.2.2-py3-none-any.whl (28 kB)
+Using cached pyzmq-25.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.1 MB)
+Using cached dill-0.3.7-py3-none-any.whl (115 kB)
+Using cached typing_extensions-4.8.0-py3-none-any.whl (31 kB)
+Using cached importlib_metadata-6.8.0-py3-none-any.whl (22 kB)
+Using cached zipp-3.17.0-py3-none-any.whl (7.4 kB)
+Building wheels for collected packages: fanc
+  Building wheel for fanc (setup.py) ... done
+  Created wheel for fanc: filename=fanc-0.9.27-cp311-cp311-linux_x86_64.whl size=316386 sha256=8c2c8cb25ed2c5283c6fcb0807f164c04c3d183d5ff16a4795c750e9375113ac
+  Stored in directory: /home/kalavatt/.cache/pip/wheels/1d/f7/8d/11c4ac70c7c5e8e55df86e6b894648b83a07617c2cd5d8e775
+Successfully built fanc
+Installing collected packages: sortedcontainers, pytz, py-cpuinfo, drmaa, asciitree, zipp, wrapt, tzdata, typing-extensions, toolz, threadpoolctl, six, simplejson, pyzmq, PyYAML, pyparsing, pyBigWig, psutil, pluggy, pillow, packaging, numpy, networkx, msgpack, lazy_loader, kiwisolver, joblib, intervaltree, iniconfig, future, fonttools, dill, cython, cycler, cloudpickle, click, tifffile, scipy, python-utils, python-dateutil, pytest, pysam, numexpr, multiprocess, msgpack-numpy, importlib-metadata, imageio, h5py, gridmap, Deprecated, cytoolz, contourpy, blosc2, biopython, tables, scikit-learn, scikit-image, pyfaidx, pybedtools, progressbar2, pandas, matplotlib, seaborn, genomic_regions, cooler, fanc
+Successfully installed Deprecated-1.2.14 PyYAML-6.0.1 asciitree-0.3.3 biopython-1.81 blosc2-2.0.0 click-8.1.7 cloudpickle-2.2.1 contourpy-1.1.1 cooler-0.9.3 cycler-0.12.0 cython-3.0.2 cytoolz-0.12.2 dill-0.3.7 drmaa-0.7.9 fanc-0.9.27 fonttools-4.43.0 future-0.18.3 genomic_regions-0.0.10 gridmap-0.15.0 h5py-3.9.0 imageio-2.31.5 importlib-metadata-6.8.0 iniconfig-2.0.0 intervaltree-3.1.0 joblib-1.3.2 kiwisolver-1.4.5 lazy_loader-0.3 matplotlib-3.8.0 msgpack-1.0.7 msgpack-numpy-0.4.8 multiprocess-0.70.15 networkx-3.1 numexpr-2.8.7 numpy-1.26.0 packaging-23.2 pandas-2.1.1 pillow-10.0.1 pluggy-1.3.0 progressbar2-4.2.0 psutil-5.9.5 py-cpuinfo-9.0.0 pyBigWig-0.3.22 pybedtools-0.9.1 pyfaidx-0.7.2.2 pyparsing-3.1.1 pysam-0.21.0 pytest-7.4.2 python-dateutil-2.8.2 python-utils-3.8.1 pytz-2023.3.post1 pyzmq-25.1.1 scikit-image-0.22.0 scikit-learn-1.3.1 scipy-1.11.3 seaborn-0.13.0 simplejson-3.19.1 six-1.16.0 sortedcontainers-2.4.0 tables-3.8.0 threadpoolctl-3.2.0 tifffile-2023.9.26 toolz-0.12.0 typing-extensions-4.8.0 tzdata-2023.3 wrapt-1.15.0 zipp-3.17.0
+
+
+❯ [[ ${check_installation} == TRUE ]] &&
+>     {
+>         which fanc
+>         fanc --version
+>     }
+/home/kalavatt/miniconda3/envs/fanc_pip_env/bin/fanc
+0.9.27
+
+
+❯ conda info -e
+# conda environments:
+#
+base                     /home/kalavatt/miniconda3
+Trinity_env              /home/kalavatt/miniconda3/envs/Trinity_env
+atria_env                /home/kalavatt/miniconda3/envs/atria_env
+chromatin_env            /home/kalavatt/miniconda3/envs/chromatin_env
+coverage_env             /home/kalavatt/miniconda3/envs/coverage_env
+data_env                 /home/kalavatt/miniconda3/envs/data_env
+deploy_snakemake         /home/kalavatt/miniconda3/envs/deploy_snakemake
+expression_env           /home/kalavatt/miniconda3/envs/expression_env
+fanc_env                 /home/kalavatt/miniconda3/envs/fanc_env
+fanc_pip_env          *  /home/kalavatt/miniconda3/envs/fanc_pip_env
+gff3_env                 /home/kalavatt/miniconda3/envs/gff3_env
+hicexplorer_env          /home/kalavatt/miniconda3/envs/hicexplorer_env
+pairtools_env            /home/kalavatt/miniconda3/envs/pairtools_env
+
+
+❯ conda remove --name fanc_env --all
+
+Remove all packages in environment /home/kalavatt/miniconda3/envs/fanc_env:
+
+
+## Package Plan ##
+
+  environment location: /home/kalavatt/miniconda3/envs/fanc_env
+
+
+The following packages will be REMOVED:
+
+  _libgcc_mutex-0.1-conda_forge
+  _openmp_mutex-4.5-2_gnu
+  bzip2-1.0.8-h7f98852_4
+  ca-certificates-2023.7.22-hbcca054_0
+  ld_impl_linux-64-2.40-h41732ed_0
+  libffi-3.4.2-h7f98852_5
+  libgcc-ng-13.2.0-h807b86a_2
+  libgomp-13.2.0-h807b86a_2
+  libnsl-2.0.0-hd590300_1
+  libsqlite-3.43.0-h2797004_0
+  libuuid-2.38.1-h0b41bf4_0
+  libzlib-1.2.13-hd590300_5
+  ncurses-6.4-hcb278e6_0
+  openssl-3.1.3-hd590300_0
+  parallel-20230922-ha770c72_0
+  perl-5.32.1-4_hd590300_perl5
+  pip-23.2.1-pyhd8ed1ab_0
+  python-3.11.0-he550d4f_1_cpython
+  readline-8.2-h8228510_1
+  rename-1.601-hdfd78af_1
+  setuptools-68.2.2-pyhd8ed1ab_0
+  tk-8.6.13-h2797004_0
+  tzdata-2023c-h71feb2d_0
+  wheel-0.41.2-pyhd8ed1ab_0
+  xz-5.2.6-h166bdaf_0
+
+
+Proceed ([y]/n)? y
+
+Preparing transaction: done
+Verifying transaction: done
+Executing transaction: done
+```
+</details>
+<br />
 <br />
 
 <a id="learn-to-use-fanc-compare-draw-some-preliminary-plots"></a>
 ## Learn to use `fanc compare`, draw some preliminary plots
-<a id="code-3"></a>
+<a id="code-4"></a>
 ### Code
 <details>
 <summary><i>Code: Learn to use `fanc compare`, draw some preliminary plots</i></summary>
@@ -808,18 +1297,20 @@ Successfully installed Deprecated-1.2.14 PyWavelets-1.4.1 PyYAML-6.0.1 asciitree
 ```bash
 #!/bin/bash
 
+grabnode  # 1, 20, 1, N
+
 [[ ${CONDA_DEFAULT_ENV} != base ]] && conda deactivate || true
-source activate fanc_env
+source activate fanc_pip_env  # Installation from Attempt #2
 
 [[ "$(pwd)" != "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process" ]] &&
     cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process" ||
     true
 
-[[ ! -d mats ]] && mkdir mats
-[[ ! -d mats/2023-0929_init ]] && mkdir mats/2023-0929_init
+[[ ! -d mats ]] && mkdir mats || true
+[[ ! -d mats/2023-0929_init ]] && mkdir mats/2023-0929_init || true
 
-[[ ! -d pngs ]] && mkdir pngs
-[[ ! -d pngs/2023-0929_init ]] && mkdir pngs/2023-0929_init
+[[ ! -d pngs ]] && mkdir pngs || true
+[[ ! -d pngs/2023-0929_init ]] && mkdir pngs/2023-0929_init || true
 
 ls -lhaFG 08_zoom/
 
@@ -831,8 +1322,13 @@ f_2=08_zoom/MC-2020_nz_WT_repM.standard-rDNA-complete.mcool
 d_out=mats/2023-0929_init
 m_Q2="log2_Q-over-G2_${res}"
 
-check_help=FALSE
-[[ check_help == TRUE ]] && fanc compare --help || true
+check_help=TRUE
+[[ ${check_help} == TRUE ]] &&
+    {
+        fanc compare --help && echo -e "\n"
+        fancplot --help && echo -e "\n"
+        fancplot --plot square --help
+    } || true
 
 check_command=TRUE
 [[ ${check_command} == TRUE ]] &&
@@ -861,7 +1357,7 @@ run_command=TRUE
             --ignore-infinite \
             ${f_Q}@${res} ${f_2}@${res} \
             ${d_out}/${m_Q2}
-    }
+    } || true
 
 ls -lhaFG ${d_out}/
 
@@ -872,38 +1368,41 @@ check_command=TRUE
 [[ ${check_command} == TRUE ]] &&
     {
         echo """
-        fancplot --output ${out} I:1-230218 --plot square ${in}
+        fancplot \\
+            -o \"pngs/2023-0929_init/${m_Q2}_XII-1-800000.pdf\" \\
+            \"XII:1-800000\" \\
+            -p square \\
+            -vmin 0 -vmax 0.1 \\
+            --title \"6400 bp, XII:1-800000\" \\
+            -c Reds \\
+            \"${f_Q}@${res}\"
         """
     } || true
 
-#  Awaiting a response from author of FAN-C before continuing work
-#+ For more details on the errors encountered (etc.), see the following URL:
-#+ github.com/vaquerizaslab/fanc/issues/170
 run_command=TRUE
 [[ ${run_command} == TRUE ]] &&
     {
         fancplot \
-            -o "test.pdf" \
-            XII:100000-200000 \
+            -o "pngs/2023-0929_init/${m_Q2}_XII-1-800000.pdf" \
+            "XII:1-800000" \
             -p square \
-            -vmin 0 -vmax 0.1 \
-            --title "6400 bp, XII:100000-200000" \
+            --log \
+            --title "6400 bp, XII:1-800000" \
             -c Reds \
             "${f_Q}@${res}"
-            # 08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool@6400
     } || true
 ```
 </details>
 <br />
 
-<a id="printed-3"></a>
+<a id="printed-4"></a>
 ### Printed
 <details>
 <summary><i>Printed: Learn to use `fanc compare`, draw some preliminary plots</i></summary>
 
 ```txt
 ❯ [[ ${CONDA_DEFAULT_ENV} != base ]] && conda deactivate || true
-❯ source activate fanc_env
+❯ source activate fanc_pip_env  # Installation from Attempt #2
 
 
 ❯ [[ "$(pwd)" != "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process" ]] &&
@@ -991,14 +1490,12 @@ mkdir: created directory 'mats/2023-0929_init'
 >             --ignore-infinite \
 >             ${f_Q}@${res} ${f_2}@${res} \
 >             ${d_out}/${m_Q2}
->     }
-/home/kalavatt/miniconda3/envs/fanc_env/bin/fanc:4: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
-  __import__('pkg_resources').require('fanc==0.9.26')
-2023-09-29 11:57:15,323 INFO FAN-C version: 0.9.26
-2023-09-29 11:57:16,107 INFO Enabling zero filter
-Compare 100% (153 of 153) |#############################################################################################################################| Elapsed Time: 0:00:47 Time:  0:00:47
+>     } || true
+2023-10-04 12:12:53,472 INFO FAN-C version: 0.9.27
+2023-10-04 12:12:54,547 INFO Enabling zero filter
+Compare 100% (153 of 153) |#############################################################################################################################| Elapsed Time: 0:00:44 Time:  0:00:44
 Buffers 100% (3 of 3) |#################################################################################################################################| Elapsed Time: 0:00:00 Time:  0:00:00
-Expected 100% (1328774 of 1328774) |####################################################################################################################| Elapsed Time: 0:00:07 Time:  0:00:07
+Expected 100% (1328774 of 1328774) |####################################################################################################################| Elapsed Time: 0:00:06 Time:  0:00:06
 
 
 ❯ ls -lhaFG ${d_out}/
@@ -1012,7 +1509,55 @@ drwxrws--- 3 kalavatt  32 Sep 29 12:00 ../
 ❯ out=pngs/2023-0929_init/${m_Q2}.png
 
 
-...
+❯ ls -lhaFG ${d_out}/
+total 18M
+drwxrws--- 2 kalavatt  37 Oct  4 12:13 ./
+drwxrws--- 4 kalavatt  64 Oct  3 05:42 ../
+-rw-rw---- 1 kalavatt 15M Oct  4 12:13 log2_Q-over-G2_6400
+
+
+❯  in=mats/2023-0929_init/${m_Q2}
+❯ out=pngs/2023-0929_init/${m_Q2}
+
+
+❯ [[ ${check_command} == TRUE ]] &&
+>     {
+>         echo """
+>         fancplot \\
+>             -o \"pngs/2023-0929_init/${m_Q2}_XII-1-800000.pdf\" \\
+>             \"XII:1-800000\" \\
+>             -p square \\
+>             -vmin 0 -vmax 0.1 \\
+>             --title \"6400 bp, XII:1-800000\" \\
+>             -c Reds \\
+>             \"${f_Q}@${res}\"
+>         """
+>     } || true
+
+        fancplot \
+            -o "pngs/2023-0929_init/log2_Q-over-G2_6400_XII-1-800000.pdf" \
+            "XII:1-800000" \
+            -p square \
+            -vmin 0 -vmax 0.1 \
+            --title "6400 bp, XII:1-800000" \
+            -c Reds \
+            "08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool@6400"
+
+
+❯ run_command=TRUE
+❯ [[ ${run_command} == TRUE ]] &&
+>     {
+>         fancplot \
+>             -o "pngs/2023-0929_init/${m_Q2}_XII-1-800000.pdf" \
+>             "XII:1-800000" \
+>             -p square \
+>             -vmin 0 -vmax 0.1 \
+>             --title "6400 bp, XII:1-800000" \
+>             -c Reds \
+>             "${f_Q}@${res}"
+>     } || true
+2023-10-04 12:46:50,530 INFO Using non-interactive backend
+2023-10-04 12:46:51,433 INFO Found 1 regions
 ```
 </details>
 <br />
@@ -1023,10 +1568,13 @@ drwxrws--- 3 kalavatt  32 Sep 29 12:00 ../
 <summary><i>Help: Learn to use `fanc compare`, draw some preliminary plots</i></summary>
 
 ```txt
-❯ fanc compare --help
-/home/kalavatt/miniconda3/envs/fanc_env/bin/fanc:4: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
-  __import__('pkg_resources').require('fanc==0.9.26')
-2023-09-29 11:39:39,118 INFO FAN-C version: 0.9.26
+❯ [[ ${check_help} == TRUE ]] &&
+>     {
+>         fanc compare --help && echo -e "\n"
+>         fancplot --help
+>         fancplot --plot square --help
+>     } || true
+2023-10-04 12:51:42,331 INFO FAN-C version: 0.9.27
 usage: fanc compare [-h] [-c COMPARISON] [-o OUTPUT_FORMAT] [-S] [-l] [--log-matrix] [-Z] [-I] [-e] [-u] [-tmp] input input output
 
 Create pairwise comparisons of Hi-C comparison maps
@@ -1051,6 +1599,94 @@ options:
                         O/E transform matrix values before comparison. Only has an effect on matrix comparisons.
   -u, --uncorrected     Compare uncorrected matrices. Only has an effect on matrix comparisons.
   -tmp, --work-in-tmp   Work in temporary directory
+
+
+usage: fancplot [<fancplot global parameters>] <region> [<region> ...]
+            --plot <plot type> [<plot parameters>] <plot data file(s)> [...]
+
+            Run fancplot --plot <plot type> -h for help on a specific subplot.
+
+Plot types:
+
+-- Matrix --
+triangular    Triangular Hi-C plot
+square        Square Hi-C plot
+split         Matrix vs matrix plot
+mirror        "Mirrored" matrix comparison plot
+
+-- Region --
+scores        Region scores plot with parameter dependency
+line          Line plot
+bar           Bar plot for region scores
+layer         Layered feature plot
+gene          Gene plot
+
+fancplot plotting tool for fanc
+
+positional arguments:
+  regions               List of region selectors (<chr>:<start>-<end>) or files with region information (BED, GTF, ...).
+
+options:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        Suppresses interactive plotting window and redirects plot to file. Specify path to file when plotting a single region, and path to a folder for plotting multiple
+                        regions.
+  -s SCRIPT, --script SCRIPT
+                        Use a script file to define plot.
+  -p PLOT, --plot PLOT  New plot, type will be chosen automatically by file type, unless "-t" is provided.
+  -n NAME, --name NAME  Plot name to be used as prefix when plotting multiple regions. Is ignored for single region and interactive plot.
+  --width WIDTH         Width of the figure in inches. Default: 4
+  -w WINDOW_SIZE, --window-size WINDOW_SIZE
+                        Plotting region size in base pairs. If provided, the actual size of the given region is ignored and instead a region <chromosome>:<region center - window size/2> -
+                        <region center + window size/2> will be plotted.
+  --invert-x            Invert x-axis for this plot
+  --tick-locations TICK_LOCATIONS [TICK_LOCATIONS ...]
+                        Manually define the locations of the tick labels on the genome axis.
+  --verbose, -v         Set verbosity level: Can be chained like "-vvv" to increase verbosity. Default is to show errors, warnings, and info messages (same as "-vv"). "-v" shows only errors
+                        and warnings, "-vvv" shows errors, warnings, info, and debug messages.
+  --silent              Do not print log messages to command line.
+  -V, --version         Print version information
+  --pdf-text-as-font    When saving a plot to PDF, save text as a font instead of a path. This will increase the file size, sometimes by a lot, but it makes the text in plots editable in
+                        vector graphics programs such as Inkscape or Illustrator.
+
+
+usage: fancplot <region> -p square [-h] [--aspect-ratio ASPECT_RATIO] [--title TITLE] [--fix-chromosome] [--hide-x] [--show-minor-ticks] [--hide-major-ticks] [--show-tick-legend]
+                                   [-vmin VMIN] [-vmax VMAX] [-u] [-e] [-l] [-r] [-f] [-c COLORMAP] [-s COLORBAR_SYMMETRY] [-C] [--weight-field WEIGHT_FIELD]
+                                   hic
+
+Square Hi-C plot.
+
+positional arguments:
+  hic                   Hi-C object.
+
+options:
+  -h, --help            show this help message and exit
+  --aspect-ratio ASPECT_RATIO
+                        Aspect ratio of this panel. Default is determined by figure type (usually 1.0).
+  --title TITLE         Title of this plot.
+  --fix-chromosome      Fix chromosome identifier for this plot (add or remove "chr" as required). Use this ifthere is a mismatch between the nomenclature used by different datasets in the
+                        figure, specifically if the chromosome prefix for this dataset does not match the plot region definition.
+  --hide-x              Hide x-axis for this plot
+  --show-minor-ticks    Show minor ticks on genome axis
+  --hide-major-ticks    Hide major ticks on genome axis.
+  --show-tick-legend    Show tick legend with distance between ticks on genome axis
+  -vmin VMIN, --minimum-value VMIN
+                        Minimum value assigned the first color in the colorbar.
+  -vmax VMAX, --maximum-value VMAX
+                        Maximum value assigned the last color in the colorbar.
+  -u, --uncorrected     Plot uncorrected Hi-C matrix values.
+  -e, --observed-expected
+                        Log2-O/E transform matrix values. Automatically sets colormap to bwr and makes colorbar symmetrical around 0.
+  -l, --log             Log-scale colorbar.
+  -r, --range-slider    Add vmax/vmin slider to plot
+  -f, --flip            Flip matrix upside down
+  -c COLORMAP, --colormap COLORMAP
+                        Matplotlib colormap
+  -s COLORBAR_SYMMETRY, --colorbar-symmetry COLORBAR_SYMMETRY
+                        Make colorbar symmetrical around this value.
+  -C, --no-colorbar     Do not show colorbar in plot
+  --weight-field WEIGHT_FIELD
+                        Which value to use for plotting. Default: weight
 ```
 
 More details [here](https://fan-c.readthedocs.io/en/latest/fanc-executable/fanc-analyse-hic/comparisons.html).
@@ -1060,7 +1696,7 @@ More details [here](https://fan-c.readthedocs.io/en/latest/fanc-executable/fanc-
 
 <a id="set-up-virtual-environment-for-analyses-with-hicexplorer"></a>
 ## Set up virtual environment for analyses with `HiCExplorer`
-<a id="code-4"></a>
+<a id="code-5"></a>
 ### Code
 <details>
 <summary><i>Code: Set up virtual environment for analyses with `HiCExplorer`</i></summary>
@@ -1086,7 +1722,7 @@ fi
 </details>
 <br />
 
-<a id="printed-4"></a>
+<a id="printed-5"></a>
 ### Printed
 <details>
 <summary><i>Printed: Set up virtual environment for analyses with `HiCExplorer`</i></summary>
@@ -1567,7 +2203,7 @@ Executing transaction: done
 ## Learn to use `hicexplorer`, draw some preliminary plots
 <a id="take-the-log2-ratio-of-q-over-g2"></a>
 ### Take the log2 ratio of Q over G2
-<a id="code-5"></a>
+<a id="code-6"></a>
 #### Code
 <details>
 <summary><i>Code: Take the log2 ratio of Q over G2</i></summary>
@@ -1710,7 +2346,7 @@ run_commands=TRUE
 
 <a id="take-the-log2-ratio-of-q-over-g1"></a>
 ### Take the log2 ratio of Q over G1
-<a id="code-6"></a>
+<a id="code-7"></a>
 #### Code
 <details>
 <summary><i>Code: Take the log2 ratio of Q over G1</i></summary>
@@ -1830,7 +2466,7 @@ run_commands=TRUE
 
 <a id="take-the-log2-ratio-of-g2-over-g1"></a>
 ### Take the log2 ratio of G2 over G1
-<a id="code-7"></a>
+<a id="code-8"></a>
 #### Code
 <details>
 <summary><i>Code: Take the log2 ratio of G2 over G1</i></summary>
