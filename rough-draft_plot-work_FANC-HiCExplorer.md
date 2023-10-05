@@ -26,6 +26,7 @@
         1. [Printed](#printed-3)
 1. [Learn to use `fanc compare`, draw some preliminary plots](#learn-to-use-fanc-compare-draw-some-preliminary-plots)
     1. [Code](#code-4)
+    1. [Notes](#notes-2)
     1. [Printed](#printed-4)
     1. [Help](#help)
 1. [Set up virtual environment for analyses with `HiCExplorer`](#set-up-virtual-environment-for-analyses-with-hicexplorer)
@@ -39,7 +40,7 @@
     1. [Take the log2 ratio of G2 over G1](#take-the-log2-ratio-of-g2-over-g1)
         1. [Code](#code-8)
     1. [Help](#help-1)
-    1. [Notes](#notes-2)
+    1. [Notes](#notes-3)
 
 <!-- /MarkdownTOC -->
 </details>
@@ -1307,10 +1308,10 @@ source activate fanc_pip_env  # Installation from Attempt #2
     true
 
 [[ ! -d mats ]] && mkdir mats || true
-[[ ! -d mats/2023-0929_init ]] && mkdir mats/2023-0929_init || true
+[[ ! -d mats/2023-0929 ]] && mkdir mats/2023-0929 || true
 
 [[ ! -d pngs ]] && mkdir pngs || true
-[[ ! -d pngs/2023-0929_init ]] && mkdir pngs/2023-0929_init || true
+[[ ! -d pngs/2023-0929 ]] && mkdir pngs/2023-0929 || true
 
 ls -lhaFG 08_zoom/
 
@@ -1319,7 +1320,7 @@ res=6400
 f_Q=08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool
 f_1=08_zoom/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mcool
 f_2=08_zoom/MC-2020_nz_WT_repM.standard-rDNA-complete.mcool
-d_out=mats/2023-0929_init
+d_out=mats/2023-0929
 m_Q2="log2_Q-over-G2_${res}"
 
 check_help=TRUE
@@ -1351,7 +1352,6 @@ run_command=TRUE
     {
         fanc compare \
             --comparison "fold-change" \
-            --no-scale \
             --log \
             --ignore-zero \
             --ignore-infinite \
@@ -1361,21 +1361,30 @@ run_command=TRUE
 
 ls -lhaFG ${d_out}/
 
- in=mats/2023-0929_init/${m_Q2}
-out=pngs/2023-0929_init/${m_Q2}
+ in=mats/2023-0929/${m_Q2}
+out=pngs/2023-0929/${m_Q2}
 
 check_command=TRUE
 [[ ${check_command} == TRUE ]] &&
     {
         echo """
         fancplot \\
-            -o \"pngs/2023-0929_init/${m_Q2}_XII-1-800000.pdf\" \\
+            -o \"pngs/2023-0929/$(basename ${f_Q/mcool/${res}})_XII-1-800000.pdf\" \\
             \"XII:1-800000\" \\
             -p square \\
             -vmin 0 -vmax 0.1 \\
             --title \"6400 bp, XII:1-800000\" \\
             -c Reds \\
             \"${f_Q}@${res}\"
+
+        fancplot \\
+            -o \"pngs/2023-0929/${m_Q2}_XII-1-800000.pdf\" \\
+            \"XII:1-800000\" \\
+            -p square \\
+            --title \"6400 bp, XII:1-800000\" \\
+            -s 0 \\
+            -c \"coolwarm\" \\
+            \"${d_out}/${m_Q2}\"
         """
     } || true
 
@@ -1383,15 +1392,39 @@ run_command=TRUE
 [[ ${run_command} == TRUE ]] &&
     {
         fancplot \
-            -o "pngs/2023-0929_init/${m_Q2}_XII-1-800000.pdf" \
+            -o "pngs/2023-0929/$(basename ${f_Q/mcool/${res}})_XII-1-800000.pdf" \
             "XII:1-800000" \
             -p square \
-            --log \
+            -vmin 0 -vmax 0.1 \
             --title "6400 bp, XII:1-800000" \
             -c Reds \
             "${f_Q}@${res}"
+
+        fancplot \
+            -o "pngs/2023-0929/${m_Q2}_XII-1-800000.pdf" \
+            "XII:1-800000" \
+            -p square \
+            --title "6400 bp, XII:1-800000" \
+            -s 0 -vmin "-4" -vmax 4 \
+            -c "coolwarm" \
+            "${d_out}/${m_Q2}"
     } || true
 ```
+</details>
+<br />
+
+<a id="notes-2"></a>
+### Notes
+<details>
+<summary><i>Notes: Learn to use `fanc compare`, draw some preliminary plots</i></summary>
+<br />
+
+__Record of Q&A with `FANC` author__
+- [Problem with region in fanc/bin/fancplot](https://github.com/vaquerizaslab/fanc/issues/170)
+- [Clarification on matrix weights, scaling, and visualization in the context of `fanc compare`](https://github.com/vaquerizaslab/fanc/issues/171)
+
+__Notes on KR and ICE balancing__
+- `#TODO` *Copy these into the notebook*
 </details>
 <br />
 
@@ -1428,16 +1461,16 @@ drwxrws---  2 kalavatt 1.2K Aug  6 17:20 err_out/
 mkdir: created directory 'pngs'
 
 
-❯ [[ ! -d pngs/2023-0929_init ]] && mkdir pngs/2023-0929_init
-mkdir: created directory 'pngs/2023-0929_init'
+❯ [[ ! -d pngs/2023-0929 ]] && mkdir pngs/2023-0929
+mkdir: created directory 'pngs/2023-0929'
 
 
 ❯ [[ ! -d mats ]] && mkdir mats
 mkdir: created directory 'mats'
 
 
-❯ [[ ! -d mats/2023-0929_init ]] && mkdir mats/2023-0929_init
-mkdir: created directory 'mats/2023-0929_init'
+❯ [[ ! -d mats/2023-0929 ]] && mkdir mats/2023-0929
+mkdir: created directory 'mats/2023-0929'
 
 
 ❯ check_help=FALSE
@@ -1448,116 +1481,11 @@ mkdir: created directory 'mats/2023-0929_init'
 ❯ f_Q=08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool
 ❯ f_1=08_zoom/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mcool
 ❯ f_2=08_zoom/MC-2020_nz_WT_repM.standard-rDNA-complete.mcool
-❯ d_out=mats/2023-0929_init
+❯ d_out=mats/2023-0929
 ❯ m_Q2="log2_Q-over-G2_${res}"
 
 
-❯ check_command=TRUE
-❯ [[ ${check_command} == TRUE ]] &&
->     {
->         echo """
->         fanc compare \\
->             --comparison \"fold-change\" \\
->             --no-scale \\
->             --log \\
->             --ignore-zero \\
->             --ignore-infinite \\
->             ${f_Q}@${res} \\
->             ${f_2}@${res} \\
->             ${d_out}/${m_Q2}
->         """
->     } || true
-
-        fanc compare \
-            --comparison "fold-change" \
-            --no-scale \
-            --log \
-            --ignore-zero \
-            --ignore-infinite \
-            08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool@6400 \
-            08_zoom/MC-2020_nz_WT_repM.standard-rDNA-complete.mcool@6400 \
-            pngs/2023-0929_init/log2_Q-over-G2_6400
-
-
-❯ run_command=TRUE
-❯ [[ ${run_command} == TRUE ]] &&
->     {
->         fanc compare \
->             --comparison "fold-change" \
->             --no-scale \
->             --log \
->             --ignore-zero \
->             --ignore-infinite \
->             ${f_Q}@${res} ${f_2}@${res} \
->             ${d_out}/${m_Q2}
->     } || true
-2023-10-04 12:12:53,472 INFO FAN-C version: 0.9.27
-2023-10-04 12:12:54,547 INFO Enabling zero filter
-Compare 100% (153 of 153) |#############################################################################################################################| Elapsed Time: 0:00:44 Time:  0:00:44
-Buffers 100% (3 of 3) |#################################################################################################################################| Elapsed Time: 0:00:00 Time:  0:00:00
-Expected 100% (1328774 of 1328774) |####################################################################################################################| Elapsed Time: 0:00:06 Time:  0:00:06
-
-
-❯ ls -lhaFG ${d_out}/
-total 18M
-drwxrws--- 2 kalavatt  37 Sep 29 12:01 ./
-drwxrws--- 3 kalavatt  32 Sep 29 12:00 ../
--rw-rw---- 1 kalavatt 15M Sep 29 11:58 log2_Q-over-G2_6400
-
-
-❯  in=mats/2023-0929_init/${m_Q2}
-❯ out=pngs/2023-0929_init/${m_Q2}.png
-
-
-❯ ls -lhaFG ${d_out}/
-total 18M
-drwxrws--- 2 kalavatt  37 Oct  4 12:13 ./
-drwxrws--- 4 kalavatt  64 Oct  3 05:42 ../
--rw-rw---- 1 kalavatt 15M Oct  4 12:13 log2_Q-over-G2_6400
-
-
-❯  in=mats/2023-0929_init/${m_Q2}
-❯ out=pngs/2023-0929_init/${m_Q2}
-
-
-❯ [[ ${check_command} == TRUE ]] &&
->     {
->         echo """
->         fancplot \\
->             -o \"pngs/2023-0929_init/${m_Q2}_XII-1-800000.pdf\" \\
->             \"XII:1-800000\" \\
->             -p square \\
->             -vmin 0 -vmax 0.1 \\
->             --title \"6400 bp, XII:1-800000\" \\
->             -c Reds \\
->             \"${f_Q}@${res}\"
->         """
->     } || true
-
-        fancplot \
-            -o "pngs/2023-0929_init/log2_Q-over-G2_6400_XII-1-800000.pdf" \
-            "XII:1-800000" \
-            -p square \
-            -vmin 0 -vmax 0.1 \
-            --title "6400 bp, XII:1-800000" \
-            -c Reds \
-            "08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool@6400"
-
-
-❯ run_command=TRUE
-❯ [[ ${run_command} == TRUE ]] &&
->     {
->         fancplot \
->             -o "pngs/2023-0929_init/${m_Q2}_XII-1-800000.pdf" \
->             "XII:1-800000" \
->             -p square \
->             -vmin 0 -vmax 0.1 \
->             --title "6400 bp, XII:1-800000" \
->             -c Reds \
->             "${f_Q}@${res}"
->     } || true
-2023-10-04 12:46:50,530 INFO Using non-interactive backend
-2023-10-04 12:46:51,433 INFO Found 1 regions
+...
 ```
 </details>
 <br />
@@ -2229,15 +2157,15 @@ source activate hicexplorer_env
     true
 
 [[ ! -d mats ]] && mkdir mats || true
-[[ ! -d mats/2023-1001_init ]] && mkdir mats/2023-1001_init || true
+[[ ! -d mats/2023-1001 ]] && mkdir mats/2023-1001 || true
 
 [[ ! -d pngs ]] && mkdir pngs || true
-[[ ! -d pngs/2023-1001_init ]] && mkdir pngs/2023-1001_init || true
+[[ ! -d pngs/2023-1001 ]] && mkdir pngs/2023-1001 || true
 
   f_Q="08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool"
   f_1="08_zoom/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mcool"
   f_2="08_zoom/MC-2020_nz_WT_repM.standard-rDNA-complete.mcool"
-d_out="mats/2023-1001_init"
+d_out="mats/2023-1001"
  m_Q2="log2_Q-over-G2_${res}"
   res=50
   ext="cool"
@@ -2298,8 +2226,8 @@ run_command=TRUE
 
 ls -lhaFG ${d_out}/${m_Q2}*
 
- in=mats/2023-1001_init/${m_Q2}  # ., ${in}.cool
-out=pngs/2023-1001_init/${m_Q2}  # echo "${png}"
+ in=mats/2023-1001/${m_Q2}  # ., ${in}.cool
+out=pngs/2023-1001/${m_Q2}  # echo "${png}"
 chr="XII"
 
 check_variables=TRUE
@@ -2357,7 +2285,7 @@ run_commands=TRUE
   f_Q="08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool"
   f_1="08_zoom/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mcool"
   f_2="08_zoom/MC-2020_nz_WT_repM.standard-rDNA-complete.mcool"
-d_out="mats/2023-1001_init"
+d_out="mats/2023-1001"
  m_Q1="log2_Q-over-G1_${res}"
   res=50
   ext="cool"
@@ -2418,8 +2346,8 @@ run_command=TRUE
 
 ls -lhaFG ${d_out}/${m_Q1}*
 
- in=mats/2023-1001_init/${m_Q1}  # ., ${in}.cool
-out=pngs/2023-1001_init/${m_Q1}  # echo "${png}"
+ in=mats/2023-1001/${m_Q1}  # ., ${in}.cool
+out=pngs/2023-1001/${m_Q1}  # echo "${png}"
 chr="XII"
 
 check_variables=TRUE
@@ -2477,7 +2405,7 @@ run_commands=TRUE
   f_Q="08_zoom/MC-2019_Q_WT_repM.standard-rDNA-complete.mcool"
   f_1="08_zoom/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mcool"
   f_2="08_zoom/MC-2020_nz_WT_repM.standard-rDNA-complete.mcool"
-d_out="mats/2023-1001_init"
+d_out="mats/2023-1001"
  m_21="log2_G2-over-G1_${res}"
   res=50
   ext="cool"
@@ -2538,8 +2466,8 @@ run_command=TRUE
 
 ls -lhaFG ${d_out}/${m_21}*
 
- in=mats/2023-1001_init/${m_21}  # ., ${in}.cool
-out=pngs/2023-1001_init/${m_21}  # echo "${png}"
+ in=mats/2023-1001/${m_21}  # ., ${in}.cool
+out=pngs/2023-1001/${m_21}  # echo "${png}"
 chr="XII"
 
 check_variables=TRUE
@@ -2700,7 +2628,7 @@ Optional arguments:
 </details>
 <br />
 
-<a id="notes-2"></a>
+<a id="notes-3"></a>
 ### Notes
 <details>
 <summary><i>Notes: Learn to use `hicexplorer`, draw some preliminary plots</i></summary>
