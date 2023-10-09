@@ -58,37 +58,45 @@
     1. [4. Run `pairtools sort`](#4-run-pairtools-sort)
         1. [Code](#code-19)
     1. [5. Run `pairtools dedup` and `pairtools split`](#5-run-pairtools-dedup-and-pairtools-split)
-        1. [...for deduplicated \(`nodups`\) pairs](#for-deduplicated-nodups-pairs)
+        1. [A. ...for `nodups` pairs](#a-for-nodups-pairs)
             1. [Code](#code-20)
-        1. [...for deduplicated \(`dups`\) pairs](#for-deduplicated-dups-pairs)
+        1. [B. ...for `dups` pairs](#b-for-dups-pairs)
             1. [Code](#code-21)
     1. [X. General strategy](#x-general-strategy)
         1. [Notes](#notes-1)
     1. [X. Create `*.keep-MM-0.mapped.pairs.gz files` if applicable](#x-create-keep-mm-0mappedpairsgz-files-if-applicable)
         1. [Code](#code-22)
     1. [X. Run `pairtools merge` if applicable](#x-run-pairtools-merge-if-applicable)
-        1. [...for `nodups` pairs](#for-nodups-pairs)
+        1. [A. ...for `nodups` pairs](#a-for-nodups-pairs-1)
             1. [Code](#code-23)
-        1. [...for `mapped` pairs](#for-mapped-pairs)
+        1. [B. ...for `mapped` pairs](#b-for-mapped-pairs)
             1. [Code](#code-24)
     1. [X. Run "`standard-rDNA-complete`" processing if applicable](#x-run-standard-rdna-complete-processing-if-applicable)
         1. [A. Exclude rDNA-associated *cis* and *trans* interactions from "`standard.nodups`" file](#a-exclude-rdna-associated-cis-and-trans-interactions-from-standardnodups-file)
             1. [Code](#code-25)
-        1. [B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file](#b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file)
-            1. [Code](#code-26)
-        1. [C. Merge the "`standard.nodups`" and "`keep-MM.nodups`" files](#c-merge-the-standardnodups-and-keep-mmnodups-files)
-            1. [Code](#code-27)
+        1. [B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM-?`" file](#b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mm--file)
+            1. [i. ...for `nodups` pairs](#i-for-nodups-pairs)
+                1. [Code](#code-26)
+            1. [ii. ...for `mapped` pairs](#ii-for-mapped-pairs)
+                1. [Code](#code-27)
+        1. [C. Merge the "`standard.nodups`" and "`keep-MM-?.nodups`" files](#c-merge-the-standardnodups-and-keep-mm-nodups-files)
+            1. [i. ...with "rDNA" `nodups` pairs](#i-with-rdna-nodups-pairs)
+                1. [Code](#code-28)
+            1. [ii. ...with "rDNA" `mapped` pairs](#ii-with-rdna-mapped-pairs)
+                1. [Code](#code-29)
     1. [6. Run `pairtools stats`](#6-run-pairtools-stats)
         1. [Individual pairs files](#individual-pairs-files)
-            1. [Code](#code-28)
-    1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
-        1. [Individual pairs file](#individual-pairs-file)
-            1. [Code](#code-29)
-    1. [8. Generate a multi-resolution cooler by coarsening](#8-generate-a-multi-resolution-cooler-by-coarsening)
-        1. [Cools from individual pairs files](#cools-from-individual-pairs-files)
             1. [Code](#code-30)
-    1. [9. Ingest files for HiGlass](#9-ingest-files-for-higlass)
-        1. [Code](#code-31)
+    1. [7. Load pairs to cooler](#7-load-pairs-to-cooler)
+        1. [A. ...containing "rDNA" `nodups` pairs](#a-containing-rdna-nodups-pairs)
+            1. [Code](#code-31)
+        1. [B. ...containing "rDNA" `mapped` pairs](#b-containing-rdna-mapped-pairs)
+            1. [Code](#code-32)
+    1. [8. Generate a multi-resolution cooler by coarsening](#8-generate-a-multi-resolution-cooler-by-coarsening)
+        1. [A. ...containing "rDNA" `nodups` pairs](#a-containing-rdna-nodups-pairs-1)
+            1. [Code](#code-33)
+        1. [B. ...containing "rDNA" `mapped` pairs](#b-containing-rdna-mapped-pairs-1)
+            1. [Code](#code-34)
 
 <!-- /MarkdownTOC -->
 </details>
@@ -2420,59 +2428,95 @@ for (( i = 0; i < ${#all[@]}; i++ )); do
 done
 
 
-#  X.B. -----------------------------------------------------------------------
-unset all_dedup_pre_pairs_rDNA && typeset -a all_dedup_pre_pairs_rDNA
+#  X.B.i/ii. ------------------------------------------------------------------
+unset     all_dedup_pre_pairs_rDNA && typeset -a all_dedup_pre_pairs_rDNA       # echo_test "${all_dedup_pre_pairs_rDNA[@]}"
+unset all_dedup_pre_pairs_rDNA_map && typeset -a all_dedup_pre_pairs_rDNA_map   # echo_test "${all_dedup_pre_pairs_rDNA_map[@]}"
 
-unset          f_comp_rDNA_pre && typeset -a f_comp_rDNA_pre
-unset              f_comp_rDNA && typeset -a f_comp_rDNA
-unset              a_comp_rDNA && typeset -a a_comp_rDNA
+unset          f_comp_rDNA_pre && typeset -a f_comp_rDNA_pre                    # echo_test "${f_comp_rDNA_pre[@]}"
+unset              f_comp_rDNA && typeset -a f_comp_rDNA                        # echo_test "${f_comp_rDNA[@]}"
+unset          f_comp_rDNA_map && typeset -a f_comp_rDNA_map                    # echo_test "${f_comp_rDNA_map[@]}"
+unset              a_comp_rDNA && typeset -a a_comp_rDNA                        # echo_test "${a_comp_rDNA[@]}"
+unset          a_comp_rDNA_map && typeset -a a_comp_rDNA_map                    # echo_test "${a_comp_rDNA_map[@]}"
 
 for (( i = 0; i < ${#stem[@]}; i++ )); do
         all_dedup_pre_pairs_rDNA+=(
             "${d_comp}/${stem[${i}]}.keep-MM-${max_mismatch_rDNA}.${post}"
-        )                                                                       # echo_test "${all_dedup_pre_pairs_rDNA[@]}"  # echo "${#all_dedup_pre_pairs_rDNA[@]}"
+        )                                                                       # echo_test "${all_dedup_pre_pairs_rDNA[@]}"      # echo "${#all_dedup_pre_pairs_rDNA[@]}"
+    all_dedup_pre_pairs_rDNA_map+=(
+            "${d_comp}/${stem[${i}]}.keep-MM-${max_mismatch_rDNA}.${post_map}"
+    )                                                                           # echo_test "${all_dedup_pre_pairs_rDNA_map[@]}"  # echo "${#all_dedup_pre_pairs_rDNA_map[@]}"
 done
 
 if [[ "${#to_merge[@]}" -ne 0 ]]; then
     for (( i = 0; i < ${#to_merge[@]}; i++ )); do
-        all_dedup_pre_pairs_rDNA+=( "${a_merge_rDNA[${i}]}" )                   # echo_test "${all_dedup_pre_pairs_rDNA[@]}"  # echo "${#all_dedup_pre_pairs_rDNA[@]}"
+        all_dedup_pre_pairs_rDNA+=( "${a_merge_rDNA[${i}]}" )                   # echo_test "${all_dedup_pre_pairs_rDNA[@]}"      # echo "${#all_dedup_pre_pairs_rDNA[@]}"
+    all_dedup_pre_pairs_rDNA_map+=( "${a_merge_rDNA_map[${i}]}" )               # echo_test "${all_dedup_pre_pairs_rDNA_map[@]}"  # echo "${#all_dedup_pre_pairs_rDNA_map[@]}"
     done
 fi
 
 for (( i = 0; i < ${#all[@]}; i++ )); do
     f_comp_rDNA_pre+=( "${all[${i}]}.keep-MM-${max_mismatch_rDNA}.only-rDNA" )  # echo_test "${f_comp_rDNA_pre[@]}"
         f_comp_rDNA+=( "${f_comp_rDNA_pre[${i}]}.${post}" )                     # echo_test "${f_comp_rDNA[@]}"
+    f_comp_rDNA_map+=( "${f_comp_rDNA_pre[${i}]}.${post_map}" )                 # echo_test "${f_comp_rDNA_map[@]}"
         a_comp_rDNA+=( "${d_comp}/${f_comp_rDNA[${i}]}" )                       # echo_test "${a_comp_rDNA[@]}"
+    a_comp_rDNA_map+=( "${d_comp}/${f_comp_rDNA_map[${i}]}" )                   # echo_test "${a_comp_rDNA_map[@]}"
 done
 
 
 #  X.C. -----------------------------------------------------------------------
-unset          a_comp_std_rhdr && typeset -a a_comp_std_rhdr
-unset         a_comp_rDNA_rhdr && typeset -a a_comp_rDNA_rhdr
-unset          a_comp_std_rDNA && typeset -a a_comp_std_rDNA
-unset     a_comp_std_rDNA_sort && typeset -a a_comp_std_rDNA_sort
-unset    a_comp_std_rDNA_cload && typeset -a a_comp_std_rDNA_cload
+unset          a_comp_std_rhdr && typeset -a a_comp_std_rhdr                    # echo_test "${a_comp_std_rhdr[@]}"
 
 for (( i = 0; i < ${#all[@]}; i++ )); do
     a_comp_std_rhdr+=(
         "${a_comp_std[${i}]%.no-rDNA.nodups.pairs.gz}.no-rDNA.reheader.${post}"
-    )  # echo_test "${a_comp_std_rhdr[@]}"
+    )
+done
+
+#  X.C.i. ---------------------------------------------------------------------
+unset         a_comp_rDNA_rhdr && typeset -a a_comp_rDNA_rhdr                   # echo_test "${a_comp_rDNA_rhdr[@]}"
+unset          a_comp_std_rDNA && typeset -a a_comp_std_rDNA                    # echo_test "${a_comp_std_rDNA[@]}"
+unset     a_comp_std_rDNA_sort && typeset -a a_comp_std_rDNA_sort               # echo_test "${a_comp_std_rDNA_sort[@]}"
+unset    a_comp_std_rDNA_cload && typeset -a a_comp_std_rDNA_cload              # echo_test "${a_comp_std_rDNA_cload[@]}"
+
+for (( i = 0; i < ${#all[@]}; i++ )); do
     a_comp_rDNA_rhdr+=(
         "${a_comp_rDNA[${i}]%.only-rDNA.nodups.pairs.gz}.only-rDNA.reheader.${post}"
-    )  # echo_test "${a_comp_rDNA_rhdr[@]}"
+    )
     a_comp_std_rDNA+=(
         "${a_comp_std[${i}]%.standard-${max_mismatch_std}.no-rDNA.nodups.pairs.gz}.standard-rDNA-complete.${post}"
-    )  # echo_test "${a_comp_std_rDNA[@]}"
+    )
     a_comp_std_rDNA_sort+=(
         "${a_comp_std[${i}]%.standard-${max_mismatch_std}.no-rDNA.nodups.pairs.gz}.standard-rDNA-complete.sort.${post}"
-    )  # echo_test "${a_comp_std_rDNA[@]}"
+    )
     a_comp_std_rDNA_cload+=(
-        "${d_cload}/$(basename ${a_comp_std[${i}]} .standard-${max_mismatch_std}.no-rDNA.nodups.pairs.gz).standard-rDNA-complete.cool"
-    )  # echo_test "${a_comp_std_rDNA[@]}"
+        "${d_cload}/$(basename ${a_comp_std[${i}]} .standard-${max_mismatch_std}.no-rDNA.nodups.pairs.gz).standard-rDNA-complete.nodups.cool"
+    )
 done
 
 
-#  Run checks #TODO Better... -------------------------------------------------
+#  X.C.ii. --------------------------------------------------------------------
+unset      a_comp_rDNA_map_rhdr && typeset -a a_comp_rDNA_map_rhdr               # echo_test "${a_comp_rDNA_map_rhdr[@]}"
+unset       a_comp_std_rDNA_map && typeset -a a_comp_std_rDNA_map                # echo_test "${a_comp_std_rDNA_map[@]}"
+unset  a_comp_std_rDNA_map_sort && typeset -a a_comp_std_rDNA_map_sort           # echo_test "${a_comp_std_rDNA_map_sort[@]}"
+unset a_comp_std_rDNA_map_cload && typeset -a a_comp_std_rDNA_map_cload          # echo_test "${a_comp_std_rDNA_map_cload[@]}"
+
+for (( i = 0; i < ${#all[@]}; i++ )); do
+    # i=0
+    a_comp_rDNA_map_rhdr+=(
+        "${a_comp_rDNA_map[${i}]%.only-rDNA.mapped.pairs.gz}.only-rDNA.reheader.${post_map}"
+    )
+    a_comp_std_rDNA_map+=(
+        "${a_comp_std[${i}]%.standard-${max_mismatch_std}.no-rDNA.nodups.pairs.gz}.standard-rDNA-complete.${post_map}"
+    )
+    a_comp_std_rDNA_map_sort+=(
+        "${a_comp_std[${i}]%.standard-${max_mismatch_std}.no-rDNA.nodups.pairs.gz}.standard-rDNA-complete.sort.${post_map}"
+    )
+    a_comp_std_rDNA_map_cload+=(
+        "${d_cload}/$(basename ${a_comp_std[${i}]} .standard-${max_mismatch_std}.no-rDNA.nodups.pairs.gz).standard-rDNA-complete.mapped.cool"
+    )
+done
+
+#  Run checks #TODO Better, expanded... -------------------------------------------------
 run_check=TRUE
 [[ "${run_check}" == TRUE ]] &&
     {
@@ -3263,12 +3307,12 @@ EOF
 
 <a id="5-run-pairtools-dedup-and-pairtools-split"></a>
 ### 5. Run `pairtools dedup` and `pairtools split`
-<a id="for-deduplicated-nodups-pairs"></a>
-#### ...for deduplicated (`nodups`) pairs
+<a id="a-for-nodups-pairs"></a>
+#### A. ...for `nodups` pairs
 <a id="code-20"></a>
 ##### Code
 <details>
-<summary><i>Code: Run pairtools dedup and pairtools split for deduplicated (`nodups`) pairs</i></summary>
+<summary><i>Code: Run pairtools dedup and pairtools split for (A) `nodups` pairs</i></summary>
 
 ```bash
 #!/bin/bash
@@ -3459,12 +3503,12 @@ EOF
 </details>
 <br />
 
-<a id="for-deduplicated-dups-pairs"></a>
-#### ...for deduplicated (`dups`) pairs
+<a id="b-for-dups-pairs"></a>
+#### B. ...for `dups` pairs
 <a id="code-21"></a>
 ##### Code
 <details>
-<summary><i>Code: Run pairtools dedup and pairtools split for duplicated (`dups`) pairs</i></summary>
+<summary><i>Code: Run pairtools dedup and pairtools split for (B) `dups` pairs</i></summary>
 
 ```bash
 #!/bin/bash
@@ -3782,12 +3826,12 @@ EOF
 
 <a id="x-run-pairtools-merge-if-applicable"></a>
 ### X. Run `pairtools merge` if applicable
-<a id="for-nodups-pairs"></a>
-#### ...for `nodups` pairs
+<a id="a-for-nodups-pairs-1"></a>
+#### A. ...for `nodups` pairs
 <a id="code-23"></a>
 ##### Code
 <details>
-<summary><i>Code: Run pairtools merge if applicable for nodups pairs</i></summary>
+<summary><i>Code: Run pairtools merge if applicable for (A) nodups pairs</i></summary>
 
 ```bash
 #!/bin/bash
@@ -3962,12 +4006,12 @@ EOF
 </details>
 <br />
 
-<a id="for-mapped-pairs"></a>
-#### ...for `mapped` pairs
+<a id="b-for-mapped-pairs"></a>
+#### B. ...for `mapped` pairs
 <a id="code-24"></a>
 ##### Code
 <details>
-<summary><i>Code: Run pairtools merge if applicable for mapped pairs</i></summary>
+<summary><i>Code: Run pairtools merge if applicable for (B) mapped pairs</i></summary>
 
 ```bash
 #!/bin/bash
@@ -4153,7 +4197,7 @@ print_test=TRUE
                              already present.
 
                     Thus, did not run \"Step #X.A.: Exclude rDNA-associated cis and trans
-                    interactions from \"standard\" via \"pairtools select\"
+                    interactions from \"standard.nodups\" via \"pairtools select\"
                     """
                 }
         done
@@ -4228,7 +4272,7 @@ EOF
                              already present.
 
                     Thus, did not run \"Step #X.A.: Exclude rDNA-associated cis and trans
-                    interactions from \"standard\" via \"pairtools select\"
+                    interactions from \"standard.nodups\" via \"pairtools select\"
                     """
                 }
         done
@@ -4237,12 +4281,14 @@ EOF
 </details>
 <br />
 
-<a id="b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mmnodups-file"></a>
-#### B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM.nodups`" file
+<a id="b-exclude-all-but-rdna-associated-cis-and-trans-interactions-from-keep-mm--file"></a>
+#### B. Exclude all but rDNA-associated *cis* and *trans* interactions from "`keep-MM-?`" file
+<a id="i-for-nodups-pairs"></a>
+##### i. ...for `nodups` pairs
 <a id="code-26"></a>
-##### Code
+###### Code
 <details>
-<summary><i>Code: B. Exclude all but rDNA-associated cis and trans interactions from "keep-MM.nodups" file</i></summary>
+<summary><i>Code: B.i. Exclude all but rDNA-associated cis and trans interactions from "keep-MM-?.nodups" file</i></summary>
 
 ```bash
 #!/bin/bash
@@ -4266,6 +4312,13 @@ run_check=TRUE
 #     IF chrom1 == "XII" && pos1 >= rDNA left && pos1 <= rDNA right
 #+ OR IF chrom2 == "XII" && pos2 >= rDNA left && pos2 <= rDNA right
 #+  THEN print record
+
+#CODESNIPPET
+# "(
+#     (chrom1 == 'XII' and int(pos51) >= 451526 and int(pos51) <= 468980) \
+#     or \
+#     (chrom2 == 'XII' and int(pos31) >= 451526 and int(pos31) <= 468980)
+# )"
 
 
 #  Run print tests -----------------------------------------------------------
@@ -4302,8 +4355,8 @@ print_test=TRUE
                              not found, or \"${a_comp_rDNA[${i}]}\" was
                              already present.
 
-                    Thus, did not run \"Step #X.A.: Exclude rDNA-associated cis and trans
-                    interactions from \"standard\" via \"pairtools select\"
+                    Thus, did not run \"Step #X.B.i.: Exclude all but rDNA-associated
+                    cis and trans interactions from 'keep-MM-?.nodups' file\"
                     """
                 }
         done
@@ -4311,11 +4364,6 @@ print_test=TRUE
 
 
 #  Submit jobs to SLURM -------------------------------------------------------
-# "(
-#     (chrom1 == 'XII' and int(pos51) >= 451526 and int(pos51) <= 468980) \
-#     or \
-#     (chrom2 == 'XII' and int(pos31) >= 451526 and int(pos31) <= 468980)
-# )"
 run=TRUE
 [[ "${run}" == TRUE ]] &&
     {
@@ -4348,8 +4396,8 @@ EOF
                              not found, or \"${a_comp_rDNA[${i}]}\" was
                              already present.
 
-                    Thus, did not run \"Step #X.A.: Exclude rDNA-associated cis and trans
-                    interactions from \"standard\" via \"pairtools select\"
+                    Thus, did not run \"Step #X.B.i.: Exclude all but rDNA-associated
+                    cis and trans interactions from 'keep-MM-?.nodups' file\"
                     """
                 }
         done
@@ -4358,12 +4406,125 @@ EOF
 </details>
 <br />
 
-<a id="c-merge-the-standardnodups-and-keep-mmnodups-files"></a>
-#### C. Merge the "`standard.nodups`" and "`keep-MM.nodups`" files
+<a id="ii-for-mapped-pairs"></a>
+##### ii. ...for `mapped` pairs
 <a id="code-27"></a>
-##### Code
+###### Code
 <details>
-<summary><i>Code: C. Merge the "standard.nodups" and "keep-MM.nodups" files</i></summary>
+<summary><i>Code: B.ii. Exclude all but rDNA-associated cis and trans interactions from "keep-MM-?.mapped" file</i></summary>
+
+```bash
+#!/bin/bash
+
+#  Check arrays, files --------------------------------------------------------
+run_check=TRUE
+[[ "${run_check}" == TRUE ]] &&
+    {
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            ., "${all_dedup_pre_pairs_rDNA_map[${i}]}"
+        done
+        echo ""
+
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            echo "${f_comp_rDNA_pre[${i}]}"
+        done
+    }
+
+
+#  Run print tests -----------------------------------------------------------
+print_test=TRUE
+[[ "${print_test}" == TRUE ]] &&
+    {
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0
+            [[ -f "${all_dedup_pre_pairs_rDNA_map[${i}]}" && ! -f "${a_comp_rDNA_map[${i}]}" ]] &&
+                {
+                    job_name="retain_only_rDNA.${f_comp_rDNA_pre[${i}]}"  # echo "${job_name}"
+                    
+                    echo """
+                    #HEREDOC
+                    sbatch << EOF
+                    #!/bin/bash
+
+                    #SBATCH --job-name=\"${job_name}\"
+                    #SBATCH --nodes=1
+                    #SBATCH --cpus-per-task=1
+                    #SBATCH --error=\"${d_comp}/err_out/${job_name}.%A.stderr.txt\"
+                    #SBATCH --output=\"${d_comp}/err_out/${job_name}.%A.stdout.txt\"
+
+                    pairtools select \\
+                        \"((chrom1 == 'XII' and int(pos51) >= 451526 and int(pos51) <= 468980) or (chrom2 == 'XII' and int(pos31) >= 451526 and int(pos31) <= 468980))\" \\
+                        \"${all_dedup_pre_pairs_rDNA_map[${i}]}\" \\
+                        -o \"${a_comp_rDNA_map[${i}]}\"
+                    EOF
+                    """
+                } ||
+                {
+                    echo """
+                    Warning: Either \"${all_dedup_pre_pairs_rDNA_map[${i}]}\" was
+                             not found, or \"${a_comp_rDNA_map[${i}]}\" was
+                             already present.
+
+                    Thus, did not run \"Step #X.B.i.: Exclude all but rDNA-associated
+                    cis and trans interactions from 'keep-MM-?.mapped' file\"
+                    """
+                }
+        done
+    }
+
+
+#  Submit jobs to SLURM -------------------------------------------------------
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0
+            [[ -f "${all_dedup_pre_pairs_rDNA_map[${i}]}" && ! -f "${a_comp_rDNA_map[${i}]}" ]] &&
+                {
+                    job_name="retain_only_rDNA.${f_comp_rDNA_pre[${i}]}"  # echo "${job_name}"
+                    
+#HEREDOC
+sbatch << EOF
+#!/bin/bash
+
+#SBATCH --job-name="${job_name}"
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=1
+#SBATCH --error="${d_comp}/err_out/${job_name}.%A.stderr.txt"
+#SBATCH --output="${d_comp}/err_out/${job_name}.%A.stdout.txt"
+
+pairtools select \
+    "((chrom1 == 'XII' and int(pos51) >= 451526 and int(pos51) <= 468980) or (chrom2 == 'XII' and int(pos31) >= 451526 and int(pos31) <= 468980))" \
+    "${all_dedup_pre_pairs_rDNA_map[${i}]}" \
+    -o "${a_comp_rDNA_map[${i}]}"
+EOF
+                    sleep 0.2
+                } ||
+                {
+                    echo """
+                    Warning: Either \"${all_dedup_pre_pairs_rDNA_map[${i}]}\" was
+                             not found, or \"${a_comp_rDNA_map[${i}]}\" was
+                             already present.
+
+                    Thus, did not run \"Step #X.B.i.: Exclude all but rDNA-associated
+                    cis and trans interactions from 'keep-MM-?.mapped' file\"
+                    """
+                }
+        done
+    }
+```
+</details>
+<br />
+
+
+<a id="c-merge-the-standardnodups-and-keep-mm-nodups-files"></a>
+#### C. Merge the "`standard.nodups`" and "`keep-MM-?.nodups`" files
+<a id="i-with-rdna-nodups-pairs"></a>
+##### i. ...with "rDNA" `nodups` pairs
+<a id="code-28"></a>
+###### Code
+<details>
+<summary><i>Code: C.i. Merge the "standard.nodups" and "keep-MM-?.nodups" files</i></summary>
 
 ```bash
 #!/bin/bash
@@ -4424,6 +4585,15 @@ print_test=TRUE
                         \"${a_comp_rDNA[${i}]}\"
                 EOF
                 """
+            } ||
+            {
+                echo """
+                Warning: Either \"${a_comp_std[${i}]}\" or \"${a_comp_rDNA[${i}]}\" was
+                         not found, or \"${a_comp_std_rDNA[${i}]}\" was already present.
+
+                Thus, did not run \"Step #X.C.i.: Merge the \"standard.nodups\" and
+                \"keep-MM-?.nodups\" files
+                """
             }
         done
     }
@@ -4464,7 +4634,180 @@ EOF
                 sleep 0.25
             }
         done
+    } ||
+            {
+                echo """
+                Warning: Either \"${a_comp_std[${i}]}\" or \"${a_comp_rDNA[${i}]}\" was
+                         not found, or \"${a_comp_std_rDNA[${i}]}\" was already present.
+
+                Thus, did not run \"Step #X.C.i.: Merge the \"standard.nodups\" and
+                \"keep-MM-?.nodups\" files
+                """
+            }
+```
+</details>
+<br />
+
+<a id="ii-with-rdna-mapped-pairs"></a>
+##### ii. ...with "rDNA" `mapped` pairs
+<a id="code-29"></a>
+###### Code
+<details>
+<summary><i>Code: C.ii. Merge the "standard.nodups" and "keep-MM-?.mapped" files</i></summary>
+
+```bash
+#!/bin/bash
+
+#  Check arrays, files --------------------------------------------------------
+run_check=TRUE
+[[ "${run_check}" == TRUE ]] &&
+    {
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0 && echo "${a_comp_std[${i}]}"
+            ., "${a_comp_std[${i}]}"
+        done
+        echo ""
+
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0 && echo "${a_comp_rDNA_map[${i}]}"
+            ., "${a_comp_rDNA_map[${i}]}"
+        done
+        echo ""
+
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0 && echo "${a_comp_std_rDNA_map[${i}]}"
+            echo "${a_comp_std_rDNA_map[${i}]}"
+        done
     }
+
+
+#  Run print tests ------------------------------------------------------------
+print_test=TRUE
+[[ "${print_test}" == TRUE ]] &&
+    {
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0
+
+            [[ 
+                     -f "${a_comp_std[${i}]}" \
+                &&   -f "${a_comp_rDNA_map[${i}]}" \
+                && ! -f "${a_comp_std_rDNA_map[${i}]}"
+            ]] &&
+            {
+                job_name="merge.$(basename ${a_comp_std_rDNA_map[${i}]} .${post})"  # echo "${job_name}"
+                
+                echo """
+                #HEREDOC
+                sbatch << EOF
+                #!/bin/bash
+
+                #SBATCH --job-name=\"${job_name}\"
+                #SBATCH --nodes=1
+                #SBATCH --cpus-per-task=${threads}
+                #SBATCH --error=\"${d_comp}/err_out/${job_name}.%A.stderr.txt\"
+                #SBATCH --output=\"${d_comp}/err_out/${job_name}.%A.stdout.txt\"
+
+                pairtools merge \\
+                    --keep-first-header \\
+                    --output \"${a_comp_std_rDNA_map[${i}]}\" \\
+                    --nproc \"${threads}\" \\
+                    --tmpdir \"${scratch}\" \\
+                        \"${a_comp_std[${i}]}\" \\
+                        \"${a_comp_rDNA_map[${i}]}\"
+                EOF
+                """
+            } ||
+            {
+                echo """
+                Warning: Either \"${a_comp_std[${i}]}\" or \"${a_comp_rDNA_map[${i}]}\" was
+                         not found, or \"${a_comp_std_rDNA_map[${i}]}\" was already present.
+
+                Thus, did not run \"Step #X.C.ii.: Merge the \"standard.nodups\" and
+                \"keep-MM-?.nodups\" files
+                """
+            }
+        done
+    }
+
+
+#  Submit jobs to SLURM -------------------------------------------------------
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0
+
+            [[ 
+                     -f "${a_comp_std[${i}]}" \
+                &&   -f "${a_comp_rDNA_map[${i}]}" \
+                && ! -f "${a_comp_std_rDNA_map[${i}]}"
+            ]] &&
+            {
+                job_name="merge.$(basename ${a_comp_std_rDNA_map[${i}]} .${post})"
+                
+#HEREDOC
+sbatch << EOF
+#!/bin/bash
+
+#SBATCH --job-name="${job_name}"
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=${threads}
+#SBATCH --error="${d_comp}/err_out/${job_name}.%A.stderr.txt"
+#SBATCH --output="${d_comp}/err_out/${job_name}.%A.stdout.txt"
+
+pairtools merge \
+    --keep-first-header \
+    --output "${a_comp_std_rDNA_map[${i}]}" \
+    --nproc "${threads}" \
+    --tmpdir "${scratch}" \
+        "${a_comp_std[${i}]}" \
+        "${a_comp_rDNA_map[${i}]}"
+EOF
+                sleep 0.25
+            } ||
+            {
+                echo """
+                Warning: Either \"${a_comp_std[${i}]}\" or \"${a_comp_rDNA_map[${i}]}\" was
+                         not found, or \"${a_comp_std_rDNA_map[${i}]}\" was already present.
+
+                Thus, did not run \"Step #X.C.ii.: Merge the \"standard.nodups\" and
+                \"keep-MM-?.nodups\" files
+                """
+            }
+        done
+    }
+
+#NOTE 2023-1009
+#  Have added flag "--keep-first-header" because was encountering the following
+#+ error in the creation of some files:
+#+ 
+#+ ❯ cat merge.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.pairs.gz.30129423.stderr.txt
+#+ Traceback (most recent call last):
+#+   File "/home/kalavatt/miniconda3/envs/pairtools_env/bin/pairtools", line 11, in <module>
+#+     sys.exit(cli())
+#+   File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/click/core.py", line 1130, in __call__
+#+     return self.main(*args, **kwargs)
+#+   File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/click/core.py", line 1055, in main
+#+     rv = self.invoke(ctx)
+#+   File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/click/core.py", line 1657, in invoke
+#+     return _process_result(sub_ctx.command.invoke(sub_ctx))
+#+   File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/click/core.py", line 1404, in invoke
+#+     return ctx.invoke(self.callback, **ctx.params)
+#+   File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/click/core.py", line 760, in invoke
+#+     return __callback(*args, **kwargs)
+#+   File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/cli/merge.py", line 134, in merge
+#+     merge_py(
+#+   File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/cli/merge.py", line 194, in merge_py
+#+     merged_header = headerops.merge_headers(headers)
+#+   File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/headerops.py", line 730, in merge_headers
+#+     new_pairheader = _merge_pairheaders(pairheaders, force=False)
+#+   File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/headerops.py", line 686, in _merge_pairheaders
+#+     chroms_merged = merge_chrom_lists(*chrom_lists)
+#+   File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/headerops.py", line 576, in merge_chrom_lists
+#+     chrom_list = list(_toposort(g.copy(), tie_breaker=min))
+#+   File "/home/kalavatt/miniconda3/envs/pairtools_env/lib/python3.10/site-packages/pairtools/lib/headerops.py", line 561, in _toposort
+#+     raise ValueError("Circular dependencies exist: {} ".format(list(dag.items())))
+#+ ValueError: Circular dependencies exist: [('V', {'Mito'}), ('VI', {'V'}), ('VII', {'VI'}), ('VIII', {'VII'}), ('IX', {'VIII'}), ('X', {'IX', 'VIII'}), ('XI', {'X'}), ('XII', {'XI'}), ('XIII', {'XII'}), ('XIV', {'XIII'}), ('XV', {'XIV'}), ('XVI', {'XV'}), ('Mito', {'XVI', 'IX'})]
 ```
 </details>
 <br />
@@ -4473,7 +4816,7 @@ EOF
 ### 6. Run `pairtools stats`
 <a id="individual-pairs-files"></a>
 #### Individual pairs files
-<a id="code-28"></a>
+<a id="code-30"></a>
 ##### Code
 <details>
 <summary><i>Code: 6. Run pairtools stats</i></summary>
@@ -4484,7 +4827,7 @@ EOF
 #TODO #LOWERPRIORITY Update/refactor
 
 #  Do a trial run of pairtools stats ------------------------------------------
-run=TRUE
+run=FALSE
 [[ 
     "${run}" == TRUE && \
         -f "${a_dedup_pre_pairs}" && \
@@ -4510,12 +4853,12 @@ run=TRUE
 
 <a id="7-load-pairs-to-cooler"></a>
 ### 7. Load pairs to cooler
-<a id="individual-pairs-file"></a>
-#### Individual pairs file
-<a id="code-29"></a>
+<a id="a-containing-rdna-nodups-pairs"></a>
+#### A. ...containing "rDNA" `nodups` pairs
+<a id="code-31"></a>
 ##### Code
 <details>
-<summary><i>Code: 7. Load pairs to cooler</i></summary>
+<summary><i>Code: 7.A. Load pairs (containing "rDNA" nodups pairs) to cooler</i></summary>
 
 ```bash
 #!/bin/bash
@@ -4567,6 +4910,14 @@ print_test=TRUE
                         \"${a_comp_std_rDNA_cload[${i}]}\"
                     EOF
                     """
+                } ||
+                {
+                    echo """
+                    Warning: Either \"${a_comp_std_rDNA[${i}]}\" was not found, or
+                             \"${a_comp_std_rDNA_cload[${i}]}\" was already present.
+
+                    Thus, did not run \"Step 7.A. Load pairs (containing 'rDNA' nodups pairs) to cooler\"
+                    """
                 }
         done
     }
@@ -4604,6 +4955,133 @@ cooler cload pairs \
     "${a_comp_std_rDNA_cload[${i}]}"
 EOF
                     sleep 0.2
+                } ||
+                {
+                    echo """
+                    Warning: Either \"${a_comp_std_rDNA[${i}]}\" was not found, or
+                             \"${a_comp_std_rDNA_cload[${i}]}\" was already present.
+
+                    Thus, did not run \"Step 7.A. Load pairs (containing 'rDNA' nodups pairs) to cooler\"
+                    """
+                }
+        done
+    }
+```
+</details>
+<br />
+
+<a id="b-containing-rdna-mapped-pairs"></a>
+#### B. ...containing "rDNA" `mapped` pairs
+<a id="code-32"></a>
+##### Code
+<details>
+<summary><i>Code: 7.B. Load pairs (containing "rDNA" mapped pairs) to cooler</i></summary>
+
+```bash
+#!/bin/bash
+
+#  Check arrays, files --------------------------------------------------------
+run_check=TRUE
+[[ "${run_check}" == TRUE ]] &&
+    {
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0 && ., "${a_comp_std_rDNA_map[${i}]}"
+            ., "${a_comp_std_rDNA_md[${i}]}"
+        done
+        echo ""
+
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0 && echo "${a_comp_std_rDNA_map_cload[${i}]}"
+            echo "${a_comp_std_rDNA_map_cload[${i}]}"
+        done
+    }
+
+
+#  Run print tests ------------------------------------------------------------
+print_test=TRUE
+[[ "${print_test}" == TRUE ]] &&
+    {
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0
+            job_name="cload.$(basename "${a_comp_std_rDNA_map_cload[${i}]}" .cool)"  # echo "${job_name}"
+
+            [[
+                     -f "${a_comp_std_rDNA_map[${i}]}" \
+                && ! -f "${a_comp_std_rDNA_map_cload[${i}]}"
+            ]] &&
+                {
+                    echo """
+                    #HEREDOC
+                    sbatch << EOF
+                    #!/bin/bash
+
+                    #SBATCH --job-name=\"${job_name}\"
+                    #SBATCH --nodes=1
+                    #SBATCH --cpus-per-task=1
+                    #SBATCH --error=\"${d_cload}/err_out/${job_name}.%A.stderr.txt\"
+                    #SBATCH --output=\"${d_cload}/err_out/${job_name}.%A.stdout.txt\"
+
+                    cooler cload pairs \\
+                        -c1 2 -p1 3 -c2 4 -p2 5 \\
+                        --assembly \"${assembly}\" \\
+                        \"${a_size}\":\"${bin_initial}\" \\
+                        \"${a_comp_std_rDNA_map[${i}]}\" \\
+                        \"${a_comp_std_rDNA_map_cload[${i}]}\"
+                    EOF
+                    """
+                } ||
+                {
+                    echo """
+                    Warning: Either \"${a_comp_std_rDNA_map[${i}]}\" was not found, or
+                             \"${a_comp_std_rDNA_map_cload[${i}]}\" was already present.
+
+                    Thus, did not run \"Step 7.B. Load pairs (containing 'rDNA' mapped pairs) to cooler\"
+                    """
+                }
+        done
+    }
+
+
+#  Submit jobs to SLURM -------------------------------------------------------
+run=TRUE
+[[ "${run}" == TRUE ]] &&
+    {
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0
+
+            [[
+                     -f "${a_comp_std_rDNA_map[${i}]}" \
+                && ! -f "${a_comp_std_rDNA_map_cload[${i}]}"
+            ]] &&
+                {
+                    job_name="cload.$(basename "${a_comp_std_rDNA_map_cload[${i}]}" .cool)"  # echo "${job_name}"
+
+#HEREDOC
+sbatch << EOF
+#!/bin/bash
+
+#SBATCH --job-name="${job_name}"
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=1
+#SBATCH --error="${d_cload}/err_out/${job_name}.%A.stderr.txt"
+#SBATCH --output="${d_cload}/err_out/${job_name}.%A.stdout.txt"
+
+cooler cload pairs \
+    -c1 2 -p1 3 -c2 4 -p2 5 \
+    --assembly "${assembly}" \
+    "${a_size}":"${bin_initial}" \
+    "${a_comp_std_rDNA_map[${i}]}" \
+    "${a_comp_std_rDNA_map_cload[${i}]}"
+EOF
+                    sleep 0.2
+                } ||
+                {
+                    echo """
+                    Warning: Either \"${a_comp_std_rDNA_map[${i}]}\" was not found, or
+                             \"${a_comp_std_rDNA_map_cload[${i}]}\" was already present.
+
+                    Thus, did not run \"Step 7.B. Load pairs (containing 'rDNA' mapped pairs) to cooler\"
+                    """
                 }
         done
     }
@@ -4613,22 +5091,23 @@ EOF
 
 <a id="8-generate-a-multi-resolution-cooler-by-coarsening"></a>
 ### 8. Generate a multi-resolution cooler by coarsening
-<a id="cools-from-individual-pairs-files"></a>
-#### Cools from individual pairs files
-<a id="code-30"></a>
+<a id="a-containing-rdna-nodups-pairs-1"></a>
+#### A. ...containing "rDNA" `nodups` pairs
+<a id="code-33"></a>
 ##### Code
 <details>
-<summary><i>Code: 8. Generate a multi-resolution cooler by coarsening</i></summary>
+<summary><i>Code: 8.A. Generate a multi-resolution cooler by coarsening (cool containing "rDNA" nodups pairs)</i></summary>
 
 ```bash
 #!/bin/bash
 
 #TODO Move initialization to an appropriate spot in Step #0
-unset a_comp_std_rDNA_zoom && typeset -a a_comp_std_rDNA_zoom
+    unset a_comp_std_rDNA_zoom && typeset -a a_comp_std_rDNA_zoom
+unset a_comp_std_rDNA_map_zoom && typeset -a a_comp_std_rDNA_map_zoom
 
 for (( i = 0; i < ${#all[@]}; i++ )); do
-    # echo "${a_comp_std_rDNA_cload[${i}]}"
-    a_comp_std_rDNA_zoom+=( "${d_zoom}/$(basename ${a_comp_std_rDNA_cload[${i}]} .cool).mcool" )
+    # i=0 && echo "${a_comp_std_rDNA_cload[${i}]}"
+        a_comp_std_rDNA_zoom+=( "${d_zoom}/$(basename ${a_comp_std_rDNA_cload[${i}]} .cool).mcool" )
 done
 # echo_test "${a_comp_std_rDNA_zoom[@]}"
 
@@ -4669,8 +5148,12 @@ print_test=TRUE
                     """
                 } ||
                 {
-                    echo "Warning: Either the infile was not found or the outfile already exists"
-                    echo "         Stopping the operation"
+                    echo """
+                    Warning: Either \"${a_comp_std_rDNA_cload[${i}]}\" was not found or
+                             \"${a_comp_std_rDNA_zoom[${i}]}\" already exists
+
+                    Stopping \"8.A. Generate a multi-resolution cooler by coarsening (cool containing 'rDNA' nodups pairs)\"
+                    """
                 }
         done
     }
@@ -4710,8 +5193,12 @@ EOF
                     sleep 0.2
                 } ||
                 {
-                    echo "Warning: Either the infile was not found or the outfile already exists"
-                    echo "         Stopping the operation"
+                    echo """
+                    Warning: Either \"${a_comp_std_rDNA_cload[${i}]}\" was not found or
+                             \"${a_comp_std_rDNA_zoom[${i}]}\" already exists
+
+                    Stopping \"8.A. Generate a multi-resolution cooler by coarsening (cool containing 'rDNA' nodups pairs)\"
+                    """
                 }
         done
     }
@@ -4719,271 +5206,118 @@ EOF
 </details>
 <br />
 
-<a id="9-ingest-files-for-higlass"></a>
-### 9. Ingest files for HiGlass
-<a id="code-31"></a>
-#### Code
+<a id="b-containing-rdna-mapped-pairs-1"></a>
+#### B. ...containing "rDNA" `mapped` pairs
+<a id="code-34"></a>
+##### Code
 <details>
-<summary><i>Code: Ingest files for HiGlass</i></summary>
+<summary><i>Code: 8.B. Generate a multi-resolution cooler by coarsening (cool containing "rDNA" mapped pairs)</i></summary>
 
 ```bash
 #!/bin/bash
 
-#  Run on WorkMac (local)
-run_check=FALSE
-[[ "${run_check}" == TRUE ]] &&
-    {
-        docker exec higlass-container python higlass-server/manage.py
+#TODO Move initialization to an appropriate spot in Step #0
+unset a_comp_std_rDNA_map_zoom && typeset -a a_comp_std_rDNA_map_zoom
 
-        docker exec higlass-container \
-            python higlass-server/manage.py ingest_tileset \
-                --help
+for (( i = 0; i < ${#all[@]}; i++ )); do
+    # i=0 && echo "${a_comp_std_rDNA_map_cload[${i}]}"
+    a_comp_std_rDNA_map_zoom+=( "${d_zoom}/$(basename ${a_comp_std_rDNA_map_cload[${i}]} .cool).mcool" )
+done
+# echo_test "${a_comp_std_rDNA_map_zoom[@]}"
+
+
+#  Run print tests ------------------------------------------------------------
+print_test=TRUE
+[[ "${print_test}" == TRUE ]] &&
+    {
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0
+            
+            [[
+                     -f "${a_comp_std_rDNA_map_cload[${i}]}" \
+                && ! -f "${a_comp_std_rDNA_map_zoom[${i}]}"
+            ]] &&
+                {
+                    job_name="zoom.$(basename "${a_comp_std_rDNA_map_zoom[${i}]}" .mcool)"  # echo "${job_name}"
+                    
+                    echo """
+                    #HEREDOC
+                    sbatch << EOF
+                    #!/bin/bash
+
+                    #SBATCH --job-name=\"${job_name}\"
+                    #SBATCH --nodes=1
+                    #SBATCH --cpus-per-task=${threads}
+                    #SBATCH --error=\"${d_zoom}/err_out/${job_name}.%A.stderr.txt\"
+                    #SBATCH --output=\"${d_zoom}/err_out/${job_name}.%A.stdout.txt\"
+
+                    cooler zoomify \\
+                        --out \"${a_comp_std_rDNA_map_zoom[${i}]}\" \\
+                        --nproc ${threads} \\
+                        --resolutions 50,100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \\
+                        --balance \\
+                        --balance-args '--max-iters 2000' \\
+                        \"${a_comp_std_rDNA_map_cload[${i}]}\"
+                    EOF
+                    """
+                } ||
+                {
+                    echo """
+                    Warning: Either \"${a_comp_std_rDNA_map_cload[${i}]}\" was not found or
+                             \"${a_comp_std_rDNA_map_zoom[${i}]}\" already exists
+
+                    Stopping \"8.B. Generate a multi-resolution cooler by coarsening (cool containing 'rDNA' mapped pairs)\"
+                    """
+                }
+        done
     }
 
 
-#  Load mcool files: This is work for quick, rough-draft assessments ----------
-rough_Q=FALSE
-[[ "${rough_Q}" == TRUE ]] &&
+#  Submit jobs to SLURM -------------------------------------------------------
+run=TRUE
+[[ "${run}" == TRUE ]] &&
     {
-        docker exec higlass-container \
-            python higlass-server/manage.py ingest_tileset \
-                --filename /data/SRR7939018.mcool \
-                --filetype cooler \
-                --datatype matrix
+        for (( i = 0; i < ${#all[@]}; i++ )); do
+            # i=0
+            
+            [[
+                     -f "${a_comp_std_rDNA_map_cload[${i}]}" \
+                && ! -f "${a_comp_std_rDNA_map_zoom[${i}]}"
+            ]] &&
+                {
+                    job_name="zoom.$(basename "${a_comp_std_rDNA_map_zoom[${i}]}" .mcool)"  # echo "${job_name}"
+#HEREDOC
+sbatch << EOF
+#!/bin/bash
 
-        # curl http://localhost:8888/api/v1/tilesets/
-    }
+#SBATCH --job-name="${job_name}"
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=${threads}
+#SBATCH --error="${d_zoom}/err_out/${job_name}.%A.stderr.txt"
+#SBATCH --output="${d_zoom}/err_out/${job_name}.%A.stdout.txt"
 
-rough_G1=FALSE
-[[ "${rough_G1}" == TRUE ]] &&
-    {
-        docker exec higlass-container \
-            python higlass-server/manage.py ingest_tileset \
-                --filename /data/SRR11893107.mcool \
-                --filetype cooler \
-                --datatype matrix
+cooler zoomify \
+    --out "${a_comp_std_rDNA_map_zoom[${i}]}" \
+    --nproc ${threads} \
+    --resolutions 50,100,200,400,800,1600,3200,6400,12800,25600,51200,102400 \
+    --balance \
+    --balance-args '--max-iters 2000' \
+    "${a_comp_std_rDNA_map_cload[${i}]}"
+EOF
+                    sleep 0.2
+                } ||
+                {
+                    echo """
+                    Warning: Either \"${a_comp_std_rDNA_map_cload[${i}]}\" was not found or
+                             \"${a_comp_std_rDNA_map_zoom[${i}]}\" already exists
 
-        # curl http://localhost:8888/api/v1/tilesets/
-    }
-
-rough_G2_M=FALSE
-[[ ${rough_G2_M} == TRUE ]] &&
-    {
-        docker exec higlass-container \
-            python higlass-server/manage.py ingest_tileset \
-                --filename /data/SRR11893084-SRR11893085.mcool \
-                --filetype cooler \
-                --datatype matrix
-
-        # curl http://localhost:8888/api/v1/tilesets/
-    }
-
-#  Test my "${rough_G2_M}" .mcool against the publicly available .mcool
-rough_G2_M_GSE151553=TRUE
-[[ ${rough_G2_M_GSE151553} == TRUE ]] &&
-    {
-        docker exec higlass-container \
-            python higlass-server/manage.py ingest_tileset \
-                --filename /data/GSE151553_A364_merged.mcool \
-                --filetype cooler \
-                --datatype matrix
-
-        # curl http://localhost:8888/api/v1/tilesets/
-    }
-
-rough_size=FALSE
-[[ "${rough_size}" == TRUE ]] &&
-    {
-        docker exec higlass-container \
-            python higlass-server/manage.py ingest_tileset \
-                --filename /data/S288C_reference_sequence_R64-3-1_20210421.size \
-                --filetype chromsizes-tsv \
-                --datatype chromsizes
-
-        # curl http://localhost:8888/api/v1/tilesets/
-    }
-
-rough_Q_rDNA=TRUE
-[[ "${rough_Q_rDNA}" == TRUE ]] &&
-    {
-        docker exec higlass-container \
-            python higlass-server/manage.py ingest_tileset \
-                --filename /data/SRR7939018.standard-rDNA.mcool \
-                --filetype cooler \
-                --datatype matrix
-
-        # curl http://localhost:8888/api/v1/tilesets/
-    }
-
-
-#  Work, 2023-0807 ------------------------------------------------------------
-conda activate chromatin_env
-
-#  Initialize function for ingesting mcool files
-ingest_mcool() {
-    docker exec higlass-container \
-            python higlass-server/manage.py ingest_tileset \
-                --filename "/data/${1}" \
-                --filetype cooler \
-                --datatype matrix
-}
-
-
-aggregate_bed() {
-    clodius aggregate bedfile \
-        --assembly "sacCer3" \
-        --output-file "${1/bed/db}" \
-        --chromsizes-filename "${2:-S288C_reference_sequence_R64-3-1_20210421.size}" \
-        "${1}"
-}
-
-
-ingest_bed() {
-    docker exec higlass-container \
-        python higlass-server/manage.py ingest_tileset \
-           --filename "/data/${1}" \
-           --filetype beddb \
-           --datatype bedlike \
-           --coordSystem sacCer3
-}
-
-
-export -f load_mcool
-export -f aggregate_bed
-export -f ingest_bed
-
-
-#  Ingest "updated" mcool files
-updated_Q=FALSE
-updated_G2M=FALSE
-updated_G1=FALSE
-[[ "${updated_Q}" == TRUE ]] \
-    && ingest_mcool MC-2019_Q_WT_repM.standard-rDNA-complete.mcool
-[[ "${updated_G2M}" == TRUE ]] \
-    && ingest_mcool MC-2020_nz_WT_repM.standard-rDNA-complete.mcool
-[[ "${updated_G1}" == TRUE ]] \
-    && ingest_mcool MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mcool
-
-
-#  Aggregate and ingest gene track file
-agg_rep_coding_ncRNA=FALSE
-[[ "${agg_rep_coding_ncRNA}" == TRUE ]] \
-    && aggregate_bed Greenlaw-et-al_representative-coding-ncRNA-transcriptome.bed
-
-ing_rep_coding_ncRNA=FALSE
-[[ "${ing_rep_coding_ncRNA}" == TRUE ]] \
-    && ingest_bed Greenlaw-et-al_representative-coding-ncRNA-transcriptome.db
-    #ACCIDENT #DELETE #TODO
-    # && ingest_bed Greenlaw-et-al_representative-coding-ncRNA-transcriptome.bed
-
-agg_rep_coding_non_pancRNA=FALSE
-[[ "${agg_rep_coding_non_pancRNA}" == TRUE ]] \
-    && aggregate_bed Greenlaw-et-al_representative-coding-non-pa-ncRNA-transcriptome.bed
-
-ing_rep_coding_non_pancRNA=FALSE
-[[ "${ing_rep_coding_non_pancRNA}" == TRUE ]] \
-    && ingest_bed Greenlaw-et-al_representative-coding-non-pa-ncRNA-transcriptome.db
-
-agg_rep_coding_noncoding=FALSE
-[[ "${agg_rep_coding_noncoding}" == TRUE ]] \
-    && aggregate_bed Greenlaw-et-al_representative-non-coding-transcriptome.bed
-
-ing_rep_coding_noncoding=FALSE
-[[ "${ing_rep_coding_noncoding}" == TRUE ]] \
-    && ingest_bed Greenlaw-et-al_representative-non-coding-transcriptome.db
-
-agg_S_cerevisiae_gene=TRUE
-[[ "${agg_S_cerevisiae_gene}" == TRUE ]] \
-    && aggregate_bed Saccharomyces_cerevisiae.R64-1-1.108.gene.bed
-
-ing_S_cerevisiae_gene=TRUE
-[[ "${ing_S_cerevisiae_gene}" == TRUE ]] \
-    && ingest_bed Saccharomyces_cerevisiae.R64-1-1.108.gene.db
-
-run_check=TRUE
-[[ "${run_check}" == TRUE ]] && curl http://localhost:8888/api/v1/tilesets/
-
-
-#  Work, 2023-0713, 2023-0807 -------------------------------------------------
-docker exec higlass-container \
-    python higlass-server/manage.py --help
-
-docker exec higlass-container \
-    python higlass-server/manage.py ingest_tileset --help
-
-clodius --help
-
-clodius aggregate --help
-
-clodius aggregate bedfile --help
-
-clodius aggregate bedgraph --help
-
-clodius aggregate bedfile \
-    --output-file "${outfile}" \
-    --assembly "${assembly}" \
-
-#  Step #1: Convert gtfs of interest into beds
-gtf2bed \
-    < Greenlaw-et-al_non-collapsed-non-coding-transcriptome.gtf \
-    > Greenlaw-et-al_non-collapsed-non-coding-transcriptome.bed
-
-gtf2bed \
-    < Greenlaw-et-al_representative-coding-ncRNA-transcriptome.gtf \
-    > Greenlaw-et-al_representative-coding-ncRNA-transcriptome.bed
-
-gtf2bed \
-    < Greenlaw-et-al_representative-coding-non-pa-ncRNA-transcriptome.gtf \
-    > Greenlaw-et-al_representative-coding-non-pa-ncRNA-transcriptome.bed
-
-gtf2bed \
-    < Greenlaw-et-al_representative-coding-pa-ncRNA-transcriptome.gtf \
-    > Greenlaw-et-al_representative-coding-pa-ncRNA-transcriptome.bed
-
-gtf2bed \
-    < Greenlaw-et-al_representative-non-coding-transcriptome.gtf \
-    > Greenlaw-et-al_representative-non-coding-transcriptome.bed
-
-gtf2bed \
-    < processed_features-intergenic_sense-antisense.gtf \
-    > processed_features-intergenic_sense-antisense.bed
-
-gtf2bed \
-    < processed_features-intergenic_sense.gtf \
-    > processed_features-intergenic_sense.bed
-
-cat Saccharomyces_cerevisiae.R64-1-1.108.gtf \
-    | awk '{ if ($0 ~ "transcript_id") print $0; else print $0" transcript_id \"\";"; }' \
-    | gtf2bed - \
-        > Saccharomyces_cerevisiae.R64-1-1.108.bed
-
-#IMPORTANT (2023-0807)
-cat Saccharomyces_cerevisiae.R64-1-1.108.bed \
-    | awk '{ if ($8 ~ "gene") { print $0 } }' \
-        > Saccharomyces_cerevisiae.R64-1-1.108.gene.bed
-
-cat Saccharomyces_cerevisiae.R64-1-1.108.bed | head
-
-#  Step #2: Aggregate bed files for use with HiGlass
-clodius aggregate bedfile \
-    --assembly "sacCer3" \
-    --output-file Saccharomyces_cerevisiae.R64-1-1.108.db \
-    --chromsizes-filename S288C_reference_sequence_R64-3-1_20210421.size \
-    Saccharomyces_cerevisiae.R64-1-1.108.bed
-
-#  Step #3: Ingest the aggregated bed files
-docker exec higlass-container \
-    python higlass-server/manage.py ingest_tileset \
-       --filename /data/Saccharomyces_cerevisiae.R64-1-1.108.db \
-       --filetype beddb \
-       --datatype bedlike \
-       --coordSystem sacCer3
-
-rough_gene_track=TRUE
-[[ "${rough_gene_track}" == TRUE ]] &&
-    {
-
+                    Stopping \"8.B. Generate a multi-resolution cooler by coarsening (cool containing 'rDNA' mapped pairs)\"
+                    """
+                }
+        done
     }
 ```
 </details>
 <br />
+
+

@@ -142,3 +142,70 @@ pbgzip -dc MC-2020_30C-a15_WT_repM.keep-MM-0.mapped.pairs.gz | wc -l
 #
 # ❯ pbgzip -dc MC-2020_30C-a15_WT_repM.keep-MM-0.mapped.pairs.gz | wc -l
 # 102794286
+
+pbgzip -dc MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.pairs.gz | wc -l
+pbgzip -dc MC-2020_nz_WT_repM.standard-rDNA-complete.nodups.pairs.gz | wc -l
+
+pbgzip -dc MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.pairs.gz | wc -l
+pbgzip -dc MC-2020_30C-a15_WT_repM.standard-rDNA-complete.nodups.pairs.gz | wc -l
+
+pbgzip -dc MC-2020_nz_WT_rep1.standard-rDNA-complete.mapped.pairs.gz | wc -l
+pbgzip -dc MC-2020_nz_WT_rep1.standard-rDNA-complete.nodups.pairs.gz | wc -l
+
+pbgzip -dc MC-2020_nz_WT_rep2.standard-rDNA-complete.mapped.pairs.gz | wc -l
+pbgzip -dc MC-2020_nz_WT_rep2.standard-rDNA-complete.nodups.pairs.gz | wc -l
+
+pbgzip -dc MC-2020_30C-a15_WT_rep2.standard-rDNA-complete.mapped.pairs.gz | wc -l
+pbgzip -dc MC-2020_30C-a15_WT_rep2.standard-rDNA-complete.nodups.pairs.gz | wc -l
+
+pbgzip -dc MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.pairs.gz | wc -l
+pbgzip -dc MC-2019_Q_WT_repM.standard-rDNA-complete.nodups.pairs.gz | wc -l
+
+pbgzip -dc MC-2020_30C-a15_WT_rep1.standard-rDNA-complete.mapped.pairs.gz | wc -l
+pbgzip -dc MC-2020_30C-a15_WT_rep1.standard-rDNA-complete.nodups.pairs.gz | wc -l
+
+
+# ❯ pbgzip -dc MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.pairs.gz | wc -l
+# 54590143
+# ❯ pbgzip -dc MC-2020_nz_WT_repM.standard-rDNA-complete.nodups.pairs.gz | wc -l
+# 53846960
+# ❯ pbgzip -dc MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.pairs.gz | wc -l
+# 80491566
+# ❯ pbgzip -dc MC-2020_30C-a15_WT_repM.standard-rDNA-complete.nodups.pairs.gz | wc -l
+# 80015061
+# ❯ pbgzip -dc MC-2020_nz_WT_rep1.standard-rDNA-complete.mapped.pairs.gz | wc -l
+# 23396270
+# ❯ pbgzip -dc MC-2020_nz_WT_rep1.standard-rDNA-complete.nodups.pairs.gz | wc -l
+# 23089624
+# ❯ pbgzip -dc MC-2020_nz_WT_rep2.standard-rDNA-complete.mapped.pairs.gz | wc -l
+# 31193874
+# ❯ pbgzip -dc MC-2020_nz_WT_rep2.standard-rDNA-complete.nodups.pairs.gz | wc -l
+# 30757371
+# ❯ pbgzip -dc MC-2020_30C-a15_WT_rep2.standard-rDNA-complete.mapped.pairs.gz | wc -l
+# 37740777
+# ❯ pbgzip -dc MC-2020_30C-a15_WT_rep2.standard-rDNA-complete.nodups.pairs.gz | wc -l
+# 37520885
+# ❯ pbgzip -dc MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.pairs.gz | wc -l
+# 43780484
+# ❯ pbgzip -dc MC-2019_Q_WT_repM.standard-rDNA-complete.nodups.pairs.gz | wc -l
+# 41652844
+# ❯ pbgzip -dc MC-2020_30C-a15_WT_rep1.standard-rDNA-complete.mapped.pairs.gz | wc -l
+# 42750790
+# ❯ pbgzip -dc MC-2020_30C-a15_WT_rep1.standard-rDNA-complete.nodups.pairs.gz | wc -l
+# 42494211
+
+# ❯ pbgzip -dc MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.pairs.gz | wc -l
+# 54590143
+# ❯ pbgzip -dc MC-2020_nz_WT_repM.standard-rDNA-complete.nodups.pairs.gz | wc -l
+# 53846960
+#
+# ❯ pbgzip -dc MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.pairs.gz | wc -l
+# 80491566
+# ❯ pbgzip -dc MC-2020_30C-a15_WT_repM.standard-rDNA-complete.nodups.pairs.gz | wc -l
+# 80015061
+#
+# ❯ pbgzip -dc MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.pairs.gz | wc -l
+# 43780484
+# ❯ pbgzip -dc MC-2019_Q_WT_repM.standard-rDNA-complete.nodups.pairs.gz | wc -l
+# 41652844
+
