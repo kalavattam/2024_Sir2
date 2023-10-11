@@ -16,7 +16,7 @@
         1. [Code](#code-1)
 1. [1. Use `fanc to-fanc` to convert `07_cload/` `.cool` files to FAN-C `.hic` files](#1-use-fanc-to-fanc-to-convert-07_cload-cool-files-to-fan-c-hic-files)
     1. [Code](#code-2)
-1. [2. Create binned, unbalanced FAN-C `.hic` files comprised solely of chromosome XII](#2-create-binned-unbalanced-fan-c-hic-files-comprised-solely-of-chromosome-xii)
+1. [2. Create binned, unbalanced FAN-C `.hic` files](#2-create-binned-unbalanced-fan-c-hic-files)
     1. [Code](#code-3)
 1. [3. Downsample Q, G1, G2/M `.hic` files to smallest matrix](#3-downsample-q-g1-g2m-hic-files-to-smallest-matrix)
     1. [A. Draft `Python` code to dynamically handles the downsampling](#a-draft-python-code-to-dynamically-handles-the-downsampling)
@@ -29,7 +29,6 @@
     1. [Code](#code-7)
 1. [5. Draw example plots of the above-processed `.hic` files](#5-draw-example-plots-of-the-above-processed-hic-files)
     1. [Code](#code-8)
-    1. [Printed](#printed)
     1. [Help](#help)
 
 <!-- /MarkdownTOC -->
@@ -51,9 +50,12 @@
     A.    Q: Q repM mapped
     B.   G1: 30C-a15 repM mapped
     C. G2/M: nz repM mapped
-2. Use `fanc hic --bin-size 6400 --chromosomes "XII" path/to/output/file.hic` to create unbalanced .hic files comprised solely of XII 
-3. Referencing the Q XII .hic file, use `fanc downsample` to sample G1 XII and G2/M XII .hic files to the same size as the Q XII .hic file
-4. Use `fanc hic --filter-low-coverage-relative --statistics path/to/save/file.txt --statistics-plot path/to/save/file.pdf --normalise --norm-method "KR" path/to/output/file.hic`
+2. Create unbalanced .hic files comprised solely of...
+    A. XII
+    B. whole genome
+    C. ...
+3. Downsample the Q, G1, and G2/M XII .hic files to the smallest of the three contact-matrix sums
+4. Balance the matrices `fanc hic --filter-low-coverage-relative --statistics path/to/save/file.txt --statistics-plot path/to/save/file.pdf --normalise --norm-method "KR" path/to/output/file.hic`
 ```
 </details>
 <br />
@@ -77,6 +79,10 @@ cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align
 
 [[ ! -d 09_fanc_XII ]] &&
     mkdir -p 09_fanc_XII/err_out ||
+    true
+
+[[ ! -d 09_fanc_genome ]] &&
+    mkdir -p 09_fanc_genome/err_out ||
     true
 ```
 </details>
@@ -129,6 +135,24 @@ check_variables=TRUE
 
         ., ${d_XII}
     } || true
+
+  d_gen="09_fanc_genome"
+  gen_Q="${d_gen}/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.hic"
+ gen_G1="${d_gen}/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.hic"
+gen_G2M="${d_gen}/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.hic"
+
+check_variables=TRUE
+[[ ${check_variables} == TRUE ]] &&
+    {
+        echo """
+          d_XII  ${d_gen}
+          XII_Q  ${gen_Q}
+         XII_G1  ${gen_G1}
+        XII_G2M  ${gen_G2M}
+        """
+
+        ., ${d_XII}
+    } || true
 ```
 </details>
 <br />
@@ -143,7 +167,7 @@ check_variables=TRUE
 ```bash
 #!/bin/bash
 
-check_test_command=TRUE
+check_test_command=FALSE
 [[ ${check_test_command} == TRUE ]] &&
     {
         [[ -f ${cool_Q} && ! -f ${XII_Q} ]] &&
@@ -156,7 +180,7 @@ check_test_command=TRUE
             } || echo "Warning: Did not run command; check in/outfiles."
     } || true
 
-run_test_command=TRUE
+run_test_command=FALSE
 [[ ${run_test_command} == TRUE ]] &&
     {
         [[ -f ${cool_Q} && ! -f ${XII_Q} ]] &&
@@ -169,9 +193,9 @@ run_test_command=TRUE
 
 #  Initialize associative array that pairs in- with outfiles
 unset conversion && typeset -A conversion
-conversion["${cool_Q}"]="${XII_Q}"
-conversion["${cool_G1}"]="${XII_G1}"
-conversion["${cool_G2M}"]="${XII_G2M}"
+conversion["${cool_Q}"]="${XII_Q}; ${gen_Q}"
+conversion["${cool_G1}"]="${XII_G1}; ${gen_G1}"
+conversion["${cool_G2M}"]="${XII_G2M}; ${gen_G2M}"
 
 check_array=TRUE
 [[ ${check_array} == TRUE ]] &&
@@ -180,8 +204,9 @@ check_array=TRUE
             # [[ -f ${i} && ! -f ${conversion[${i}]} ]] &&
             #    {
                     echo """
-                     key (cool)  ${i}
-                    value (hic)  ${conversion[${i}]}
+                          key (cool)  ${i}
+                    value (hic, XII)  $(echo ${conversion[${i}]} | awk -F '; ' '{ print $1 }')
+                    value (hic, gen)  $(echo ${conversion[${i}]} | awk -F '; ' '{ print $2 }')
                     """
             #    } ||
             #     {
@@ -194,13 +219,20 @@ check_array=TRUE
 check_jobs=TRUE
 [[ ${check_jobs} == TRUE ]] &&
     {
+        iter=0
         for i in "${!conversion[@]}"; do
-            [[ -f ${i} && ! -f ${conversion[${i}]} ]] &&
+            XII=$(echo ${conversion[${i}]} | awk -F '; ' '{ print $1 }')
+            gen=$(echo ${conversion[${i}]} | awk -F '; ' '{ print $2 }')
+
+            (( iter++ ))
+            [[ -f ${i} && ! -f ${XII} ]] &&
                 {
                     job_name="to-fanc.$(basename ${i} .cool)"
                     threads=1
                     
                     echo """
+                    ### ${iter} ###
+
                     #HEREDOC
                     sbatch << EOF
                     #!/bin/bash
@@ -213,9 +245,41 @@ check_jobs=TRUE
 
                     fanc from-cooler \\
                         ${i} \\
-                        ${conversion[${i}]}
+                        ${XII}
                     EOF
                     """
+                    sleep 0.2
+                } ||
+                {
+                    echo "Warning: Did not run command; check infile ${i}"
+                    echo "         and/or outfile ${conversion[${i}]}."
+                }
+                
+                (( iter++ ))
+                [[ -f ${i} && ! -f ${gen} ]] &&
+                {
+                    job_name="to-fanc.$(basename ${i} .cool)"
+                    threads=1
+                    
+                    echo """
+                    ### ${iter} ###
+
+                    #HEREDOC
+                    sbatch << EOF
+                    #!/bin/bash
+
+                    #SBATCH --job-name="${job_name}"
+                    #SBATCH --nodes=1
+                    #SBATCH --cpus-per-task=${threads}
+                    #SBATCH --error="${d_gen}/err_out/${job_name}.%A.stderr.txt"
+                    #SBATCH --output="${d_gen}/err_out/${job_name}.%A.stdout.txt"
+
+                    fanc from-cooler \\
+                        ${i} \\
+                        ${gen}
+                    EOF
+                    """
+                    sleep 0.2
                 } ||
                 {
                     echo "Warning: Did not run command; check infile ${i}"
@@ -227,12 +291,19 @@ check_jobs=TRUE
 submit_jobs=TRUE
 [[ ${submit_jobs} == TRUE ]] &&
     {
+        iter=0
         for i in "${!conversion[@]}"; do
-            [[ -f ${i} && ! -f ${conversion[${i}]} ]] &&
+            XII=$(echo ${conversion[${i}]} | awk -F '; ' '{ print $1 }')
+            gen=$(echo ${conversion[${i}]} | awk -F '; ' '{ print $2 }')
+
+            (( iter++ ))
+            [[ -f ${i} && ! -f ${XII} ]] &&
                 {
                     job_name="to-fanc.$(basename ${i} .cool)"
                     threads=1
-            
+                    
+                    echo "### ${iter} ###"
+
 #HEREDOC
 sbatch << EOF
 #!/bin/bash
@@ -245,7 +316,36 @@ sbatch << EOF
 
 fanc from-cooler \
     ${i} \
-    ${conversion[${i}]}
+    ${XII}
+EOF
+                    sleep 0.2
+                } ||
+                {
+                    echo "Warning: Did not run command; check infile ${i}"
+                    echo "         and/or outfile ${conversion[${i}]}."
+                }
+                
+                (( iter++ ))
+                [[ -f ${i} && ! -f ${gen} ]] &&
+                {
+                    job_name="to-fanc.$(basename ${i} .cool)"
+                    threads=1
+                    
+                    echo "### ${iter} ###"
+
+#HEREDOC
+sbatch << EOF
+#!/bin/bash
+
+#SBATCH --job-name="${job_name}"
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=${threads}
+#SBATCH --error="${d_gen}/err_out/${job_name}.%A.stderr.txt"
+#SBATCH --output="${d_gen}/err_out/${job_name}.%A.stdout.txt"
+
+fanc from-cooler \
+    ${i} \
+    ${gen}
 EOF
                     sleep 0.2
                 } ||
@@ -259,91 +359,109 @@ EOF
 </details>
 <br />
 
-<a id="2-create-binned-unbalanced-fan-c-hic-files-comprised-solely-of-chromosome-xii"></a>
-### 2. Create binned, unbalanced FAN-C `.hic` files comprised solely of chromosome XII
+<a id="2-create-binned-unbalanced-fan-c-hic-files"></a>
+### 2. Create binned, unbalanced FAN-C `.hic` files
 <a id="code-3"></a>
 #### Code
 <details>
-<summary><i>Code: 2. Create binned, unbalanced FAN-C `.hic` files comprised solely of chromosome XII</i></summary>
+<summary><i>Code: 2. Create binned, unbalanced FAN-C `.hic` files</i></summary>
 
 ```bash
 #!/bin/bash
 
 threads=4
-chroms="XII"
+unset chroms && typeset -a chroms=("XII" "gen")
 unset res && typeset -a res=(
-    50 100 150 200 300 400 500 800 1600 3200 6400 12800
+    50 100 150 200 300 400 500 800 1600 3200 5000 6400 12800
 )
 
 check_array=FALSE
-[[ ${check_array} ]] && echo_test "${res[@]}" || true
-    
-for j in "${res[@]}"; do
-    # j=${res[10]}  # echo "${j}"
+[[ ${check_array} ]] &&
+    {
+        echo_test "${res[@]}"
+        echo ""
+        
+        echo_test "${chroms[@]}"
+        echo ""
+    } ||
+    true
 
-    XII_Q_bin="${XII_Q%.hic}.${j}.hic"
-    XII_G1_bin="${XII_G1%.hic}.${j}.hic"
-    XII_G2M_bin="${XII_G2M%.hic}.${j}.hic"
+for k in "${chroms[@]}"; do
+    iter=0
+    if [[ "${k}" == "XII" ]]; then
+        # k="gen"
+        for j in "${res[@]}"; do
+            # j=${res[10]}  # echo "${j}"
 
-    unset bin && typeset -A bin
-    bin["${XII_Q}"]="${XII_Q_bin}"
-    bin["${XII_G1}"]="${XII_G1_bin}"
-    bin["${XII_G2M}"]="${XII_G2M_bin}"
+            unset Q_bin && typeset Q_bin="${XII_Q%.hic}.${j}.hic"        # echo "${Q_bin}"
+            unset G1_bin && typeset G1_bin="${XII_G1%.hic}.${j}.hic"     # echo "${G1_bin}"
+            unset G2M_bin && typeset G2M_bin="${XII_G2M%.hic}.${j}.hic"  # echo "${G2M_bin}"
 
-    check_array=FALSE
-    [[ ${check_array} == TRUE ]] &&
-        {
-            for i in "${!bin[@]}"; do
-                echo """
-                key (all, 25)  ${i}
-                value (${chroms}, ${j})  ${bin[${i}]}
-                """
-            done
-        } || true
+            unset bin && typeset -A bin
+            bin["${XII_Q}"]="${Q_bin}"
+            bin["${XII_G1}"]="${G1_bin}"
+            bin["${XII_G2M}"]="${G2M_bin}"
 
-    check_jobs=TRUE
-    [[ ${check_jobs} == TRUE ]] &&
-        {
-            for i in "${!bin[@]}"; do
-                [[ -f ${i} && ! -f ${bin[${i}]} ]] &&
-                    {
-                        job_name="bin.$(basename ${bin[${i}]} .hic)"
-
+            check_array=FALSE
+            [[ ${check_array} == TRUE ]] &&
+                {
+                    for i in "${!bin[@]}"; do
                         echo """
-                        #HEREDOC
-                        sbatch << EOF
-                        #!/bin/bash
-
-                        #SBATCH --job-name="${job_name}"
-                        #SBATCH --nodes=1
-                        #SBATCH --cpus-per-task=${threads}
-                        #SBATCH --error="${d_XII}/err_out/${job_name}.%A.stderr.txt"
-                        #SBATCH --output="${d_XII}/err_out/${job_name}.%A.stdout.txt"
-
-                        fanc hic \\
-                            ${i} \\
-                            ${bin[${i}]} \\
-                            --threads ${threads} \\
-                            --bin-size ${j} \\
-                            --chromosomes \"${chroms}\"
-                        EOF
+                        key (all, 25)  ${i}
+                        value (${k}, ${j})  ${bin[${i}]}
                         """
-                        sleep 0.2
-                    } ||
-                    {
-                        echo "Warning: Did not run command; check infile ${i}"
-                        echo "         and/or outfile ${bin[${i}]}."
-                    }
-            done
-        } || true
+                    done
+                } || true
 
-    submit_jobs=TRUE
-    [[ ${submit_jobs} == TRUE ]] &&
-        {
-            for i in "${!bin[@]}"; do
-                [[ -f ${i} && ! -f ${bin[${i}]} ]] &&
-                    {
-                        job_name="bin.$(basename ${bin[${i}]} .hic)"
+            check_jobs=TRUE
+            [[ ${check_jobs} == TRUE ]] &&
+                {
+                    for i in "${!bin[@]}"; do
+                        (( iter++ ))
+                        [[ -f ${i} && ! -f ${bin[${i}]} ]] &&
+                            {
+                                job_name="bin.$(basename ${bin[${i}]} .hic)"
+
+                                echo """
+                                ### ${iter} ###
+
+                                #HEREDOC
+                                sbatch << EOF
+                                #!/bin/bash
+
+                                #SBATCH --job-name="${job_name}"
+                                #SBATCH --nodes=1
+                                #SBATCH --cpus-per-task=${threads}
+                                #SBATCH --error="${d_XII}/err_out/${job_name}.%A.stderr.txt"
+                                #SBATCH --output="${d_XII}/err_out/${job_name}.%A.stdout.txt"
+
+                                fanc hic \\
+                                    ${i} \\
+                                    ${bin[${i}]} \\
+                                    --threads ${threads} \\
+                                    --bin-size ${j} \\
+                                    --chromosomes \"${k}\"
+                                EOF
+                                """
+                                sleep 0.2
+                            } ||
+                            {
+                                echo "Warning: Did not run command; check infile ${i}"
+                                echo "         and/or outfile ${bin[${i}]}."
+                            }
+                    done
+                } || true
+
+            submit_jobs=TRUE
+            [[ ${submit_jobs} == TRUE ]] &&
+                {
+                    for i in "${!bin[@]}"; do
+                        (( iter++ ))
+                        [[ -f ${i} && ! -f ${bin[${i}]} ]] &&
+                            {
+                                job_name="bin.$(basename ${bin[${i}]} .hic)"
+
+                                echo "### ${iter} ###"
 
 #HEREDOC
 sbatch << EOF
@@ -360,16 +478,116 @@ fanc hic \
     ${bin[${i}]} \
     --threads ${threads} \
     --bin-size ${j} \
-    --chromosomes "${chroms}"
+    --chromosomes "${k}"
 EOF
-                        sleep 0.2
-                    } ||
-                    {
-                        echo "Warning: Did not run command; check infile ${i}"
-                        echo "         and/or outfile ${bin[${i}]}."
-                    }
-            done
-        } || true
+                                sleep 0.2
+                            } ||
+                            {
+                                echo "Warning: Did not run command; check infile ${i}"
+                                echo "         and/or outfile ${bin[${i}]}."
+                            }
+                    done
+                } || true
+        done
+    elif [[ "${k}" == "gen" ]]; then
+        for j in "${res[@]}"; do
+            # j=${res[10]}  # echo "${j}"
+
+            unset Q_bin && typeset Q_bin="${gen_Q%.hic}.${j}.hic"        # echo "${Q_bin}"
+            unset G1_bin && typeset G1_bin="${gen_G1%.hic}.${j}.hic"     # echo "${G1_bin}"
+            unset G2M_bin && typeset G2M_bin="${gen_G2M%.hic}.${j}.hic"  # echo "${G2M_bin}"
+
+            unset bin && typeset -A bin
+            bin["${gen_Q}"]="${Q_bin}"
+            bin["${gen_G1}"]="${G1_bin}"
+            bin["${gen_G2M}"]="${G2M_bin}"
+
+            check_array=FALSE
+            [[ ${check_array} == TRUE ]] &&
+                {
+                    for i in "${!bin[@]}"; do
+                        echo """
+                        key (all, 25)  ${i}
+                        value (${k}, ${j})  ${bin[${i}]}
+                        """
+                    done
+                } || true
+
+            check_jobs=TRUE
+            [[ ${check_jobs} == TRUE ]] &&
+                {
+                    for i in "${!bin[@]}"; do
+                        (( iter++ ))
+                        [[ -f ${i} && ! -f ${bin[${i}]} ]] &&
+                            {
+                                job_name="bin.$(basename ${bin[${i}]} .hic)"
+
+                                echo """
+                                ### ${iter} ###
+
+                                #HEREDOC
+                                sbatch << EOF
+                                #!/bin/bash
+
+                                #SBATCH --job-name="${job_name}"
+                                #SBATCH --nodes=1
+                                #SBATCH --cpus-per-task=${threads}
+                                #SBATCH --error="${d_gen}/err_out/${job_name}.%A.stderr.txt"
+                                #SBATCH --output="${d_gen}/err_out/${job_name}.%A.stdout.txt"
+
+                                fanc hic \\
+                                    ${i} \\
+                                    ${bin[${i}]} \\
+                                    --threads ${threads} \\
+                                    --bin-size ${j}
+                                EOF
+                                """
+                                sleep 0.2
+                            } ||
+                            {
+                                echo "Warning: Did not run command; check infile ${i}"
+                                echo "         and/or outfile ${bin[${i}]}."
+                            }
+                    done
+                } || true
+
+            submit_jobs=TRUE
+            [[ ${submit_jobs} == TRUE ]] &&
+                {
+                    for i in "${!bin[@]}"; do
+                        (( iter++ ))
+                        [[ -f ${i} && ! -f ${bin[${i}]} ]] &&
+                            {
+                                job_name="bin.$(basename ${bin[${i}]} .hic)"
+
+                                echo "### ${iter} ###"
+
+#HEREDOC
+sbatch << EOF
+#!/bin/bash
+
+#SBATCH --job-name="${job_name}"
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=${threads}
+#SBATCH --error="${d_gen}/err_out/${job_name}.%A.stderr.txt"
+#SBATCH --output="${d_gen}/err_out/${job_name}.%A.stdout.txt"
+
+fanc hic \
+    ${i} \
+    ${bin[${i}]} \
+    --threads ${threads} \
+    --bin-size ${j}
+EOF
+                                sleep 0.2
+                            } ||
+                            {
+                                echo "Warning: Did not run command; check infile ${i}"
+                                echo "         and/or outfile ${bin[${i}]}."
+                            }
+                    done
+                } || true
+        done
+    fi
 done
 ```
 </details>
@@ -500,24 +718,13 @@ python calculate_fanc-contact-sums.py -h
 #   --G2_outfile G2_OUTFILE
 #                         Path and name for the G2/M downsampled FAN-C .hic outfile; if not specified, then path and name is derived from corresponding infile <chr>
 
-run_test_script=FALSE
-[[ ${run_test_script} == TRUE ]] &&
-    {
-        ls -1 "${d_XII}/"*".800.hic"
-
-        test_Q="${d_XII}/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.800.hic"
-        test_G1="${d_XII}/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.800.hic"
-        test_G2="${d_XII}/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.800.hic"
-
-        python calculate_fanc-contact-sums.py \
-            --Q_infile "${test_Q}" \
-            --G1_infile "${test_G1}" \
-            --G2_infile "${test_G2}"
-    } || true
+#PICKUPHERE #TODO
+#  Need to extend logic to handle genome-wide maps now, in addition XII maps
 
 threads=1
+unset chroms && typeset -a chroms=("XII" "gen")
 unset res && typeset -a res=(
-    50 100 150 200 300 400 500 800 1600 3200 6400 12800
+    50 100 150 200 300 400 500 800 1600 3200 5000 6400 12800
 )
 
 check_array=FALSE
@@ -825,166 +1032,6 @@ for i in "${downsample[@]}"; do
         "${i}"
 done
 ```
-
-```bash
-#  rDNA, Log_e-transformed, 10E-5 min, 10E1 max
-fancplot \
-    -o "${outdir}/$(basename ${downsample[0]} .hic).rDNA-full.log_10E-4_10E1.pdf" \
-    "XII:451526-468980" \
-    -p triangular -l -vmin 0.0001 -vmax 1 \
-    --title "6400 bp, XII:451526-468980" \
-    -c Reds \
-    "${downsample[0]}"
-
-fancplot \
-    -o "${outdir}/$(basename ${downsample[1]} .hic).rDNA-full.log_10E-4_10E1.pdf" \
-    "XII:451526-468980" \
-    -p triangular -l -vmin 0.0001 -vmax 1 \
-    --title "6400 bp, XII:451526-468980" \
-    -c Reds \
-    "${downsample[1]}"
-
-fancplot \
-    -o "${outdir}/$(basename ${downsample[2]} .hic).rDNA-full.log_10E-4_10E1.pdf" \
-    "XII:451526-468980" \
-    -p triangular -l -vmin 0.0001 -vmax 1 \
-    --title "6400 bp, XII:451526-468980" \
-    -c Reds \
-    "${downsample[2]}"
-
-
-#  Comparisons across XII  #TODO Need to run fanc compare first
-fancplot \
-    -o "${outdir}/$(basename ${downsample[0]} .hic).div.pdf" \
-    "XII:1-1078177" \
-    -p square \
-    --title "6400 bp, XII" \
-    -s 0 -vmin "-4" -vmax 4 \
-    -c "coolwarm" \
-    "${d_out}/${m_Q2}"
-```
-</details>
-<br />
-
-<a id="printed"></a>
-#### Printed
-<details>
-<summary><i>Printed</i></summary>
-
-```txt
-...
-
-
-❯ check_test_command=TRUE
-❯ [[ ${check_test_command} == TRUE ]] &&
->     {
->         echo """
->         fanc from-cooler \\
->             ${cool_Q} \\
->             ${XII_Q}
->         """
->     } || true
-
-        fanc from-cooler \
-            07_cload/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.cool \
-            09_fanc_XII/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.hic
-
-
-❯ run_test_command=TRUE
-❯ [[ ${run_test_command} == TRUE ]] &&
->     {
->         fanc from-cooler \
->             ${cool_Q} \
->             ${XII_Q}
->     } || true
-100% (28826633 of 28826633) |###########################################################################################################################| Elapsed Time: 0:03:14 Time:  0:03:14
-Buffers 100% (5151 of 5151) |###########################################################################################################################| Elapsed Time: 0:00:11 Time:  0:00:11
-Expected 100% (28826633 of 28826633) |##################################################################################################################| Elapsed Time: 0:03:26 Time:  0:03:26
-2023-10-09 11:10:51,779 INFO All done.
-Closing remaining open files:09_fanc_XII/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.hic...done
-
-
-...
-
-
-❯ [[ ${check_array} == TRUE ]] &&
->     {
->         for i in "${!downsample[@]}"; do
->             echo """
->               key  ${i}
->             value  ${downsample[${i}]}
->             """
->         done
->     }
-
-              key  09_fanc_XII/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.6400.hic
-            value  09_fanc_XII/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.6400.down-to-G1.hic
-
-
-              key  09_fanc_XII/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.6400.hic
-            value  09_fanc_XII/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.6400.down-to-G1.hic
-
-
-❯ check_jobs=TRUE
-❯ [[ ${check_jobs} == TRUE ]] &&
->     {
->         for i in "${!downsample[@]}"; do
->             job_name="downsample.$(basename ${downsample[${i}]} .hic)"
->             threads=1
-> 
->             echo """
-> #HEREDOC
-> sbatch << EOF
-> #!/bin/bash
-> 
-> #SBATCH --job-name="${job_name}"
-> #SBATCH --nodes=1
-> #SBATCH --cpus-per-task=${threads}
-> #SBATCH --error="${d_XII}/err_out/${job_name}.%A.stderr.txt"
-> #SBATCH --output="${d_XII}/err_out/${job_name}.%A.stdout.txt"
-> 
-> fanc downsample \\
->     ${i} \\
->     ${XII_G1_6400} \\
->     ${downsample[${i}]}
-> EOF
->             """
->         done
->     }
-
-#HEREDOC
-sbatch << EOF
-#!/bin/bash
-
-#SBATCH --job-name=downsample.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.6400.down-to-G1
-#SBATCH --nodes=1
-#SBATCH --cpus-per-task=1
-#SBATCH --error=09_fanc_XII/err_out/downsample.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.6400.down-to-G1.%A.stderr.txt
-#SBATCH --output=09_fanc_XII/err_out/downsample.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.6400.down-to-G1.%A.stdout.txt
-
-fanc downsample \
-    09_fanc_XII/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.6400.hic \
-    09_fanc_XII/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.6400.hic \
-    09_fanc_XII/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.6400.down-to-G1.hic
-EOF
-
-
-#HEREDOC
-sbatch << EOF
-#!/bin/bash
-
-#SBATCH --job-name=downsample.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.6400.down-to-G1
-#SBATCH --nodes=1
-#SBATCH --cpus-per-task=1
-#SBATCH --error=09_fanc_XII/err_out/downsample.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.6400.down-to-G1.%A.stderr.txt
-#SBATCH --output=09_fanc_XII/err_out/downsample.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.6400.down-to-G1.%A.stdout.txt
-
-fanc downsample \
-    09_fanc_XII/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.6400.hic \
-    09_fanc_XII/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.6400.hic \
-    09_fanc_XII/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.6400.down-to-G1.hic
-EOF
-```
 </details>
 <br />
 
@@ -1088,219 +1135,6 @@ positional arguments:
 options:
   -h, --help           show this help message and exit
   -tmp, --work-in-tmp  Work in temporary directory
-```
-</details>
-<br />
-
-<details>
-<summary><i>Code: Drafting code for a masking approach...</i></summary>
-
-```bash
-#!/bin/bash
-
-
-mkdir test-masking
-
-cp 09_fanc_XII/*6400.downsample*hic test-masking/
-
-cd test-masking/
-
-mv MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.6400.downsample-to-G1.hic Q.hic
-mv MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.6400.downsample-to-G1.hic G1.hic
-mv MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.6400.downsample-to-G1.hic G2.hic
-
-python
-```
-
-```python
-#!/usr/bin/env python3
-
-import fanc
-import numpy as np
-
-#  Load the .hic files
-hic_files = ["Q.hic", "G1.hic", "G2.hic"]
-hics = [fanc.load(hic_file) for hic_file in hic_files]
-
-#  Print file name and some information about each .hic file
-run_check = True
-if run_check:
-    for hic in hics:
-        print("\n" + "="*40 + "\n")  # This prints a separator between files
-        print(f"File: {hic.file.filename}")
-        print(f"Matrix size: {hic.matrix().shape}")
-        print(f"Sum of contacts: {np.nansum(hic.matrix())}")
-
-#  Identify NaN and low-coverage bins
-nan_bins = set()
-low_coverage_bins = set()
-
-for hic in hics:
-    matrix = hic.matrix(balance=False, mask=False)  # Access uncorrected matrix
-    marginals = np.nansum(matrix, axis=0)  # Calculate marginals from uncorrected matrix
-    nan_bins.update(np.where(np.isnan(marginals))[0])  # Identify NaN bins
-    median_coverage = np.nanmedian(marginals[np.nonzero(marginals)])  # Identify low-coverage bins; use nanmedian() to ignore NaNs
-    threshold = 0.1 * median_coverage
-    low_coverage = np.where(marginals < threshold)[0]
-    low_coverage_bins.update(low_coverage)
-
-#  Combine NaN and low-coverage bins
-combined_bins = nan_bins.union(low_coverage_bins)
-
-
-
-# Function to print specific bin values
-def print_bin_values(hics, combined_bins):
-    for i, hic in enumerate(hics):
-        matrix = hic.matrix(balance=False, as_pixels=True, join_regions=False)
-        print(f"Hi-C matrix {i+1}:")
-        for bin_index in combined_bins:
-            print(f"  Bin {bin_index} value before: {matrix[bin_index, bin_index]}")
-
-# Print bin values before setting to NaN
-print("Before setting to NaN:")
-print_bin_values(hics, combined_bins)
-
-# Set the values of the combined bins to NaN in each Hi-C object and print the matrix
-for i, hic in enumerate(hics):
-    matrix = hic.matrix(balance=False, as_pixels=True, join_regions=False)  # Access uncorrected matrix as pixels
-    print(f"\nHi-C matrix {i+1} before setting to NaN:")
-    print(matrix)    
-    for bin_index in combined_bins:
-        matrix[:, bin_index] = np.nan  # Set the values of the bin to NaN
-        matrix[bin_index, :] = np.nan  # Do this for both rows and columns to ensure the entire bin is NaN
-    print(f"\nHi-C matrix {i+1} after setting to NaN:")
-    print(matrix)
-
-# Print bin values after setting to NaN
-print("\nValues of specific bins after setting to NaN:")
-print_bin_values(hics, combined_bins)
-
-
-
-# Check marginals for Q, G1, and G2
-run_check = True
-if run_check:
-    for hic in hics:
-        matrix = hic.matrix(balance=False)  # Access uncorrected matrix
-        marginals = np.nansum(matrix, axis=0)  # Calculate marginals from uncorrected matrix
-        print(f"Marginals for {hic.name if hasattr(hic, 'name') else 'Hi-C matrix'}: {marginals}")
-
-run_check = True
-if run_check:
-    for result in results:
-        print("\n" + "="*40 + "\n")  # This prints a separator between iterations
-        print(f"Marginals: {result['marginals']}")
-        print(f"Median coverage: {result['median_coverage']}")
-        print(f"Threshold: {result['threshold']}")
-        print(f"Low coverage bins: {result['low_coverage']}")
-        print(f"Low coverage bins set: {result['low_coverage_bins']}")
-
-
-
-#  Mask low-coverage bins in each matrix
-# for hic in hics:
-#     hic.mask_bins(low_coverage_bins)
-
-for hic in hics:
-    for bin_index in combined_bins:
-        hic._mask(bin_index)  # Mask each bin individually
-
-
-#  Proceed with KR balancing
-for hic in hics:
-    hic.balance()
-```
-</details>
-<br />
-
-<details>
-<summary><i>Code: Scraps/temporary bits for the above...</i></summary>
-
-```python
-#!usr/bin/env python3
-
-#  Calculate marginals and identify low-coverage and bins with NaN values
-nan_bins = set()
-low_coverage_bins = set()
-results = []  # Create a list to hold the dictionaries
-for hic in hics:
-    matrix = hic.matrix(balance=False)  # Access uncorrected matrix
-    marginals = np.nansum(matrix, axis=0)  # Calculate marginals from uncorrected matrix
-    if np.ma.isMaskedArray(marginals):  #  Check if marginals is a masked array
-        print("Marginals is a masked array, converting to regular array.")
-        marginals = np.ma.filled(marginals, np.nan)  # Convert to regular numpy array
-    nan_bins.update(np.where(np.isnan(marginals))[0])  #  Identify bins with NaN values and add their indices to the nan_bins set
-    median_coverage = np.nanmedian(marginals[np.nonzero(marginals)])  # Use nanmedian() to ignore NaNs
-    threshold = 0.1 * median_coverage
-    low_coverage = np.where(marginals < threshold)[0]
-    low_coverage_bins.update(low_coverage)
-    results.append({  # Store the results in a dictionary and append to the list
-        "marginals": marginals,
-        "median_coverage": median_coverage,
-        "threshold": threshold,
-        "low_coverage": low_coverage,
-        "low_coverage_bins": low_coverage_bins.copy(),  # Use copy to store the state at this iteration
-        "nan_bins": nan_bins.copy()  # Store the state of nan_bins at this iteration
-    })
-
-#  Create vector comprised of both low-coverage and NaN bins
-combined_bins = low_coverage_bins.union(nan_bins)
-
-#  Mask bins with NaN values in each matrix
-for hic in hics:
-    hic.mask_bins(nan_bins)
-
-
-for hic in hics:
-    matrix = hic.matrix(balance=False)  # Access uncorrected matrix
-    marginals = np.nansum(matrix, axis=0)  # Calculate marginals from uncorrected matrix
-    median_coverage = np.nanmedian(marginals[np.nonzero(marginals)])  # Use nanmedian() to ignore NaNs
-    threshold = 0.1 * median_coverage
-    low_coverage = np.where(marginals < threshold)[0]
-    low_coverage_bins.update(low_coverage)
-    results.append({  # Store the results in a dictionary and append to the list
-        "marginals": marginals,
-        "median_coverage": median_coverage,
-        "threshold": threshold,
-        "low_coverage": low_coverage,
-        "low_coverage_bins": low_coverage_bins.copy()  # Use copy to store the state at this iteration
-    })
-    # marginals = hic.marginals()
-    # marginals = np.ma.filled(marginals, np.nan)  # Convert from masked array to NumPy array
-    # median_coverage = np.nanmedian(marginals[np.nonzero(marginals)])  # Use nanmedian() to ignore NaNs
-    # threshold = 0.1 * median_coverage
-    # low_coverage = np.where(marginals < threshold)[0]
-    # low_coverage_bins.update(low_coverage)
-    # results.append({  # Store the results in a dictionary and append to the list
-    #     "marginals": marginals,
-    #     "median_coverage": median_coverage,
-    #     "threshold": threshold,
-    #     "low_coverage": low_coverage,
-    #     "low_coverage_bins": low_coverage_bins.copy()  # Use copy to store the state at this iteration
-    # })
-
-
-#  Calculate marginals and identify low-coverage bins
-low_coverage_bins = set()
-results = []  # Create a list to hold the dictionaries
-for hic in hics:
-    matrix = hic.matrix(balance=False)                                      # Access uncorrected matrix
-    marginals = np.nansum(matrix, axis=0)                                   # Calculate marginals from uncorrected matrix
-    if np.ma.isMaskedArray(marginals):                                      # Check if marginals is a masked array
-        print("Marginals is a masked array, converting to regular array.")
-        marginals = np.ma.filled(marginals, np.nan)                         # Convert to regular numpy array
-    median_coverage = np.nanmedian(marginals[np.nonzero(marginals)])        # Use nanmedian() to ignore NaNs
-    threshold = 0.1 * median_coverage
-    low_coverage = np.where(marginals < threshold)[0]
-    low_coverage_bins.update(low_coverage)
-    results.append({                                                        # Store the results in a dictionary and append to the list
-        "marginals": marginals,
-        "median_coverage": median_coverage,
-        "threshold": threshold,
-        "low_coverage": low_coverage,
-        "low_coverage_bins": low_coverage_bins.copy()                       # Use copy to store the state at this iteration
-    })
 ```
 </details>
 <br />
