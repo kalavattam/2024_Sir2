@@ -16,6 +16,7 @@ import os
 import fanc
 import argparse
 
+
 def get_matrix_size(file_path):
     if not os.path.exists(file_path):
         print(f"Error: The file '{file_path}' does not exist.")
