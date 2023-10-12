@@ -721,97 +721,118 @@ python calculate_fanc-contact-sums.py -h
 #PICKUPHERE #TODO
 #  Need to extend logic to handle genome-wide maps now, in addition XII maps
 
+d_XII="09_fanc_XII"
+d_gen="09_fanc_genome"
 threads=1
-unset chroms && typeset -a chroms=("XII" "gen")
+# unset chroms && typeset -a chroms=("XII" "gen")
+# unset chroms && typeset -a chroms="XII"
+unset chroms && typeset -a chroms="gen"
 unset res && typeset -a res=(
     50 100 150 200 300 400 500 800 1600 3200 5000 6400 12800
 )
 
-check_array=FALSE
-[[ ${check_array} ]] && echo_test "${res[@]}" || true
+check_array=TRUE
+[[ ${check_array} ]] &&
+    {
+        echo_test "${res[@]}"
+        echo ""
 
-for j in "${res[@]}"; do
-    # j=${res[10]}  # echo "${j}"
+        echo_test "${chroms[@]}"
+        echo ""
+    } || true
 
-    XII_Q_bin="$( find ${d_XII} -name MC-2019_Q_*.${j}.hic )"
-    XII_G1_bin="$( find ${d_XII} -name MC-2020_30C-a15_*.${j}.hic )"
-    XII_G2M_bin="$( find ${d_XII} -name MC-2020_nz_*.${j}.hic )"
+iter=0
+for k in "${chroms[@]}"; do
+    if [[ "${k}" == "XII" ]]; then
+        unset dir && typeset dir="${d_XII}"
+    elif [[ "${k}" == "gen" ]]; then
+        unset dir && typeset dir="${d_gen}"
+    fi
 
-    check_files=FALSE
-    [[ ${check_files} == TRUE ]] &&
-        {
-            # echo XII_Q_bin
-            # echo XII_G1_bin
-            # echo XII_G2M_bin
+    for j in "${res[@]}"; do
+        # j=${res[10]}  # echo "${j}"
 
-            ls -lhaFG "${XII_Q_bin}"
-            ls -lhaFG "${XII_G1_bin}"
-            ls -lhaFG "${XII_G2M_bin}"
-        } || true
+        Q_bin="$( find ${dir} -name MC-2019_Q_*.${j}.hic )"         # echo "${Q_bin}"
+        G1_bin="$( find ${dir} -name MC-2020_30C-a15_*.${j}.hic )"  # echo "${G1_bin}"
+        G2M_bin="$( find ${dir} -name MC-2020_nz_*.${j}.hic )"      # echo "${G2M_bin}"
 
-    check_jobs=TRUE
-    [[ ${check_jobs} == TRUE ]] &&
-        {
-            XII_Q_out="${XII_Q_bin%.hic}.downsample-to-G1.hic"      # echo "${XII_Q_out}"
-            XII_G1_out="${XII_G1_bin%.hic}.downsample-to-G1.hic"    # echo "${XII_G1_out}"
-            XII_G2M_out="${XII_G2M_bin%.hic}.downsample-to-G1.hic"  # echo "${XII_G2M_out}"
-            [[ 
-                  -f ${XII_Q_bin} &&   -f ${XII_G1_bin} &&   -f ${XII_G2M_bin} &&
-                ! -f ${XII_Q_out} && ! -f ${XII_G1_out} && ! -f ${XII_G2M_out}
-            ]] &&
-                {
-                    job_name="downsample_files-hic-${j}"
+        check_files=FALSE
+        [[ ${check_files} == TRUE ]] &&
+            {
+                ls -lhaFG "${Q_bin}"
+                ls -lhaFG "${G1_bin}"
+                ls -lhaFG "${G2M_bin}"
+            } || true
 
-                    echo """
-                    #HEREDOC
-                    sbatch << EOF
-                    #!/bin/bash
+        check_jobs=TRUE
+        [[ ${check_jobs} == TRUE ]] &&
+            {
+                (( iter++ ))
+                Q_out="${Q_bin%.hic}.downsample-to-G1.hic"      # echo "${Q_out}"
+                G1_out="${G1_bin%.hic}.downsample-to-G1.hic"    # echo "${G1_out}"
+                G2M_out="${G2M_bin%.hic}.downsample-to-G1.hic"  # echo "${G2M_out}"
+                [[ 
+                      -f ${Q_bin} &&   -f ${G1_bin} &&   -f ${G2M_bin} &&
+                    ! -f ${Q_out} && ! -f ${G1_out} && ! -f ${G2M_out}
+                ]] &&
+                    {
+                        job_name="downsample_files-hic-${j}"
 
-                    #SBATCH --job-name=\"${job_name}\"
-                    #SBATCH --nodes=1
-                    #SBATCH --cpus-per-task=${threads}
-                    #SBATCH --error=\"${d_XII}/err_out/${job_name}.%A.stderr.txt\"
-                    #SBATCH --output=\"${d_XII}/err_out/${job_name}.%A.stdout.txt\"
+                        echo """
+                        ### ${iter} ###
 
-                    python calculate_fanc-contact-sums.py \\
-                        --Q_infile \"${XII_Q_bin}\" \\
-                        --G1_infile \"${XII_G1_bin}\" \\
-                        --G2_infile \"${XII_G2M_bin}\"
-                    EOF
-                    """
-                    sleep 0.2
-                } ||
-                {
-                    echo """
-                    Warning: Did not run command.
+                        #HEREDOC
+                        sbatch << EOF
+                        #!/bin/bash
 
-                    Check the following infiles, one or more of which may
-                    not exist:
-                        - ${XII_Q_bin}
-                        - ${XII_G1_bin}
-                        - ${XII_G2M_bin}
+                        #SBATCH --job-name=\"${job_name}\"
+                        #SBATCH --nodes=1
+                        #SBATCH --cpus-per-task=${threads}
+                        #SBATCH --error=\"${dir}/err_out/${job_name}.%A.stderr.txt\"
+                        #SBATCH --output=\"${dir}/err_out/${job_name}.%A.stdout.txt\"
 
-                    Or check the following outfiles, one or more of which
-                    may already exist:
-                        - ${XII_Q_out}
-                        - ${XII_G1_out}
-                        - ${XII_G2M_out}
-                    """
-                }
-        } || true
+                        python calculate_fanc-contact-sums.py \\
+                            --Q_infile \"${Q_bin}\" \\
+                            --G1_infile \"${G1_bin}\" \\
+                            --G2_infile \"${G2M_bin}\"
+                        EOF
+                        """
+                        sleep 0.2
+                    } ||
+                    {
+                        echo """
+                        Warning: Did not run command.
 
-    submit_jobs=TRUE
-    [[ ${submit_jobs} == TRUE ]] &&
-        {
-            XII_Q_out="${XII_Q_bin%.hic}.downsample-to-G1.hic"      # echo "${XII_Q_out}"
-            XII_G1_out="${XII_G1_bin%.hic}.downsample-to-G1.hic"    # echo "${XII_G1_out}"
-            XII_G2M_out="${XII_G2M_bin%.hic}.downsample-to-G1.hic"  # echo "${XII_G2M_out}"
-            [[ 
-                  -f ${XII_Q_bin} &&   -f ${XII_G1_bin} &&   -f ${XII_G2M_bin} &&
-                ! -f ${XII_Q_out} && ! -f ${XII_G1_out} && ! -f ${XII_G2M_out}
-            ]] &&
-                {
-                    job_name="downsample_files-hic-${j}"
+                        Check the following infiles, one or more of which may
+                        not exist:
+                            - ${Q_bin}
+                            - ${G1_bin}
+                            - ${G2M_bin}
+
+                        Or check the following outfiles, one or more of which
+                        may already exist:
+                            - ${Q_out}
+                            - ${G1_out}
+                            - ${G2M_out}
+                        """
+                    }
+            } || true
+
+        submit_jobs=TRUE
+        [[ ${submit_jobs} == TRUE ]] &&
+            {
+                (( iter++ ))
+                Q_out="${Q_bin%.hic}.downsample-to-G1.hic"      # echo "${Q_out}"
+                G1_out="${G1_bin%.hic}.downsample-to-G1.hic"    # echo "${G1_out}"
+                G2M_out="${G2M_bin%.hic}.downsample-to-G1.hic"  # echo "${G2M_out}"
+                [[ 
+                      -f ${Q_bin} &&   -f ${G1_bin} &&   -f ${G2M_bin} &&
+                    ! -f ${Q_out} && ! -f ${G1_out} && ! -f ${G2M_out}
+                ]] &&
+                    {
+                        job_name="downsample_files-hic-${j}"
+
+                        echo "### ${iter} ###"
 
 #HEREDOC
 sbatch << EOF
@@ -820,34 +841,35 @@ sbatch << EOF
 #SBATCH --job-name="${job_name}"
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=${threads}
-#SBATCH --error="${d_XII}/err_out/${job_name}.%A.stderr.txt"
-#SBATCH --output="${d_XII}/err_out/${job_name}.%A.stdout.txt"
+#SBATCH --error="${dir}/err_out/${job_name}.%A.stderr.txt"
+#SBATCH --output="${dir}/err_out/${job_name}.%A.stdout.txt"
 
 python calculate_fanc-contact-sums.py \
---Q_infile "${XII_Q_bin}" \
---G1_infile "${XII_G1_bin}" \
---G2_infile "${XII_G2M_bin}"
+--Q_infile "${Q_bin}" \
+--G1_infile "${G1_bin}" \
+--G2_infile "${G2M_bin}"
 EOF
-                    sleep 0.2
-                } ||
-                {
-                    echo """
-                    Warning: Did not run command.
+                        sleep 0.2
+                    } ||
+                    {
+                        echo """
+                        Warning: Did not run command.
 
-                    Check the following infiles, one or more of which may
-                    not exist:
-                        - ${XII_Q_bin}
-                        - ${XII_G1_bin}
-                        - ${XII_G2M_bin}
+                        Check the following infiles, one or more of which may
+                        not exist:
+                            - ${Q_bin}
+                            - ${G1_bin}
+                            - ${G2M_bin}
 
-                    Or check the following outfiles, one or more of which
-                    may already exist:
-                        - ${XII_Q_out}
-                        - ${XII_G1_out}
-                        - ${XII_G2M_out}
-                    """
-                }
-        } || true
+                        Or check the following outfiles, one or more of which
+                        may already exist:
+                            - ${Q_out}
+                            - ${G1_out}
+                            - ${G2M_out}
+                        """
+                    }
+            } || true
+    done
 done
 ```
 </details>
@@ -865,7 +887,7 @@ done
 
 threads=1
 unset res && typeset -a res=(
-    50 100 150 200 300 400 500 800 1600 3200 6400 12800
+    50 100 150 200 300 400 500 800 1600 3200 5000 6400 12800
 )
 
 check_array=FALSE
