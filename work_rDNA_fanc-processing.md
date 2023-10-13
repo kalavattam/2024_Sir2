@@ -29,7 +29,17 @@
     1. [Code](#code-7)
 1. [5. Draw example plots of the above-processed `.hic` files](#5-draw-example-plots-of-the-above-processed-hic-files)
     1. [Code](#code-8)
-    1. [Help](#help)
+1. [6. Draw whole-genome "square" plots in the style of Seungsoo Kim](#6-draw-whole-genome-square-plots-in-the-style-of-seungsoo-kim)
+    1. [Strategy](#strategy)
+        1. [Notes](#notes-1)
+    1. [Convert `.hic` matrices of interest to `.cool` matrices](#convert-hic-matrices-of-interest-to-cool-matrices)
+        1. [Code](#code-9)
+    1. [HiCExplorer `plotHicMatrix` work](#hicexplorer-plothicmatrix-work)
+        1. [Code](#code-10)
+    1. [`#TBD`](#tbd)
+        1. [Code](#code-11)
+1. [X. Documentation \(partial\)](#x-documentation-partial)
+    1. [Notes](#notes-2)
 
 <!-- /MarkdownTOC -->
 </details>
@@ -376,7 +386,7 @@ unset res && typeset -a res=(
 )
 
 check_array=FALSE
-[[ ${check_array} ]] &&
+[[ ${check_array} == TRUE ]] &&
     {
         echo_test "${res[@]}"
         echo ""
@@ -718,21 +728,16 @@ python calculate_fanc-contact-sums.py -h
 #   --G2_outfile G2_OUTFILE
 #                         Path and name for the G2/M downsampled FAN-C .hic outfile; if not specified, then path and name is derived from corresponding infile <chr>
 
-#PICKUPHERE #TODO
-#  Need to extend logic to handle genome-wide maps now, in addition XII maps
-
 d_XII="09_fanc_XII"
 d_gen="09_fanc_genome"
 threads=1
-# unset chroms && typeset -a chroms=("XII" "gen")
-# unset chroms && typeset -a chroms="XII"
-unset chroms && typeset -a chroms="gen"
+unset chroms && typeset -a chroms=("XII" "gen")
 unset res && typeset -a res=(
     50 100 150 200 300 400 500 800 1600 3200 5000 6400 12800
 )
 
 check_array=TRUE
-[[ ${check_array} ]] &&
+[[ ${check_array} == TRUE ]] &&
     {
         echo_test "${res[@]}"
         echo ""
@@ -885,96 +890,236 @@ done
 ```bash
 #!/bin/bash
 
+#  Get situated
+[[ ${CONDA_DEFAULT_ENV} != fanc_pip_env ]] &&
+    source activate fanc_pip_env ||
+    true
+
+cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process" ||
+    echo "cd'ing failed; check on this"
+
+unset filt && typeset -a filt=(
+    # 0.2
+    # 0.3
+    # 0.4
+    0.2_whole-matrix
+    0.3_whole-matrix
+    0.4_whole-matrix
+)
+for i in "${filt[@]}"; do
+    if [[ ! "${i}" =~ "whole-matrix" ]]; then
+        [[ ! -d 10_fanc_XII_KR-filt-${i} ]] &&
+            mkrmr dir -p 10_fanc_XII_KR-filt-${i}/err_out ||
+            true
+    fi
+    [[ ! -d 10_fanc_genome_KR-filt-${i} ]] &&
+        mkdir -p 10_fanc_genome_KR-filt-${i}/err_out ||
+        true
+done
+
 threads=1
+# unset chroms && typeset -a chroms=("XII" "gen")
+unset chroms && typeset chroms="gen"
 unset res && typeset -a res=(
     50 100 150 200 300 400 500 800 1600 3200 5000 6400 12800
 )
 
-check_array=FALSE
-[[ ${check_array} ]] && echo_test "${res[@]}" || true
-    
-for j in "${res[@]}"; do
-    # j="${res[9]}"
-    
-    XII_Q_down="$(
-        find ${d_XII} -name MC-2019_Q_*.${j}.downsample-*.hic
-    )"  # echo "${XII_Q_down}"
-    XII_G1_down="$(
-        find ${d_XII} -name MC-2020_30C-a15_*.${j}.downsample-*.hic
-    )"  # echo "${XII_G1_down}"
-    XII_G2M_down="$(
-        find ${d_XII} -name MC-2020_nz_*.${j}.downsample-*.hic
-    )"  # echo "${XII_G2M_down}"
+check_array=TRUE
+[[ ${check_array} == TRUE ]] &&
+    {
+        echo_test "${filt[@]}"
+        echo ""
 
-    unset downsample && typeset -a downsample=(
-        "${XII_Q_down}"
-        "${XII_G1_down}"
-        "${XII_G2M_down}"
-    )
-    
-    check_array=TRUE
-    [[ ${check_array} ]] && echo_test "${downsample[@]}" || true
+        echo_test "${chroms[@]}"
+        echo ""
 
-    check_command=TRUE
-    [[ ${check_command} == TRUE ]] &&
+        echo_test "${res[@]}"
+        echo ""
+    } || true
+
+
+#  Copy over files to balance
+iter=0
+for j in "${chroms[@]}"; do
+    if [[ "${j}" == "XII" ]]; then
+        unset d_in && typeset d_in="09_fanc_XII"
+        unset a_out && typeset -a a_out=(
+            # "10_fanc_XII_KR-filt-0.2"
+            # "10_fanc_XII_KR-filt-0.3"
+            # "10_fanc_XII_KR-filt-0.4"
+        )
+    elif [[ "${j}" == "gen" ]]; then
+        unset d_in && typeset d_in="09_fanc_genome"
+        unset a_out && typeset -a a_out=(
+            # "10_fanc_genome_KR-filt-0.2"
+            # "10_fanc_genome_KR-filt-0.3"
+            # "10_fanc_genome_KR-filt-0.4"
+            "10_fanc_genome_KR-filt-0.2_whole-matrix"
+            "10_fanc_genome_KR-filt-0.3_whole-matrix"
+            "10_fanc_genome_KR-filt-0.4_whole-matrix"
+        )
+    fi
+
+    check_things=FALSE
+    [[ ${check_things} == TRUE ]] &&
         {
-            for i in "${downsample[@]}"; do
-                echo """
-                fanc hic \\
-                    ${i} \\
-                    --marginals-plot ${i/.hic/.marginals.pdf}
-                """
-                sleep 0.2
+            echo "${d_in}"
+            echo_test "${a_out[@]}"
+            echo ""
+        } || true
+
+    for i in "${res[@]}"; do
+        # i="${res[1]}"  # echo "${i}"
+        
+        unset a_hic && typeset -a a_hic
+        while IFS=" " read -r -d $'\0'; do
+            a_hic+=( "${REPLY}" )
+        done < <(
+            find "${d_in}" \
+                -maxdepth 1 \
+                -type f \
+                -name MC-*.mapped.${i}.downsample-*.hic \
+                -print0 \
+                    | sort -z
+        )
+
+        check_things=FALSE
+        [[ ${check_things} == TRUE ]] &&
+            {
+                echo "${d_in}"
+                echo ""
+                
+                echo_test "${a_out[@]}"
+                echo ""
+                
+                echo_test "${a_hic[@]}"
+                echo ""
+            } || true
+
+        for h in "${a_hic[@]}"; do
+            for g in "${a_out[@]}"; do
+                (( iter++ ))
+                echo "iter ${iter}: cp -f ${h} ${g}/"
+                cp -f "${h}" "${g}/"
+                echo ""
             done
-        }
+        done
+    done
+done
 
-    run_command=TRUE
-    [[ ${run_command} == TRUE ]] &&
-        {
-            for i in "${downsample[@]}"; do
-                fanc hic \
-                    ${i} \
-                    --marginals-plot ${i/.hic/.marginals.pdf}
 
-                sleep 0.2
-            done
-        }
+#  Balance the .hic files
+iter=0
+for l in "${chroms[@]}"; do
+    # l="${chroms[0]}"  # echo "${l}"  # echo_test "${chroms[@]}"
 
-    check_jobs=TRUE
-    [[ ${check_jobs} == TRUE ]] &&
-        {
-            for i in "${downsample[@]}"; do
-                job_name="balance.$(basename ${i} .hic)"
-                threads=1
+    if [[ "${l}" == "XII" ]]; then
+        unset a_in && typeset -a a_in=(
+            # "10_fanc_XII_KR-filt-0.2"
+            # "10_fanc_XII_KR-filt-0.3"
+            # "10_fanc_XII_KR-filt-0.4"
+        )
+    elif [[ "${l}" == "gen" ]]; then
+        unset a_in && typeset -a a_in=(
+            # "10_fanc_genome_KR-filt-0.2"
+            # "10_fanc_genome_KR-filt-0.3"
+            # "10_fanc_genome_KR-filt-0.4"
+            "10_fanc_genome_KR-filt-0.2_whole-matrix"
+            "10_fanc_genome_KR-filt-0.3_whole-matrix"
+            "10_fanc_genome_KR-filt-0.4_whole-matrix"
+        )
+    fi
+    # echo_test "${a_in[@]}"
 
-                echo """
-                #HEREDOC
-                sbatch << EOF
-                #!/bin/bash
+    for k in "${a_in[@]}"; do
+        # k="${a_in[0]}"  # echo "${k}"
 
-                #SBATCH --job-name="${job_name}"
-                #SBATCH --nodes=1
-                #SBATCH --cpus-per-task=${threads}
-                #SBATCH --error="${d_XII}/err_out/${job_name}.%A.stderr.txt"
-                #SBATCH --output="${d_XII}/err_out/${job_name}.%A.stdout.txt"
+        for j in "${res[@]}"; do
+            # j="${res[0]}"  # echo "${j}"
 
-                fanc hic \\
-                    ${i} \\
-                    --low-coverage-auto \\
-                    --normalise
-                EOF
-                """
-                sleep 0.2
-            done
-        }
+            unset a_bal && typeset -a a_bal
+            while IFS=" " read -r -d $'\0'; do
+                a_bal+=( "${REPLY}" )
+            done < <(
+                find "${k}" \
+                    -maxdepth 1 \
+                    -type f \
+                    -name MC-*.mapped.${j}.downsample-*.hic \
+                    -print0 \
+                        | sort -z
+            )
+            # echo_test "${a_bal[@]}"
+            
+            check_array=FALSE
+            [[ ${check_array} == TRUE ]] && echo_test "${a_bal[@]}" || true
 
-    submit_jobs=TRUE
-    [[ ${submit_jobs} == TRUE ]] &&
-        {
-            for i in "${downsample[@]}"; do
-                job_name="balance.$(basename ${i} .hic)"
-                threads=1
+            check_command_marginals=FALSE
+            [[ ${check_command_marginals} == TRUE ]] &&
+                {
+                    for i in "${a_bal[@]}"; do
+                        echo """
+                        fanc hic \\
+                            ${i} \\
+                            --marginals-plot ${i/.hic/.marginals.pdf}
+                        """
+                        sleep 0.2
+                    done
+                } || true
 
+            run_command_marginals=FALSE
+            [[ ${run_command_marginals} == TRUE ]] &&
+                {
+                    for i in "${a_bal[@]}"; do
+                        fanc hic \
+                            ${i} \
+                            --marginals-plot ${i/.hic/.marginals.pdf}
+
+                        sleep 0.2
+                    done
+                } || true
+
+            thresh=$(echo "${k}" | awk -F '[_-]' '{ print $6 }')  # echo "${thresh}"
+
+            if [[ ${k} =~ "whole-matrix" ]]; then
+                arguments="--normalise --whole-matrix"
+            else
+                arguments="--normalise"
+            fi
+            # echo "${arguments}"
+
+            for i in "${a_bal[@]}"; do
+                check_jobs_balance=TRUE
+                [[ ${check_jobs_balance} == TRUE ]] &&
+                    {
+                        (( iter++ ))
+                        job_name="balance.$(basename ${i} .hic)"
+                        threads=1
+
+                        echo """
+                        ### ${iter} ###
+
+                        #HEREDOC
+                        sbatch << EOF
+                        #!/bin/bash
+
+                        #SBATCH --job-name="${job_name}"
+                        #SBATCH --nodes=1
+                        #SBATCH --cpus-per-task=${threads}
+                        #SBATCH --error="${k}/err_out/${job_name}.%A.stderr.txt"
+                        #SBATCH --output="${k}/err_out/${job_name}.%A.stdout.txt"
+
+                        fanc hic \\
+                            ${i} \\
+                            --filter-low-coverage-relative ${thresh} \\
+                            ${arguments}
+                        EOF
+                        """
+                        sleep 0.2
+                    } || true
+
+                submit_jobs_balance=TRUE
+                [[ ${submit_jobs_balance} == TRUE ]] &&
+                    {
 #HEREDOC
 sbatch << EOF
 #!/bin/bash
@@ -982,17 +1127,19 @@ sbatch << EOF
 #SBATCH --job-name="${job_name}"
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=${threads}
-#SBATCH --error="${d_XII}/err_out/${job_name}.%A.stderr.txt"
-#SBATCH --output="${d_XII}/err_out/${job_name}.%A.stdout.txt"
+#SBATCH --error="${k}/err_out/${job_name}.%A.stderr.txt"
+#SBATCH --output="${k}/err_out/${job_name}.%A.stdout.txt"
 
 fanc hic \
     ${i} \
-    --low-coverage-auto \
-    --normalise
+    --filter-low-coverage-relative ${thresh} \
+    ${arguments}
 EOF
-                sleep 0.2
+                        sleep 0.2
+                    } || true
             done
-        }
+        done
+    done
 done
 ```
 </details>
@@ -1008,59 +1155,509 @@ done
 ```bash
 #!/bin/bash
 
-[[ ! -d pngs/2023-1010 ]] && mkdir pngs/2023-1010 || true
+outdir="pngs/2023-1012_XII-triangle"
+[[ ! -d ${outdir} ]] && mkdir ${outdir} || true
 
-outdir="pngs/2023-1010"
-j=6400
+unset indir && typeset -a indir=(
+    "10_fanc_XII_KR-filt-0.2"
+    "10_fanc_XII_KR-filt-0.3"
+    "10_fanc_XII_KR-filt-0.4"
+    "10_fanc_genome_KR-filt-0.2"
+    "10_fanc_genome_KR-filt-0.3"
+    "10_fanc_genome_KR-filt-0.4"
+)
 
-XII_Q_down="$(
-    find ${d_XII} -name MC-2019_Q_*.${j}.downsample-*.hic
-)"  # echo "${XII_Q_down}"
-XII_G1_down="$(
-    find ${d_XII} -name MC-2020_30C-a15_*.${j}.downsample-*.hic
-)"  # echo "${XII_G1_down}"
-XII_G2M_down="$(
-    find ${d_XII} -name MC-2020_nz_*.${j}.downsample-*.hic
-)"  # echo "${XII_G2M_down}"
+res=6400
 
-unset downsample && typeset -a downsample=(
-    "${XII_Q_down}"
-    "${XII_G1_down}"
-    "${XII_G2M_down}"
+for j in "${indir[@]}"; do
+    unset hics && typeset -a hics
+    while IFS=" " read -r -d $'\0'; do
+        hics+=( "${REPLY}" )
+    done < <(
+        find "${j}" \
+            -maxdepth 1 \
+            -type f \
+            -name MC-*.${res}.*.hic \
+            -print0 \
+                | sort -z
+    )
+
+    check_array=TRUE
+    [[ ${check_array} ]] && echo_test "${hics[@]}" || true
+
+    coord="XII:1-1078177"                                                    # echo "${coord}"
+    shape="triangular"                                                       # echo "${shape}"
+    # vmin=0.0001                                                              # echo "${vmin}"
+    # vmax=1                                                                   # echo "${vmax}"
+    vmin=1                                                                   # echo "${vmin}"
+    vmax=5000                                                                # echo "${vmax}"
+    how="$(echo ${j} | awk -F '_' '{ print $4" of downsampled "$3 }')"       # echo "${how}"
+    what="$(echo ${coord} | awk -F ':' '{ print $1 }')"                      # echo "${what}"
+    title="${what}, ${how}, ${res}-bp res"                                   # echo "${title}"
+    suffix="$(echo ${title} | awk -F '[,\\ ]' '{ print $1"_ds-"$6"_"$3 }')"  # echo "${suffix}"
+    matcol="RdPu"
+
+    #  XII, log_e-transformed, 10E-4 min, 10E1 max, balanced
+    for i in "${hics[@]}"; do
+        out="${outdir}/$(basename ${i} .hic).${suffix}.pdf"
+        
+        check_command_bal=FALSE
+        [[ ${check_command_bal} == TRUE ]] &&
+            {
+                echo """
+                fancplot \\
+                    -o \"${out}\" \\
+                    \"${coord}\" \\
+                    -p ${shape} -l -vmin ${vmin} -vmax ${vmax} \\
+                    --title \"${title}\" \\
+                    -c \"${matcol}\" \\
+                    \"${i}\"
+                """
+            }
+
+        run_command_bal=FALSE
+        [[ ${run_command_bal} == TRUE ]] &&
+            {
+                fancplot \
+                    -o "${out}" \
+                    "${coord}" \
+                    -p ${shape} -l -vmin ${vmin} -vmax ${vmax} \
+                    --title "${title}" \
+                    -c "${matcol}" \
+                    "${i}"
+            }
+
+        check_command_unbal=TRUE
+        [[ ${check_command_unbal} == TRUE ]] &&
+            {
+                echo """
+                fancplot \\
+                    -o \"${out%.pdf}.unbal.pdf\" \\
+                    \"${coord}\" \\
+                    -p ${shape} -u -l -vmin ${vmin} -vmax ${vmax} \\
+                    --title \"${title}\" \\
+                    -c \"${matcol}\" \\
+                    \"${i}\"
+                """
+            }
+
+        run_command_unbal=TRUE
+        [[ ${run_command_unbal} == TRUE ]] &&
+            {
+                fancplot \
+                    -o "${out%.pdf}.unbal.pdf" \
+                    "${coord}" \
+                    -p ${shape} -u -l -vmin ${vmin} -vmax ${vmax} \
+                    --title "${title}" \
+                    -c "${matcol}" \
+                    "${i}"
+            }
+
+        sleep 0.05
+    done
+done
+
+# #  XII, log_e-transformed, 1 min, 1000 max, uncorrected
+# for i in "${downsample[@]}"; do
+#     fancplot \
+#         -o "${outdir}/$(basename ${i} .hic).log-unbal.pdf" \
+#         "XII:1-1078177" \
+#         -p triangular -u -l -vmin 1 -vmax 5000 \
+#         --title "6400 bp, XII" \
+#         -c Reds \
+#         "${i}"
+# done
+```
+</details>
+<br />
+
+<a id="6-draw-whole-genome-square-plots-in-the-style-of-seungsoo-kim"></a>
+### 6. Draw whole-genome "square" plots in the style of Seungsoo Kim
+<a id="strategy"></a>
+#### Strategy
+<a id="notes-1"></a>
+##### Notes
+<details>
+<summary><i>Notes: Strategy</i></summary>
+
+No native support of whole-genome "square" plots with FAN-C.
+
+Alternative strategy:
+1. Use `fanc to-cooler` to convert 5-kb balanced `.hic` files to `.cool` files
+2. Use converted `.cool` files with HiCExplorer `hicPlotMatrix`
+
+</details>
+<br />
+
+<a id="convert-hic-matrices-of-interest-to-cool-matrices"></a>
+#### Convert `.hic` matrices of interest to `.cool` matrices
+<a id="code-9"></a>
+##### Code
+<details>
+<summary><i>Code: Convert `.hic` matrices of interest to `.cool` matrices</i></summary>
+
+```bash
+#!/bin/bash
+
+[[
+    ! -d 11_cooler_genome_KR-filt-0.2_whole-matrix &&
+    ! -d 11_cooler_genome_KR-filt-0.3_whole-matrix &&
+    ! -d 11_cooler_genome_KR-filt-0.4_whole-matrix
+]] &&
+    {
+        mkdir -p 11_cooler_genome_KR-filt-0.2_whole-matrix/err_out
+        mkdir -p 11_cooler_genome_KR-filt-0.3_whole-matrix/err_out
+        mkdir -p 11_cooler_genome_KR-filt-0.4_whole-matrix/err_out
+    }
+
+res=5000
+threads=4
+unset dirs && typeset -a dirs=(
+    "10_fanc_genome_KR-filt-0.2_whole-matrix; 11_cooler_genome_KR-filt-0.2_whole-matrix"
+    "10_fanc_genome_KR-filt-0.3_whole-matrix; 11_cooler_genome_KR-filt-0.3_whole-matrix"
+    "10_fanc_genome_KR-filt-0.4_whole-matrix; 11_cooler_genome_KR-filt-0.4_whole-matrix"
 )
 
 check_array=TRUE
-[[ ${check_array} ]] && echo_test "${downsample[@]}" || true
+[[ ${check_array} == TRUE ]] &&
+    {
+        for i in "${dirs[@]}"; do
+             in=$(echo ${i} | awk -F '; ' '{ print $1 }')
+            out=$(echo ${i} | awk -F '; ' '{ print $2 }')
 
-#  XII, Log_e-transformed, 10E-4 min, 10E1 max, balanced
-for i in "${downsample[@]}"; do
-    fancplot \
-        -o "${outdir}/$(basename ${i} .hic).log-bal.pdf" \
-        "XII:1-1078177" \
-        -p triangular -l -vmin 0.0001 -vmax 1 \
-        --title "6400 bp, XII" \
-        -c Reds \
-        "${i}"
-done
+            echo " in  ${in}"
+            echo "out  ${out}"
+            echo ""
+        done
+    }
 
-#  XII, Log_e-transformed, 1 min, 1000 max, uncorrected
-for i in "${downsample[@]}"; do
-    fancplot \
-        -o "${outdir}/$(basename ${i} .hic).log-unbal.pdf" \
-        "XII:1-1078177" \
-        -p triangular -u -l -vmin 1 -vmax 5000 \
-        --title "6400 bp, XII" \
-        -c Reds \
-        "${i}"
+iter=0
+for j in "${dirs[@]}"; do
+    # j="${dirs[0]}"  # echo "${j}"
+     in=$(echo ${j} | awk -F '; ' '{ print $1 }')
+    out=$(echo ${j} | awk -F '; ' '{ print $2 }')
+
+    unset hics && typeset -a hics
+    while IFS=" " read -r -d $'\0'; do
+        hics+=( "${REPLY}" )
+    done < <(
+        find "${in}" \
+            -maxdepth 1 \
+            -type f \
+            -name MC-*.${res}.*.hic \
+            -print0 \
+                | sort -z
+    )
+
+    check_things=FALSE
+    [[ ${check_things} == TRUE ]] &&
+        {
+            echo "---"
+            echo " in ${in}"
+            echo "---"
+            echo ""
+
+            echo "---"
+            echo "out ${out}"
+            echo "---"
+            echo ""
+
+            echo "----"
+            echo "hics"
+            echo "----"
+            echo_test "${hics[@]}"
+            echo ""
+        }
+
+    for i in "${hics[@]}"; do
+        (( iter++ ))
+          outdir="$(dirname ${i} | sed 's/10_fanc/11_cooler/g')"
+         outfile="$(basename ${i} | sed 's/\.hic/\.cool/g')"
+        job_name="to-cooler.${outfile%.cool}"
+
+        check_command=TRUE
+        [[ ${check_command} == TRUE ]] &&
+            {
+                echo """
+                ### ${iter} ###
+
+                sbatch << EOF
+                #!/bin/bash
+
+                #SBATCH --job-name=\"${job_name}\"
+                #SBATCH --nodes=1
+                #SBATCH --cpus-per-task=${threads}
+                #SBATCH --error=\"${out}/err_out/${job_name}.%A.stderr.txt\"
+                #SBATCH --output=\"${out}/err_out/${job_name}.%A.stdout.txt\"
+
+                fanc to-cooler \\
+                    --threads ${threads} \\
+                    --no-multi \\
+                    ${i} \\
+                    ${outdir}/${outfile}
+                EOF
+                """
+                sleep 0.2
+            }
+
+        run_command=TRUE
+        [[ ${run_command} == TRUE ]] &&
+            {
+                echo "### ${iter} ###"
+
+sbatch << EOF
+#!/bin/bash
+
+#SBATCH --job-name="${job_name}"
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=${threads}
+#SBATCH --error="${out}/err_out/${job_name}.%A.stderr.txt"
+#SBATCH --output="${out}/err_out/${job_name}.%A.stdout.txt"
+
+fanc to-cooler \
+    --threads ${threads} \
+    --no-multi \
+    ${i} \
+    ${outdir}/${outfile}
+EOF
+                sleep 0.2
+            }
+    done
 done
 ```
 </details>
 <br />
 
-<a id="help"></a>
-#### Help
+<a id="hicexplorer-plothicmatrix-work"></a>
+#### HiCExplorer `plotHicMatrix` work
+<a id="code-10"></a>
+##### Code
 <details>
-<summary><i>Help</i></summary>
+<summary><i>Code: HiCExplorer plotHicMatrix work</i></summary>
+
+```bash
+#!/bin/bash
+
+cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process" ||
+    echo "cd'ing failed; check on this..."
+
+[[ ${CONDA_DEFAULT_ENV} != "hicexplorer_764_env" ]] &&
+    source activate "hicexplorer_764_env" ||
+    true
+
+outdir="pngs/2023-1012_XII-square_whole-genome"
+[[ ! -d ${outdir} ]] && mkdir ${outdir} || true
+
+unset indir && typeset -a indir=(
+    "11_cooler_genome_KR-filt-0.2_whole-matrix"
+    "11_cooler_genome_KR-filt-0.3_whole-matrix"
+    "11_cooler_genome_KR-filt-0.4_whole-matrix"
+)
+# echo_test "${indir[@]}"
+
+res=5000
+iter=0
+for j in "${indir[@]}"; do
+    # j="${indir[0]}"  # echo "${j}"
+    
+    unset cools && typeset -a cools
+    while IFS=" " read -r -d $'\0'; do
+        cools+=( "${REPLY}" )
+    done < <(
+        find "${j}" \
+            -maxdepth 1 \
+            -type f \
+            -name MC*${res}*cool \
+            -print0 \
+                | sort -z
+    )
+
+    check_array=TRUE
+    [[ ${check_array} ]] && echo_test "${cools[@]}" || true
+
+    coord="genome"                                                           # echo "${coord}"
+    vmin=0.0001                                                              # echo "${vmin}"
+    vmax=1                                                                   # echo "${vmax}"
+    how="$(echo ${j} | awk -F '_' '{ print $4" of downsampled "$3 }')"       # echo "${how}"
+    what="$(echo ${coord} | awk -F ':' '{ print $1 }')"                      # echo "${what}"
+    title="${what}, ${how}, ${res}-bp res"                                   # echo "${title}"
+    suffix="$(echo ${title} | awk -F '[,\\ ]' '{ print $1"_ds-"$6"_"$3 }')"  # echo "${suffix}"
+    matcol="RdPu"                                                            # echo "${matcol}"
+    dpi=300                                                                  # echo "${dpi}"
+
+    #  XII, non-log_e-transformed, 10E-4 min, 10E1 max, balanced
+    for i in "${cools[@]}"; do
+        # i="${cools[0]}"                                                    # echo "${i}"
+        out="${outdir}/$(basename ${i} .cool).${suffix}.pdf"                 # echo "${out}"
+        
+        hicPlotMatrix \
+            --chromosomeOrder I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI \
+            --colorMap "${matcol}" \
+            --log \
+            --vMin ${vmin} \
+            --vMax ${vmax} \
+            --title "${title}" \
+            --dpi ${dpi} \
+            --matrix "${i}" \
+            --outFileName "${out}"
+
+        #  Balanced matrices
+        check_command_bal=TRUE
+        [[ ${check_command_bal} == TRUE ]] &&
+            {
+                #  For square, add back in -l once bug is resolved:
+                #+ github.com/vaquerizaslab/fanc/issues/174
+                echo """
+                fancplot \\
+                    -o \"${out}\" \\
+                    \"${coord}\" \\
+                    -p ${shape} -vmin ${vmin} -vmax ${vmax} \\
+                    --title \"${title}\" \\
+                    -c \"${matcol}\" \\
+                    \"${i}\"
+                """
+            }
+
+        run_command_bal=TRUE
+        [[ ${run_command_bal} == TRUE ]] &&
+            {
+                #  For square, add back in -l once bug is resolved:
+                #+ github.com/vaquerizaslab/fanc/issues/174
+                fancplot \
+                    -o "${out}" \
+                    "${coord}" \
+                    -p ${shape} -vmin ${vmin} -vmax ${vmax} \
+                    --title "${title}" \
+                    -c "${matcol}" \
+                    "${i}"
+            }
+
+        #  Uncorrected matrices
+        check_command_unbal=FALSE
+        [[ ${check_command_unbal} == TRUE ]] &&
+            {
+                #  For square, add back in -l once bug is resolved:
+                #+ github.com/vaquerizaslab/fanc/issues/174
+                echo """
+                fancplot \\
+                    -o \"${out%.pdf}.unbal.pdf\" \\
+                    \"${coord}\" \\
+                    -p ${shape} -u -vmin ${vmin} -vmax ${vmax} \\
+                    --title \"${title}\" \\
+                    -c \"${matcol}\" \\
+                    \"${i}\"
+                """
+            }
+
+        run_command_unbal=FALSE
+        [[ ${run_command_unbal} == TRUE ]] &&
+            {
+                #  For square, add back in -l once bug is resolved:
+                #+ github.com/vaquerizaslab/fanc/issues/174
+                fancplot \
+                    -o "${out%.pdf}.unbal.pdf" \
+                    "${coord}" \
+                    -p ${shape} -u -vmin ${vmin} -vmax ${vmax} \
+                    --title "${title}" \
+                    -c "${matcol}" \
+                    "${i}"
+            }
+
+        sleep 0.05
+    done
+done
+
+
+
+
+# ❯ hicPlotMatrix --help
+# usage: hicPlotMatrix --matrix MATRIX --outFileName OUTFILENAME [--title TITLE] [--scoreName SCORENAME] [--perChromosome] [--clearMaskedBins]
+#                      [--chromosomeOrder CHROMOSOMEORDER [CHROMOSOMEORDER ...]] [--region REGION] [--region2 REGION2] [--log1p] [--log] [--colorMap COLORMAP] [--vMin VMIN]
+#                      [--vMax VMAX] [--dpi DPI] [--bigwig BIGWIG [BIGWIG ...]] [--bigwigAdditionalVerticalAxis] [--vMinBigwig VMINBIGWIG] [--vMaxBigwig VMAXBIGWIG] [--flipBigwigSign]
+#                      [--scaleFactorBigwig SCALEFACTORBIGWIG] [--fontsize FONTSIZE] [--rotationX ROTATIONX] [--rotationY ROTATIONY] [--increaseFigureWidth INCREASEFIGUREWIDTH]
+#                      [--increaseFigureHeight INCREASEFIGUREHEIGHT] [--loops LOOPS] [--loopLargeRegionsOperation {first,last,center}] [--tads TADS] [--help] [--version]
+#
+# Creates a heatmap of a Hi-C matrix.
+#
+# Required arguments:
+#   --matrix MATRIX, -m MATRIX
+#                         Path of the Hi-C matrix to plot.
+#   --outFileName OUTFILENAME, -out OUTFILENAME
+#                         File name to save the image.
+#
+# Optional arguments:
+#   --title TITLE, -t TITLE
+#                         Plot title.
+#   --scoreName SCORENAME, -s SCORENAME
+#                         Score name label for the heatmap legend.
+#   --perChromosome       Instead of plotting the whole matrix, each chromosome is plotted next to the other. This parameter is not compatible with --region.
+#   --clearMaskedBins     If set, masked bins are removed from the matrix and the nearest bins are extended to cover the empty space instead of plotting black lines.
+#   --chromosomeOrder CHROMOSOMEORDER [CHROMOSOMEORDER ...]
+#                         Chromosomes and order in which the chromosomes should be plotted. This option overrides --region and --region2.
+#   --region REGION       Plot only this region. The format is chr:start-end The plotted region contains the main diagonal and is symmetric unless --region2 is given.
+#   --region2 REGION2     If given, then only the region defined by --region and --region2 is given. The format is the same as --region1.
+#   --log1p               Plot the log1p of the matrix values.
+#   --log                 Plot the *MINUS* log of the matrix values.
+#   --colorMap COLORMAP   Color map to use for the heatmap. Available values can be seen here: http://matplotlib.org/examples/color/colormaps_reference.html (Default: RdYlBu_r).
+#   --vMin VMIN           Minimum score value.
+#   --vMax VMAX           Maximum score value.
+#   --dpi DPI             Resolution for the image in case theoutput is a raster graphics image (e.g png, jpg) (Default: 72).
+#   --bigwig BIGWIG [BIGWIG ...]
+#                         Bigwig file to plot below the matrix. This can for example be used to visualize A/B compartments or ChIP-seq data.
+#   --bigwigAdditionalVerticalAxis
+#                         Add an additional axis to determine the values of a bigwig file in 2D better.
+#   --vMinBigwig VMINBIGWIG
+#                         Minimum score value for bigwig.
+#   --vMaxBigwig VMAXBIGWIG
+#                         Maximum score value for bigwig
+#   --flipBigwigSign      The sign of the bigwig values are flipped. Useful if hicPCA gives inverted values.
+#   --scaleFactorBigwig SCALEFACTORBIGWIG
+#                         Scale the values of a bigwig file by the given factor (Default: 1.0).
+#   --fontsize FONTSIZE   Fontsize in the plot for x and y axis (Default: 10).
+#   --rotationX ROTATIONX
+#                         Rotation in degrees for the labels of x axis (Default: 0).
+#   --rotationY ROTATIONY
+#                         Rotation in degrees for the labels of y axis (Default: 0).
+#   --increaseFigureWidth INCREASEFIGUREWIDTH
+#                         Plotting additional bigwig tracks can cause compression in x or y direction of the heatmap. Set this factor to a value unequal to 0 to correct this (Default:
+#                         0.5).
+#   --increaseFigureHeight INCREASEFIGUREHEIGHT
+#                         Plotting additional bigwig tracks can cause compression in x or y direction of the heatmap. Set this factor to a value unequal to 0 to correct this (Default:
+#                         0.5).
+#   --loops LOOPS         Bedgraph file to plot detected long range contacts from hicDetectLoops.
+#   --loopLargeRegionsOperation {first,last,center}
+#                         If a given coordinate in the bed file is larger than a bin of the input matrix, by default only the first bin is taken into account. However there are more
+#                         possibilities to handel such a case. Users can ask for the last bin or for center of the region.
+#   --tads TADS           Bedgraph file to plot detected tads
+#   --help, -h            show this help message and exit
+#   --version             show program's version number and exit
+```
+</details>
+<br />
+
+<a id="tbd"></a>
+#### `#TBD`
+<a id="code-11"></a>
+##### Code
+<details>
+<summary><i>Code: 6. Draw whole-genome "square" plots in the style of Seungsoo Kim</i></summary>
+
+```bash
+#!/bin/bash
+
+
+
+
+```
+</details>
+<br />
+
+<a id="x-documentation-partial"></a>
+### X. Documentation (partial)
+<a id="notes-2"></a>
+#### Notes
+<details>
+<summary><i>Notes: X. Documentation (partial)</i></summary>
 
 ```txt
 ❯ fanc to-fanc --help
@@ -1157,6 +1754,184 @@ positional arguments:
 options:
   -h, --help           show this help message and exit
   -tmp, --work-in-tmp  Work in temporary directory
+
+
+❯ fancplot -p triangular --help
+usage: fancplot <region> -p triangular [-h] [--aspect-ratio ASPECT_RATIO] [--title TITLE] [--fix-chromosome] [--hide-x] [--show-minor-ticks] [--hide-major-ticks]
+                                       [--show-tick-legend] [-vmin VMIN] [-vmax VMAX] [-m MAX_DIST] [-l] [-r] [-u] [-e] [-c COLORMAP] [-y YLABEL] [-d DEFAULT_VALUE]
+                                       [-s COLORBAR_SYMMETRY] [--weight-field WEIGHT_FIELD] [-C]
+                                       hic
+
+Triangular Hi-C plot.
+
+positional arguments:
+  hic                   Hi-C object.
+
+options:
+  -h, --help            show this help message and exit
+  --aspect-ratio ASPECT_RATIO
+                        Aspect ratio of this panel. Default is determined by figure type (usually 1.0).
+  --title TITLE         Title of this plot.
+  --fix-chromosome      Fix chromosome identifier for this plot (add or remove "chr" as required). Use this ifthere is a mismatch between the nomenclature used by different datasets
+                        in the figure, specifically if the chromosome prefix for this dataset does not match the plot region definition.
+  --hide-x              Hide x-axis for this plot
+  --show-minor-ticks    Show minor ticks on genome axis
+  --hide-major-ticks    Hide major ticks on genome axis.
+  --show-tick-legend    Show tick legend with distance between ticks on genome axis
+  -vmin VMIN, --minimum-value VMIN
+                        Minimum value assigned the first color in the colorbar.
+  -vmax VMAX, --maximum-value VMAX
+                        Maximum value assigned the last color in the colorbar.
+  -m MAX_DIST, --maximum-distance MAX_DIST
+                        Maximum distance between two points after which triangle will be truncated.
+  -l, --log             Log-scale colorbar.
+  -r, --range-slider    Add vmax/vmin slider to plot
+  -u, --uncorrected     Plot uncorrected Hi-C matrix values.
+  -e, --observed-expected
+                        Log2-O/E transform matrix values.
+  -c COLORMAP, --colormap COLORMAP
+                        Matplotlib colormap
+  -y YLABEL, --ylabel YLABEL
+                        Label for y axis
+  -d DEFAULT_VALUE, --default_value DEFAULT_VALUE
+                        Which value to use for missing edge weights (pixels). Default: 0
+  -s COLORBAR_SYMMETRY, --colorbar-symmetry COLORBAR_SYMMETRY
+                        Make colorbar symmetrical around this value.
+  --weight-field WEIGHT_FIELD
+                        Which value to use for plotting. Default: weight
+  -C, --no-colorbar     Do not show colorbar in plot
+
+
+❯ fancplot -p square --help
+usage: fancplot <region> -p square [-h] [--aspect-ratio ASPECT_RATIO] [--title TITLE] [--fix-chromosome] [--hide-x] [--show-minor-ticks] [--hide-major-ticks] [--show-tick-legend]
+                                   [-vmin VMIN] [-vmax VMAX] [-u] [-e] [-l] [-r] [-f] [-c COLORMAP] [-s COLORBAR_SYMMETRY] [-C] [--weight-field WEIGHT_FIELD]
+                                   hic
+
+Square Hi-C plot.
+
+positional arguments:
+  hic                   Hi-C object.
+
+options:
+  -h, --help            show this help message and exit
+  --aspect-ratio ASPECT_RATIO
+                        Aspect ratio of this panel. Default is determined by figure type (usually 1.0).
+  --title TITLE         Title of this plot.
+  --fix-chromosome      Fix chromosome identifier for this plot (add or remove "chr" as required). Use this ifthere is a mismatch between the nomenclature used by different datasets
+                        in the figure, specifically if the chromosome prefix for this dataset does not match the plot region definition.
+  --hide-x              Hide x-axis for this plot
+  --show-minor-ticks    Show minor ticks on genome axis
+  --hide-major-ticks    Hide major ticks on genome axis.
+  --show-tick-legend    Show tick legend with distance between ticks on genome axis
+  -vmin VMIN, --minimum-value VMIN
+                        Minimum value assigned the first color in the colorbar.
+  -vmax VMAX, --maximum-value VMAX
+                        Maximum value assigned the last color in the colorbar.
+  -u, --uncorrected     Plot uncorrected Hi-C matrix values.
+  -e, --observed-expected
+                        Log2-O/E transform matrix values. Automatically sets colormap to bwr and makes colorbar symmetrical around 0.
+  -l, --log             Log-scale colorbar.
+  -r, --range-slider    Add vmax/vmin slider to plot
+  -f, --flip            Flip matrix upside down
+  -c COLORMAP, --colormap COLORMAP
+                        Matplotlib colormap
+  -s COLORBAR_SYMMETRY, --colorbar-symmetry COLORBAR_SYMMETRY
+                        Make colorbar symmetrical around this value.
+  -C, --no-colorbar     Do not show colorbar in plot
+  --weight-field WEIGHT_FIELD
+                        Which value to use for plotting. Default: weight
+
+
+❯ fanc to-cooler --help
+2023-10-12 13:54:37,522 INFO FAN-C version: 0.9.27
+usage: fanc hic_to_cooler [-h] [-u] [-t THREADS] [-M] [-r RESOLUTIONS [RESOLUTIONS ...]] [-S] [--chromosomes CHROMOSOMES] [-tmp] input output
+
+Convert a binned Hic file into cooler format. See https://github.com/mirnylab/cooler for details. If input Hi-C matrix is uncorrected, the uncorrected matrix is stored. If it is
+corrected, the uncorrected matrix is stored and the bias vector. Cooler always calculates corrected matrix on-the-fly from the uncorrected matrix and the bias vector.
+
+positional arguments:
+  input                 Input binned .hic file, fanc format.
+  output                Output cooler file.
+
+options:
+  -h, --help            show this help message and exit
+  -u, --uncorrected     Output uncorrected matrix.
+  -t THREADS, --threads THREADS
+                        Number of threads used for balancing.
+  -M, --no-multi        Do not produce a multi-resolution file. This is fast, as it does not "coarsen" the matrix at multiple resolutions, but the resulting file will be
+                        incompatible with HiGlass!
+  -r RESOLUTIONS [RESOLUTIONS ...], --resolutions RESOLUTIONS [RESOLUTIONS ...]
+                        Resolutions in bp at which to "coarsen" the cooler matrix. Default resolutions are calculated as base-resolution * 2 ** z, where z is an increasing integer
+                        zoom level.
+  -S, --no-natural-sort
+                        Do not sort regions by their natural chromosome order. When using this option, chromosomes will appear in the Cooler file in the order they are listed in the
+                        FAN-C file.
+  --chromosomes CHROMOSOMES
+                        Comma-separated list of chromosomes to appear in the final Cooler file.
+  -tmp, --work-in-tmp   Work in temporary directory
+
+
+❯ hicPlotMatrix --help
+usage: hicPlotMatrix --matrix MATRIX --outFileName OUTFILENAME [--title TITLE] [--scoreName SCORENAME] [--perChromosome] [--clearMaskedBins]
+                     [--chromosomeOrder CHROMOSOMEORDER [CHROMOSOMEORDER ...]] [--region REGION] [--region2 REGION2] [--log1p] [--log] [--colorMap COLORMAP] [--vMin VMIN]
+                     [--vMax VMAX] [--dpi DPI] [--bigwig BIGWIG [BIGWIG ...]] [--bigwigAdditionalVerticalAxis] [--vMinBigwig VMINBIGWIG] [--vMaxBigwig VMAXBIGWIG] [--flipBigwigSign]
+                     [--scaleFactorBigwig SCALEFACTORBIGWIG] [--fontsize FONTSIZE] [--rotationX ROTATIONX] [--rotationY ROTATIONY] [--increaseFigureWidth INCREASEFIGUREWIDTH]
+                     [--increaseFigureHeight INCREASEFIGUREHEIGHT] [--loops LOOPS] [--loopLargeRegionsOperation {first,last,center}] [--tads TADS] [--help] [--version]
+
+Creates a heatmap of a Hi-C matrix.
+
+Required arguments:
+  --matrix MATRIX, -m MATRIX
+                        Path of the Hi-C matrix to plot.
+  --outFileName OUTFILENAME, -out OUTFILENAME
+                        File name to save the image.
+
+Optional arguments:
+  --title TITLE, -t TITLE
+                        Plot title.
+  --scoreName SCORENAME, -s SCORENAME
+                        Score name label for the heatmap legend.
+  --perChromosome       Instead of plotting the whole matrix, each chromosome is plotted next to the other. This parameter is not compatible with --region.
+  --clearMaskedBins     If set, masked bins are removed from the matrix and the nearest bins are extended to cover the empty space instead of plotting black lines.
+  --chromosomeOrder CHROMOSOMEORDER [CHROMOSOMEORDER ...]
+                        Chromosomes and order in which the chromosomes should be plotted. This option overrides --region and --region2.
+  --region REGION       Plot only this region. The format is chr:start-end The plotted region contains the main diagonal and is symmetric unless --region2 is given.
+  --region2 REGION2     If given, then only the region defined by --region and --region2 is given. The format is the same as --region1.
+  --log1p               Plot the log1p of the matrix values.
+  --log                 Plot the *MINUS* log of the matrix values.
+  --colorMap COLORMAP   Color map to use for the heatmap. Available values can be seen here: http://matplotlib.org/examples/color/colormaps_reference.html (Default: RdYlBu_r).
+  --vMin VMIN           Minimum score value.
+  --vMax VMAX           Maximum score value.
+  --dpi DPI             Resolution for the image in case theoutput is a raster graphics image (e.g png, jpg) (Default: 72).
+  --bigwig BIGWIG [BIGWIG ...]
+                        Bigwig file to plot below the matrix. This can for example be used to visualize A/B compartments or ChIP-seq data.
+  --bigwigAdditionalVerticalAxis
+                        Add an additional axis to determine the values of a bigwig file in 2D better.
+  --vMinBigwig VMINBIGWIG
+                        Minimum score value for bigwig.
+  --vMaxBigwig VMAXBIGWIG
+                        Maximum score value for bigwig
+  --flipBigwigSign      The sign of the bigwig values are flipped. Useful if hicPCA gives inverted values.
+  --scaleFactorBigwig SCALEFACTORBIGWIG
+                        Scale the values of a bigwig file by the given factor (Default: 1.0).
+  --fontsize FONTSIZE   Fontsize in the plot for x and y axis (Default: 10).
+  --rotationX ROTATIONX
+                        Rotation in degrees for the labels of x axis (Default: 0).
+  --rotationY ROTATIONY
+                        Rotation in degrees for the labels of y axis (Default: 0).
+  --increaseFigureWidth INCREASEFIGUREWIDTH
+                        Plotting additional bigwig tracks can cause compression in x or y direction of the heatmap. Set this factor to a value unequal to 0 to correct this (Default:
+                        0.5).
+  --increaseFigureHeight INCREASEFIGUREHEIGHT
+                        Plotting additional bigwig tracks can cause compression in x or y direction of the heatmap. Set this factor to a value unequal to 0 to correct this (Default:
+                        0.5).
+  --loops LOOPS         Bedgraph file to plot detected long range contacts from hicDetectLoops.
+  --loopLargeRegionsOperation {first,last,center}
+                        If a given coordinate in the bed file is larger than a bin of the input matrix, by default only the first bin is taken into account. However there are more
+                        possibilities to handel such a case. Users can ask for the last bin or for center of the region.
+  --tads TADS           Bedgraph file to plot detected tads
+  --help, -h            show this help message and exit
+  --version             show program's version number and exit
 ```
 </details>
 <br />
