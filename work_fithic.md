@@ -339,6 +339,102 @@ To activate this environment, use
 To deactivate an active environment, use
 
      $ mamba deactivate
+
+
+❯ mamba install -c anaconda networkx
+
+                  __    __    __    __
+                 /  \  /  \  /  \  /  \
+                /    \/    \/    \/    \
+███████████████/  /██/  /██/  /██/  /████████████████████████
+              /  / \   / \   / \   / \  \____
+             /  /   \_/   \_/   \_/   \    o \__,
+            / _/                       \_____/  `
+            |/
+        ███╗   ███╗ █████╗ ███╗   ███╗██████╗  █████╗
+        ████╗ ████║██╔══██╗████╗ ████║██╔══██╗██╔══██╗
+        ██╔████╔██║███████║██╔████╔██║██████╔╝███████║
+        ██║╚██╔╝██║██╔══██║██║╚██╔╝██║██╔══██╗██╔══██║
+        ██║ ╚═╝ ██║██║  ██║██║ ╚═╝ ██║██████╔╝██║  ██║
+        ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝
+
+        mamba (1.3.1) supported by @QuantStack
+
+        GitHub:  https://github.com/mamba-org/mamba
+        Twitter: https://twitter.com/QuantStack
+
+█████████████████████████████████████████████████████████████
+
+
+Looking for: ['networkx']
+
+anaconda/noarch                                    462.0kB @   2.2MB/s  0.2s
+anaconda/linux-64                                    3.1MB @   3.8MB/s  0.9s
+pkgs/r/linux-64                                               No change
+pkgs/r/noarch                                                 No change
+pkgs/main/linux-64                                            No change
+pkgs/main/noarch                                              No change
+bioconda/linux-64                                    5.2MB @   3.7MB/s  1.5s
+bioconda/noarch                                      4.7MB @   2.3MB/s  2.0s
+conda-forge/noarch                                  14.2MB @   5.0MB/s  3.2s
+conda-forge/linux-64                                35.0MB @   6.3MB/s  6.1s
+
+Pinned packages:
+  - python 3.12.*
+
+
+Transaction
+
+  Prefix: /home/kalavatt/miniconda3/envs/fithic_env
+
+  Updating specs:
+
+   - networkx
+   - ca-certificates
+   - certifi
+   - openssl
+
+
+  Package               Version  Build            Channel                Size
+───────────────────────────────────────────────────────────────────────────────
+  Install:
+───────────────────────────────────────────────────────────────────────────────
+
+  + networkx              2.7.1  pyhd3eb1b0_0     anaconda/noarch         2MB
+
+  Change:
+───────────────────────────────────────────────────────────────────────────────
+
+  - certifi           2023.7.22  pyhd8ed1ab_0     conda-forge
+  + certifi           2023.7.22  py312h06a4308_1  anaconda/linux-64     160kB
+
+  Upgrade:
+───────────────────────────────────────────────────────────────────────────────
+
+  - ca-certificates   2023.7.22  hbcca054_0       conda-forge
+  + ca-certificates  2023.08.22  h06a4308_0       anaconda/linux-64     133kB
+
+  Summary:
+
+  Install: 1 packages
+  Change: 1 packages
+  Upgrade: 1 packages
+
+  Total download: 2MB
+
+───────────────────────────────────────────────────────────────────────────────
+
+
+Confirm changes: [Y/n] Y
+ca-certificates                                    132.7kB @   1.2MB/s  0.1s
+networkx                                             1.6MB @   6.6MB/s  0.2s
+certifi                                            159.6kB @ 381.1kB/s  0.4s
+
+Downloading and Extracting Packages
+
+Preparing transaction: done
+Verifying transaction: done
+Executing transaction: done
 ```
 </details>
 <br />
@@ -355,9 +451,29 @@ To deactivate an active environment, use
 #  Initialize functions =======================================================
 function change_dir() {
     local dir="${1}"
+    local help=$(
+cat << EOM
+Usage: change_dir [directory]
+
+Change the current working directory to the one specified.
+
+Positional option:
+  directory  The directory to change to
+
+Note:
+  change_dir() checks if a directory is provided (as an argument), exists, and
+  is accessible, and then changes to it.
+EOM
+    )
+
+    if [[ "${dir}" == "-h" || "${dir}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
 
     if [[ -z "${dir}" ]]; then
         echo "Error: No directory provided."
+        echo "${help}"
         return 1
     fi
 
@@ -376,6 +492,33 @@ function change_dir() {
 
 function activate_env() {
     local env="${1}"
+    local help=$(
+cat << EOM
+Usage: activate_env [environment]
+
+Activate a specified Conda environment.
+
+Positional option:
+  environment  The name of the Conda environment to activate
+
+Note:
+  If another environment is already active, then activate_env() deactivates it
+  before activating the desired one.
+
+EOM
+    )
+
+    if [[ "${env}" == "-h" || "${env}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
+    if [[ -z "${env}" ]]; then
+        echo "Error: No environment provided."
+        echo "${help}"
+        return 1
+    fi
+
     if [[ "${CONDA_DEFAULT_ENV}" != "${env}" ]]; then
         if [[ ${CONDA_DEFAULT_ENV} != base ]]; then
             conda deactivate
@@ -383,12 +526,47 @@ function activate_env() {
 
         source activate "${env}"
     fi
+
+    return 0
 }
 
 
 function check_requirements() {
     local requirements=("$@")
     local tag="is not installed or not in the system's PATH"
+    local help=$(
+cat << EOM
+Usage: check_requirements [command_1] [command_2] ...
+
+Checks that the specified commands are available on the system.
+
+Positional options:
+  command_1, command_2, ...  The command(s) to check for installation,
+                             availability in the system's PATH.
+
+Example #1:
+  check_requirements fithic python
+
+Example #2:
+  check_requirements cooler
+
+Note:
+  check_requirements() iterates over all given commands and checks that they
+  can be executed, ensuring all required dependencies are installed.
+
+EOM
+    )
+
+    if [[ "${requirements[0]}" == "-h" || "${requirements[0]}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
+    if [[ -z "${requirements[@]}" ]]; then
+        echo "Error: No command(s) provided."
+        echo "${help}"
+        return 1
+    fi
 
     for req in "${requirements[@]}"; do
         if ! command -v "${req}" &> /dev/null; then
@@ -405,6 +583,43 @@ function check_files() {
     local operation="${1}"
     shift
     local files=("$@")
+    local help=$(
+cat << EOM
+Usage: check_files [operation] [file1] [file2] ...
+
+Check the existence or non-existence of specified files.
+
+Positional options:
+  operation          "exist" to check if files exist, "not_exist" to check if
+                     files do not exist
+  file1, file2, ...  The file(s) to check
+
+Example:
+  check_files exist "\${some_file}"
+  check_files not_exist "\${array_of_files[@]}"
+
+Note:
+  check_files() supports two operations: "exist" to check if files exist, and
+  "not_exist" to check if files do not exist.
+EOM
+    )
+
+    if [[ "${operation}" == "-h" || "${operation}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
+    if [[  -z "${operation}" ]]; then
+        echo "Error: No operation provided."
+        echo "${help}"
+        return 1
+    fi
+
+    if [[ -z "${files[@]}" ]]; then
+        echo "Error: No file(s) provided."
+        echo "${help}"
+        return 1
+    fi
 
     for file in "${files[@]}"; do
         if [[ "${operation}" == "exist" && ! -f "${file}" ]]; then
@@ -421,16 +636,45 @@ function check_files() {
 
 
 function check_python_version() {
+    local help=$(
+cat << EOM
+Usage: check_python_version
+
+Ensures that Python is installed, and its version is 3.x.
+
+Example:
+  check_python_version
+
+Notes:
+  - This function is essential for scripts or applications that rely on
+    Python 3.x features or libraries. It checks if Python is installed and
+    accessible via the system's PATH, and verifies that the installed Python
+    version is 3.x.
+  - If Python is not installed or not in the system's PATH, or if the installed
+    Python version is not 3.x, the function will print an error message and
+    return 1.
+EOM
+    )
+
+    if [[ "${1}" == "-h" || "${1}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
     if ! command -v python &> /dev/null; then
         echo "Error: Python is not installed or not in the system's PATH."
+        echo "${help}"
         return 1
     fi
 
-    if [[ "$(python -c 'import sys; print(sys.version_info[0])')" -ne 3 ]]; then
-        echo "Error: Python 3 is required."
+    local python_version=$(python -c 'import sys; print(sys.version_info[0])')
+    if [[ "${python_version}" -ne 3 ]]; then
+        echo "Error: Python 3 is required, but Python ${python_version} is installed."
+        echo "${help}"
         return 1
     fi
 
+    echo "Python 3 is installed and accessible."
     return 0
 }
 
@@ -444,15 +688,27 @@ function create_ia_file() {
 cat << EOM
 Usage: create_ia_file -c COOL_FILE -o OUT_FILE [-r REGION] [-s SCRATCH_DIR]
         
-Creates a FitHiC2 interactions file from a given .cool file. 
-If a region is specified, interactions are extracted for that region only.
+Creates a FitHiC2 interactions file from a given .cool file. The output file
+will be in bedpe format.
+
+If a region is specified (optional), interactions are extracted for that region
+only. The region can be specified as (1) a Roman numeral (I-XVI) for specific
+chromosomes; (2) chr:start-end, where start and end are bp coordinates for a 
+given Roman numeral chromosome; or (3) as "genome-trans", "genome_trans", or
+"genome" for the entire genome.
+
 Operations can optionally be performed in a specified scratch directory.
+
+create_ia_file() checks for required dependencies, validates input files, and
+handles errors appropriately.
 
 Options:
   -h, --help         Display this help message
   -c, --cool-file    Specify the .cool file
   -o, --out-file     Specify the output file
-  -r, --region       Specify the region (optional)
+  -r, --region       Specify the region (optional); accepts Roman numerals
+                     I-XVI; chr:start-end; or "genome-trans", "genome_trans",
+                     or "genome" for the entire genome
   -s, --scratch-dir  Specify a scratch directory (optional)
 
 Dependencies:
@@ -470,8 +726,19 @@ Example #2:
       -r I \\
       -s /path/to/scratch
 
-Note:
-  The output file will be in bedpe format.
+Example #3:
+  create_ia_file \\
+      -c and_another.cool \\
+      -o and_another_ia.txt \\
+      -r "genome-trans" \\
+      -s /path/to/scratch
+
+Example #4:
+  create_ia_file \\
+      -c other.cool \\
+      -o other_ia.txt \\
+      -r "XII:451000-469000" \\
+      -s /path/to/scratch
 
 FitHiC2 interactions file example (header not in file):
   +-----+------------+-------------+--------------------------+-----------------+
@@ -502,9 +769,20 @@ EOM
 
     local region_option=""
     if [[ -n "${region}" ]]; then
-        local region_option="--join -r ${region}"
+        #  Check if the region parameter matches specific strings for the entire
+        #+ genome
+        if [[ 
+               "${region}" == "genome-trans" \
+            || "${region}" == "genome_trans" \
+            || "${region}" == "genome" 
+        ]]; then
+            echo "Note: The option '-r ${region}' is used. Interactions will be extracted for the entire genome."
+            region_option="--join"
+        else
+            region_option="--join -r ${region}"
+        fi
     else
-        local region_option="--join"
+        region_option="--join"
     fi
 
     if [[ "${out: -3}" == ".gz" ]]; then
@@ -590,7 +868,11 @@ cat << EOM
 Usage: create_frag_file -i IA_FILE -o OUT_FILE [-s SCRATCH_DIR]
         
 Creates a FitHiC2 fragment file from a given FitHiC2 interactions file.
+
 Operations can optionally be performed in a specified scratch directory.
+
+create_frag_file() checks for the existence of required utilities and handles
+errors.
 
 Options:
   -h, --help         Display this help message
@@ -715,7 +997,7 @@ EOM
 }
 
 
-generate_bias_vec() {
+generate_bias_vector() {
     local pct=0.05
     local hickry=""
     local ia=""
@@ -723,9 +1005,12 @@ generate_bias_vec() {
     local out=""
     local help=$(
 cat << EOM
-Usage: generate_bias_vec -p PERCENTILE -i INT_FILE -f FRAG_FILE -o OUT_FILE -k HICKRY_PATH
+Usage: generate_bias_vector -p PERCENTILE -i INT_FILE -f FRAG_FILE -o OUT_FILE -k HICKRY_PATH
         
 Generates a bias vector file using FitHiC2's HiCKRy.py.
+
+generate_bias_vector() validates the input parameters, checks for required
+dependencies, and handles errors.
 
 Options:
   -h, --help         Display this help message
@@ -740,7 +1025,7 @@ Dependencies:
   - HiCKRy.py
 
 Example:
-  generate_bias_vec \\
+  generate_bias_vector \\
       -k /path/to/HiCKRy.py \\
       -p 0.05 \\
       -i some_ia.txt.gz \\
@@ -829,6 +1114,8 @@ Usage: main -c COOL_FILE -i IA_FILE -f FRAG_FILE -o OUT_FILE -H HICKRY_PATH \\
         
 This function integrates the creation of interaction and fragment files, the
 generation of a bias vector, and other functionalities.
+
+main() validates the input parameters and handles errors.
 
 Options:
   -h, --help         Display this help message
@@ -919,7 +1206,7 @@ EOM
     fi
 
     # Generate bias vector values
-    if ! generate_bias_vec -H "${hickry}" -p "${pct}" -i "${ia}" -f "${frag}" -o "${out}"; then
+    if ! generate_bias_vector -H "${hickry}" -p "${pct}" -i "${ia}" -f "${frag}" -o "${out}"; then
         echo "Error: Failed to generate bias vector."
         return 1
     fi
@@ -930,79 +1217,121 @@ EOM
 
 
 #  Configure work environment, directories, and variables =====================
-unset A_dirs && typeset -A A_dirs
-unset a_dirs && typeset -a a_dirs
-A_dirs["11_cooler_genome_KR-filt-0.4"]="13_FitHiC2_genome_KR-filt-0.4"; a_dirs+=( "11_cooler_genome_KR-filt-0.4" )
-A_dirs["11_cooler_genome_KR-filt-0.4_whole-matrix"]="13_FitHiC2_genome_KR-filt-0.4_whole-matrix"; a_dirs+=( "11_cooler_genome_KR-filt-0.4_whole-matrix" )
-A_dirs["11_cooler_XII_KR-filt-0.4"]="13_FitHiC2_XII_KR-filt-0.4"; a_dirs+=( "11_cooler_XII_KR-filt-0.4" )
+#  Main code ------------------------------------------------------------------
+unset A_dirs A_prefix
+typeset -A A_dirs A_prefix
 
-unset A_prefix && typeset -A A_prefix
-unset a_prefix && typeset -a a_prefix
-A_prefix["MC-2020_30C-a15_WT_repM"]="G1"; a_prefix+=( "MC-2020_30C-a15_WT_repM" )
-A_prefix["MC-2019_Q_WT_repM"]="Q"; a_prefix+=( "MC-2019_Q_WT_repM" )
-A_prefix["MC-2020_nz_WT_repM"]="G2"; a_prefix+=( "MC-2020_nz_WT_repM" )
 
+#  Populate associative arrays ----------------------------
+A_dirs["11_cooler_genome_KR-filt-0.4"]="13_FitHiC2_genome_KR-filt-0.4"
+A_dirs["11_cooler_genome_KR-filt-0.4_whole-matrix"]="13_FitHiC2_genome_KR-filt-0.4_whole-matrix"
+A_dirs["11_cooler_XII_KR-filt-0.4"]="13_FitHiC2_XII_KR-filt-0.4"
+
+A_prefix["MC-2020_30C-a15_WT_repM"]="G1"
+A_prefix["MC-2019_Q_WT_repM"]="Q"
+A_prefix["MC-2020_nz_WT_repM"]="G2"
+
+
+#  Check associative arrays
 check_array=false
-if $check_array; then
-    for key in "${a_dirs[@]}"; do
-        echo -e "key\t${key}\nvalue\t${A_dirs[${key}]}\n"
-    done
-fi
+[[ ${check_array} == true ]] &&
+    {
+        for key in "${!A_dirs[@]}"; do
+            echo """
+              key  ${key}
+            value  ${A_dirs[${key}]}
+            """
+        done
+    }
 
-dir_in="${a_dirs[0]}"
-dir_out="${A_dirs[${dir_in}]}"
-phase="Q"
-res=6400
-file_in=$(
-    find \
-        "${dir_in}" \
-        -maxdepth 1 \
-        -type f \
-        -name "MC*${phase}*${res}*cool"
-        -name "MC*${res}*cool"
-)
+[[ ${check_array} == true ]] &&
+    {
+        for key in "${!A_prefix[@]}"; do
+            echo """
+              key  ${key}
+            value  ${A_prefix[${key}]}
+            """
+        done
+    }
 
-for key in "${!A_prefix[@]}"; do  # Corrected this line
-    echo -e "key\t${key}\nvalue\t${A_prefix[$key]}\n"
 
-    run_conditional_statement=true
-    if ${run_conditional_statement}; then
-        if [[ "${file_in}" =~ "${key}" ]]; then
-            prefix="${A_prefix[${key}]}"  # Corrected this line
-            file_out=$(
-                echo "${file_in/.cool/.ia.txt.gz}" \
-                    | sed -E -e 's:11_cooler:13_FitHiC2:g' \
-                             -e 's:.standard-rDNA-complete.mapped::g' \
-                             -e 's:downsample:ds:g' \
-                             -e "s:${key}:${prefix}:g"
-            )
-        fi
-    fi
-done
+#  Initialize other configurations ------------------------
+unset resolutions && typeset -a resolutions=(800 1600 3200 5000 6400)
+unset regions && typeset -a regions=("XII-cis" "XII-all" "genome-trans")
 
-check_file_out=false
-if ${check_file_out}; then echo "${file_out}"; fi
-
-chr="XII"
 scratch="/fh/scratch/delete30/tsukiyama_t"
 HiCKRy="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils"
-type="intraOnly"
 
-check_variables=true
-if ${check_variables}; then
-cat << EOC
-  dir_in  ${dir_in}
- dir_out  ${dir_out}
-   phase  ${phase}
-     res  ${res}
- file_in  ${file_in}
-file_out  ${file_out}
-     chr  ${chr}
- scratch  ${scratch}
-  HiCKRy  ${HiCKRy}
-    type  ${type}
-EOC
-fi
+iter=0
+for dir_in in "${!A_dirs[@]}"; do
+    dir_out="${A_dirs[${dir_in}]}"  # echo "${dir_out}"
+
+    debug=false
+    [[ ${debug} == true ]] && echo "dir_out=${dir_out}"
+
+    for phase in "${!A_prefix[@]}"; do
+        for res in "${resolutions[@]}"; do
+            # res="${resolutions[0]}"  # echo "${res}"
+            (( iter++ ))
+
+            file_in=$(
+                find \
+                    "${dir_in}" \
+                    -maxdepth 1 \
+                    -type f \
+                    -name "${phase}*.${res}.*cool"
+            )
+
+            if [[ ! -z "${file_in}" ]]; then
+                for key in "${!A_prefix[@]}"; do
+                    prefix="${A_prefix[${key}]}"
+                    
+                    debug=false
+                    [[ ${debug} == true ]] \
+                        && echo -e "key\t${key}\nvalue\t${prefix}\n"
+
+                    run_conditional_statement=true
+                    if ${run_conditional_statement}; then
+                        if [[ "${file_in}" =~ "${key}" ]]; then
+                            file_out=$(
+                                echo "${file_in%.cool}" \
+                                    | sed -E -e 's:11_cooler:13_FitHiC2:g' \
+                                             -e 's:.standard-rDNA-complete.mapped::g' \
+                                             -e 's:downsample:ds:g' \
+                                             -e "s:${key}:${prefix}:g"
+                            )
+                        fi
+                    fi
+                done
+
+                for region in "${regions[@]}"; do
+                    if [[ "${region}" == "XII-cis" ]]; then
+                        type="intraOnly"
+                    elif [[ "${region}" == "XII-all" ]]; then
+                        type="all"
+                    elif [[ "${region}" == "genome-trans" ]]; then
+                        type="interOnly"
+                    fi
+
+                    echo """
+                    iter .............................. ${iter}
+                    dir_in ............................ ${dir_in}
+                    dir_out ........................... ${dir_out}
+                    phase ............................. ${phase}
+                    resolution ........................ ${res}
+                    file_in ........................... ${file_in}
+                    file_out .......................... ${file_out}
+                    region ............................ ${region}
+                    type .............................. ${type}
+                    scratch ........................... ${scratch}
+                    HiCKRy ............................ ${HiCKRy}
+                    """
+                    sleep 0.1
+                done
+            fi
+        done
+    done
+done
 
 
 #  Execute main tasks =========================================================
@@ -1013,51 +1342,246 @@ fi
 change_dir \
     "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process"
 
-#  Source work environment containing cooler
+#  Source initial work environment that allows access to cooler
 activate_env pairtools_env
 
-#  Make outfile directories
-for dir in "${!A_dirs[@]}"; do
-    if [[ ! -d "${A_dirs[${dir}]}" ]]; then
-        mkdir -p "${A_dirs[${dir}]}/err_out"
-    else
-        echo "Outfile directory ${A_dirs[${dir}]} exists."
+#  Set up test parameters
+set_up_test_parameters=true
+if ${set_up_test_parameters}; then
+    unset A_dirs A_prefix
+    typeset -A A_dirs A_prefix
+    A_dirs["11_cooler_genome_KR-filt-0.4_whole-matrix"]="13_FitHiC2_genome_KR-filt-0.4_whole-matrix"
+    A_prefix["MC-2019_Q_WT_repM"]="Q"
+
+    unset resolutions && typeset -a resolutions=(5000)
+    unset regions && typeset -a regions=("genome-trans")
+    
+    scratch="/fh/scratch/delete30/tsukiyama_t"
+    HiCKRy="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils"
+
+    iter=0
+    for dir_in in "${!A_dirs[@]}"; do
+        dir_out="${A_dirs[${dir_in}]}"  # echo "${dir_out}"
+
+        debug=false
+        [[ ${debug} == true ]] && echo "dir_out=${dir_out}"
+
+        for phase in "${!A_prefix[@]}"; do
+            for res in "${resolutions[@]}"; do
+                # res="${resolutions[0]}"  # echo "${res}"
+                (( iter++ ))
+
+                file_in=$(
+                    find \
+                        "${dir_in}" \
+                        -maxdepth 1 \
+                        -type f \
+                        -name "${phase}*.${res}.*cool"
+                    )
+                # echo "${file_in}"
+
+                if [[ ! -z "${file_in}" ]]; then
+                    for region in "${regions[@]}"; do
+                        if [[ "${region}" == "XII-cis" ]]; then
+                            type="intraOnly"
+                        elif [[ "${region}" == "XII-all" ]]; then
+                            type="All"
+                        elif [[ "${region}" == "genome-trans" ]]; then
+                            type="interOnly"
+                            # type="All"
+                        fi
+                    done
+
+                    for key in "${!A_prefix[@]}"; do
+                        prefix="${A_prefix[${key}]}"
+                        
+                        debug=false
+                        [[ ${debug} == true ]] \
+                            && echo -e "key\t${key}\nvalue\t${prefix}\n"
+
+                        run_conditional_statement=true
+                        if ${run_conditional_statement}; then
+                            if [[ "${file_in}" =~ "${key}" ]]; then
+                                file_out="$(
+                                    echo "${file_in%.cool}" \
+                                        | sed -E -e 's:11_cooler:13_FitHiC2:g' \
+                                                 -e 's:.standard-rDNA-complete.mapped::g' \
+                                                 -e 's:downsample:ds:g' \
+                                                 -e "s:${key}:${prefix}:g"
+                                ).${region}"
+                                # echo "${file_out}"
+                            fi
+                        fi
+                    done
+
+                    echo """
+                    iter .............................. ${iter}
+                    dir_in ............................ ${dir_in}
+                    dir_out ........................... ${dir_out}
+                    phase ............................. ${phase}
+                    resolution ........................ ${res}
+                    region ............................ ${region}
+                    type .............................. ${type}
+                    file_in ........................... ${file_in}
+                    file_out .......................... ${file_out}
+                    scratch ........................... ${scratch}
+                    HiCKRy ............................ ${HiCKRy}
+                    """
+                    sleep 0.1
+                fi
+            done
+        done
+    done
+fi
+
+
+#  Make outfile directories -------------------------------
+make_outfile_directories=false
+if ${make_outfile_directories}; then
+    for dir in "${!A_dirs[@]}"; do
+        if [[ ! -d "${A_dirs[${dir}]}" ]]; then
+            mkdir -p "${A_dirs[${dir}]}/err_out"
+        else
+            echo "Outfile directory ${A_dirs[${dir}]} exists."
+        fi
+    done
+fi
+
+
+#  Run workflow -------------------------------------------
+check_command_1=true
+run_command_1=true
+
+check_command_2=true
+run_command_2=true
+
+check_command_3=true
+run_command_3=true
+
+check_command_4=true
+run_command_4=true
+
+run_workflow=true
+if ${run_workflow}; then
+    #  Step #1. Create FitHiC2 interactions text file
+    activate_env pairtools_env
+
+    if ${check_command_1}; then
+        echo """
+        #  Step #1. Create FitHiC2 interactions text file
+
+        create_ia_file \\
+            -c "$(pwd)/${file_in}" \\
+            -o "$(pwd)/${file_out}.ia.txt.gz" \\
+            -r "${region}" \\
+            -s "${scratch}"
+        """
     fi
-done
 
-#  Step #1. Create FitHiC2 interactions text file
-create_ia_file \
-    -c "$(pwd)/${file_in}" \
-    -o "$(pwd)/${file_out%.ia.txt.gz}.${chr}.ia.txt.gz" \
-    -r "${chr}" \
-    -s "${scratch}"
+    if ${run_command_1}; then
+        create_ia_file \
+            -c "$(pwd)/${file_in}" \
+            -o "$(pwd)/${file_out}.ia.txt.gz" \
+            -r "${region}" \
+            -s "${scratch}"
+    fi
 
-#  Step #2. Create FitHiC2 fragments text file
-create_frag_file \
-    -i "$(pwd)/${file_out%.ia.txt.gz}.${chr}.ia.txt.gz" \
-    -o "$(pwd)/${file_out%.ia.txt.gz}.${chr}.frag.txt.gz" \
-    -s "${scratch}"
 
-#  Step #3. Generate bias vector needed to run FitHiC2
-activate_env fithic_env
+    #  Step #2. Create FitHiC2 fragments text file
+    if ${check_command_2}; then
+        echo """
+        #  Step #2. Create FitHiC2 fragments text file
 
-generate_bias_vec \
-    -k "${HiCKRy}" \
-    -p 0.05 \
-    -i "$(pwd)/${file_out%.ia.txt.gz}.${chr}.ia.txt.gz" \
-    -f "$(pwd)/${file_out%.ia.txt.gz}.${chr}.frag.txt.gz" \
-    -o "$(pwd)/${file_out%.ia.txt.gz}.${chr}.bias.txt.gz"
+        create_frag_file \\
+            -i "$(pwd)/${file_out}.ia.txt.gz" \\
+            -o "$(pwd)/${file_out}.frag.txt.gz" \\
+            -s "${scratch}"
+        """
+    fi
 
-#  Step #4. Run FitHiC2
-fithic \
-    --interactions "$(pwd)/${file_out%.ia.txt.gz}.${chr}.ia.txt.gz" \
-    --fragments "$(pwd)/${file_out%.ia.txt.gz}.${chr}.frag.txt.gz" \
-    --outdir "$(pwd)/$(dirname "${file_out}")" \
-    --resolution "${res}" \
-    --biases "$(pwd)/${file_out%.ia.txt.gz}.${chr}.bias.txt.gz" \
-    --contactType "${type}" \
-    --mappabilityThres "${map:-1}" \
-    --lib "$(basename "${file_out%.ia.txt.gz}").${chr}"
+    if ${run_command_2}; then
+        create_frag_file \
+            -i "$(pwd)/${file_out}.ia.txt.gz" \
+            -o "$(pwd)/${file_out}.frag.txt.gz" \
+            -s "${scratch}"
+    fi
+
+
+    #  Step #3. Generate bias vector needed to run FitHiC2
+    activate_env fithic_env  # Source work environment with access to FitHiC2
+
+    if ${check_command_3}; then
+        echo """
+        #  Step #3. Generate bias vector needed to run FitHiC2
+
+        generate_bias_vector \\
+            -k "${HiCKRy}" \\
+            -p 0.05 \\
+            -i "$(pwd)/${file_out}.ia.txt.gz" \\
+            -f "$(pwd)/${file_out}.frag.txt.gz" \\
+            -o "$(pwd)/${file_out}.bias.txt.gz"
+        """
+    fi
+
+    if ${run_command_3}; then
+        generate_bias_vector \
+            -k "${HiCKRy}" \
+            -p 0.05 \
+            -i "$(pwd)/${file_out}.ia.txt.gz" \
+            -f "$(pwd)/${file_out}.frag.txt.gz" \
+            -o "$(pwd)/${file_out}.bias.txt.gz"
+    fi
+
+
+    #  Step #4. Run FitHiC2
+    if ${check_command_4}; then
+        echo """
+        #  Step #4. Run FitHiC2
+
+        fithic \\
+            --interactions "$(pwd)/${file_out}.ia.txt.gz" \\
+            --fragments "$(pwd)/${file_out}.frag.txt.gz" \\
+            --outdir "$(pwd)/$(dirname "${file_out}")" \\
+            --resolution "${res}" \\
+            --biases "$(pwd)/${file_out}.bias.txt.gz" \\
+            --contactType "${type}" \\
+            --mappabilityThres "${map:-1}" \\
+            --lib "$(basename "${file_out}")" \\
+            --visual
+        """
+    fi
+
+    if ${run_command_4}; then
+        fithic \
+            --interactions "$(pwd)/${file_out}.ia.txt.gz" \
+            --fragments "$(pwd)/${file_out}.frag.txt.gz" \
+            --outdir "$(pwd)/$(dirname "${file_out}")" \
+            --resolution "${res}" \
+            --biases "$(pwd)/${file_out}.bias.txt.gz" \
+            --contactType "${type}" \
+            --mappabilityThres "${map:-1}" \
+            --lib "$(basename "${file_out}")" \
+            --visual
+    fi
+
+    if ${run_command_X}; then
+        "${HiCKRy}/merge-filter.sh" \
+            "$(pwd)/${file_out}.spline_pass1.res5000.significances.txt.gz" \
+            "${res}" \
+            "$(pwd)/${file_out}.spline_pass1.res5000.significances.merge-filter.bed" \
+            "0.05" \
+            "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils"
+    fi
+
+    if ${run_command_X}; then
+        ${HiCKRy}/visualize-UCSC.sh \
+            "$(pwd)/${file_out}.spline_pass1.res5000.significances.txt.gz" \
+            "$(pwd)/${file_out}.spline_pass1.res5000.significances.bed" \
+            "0.05"
+    fi
+
+fi
+
 ```
 </details>
 <br />
