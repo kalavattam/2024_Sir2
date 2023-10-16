@@ -808,6 +808,11 @@ EOM
         local out="${scratch}/$(basename ${out})"
     fi
 
+    #  Not actually getting the fragment midpoints; instead, getting the
+    #+ fragment starts, which "as long as what you have in [the interaction
+    #+ counts] file matches the fragments file ... should all be fine." See
+    #+     - github.com/ay-lab/fithic/issues/26
+    #+     - groups.google.com/g/fithic/c/VBFukh28v8A/m/mF9wR6dSAQAJ
     if ! cooler dump ${region_option} "${cool}" \
         | awk 'BEGIN { 
                 OFS="\t";
@@ -1564,21 +1569,51 @@ if ${run_workflow}; then
             --visual
     fi
 
-    if ${run_command_X}; then
-        "${HiCKRy}/merge-filter.sh" \
-            "$(pwd)/${file_out}.spline_pass1.res5000.significances.txt.gz" \
-            "${res}" \
-            "$(pwd)/${file_out}.spline_pass1.res5000.significances.merge-filter.bed" \
-            "0.05" \
-            "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils"
-    fi
+    test="13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.5000.ds-to-Q.genome-trans.spline_pass1.res5000.significances.txt.gz"
+    zcat "${test}" \
+        | awk 'BEGIN { 
+            OFS="\t" 
+        } NR==1 { 
+            print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 
+        } NR>1 && $7 <= 0.05 { 
+            print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 
+        }' \
+            > "${test%.txt.gz}.filt.txt"
 
-    if ${run_command_X}; then
-        ${HiCKRy}/visualize-UCSC.sh \
-            "$(pwd)/${file_out}.spline_pass1.res5000.significances.txt.gz" \
-            "$(pwd)/${file_out}.spline_pass1.res5000.significances.bed" \
-            "0.05"
-    fi
+    less "${test%.txt.gz}.filt.txt"
+
+    res=5000
+    cat "${test%.txt.gz}.filt.txt" \
+        | awk -v res="${res}" 'BEGIN { 
+            OFS="\t" 
+        } NR>1 { 
+            color="255,0,0"; 
+            if (-log($7)/log(10) > 5) color="0,255,0"; 
+            if (-log($7)/log(10) > 10) color="0,0,255"; 
+            print $1, $2, $2+res, $3, $4, $4+res, $1"_"$2"_"$2+res"__"$3"_"$4"_"$4+res, -log($7)/log(10), ".", ".", color 
+        }' \
+            > "${test%.txt.gz}.filt.bedpe"
+
+    less "${test%.txt.gz}.filt.bedpe"
+
+    #  Previous awk print statement
+    # print $1, $2, $2+res, $3, $4, $4+res, $7, -log($7)/log(10), $6, $8, $9, $10 
+
+    # if ${run_command_X}; then
+    #     "${HiCKRy}/merge-filter.sh" \
+    #         "$(pwd)/${file_out}.spline_pass1.res5000.significances.txt.gz" \
+    #         "${res}" \
+    #         "$(pwd)/${file_out}.spline_pass1.res5000.significances.merge-filter.bed" \
+    #         "0.05" \
+    #         "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils"
+    # fi
+    #
+    # if ${run_command_X}; then
+    #     ${HiCKRy}/visualize-UCSC.sh \
+    #         "$(pwd)/${file_out}.spline_pass1.res5000.significances.txt.gz" \
+    #         "$(pwd)/${file_out}.spline_pass1.res5000.significances.bed" \
+    #         "0.05"
+    # fi
 
 fi
 
