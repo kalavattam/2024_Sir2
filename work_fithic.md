@@ -457,12 +457,11 @@ Usage: change_dir [directory]
 
 Change the current working directory to the one specified.
 
-Positional option:
-  directory  The directory to change to
+change_dir() checks if a directory is provided (as an argument), exists, and is
+accessible, and then changes to it.
 
-Note:
-  change_dir() checks if a directory is provided (as an argument), exists, and
-  is accessible, and then changes to it.
+Positional argument:
+  directory  The directory to change to
 EOM
     )
 
@@ -498,13 +497,11 @@ Usage: activate_env [environment]
 
 Activate a specified Conda environment.
 
-Positional option:
+If another environment is already active, then activate_env() deactivates it
+before activating the desired one.
+
+Positional argument:
   environment  The name of the Conda environment to activate
-
-Note:
-  If another environment is already active, then activate_env() deactivates it
-  before activating the desired one.
-
 EOM
     )
 
@@ -513,9 +510,17 @@ EOM
         return 0
     fi
 
+    if ! check_requirements conda; then return 1; fi
+
     if [[ -z "${env}" ]]; then
         echo "Error: No environment provided."
         echo "${help}"
+        return 1
+    fi
+
+    if ! conda info --envs | grep -q "^${env} *"; then
+        echo "Error: The environment '${env}' is not found. Please provide a"
+        echo "       valid Conda environment name."
         return 1
     fi
 
@@ -540,7 +545,10 @@ Usage: check_requirements [command_1] [command_2] ...
 
 Checks that the specified commands are available on the system.
 
-Positional options:
+check_requirements() iterates over all given commands and checks that they can
+be executed, ensuring all required dependencies are installed.
+
+Positional arguments:
   command_1, command_2, ...  The command(s) to check for installation,
                              availability in the system's PATH.
 
@@ -549,11 +557,6 @@ Example #1:
 
 Example #2:
   check_requirements cooler
-
-Note:
-  check_requirements() iterates over all given commands and checks that they
-  can be executed, ensuring all required dependencies are installed.
-
 EOM
     )
 
@@ -589,7 +592,10 @@ Usage: check_files [operation] [file1] [file2] ...
 
 Check the existence or non-existence of specified files.
 
-Positional options:
+check_files() supports two operations: "exist" to check if files exist, and
+"not_exist" to check if files do not exist.
+
+Positional arguments:
   operation          "exist" to check if files exist, "not_exist" to check if
                      files do not exist
   file1, file2, ...  The file(s) to check
@@ -597,10 +603,6 @@ Positional options:
 Example:
   check_files exist "\${some_file}"
   check_files not_exist "\${array_of_files[@]}"
-
-Note:
-  check_files() supports two operations: "exist" to check if files exist, and
-  "not_exist" to check if files do not exist.
 EOM
     )
 
@@ -646,13 +648,14 @@ Example:
   check_python_version
 
 Notes:
-  - This function is essential for scripts or applications that rely on
-    Python 3.x features or libraries. It checks if Python is installed and
-    accessible via the system's PATH, and verifies that the installed Python
-    version is 3.x.
-  - If Python is not installed or not in the system's PATH, or if the installed
-    Python version is not 3.x, the function will print an error message and
-    return 1.
+  This function is essential for scripts or applications that rely on
+  Python 3.x features or libraries. It checks if Python is installed and
+  accessible via the system's PATH, and verifies that the installed Python
+  version is 3.x.
+  
+  If Python is not installed or not in the system's PATH, or if the installed
+  Python version is not 3.x, the function will print an error message and
+  return 1.
 EOM
     )
 
@@ -694,8 +697,11 @@ will be in bedpe format.
 If a region is specified (optional), interactions are extracted for that region
 only. The region can be specified as (1) a Roman numeral (I-XVI) for specific
 chromosomes; (2) chr:start-end, where start and end are bp coordinates for a 
-given Roman numeral chromosome; or (3) as "genome-trans", "genome_trans", or
-"genome" for the entire genome.
+given Roman numeral chromosome; (3) "genome-trans", "genome_trans", or
+"genome" for the entire genome; (4) "XII-all" and "XII_all" for the entire
+genome (used for experiments that specifically examine XII-associated cis and
+trans interactions); and (5) "XII-cis" and "XII_cis" for chromosome XII (used
+for experiments that specifically examine XII-associated cis interactions).
 
 Operations can optionally be performed in a specified scratch directory.
 
@@ -713,31 +719,41 @@ Options:
 
 Dependencies:
   cooler: Required for processing .cool files
+  awk:    Required for processing text streams
+
+Note:
+  In this function, we work with "fragment starts" rather than "fragment
+  midpoints" as specified in the FitHiC2 documentation (e.g., as shown in the
+  file example below). Per the authors of FitHiC2, "as long as what you have in
+  [the interaction counts] file matches the fragments file," this approach 
+  "should all be fine." For details, see the following URLs:
+      - github.com/ay-lab/fithic/issues/26
+      - groups.google.com/g/fithic/c/VBFukh28v8A/m/mF9wR6dSAQAJ
 
 Example #1:
-  create_ia_file \\
-      -c some.cool \\
+  create_ia_file
+      -c some.cool
       -o some_ia.txt
 
 Example #2:
-  create_ia_file \\
-      -c another.cool \\
-      -o another_ia.txt \\
-      -r I \\
+  create_ia_file
+      -c another.cool
+      -o another_ia.txt
+      -r I
       -s /path/to/scratch
 
 Example #3:
-  create_ia_file \\
-      -c and_another.cool \\
-      -o and_another_ia.txt \\
-      -r "genome-trans" \\
+  create_ia_file
+      -c and_another.cool
+      -o and_another_ia.txt
+      -r "genome-trans"
       -s /path/to/scratch
 
 Example #4:
-  create_ia_file \\
-      -c other.cool \\
-      -o other_ia.txt \\
-      -r "XII:451000-469000" \\
+  create_ia_file
+      -c other.cool
+      -o other_ia.txt
+      -r "XII:451000-469000"
       -s /path/to/scratch
 
 FitHiC2 interactions file example (header not in file):
@@ -757,13 +773,21 @@ EOM
             -h|--help) echo "${help}"; return 0 ;;
             -c|--cool-file) cool="${2}"; shift 2 ;;
             -o|--out-file) out="${2}"; shift 2 ;;
-            -r|--region) region="${2}"; shift 2 ;;
+            -r|--region) 
+                region="${2}"
+                if [[ "${region}" == "XII-cis" || "${region}" == "XII_cis" ]]; then
+                    region="XII"
+                elif [[ "${region}" == "XII-all" || "${region}" == "XII_all" ]]; then
+                    region="genome-trans"
+                fi
+                shift 2 
+                ;;
             -s|--scratch-dir) scratch="${2}"; shift 2 ;;
             *) echo "Unknown parameter passed: ${1}"; return 1 ;;
         esac
     done
 
-    if ! check_requirements cooler; then return 1; fi
+    if ! check_requirements cooler awk; then return 1; fi
     if ! check_files "exist" "${cool}"; then return 1; fi
     if ! check_files "not_exist" "${out}"; then return 1; fi
 
@@ -889,14 +913,14 @@ Dependencies:
   bash utilities awk, gunzip, and sort: Required for processing, sorting data
 
 Example #1:
-  create_frag_file \\
-      -i some_ia.txt.gz \\
+  create_frag_file
+      -i some_ia.txt.gz
       -o some_frag.txt.gz
 
 Example #2:
-  create_frag_file \\
-      -i another_ia.txt.gz \\
-      -o another_frag.txt.gz \\
+  create_frag_file
+      -i another_ia.txt.gz
+      -o another_frag.txt.gz
       -s /path/to/scratch
 
 FitHiC2 fragment file example (header not in file):
@@ -1026,15 +1050,15 @@ Options:
   -o, --out-file     Specify the output file
 
 Dependencies:
-  - Python
-  - HiCKRy.py
+  Python
+  HiCKRy.py
 
 Example:
-  generate_bias_vector \\
-      -k /path/to/HiCKRy.py \\
-      -p 0.05 \\
-      -i some_ia.txt.gz \\
-      -f some_frag.txt.gz \\
+  generate_bias_vector
+      -k /path/to/HiCKRy.py
+      -p 0.05
+      -i some_ia.txt.gz
+      -f some_frag.txt.gz
       -o some_bias.txt.gz
 EOM
     )
@@ -1103,6 +1127,278 @@ EOM
 }
 
 
+function filter_significances_file() {
+    local input_file=""
+    local output_file=""
+    local q_thresh=0.05
+    local help=$(
+cat << EOM
+Usage: filter_significances_file -i INPUT_FILE -o OUTPUT_FILE [-q Q_VALUE_THRESHOLD]
+        
+Filters a gzipped FitHiC2 significances file based on a specified q-value threshold.
+
+Options:
+  -h, --help                Display this help message
+  -i, --input-file          Specify the gzipped input significances file
+  -o, --output-file         Specify the gzipped output file for filtered results
+  -q, --q-value-threshold   Specify the q-value threshold for filtering (default: 0.05)
+
+Dependencies:
+  gzip: Required for processing gzipped files
+  awk:  Required for processing text streams
+
+Example:
+  filter_significances_file
+      -i some.significances.txt.gz
+      -o some.significances.filtered.txt.gz
+      -q 0.05
+EOM
+    )
+
+    if [[ -z "${1}" ]]; then echo "${help}"; return 0; fi
+    while [[ "$#" -gt 0 ]]; do
+        case "${1}" in
+            -h|--help) echo "${help}"; return 0 ;;
+            -i|--input-file) input_file="${2}"; shift 2 ;;
+            -o|--output-file) output_file="${2}"; shift 2 ;;
+            -q|--q-value-threshold) q_thresh="${2}"; shift 2 ;;
+            *) echo "Unknown parameter passed: ${1}"; return 1 ;;
+        esac
+    done
+
+    if ! check_requirements awk gzip; then return 1; fi
+    if ! check_files "exist" "${input_file}"; then return 1; fi
+    if ! check_files "not_exist" "${output_file}"; then return 1; fi
+
+    local read_cmd="cat"
+    local write_cmd="cat"
+    if [[ "${input_file}" == *.gz ]]; then read_cmd="gunzip -c"; fi
+    if [[ "${output_file}" == *.gz ]]; then write_cmd="gzip"; fi
+
+    ${read_cmd} "${input_file}" \
+        | awk -v threshold="${q_thresh}" 'BEGIN { 
+            OFS="\t" 
+        } NR==1 { 
+            print $0 
+        } NR>1 && $7 <= threshold { 
+            print $0 
+        }' \
+        | ${write_cmd} > "${output_file}"
+
+    if [[ $? -eq 0 ]]; then
+        echo "Filtered file ${output_file} was created successfully."
+        return 0
+    else
+        echo "Error: Failed to create filtered file."
+        return 1
+    fi
+}
+
+
+function create_bedpe_file() {
+    local input_file=""
+    local output_file=""
+    local res=""
+    local color_1="255,0,0"
+    local color_2="255,255,0"
+    local color_3="0,255,0"
+    local color_4="0,255,255"
+    local color_5="0,0,255"
+    local threshold_1=5
+    local threshold_2=10
+    local threshold_3=50
+    local threshold_4=100
+    local in_region_check="yes"
+    local chromosome="XII"
+    local start=435000
+    local end=500000
+    local help=$(
+cat << EOM
+Usage: create_bedpe_file -i INPUT_FILE -o OUTPUT_FILE -r RESOLUTION 
+                         [-c1 COLOR_1] [-c2 COLOR_2] [-c3 COLOR_3] [-c4 COLOR_4] [-c5 COLOR_5]
+                         [-t1 THRESHOLD_1] [-t2 THRESHOLD_2] [-t3 THRESHOLD_3] [-t4 THRESHOLD_4]
+        
+Creates a bedpe file with color annotations based on the significance values.
+
+Options:
+  -h, --help                Display this help message
+  -i, --input-file          Specify the input file
+  -o, --output-file         Specify the output bedpe file
+  -r, --resolution          Specify the resolution
+  -c1, --color-1            Specify the first RGB color (default: 255,0,0 (red))
+  -c2, --color-2            Specify the second RGB color (default: 255,255,0 (yellow))
+  -c3, --color-3            Specify the third RGB color (default: 0,255,0 (green))
+  -c4, --color-4            Specify the fourth RGB color (default: 0,255,255 (cyan))
+  -c5, --color-5            Specify the fifth RGB color (default: 0,0,255 (blue))
+  -t1, --threshold-1        Specify the first -log10(q) threshold (default: 5; below t1 = c1; above t1 = c2)
+  -t2, --threshold-2        Specify the second -log10(q) threshold (default: 10; above t2 = c3)
+  -t3, --threshold-3        Specify the third -log10(q) threshold (default: 50; above t3 = c4)
+  -t4, --threshold-4        Specify the fourth -log10(q) threshold (default: 100; above t4 = c5)
+  -n, --in-region           Specify whether to perform in-region check (default: yes)
+  -c, --chromosome          Specify the chromosome for in-region check (default: XII)
+  -s, --start               Specify the start position for in-region check (default: 435000)
+  -e, --end                 Specify the end position for in-region check (default: 500000)
+
+Dependencies:
+  gzip: Required for processing gzipped in- and outfiles
+  awk:  Required for processing text streams
+
+Note:
+  Values passed to -r|--resolution and -t?|--threshold-? must be positive
+  integers.
+
+  If not provided, then create_bedpe_file() attempts to extract the resolution
+  from the input file name:
+
+    if [[ -z "\${res}" ]]; then
+        #  Extract resolution from the input file name if not provided
+        if [[ "\${input_file}" =~ .res([0-9]+). ]]; then
+            res="\${BASH_REMATCH[1]}"
+            echo "Resolution not provided. Extracted resolution \${res} from the input file name."
+        else
+            echo "Error: Resolution is not provided and could not be extracted from the input file name."
+            return 1
+        fi
+    fi
+
+Example #1:
+  create_bedpe_file
+      -i some.significances.filt.txt.gz
+      -o some.significances.filt.bedpe
+
+Example #2:
+  create_bedpe_file
+      -i some_other.significances.filt.txt.gz
+      -o some_other.bedpe
+      -r 5000
+      -c1 "255,0,0"
+      -c2 "255,255,0"
+      -c3 "0,255,0"
+      -c4 "0,255,255"
+      -c5 "0,0,255"
+      -t1 5
+      -t2 10
+      -t3 50
+      -t4 100
+      -n "no"
+
+Example #3:
+  create_bedpe_file
+      -i "another.significances.filt.txt.gz"
+      -o "another.bedpe"
+      -r 6400
+      -c1 "255,0,0"
+      -c2 "255,255,0"
+      -c3 "0,255,0"
+      -c4 "0,255,255"
+      -c5 "0,0,255"
+      -t1 10
+      -t2 20
+      -t3 50
+      -t4 100
+      -n "yes"
+      -c "XII"
+      -s 450000
+      -e 470000
+EOM
+    )
+
+    if [[ -z "${1}" ]]; then echo "${help}"; return 0; fi
+    while [[ "$#" -gt 0 ]]; do
+        case "${1}" in
+            -h|--help) echo "${help}"; return 0 ;;
+            -i|--input-file) input_file="${2}"; shift 2 ;;
+            -o|--output-file) output_file="${2}"; shift 2 ;;
+            -r|--resolution) res="${2}"; shift 2 ;;
+            -c1|--color-1) color_1="${2}"; shift 2 ;;
+            -c2|--color-2) color_2="${2}"; shift 2 ;;
+            -c3|--color-3) color_3="${2}"; shift 2 ;;
+            -c4|--color-4) color_4="${2}"; shift 2 ;;
+            -c5|--color-5) color_5="${2}"; shift 2 ;;
+            -t1|--threshold-1) threshold_1="${2}"; shift 2 ;;
+            -t2|--threshold-2) threshold_2="${2}"; shift 2 ;;
+            -t3|--threshold-3) threshold_3="${2}"; shift 2 ;;
+            -t4|--threshold-4) threshold_4="${2}"; shift 2 ;;
+            -n|--in-region) in_region_check="${2,,}"; shift 2 ;;
+            -c|--chromosome) chromosome="${2}"; shift 2 ;;
+            -s|--start) start="${2}"; shift 2 ;;
+            -e|--end) end="${2}"; shift 2 ;;
+            *) echo "Unknown parameter passed: ${1}"; return 1 ;;
+        esac
+    done
+
+    if ! check_requirements awk gzip; then return 1; fi
+    if ! check_files "exist" "${input_file}"; then return 1; fi
+    if ! check_files "not_exist" "${output_file}"; then return 1; fi
+
+    if [[ -z "${res}" ]]; then
+        #  Extract resolution from the input file name if not provided
+        if [[ "${input_file}" =~ .res([0-9]+). ]]; then
+            res="${BASH_REMATCH[1]}"
+            echo "Resolution not provided. Extracted resolution ${res} from the input file name."
+        else
+            echo "Error: Resolution is not provided and could not be extracted from the input file name."
+            return 1
+        fi
+    fi
+
+    #  Validate resolution and thresholds
+    for num in "${res}" "${threshold_1}" "${threshold_2}" "${threshold_3}" "${threshold_4}"; do
+        if ! [[ ${num} =~ ^[0-9]+$ ]]; then
+            echo "Error: Invalid number format: ${num}. Please provide a positive integer."
+            return 1
+        fi
+    done
+
+    #  Validate color format
+    for color in "${color_1}" "${color_2}" "${color_3}" "${color_4}" "${color_5}"; do
+        if ! [[ ${color} =~ ^[0-9]{1,3},[0-9]{1,3},[0-9]{1,3}$ ]]; then
+            echo "Error: Invalid color format: ${color}. Please use the format R,G,B."
+            return 1
+        fi
+    done
+
+    local read_cmd="cat"
+    local write_cmd="cat"
+    if [[ "${input_file}" == *.gz ]]; then read_cmd="gunzip -c"; fi
+    if [[ "${output_file}" == *.gz ]]; then write_cmd="gzip"; fi
+
+    ${read_cmd} "${input_file}" \
+        | awk \
+            -v res="${res}" \
+            -v c1="${color_1}" -v c2="${color_2}" -v c3="${color_3}" \
+            -v c4="${color_4}" -v c5="${color_5}" \
+            -v t1="${threshold_1}" -v t2="${threshold_2}" \
+            -v t3="${threshold_3}" -v t4="${threshold_4}" \
+            -v check="${in_region_check}" \
+            -v chr="${chromosome}" -v start="${start}" -v end="${end}" \
+            'BEGIN { 
+                FS = "\t"; OFS="\t" 
+            } NR>1 { 
+                color=c1;
+                if (-log($7)/log(10) > t1) color=c2;
+                if (-log($7)/log(10) > t2) color=c3;
+                if (-log($7)/log(10) > t3) color=c4;
+                if (-log($7)/log(10) > t4) color=c5;
+                in_region = "FALSE";
+                if (check == "yes" && (($1 == chr && $2 >= start && $2 <= end) || 
+                    ($3 == chr && $4 >= start && $4 <= end))) in_region = "TRUE";
+                print $1, $2, $2+res, $3, $4, $4+res, \
+                      $1"_"$2"_"$2+res"__"$3"_"$4"_"$4+res, \
+                      -log($7)/log(10), ".", ".", color, in_region
+            }' \
+        | ${write_cmd} > "${output_file}"
+
+    if [[ $? -eq 0 ]]; then
+        echo "Bedpe file ${output_file} was created successfully."
+        return 0
+    else
+        echo "Error: Failed to create bedpe file."
+        return 1
+    fi
+}
+
+
 main() {
     local region=""
     local cool=""
@@ -1134,22 +1430,22 @@ Options:
   -s, --scratch-dir  Specify a scratch directory (optional)
 
 Example #1:
-  main \\
-      -c some.cool \\
-      -i some_ia.txt \\
-      -f some_frag.txt \\
-      -o some_bias.txt \\
+  main
+      -c some.cool
+      -i some_ia.txt
+      -f some_frag.txt
+      -o some_bias.txt
       -H /path/to/HiCKRy.py
 
 Example #2:
-  main \\
-      -c another.cool \\
-      -i another_ia.txt \\
-      -f another_frag.txt \\
-      -o another_bias.txt \\
-      -H /path/to/HiCKRy.py \\
-      -p 0.10 \\
-      -r XII \\
+  main
+      -c another.cool
+      -i another_ia.txt
+      -f another_frag.txt
+      -o another_bias.txt
+      -H /path/to/HiCKRy.py
+      -p 0.10
+      -r XII
       -s /path/to/scratch
 EOM
     )
@@ -1238,7 +1534,7 @@ A_prefix["MC-2020_nz_WT_repM"]="G2"
 
 
 #  Check associative arrays
-check_array=false
+check_array=true
 [[ ${check_array} == true ]] &&
     {
         for key in "${!A_dirs[@]}"; do
@@ -1249,6 +1545,7 @@ check_array=false
         done
     }
 
+check_array=true
 [[ ${check_array} == true ]] &&
     {
         for key in "${!A_prefix[@]}"; do
@@ -1352,18 +1649,37 @@ activate_env pairtools_env
 
 #  Set up test parameters
 set_up_test_parameters=true
+check_variables=true
 if ${set_up_test_parameters}; then
     unset A_dirs A_prefix
     typeset -A A_dirs A_prefix
-    A_dirs["11_cooler_genome_KR-filt-0.4_whole-matrix"]="13_FitHiC2_genome_KR-filt-0.4_whole-matrix"
-    A_prefix["MC-2019_Q_WT_repM"]="Q"
-
-    unset resolutions && typeset -a resolutions=(5000)
-    unset regions && typeset -a regions=("genome-trans")
+    # A_dirs["11_cooler_genome_KR-filt-0.4_whole-matrix"]="13_FitHiC2_genome_KR-filt-0.4_whole-matrix"
+    A_dirs["11_cooler_XII_KR-filt-0.4"]="13_FitHiC2_XII_KR-filt-0.4"
     
+    # A_prefix["MC-2019_Q_WT_repM"]="Q"
+    # A_prefix["MC-2020_30C-a15_WT_repM"]="G1"
+    A_prefix["MC-2020_nz_WT_repM"]="G2"
+
+    # unset resolutions && typeset -a resolutions=(5000)
+    unset resolutions && typeset -a resolutions=(1600)
+
+    # unset regions && typeset -a regions=("genome-trans")
+    unset regions && typeset -a regions=("XII-cis")
+
     scratch="/fh/scratch/delete30/tsukiyama_t"
     HiCKRy="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils"
-
+    HiCKRy_pct=0.05
+    
+    c1="255,0,0"
+    c2="255,255,0"
+    c3="0,255,0"
+    c4="0,255,255"
+    c5="0,0,255"
+    t1=5
+    t2=10
+    t3=50
+    t4=100
+    
     iter=0
     for dir_in in "${!A_dirs[@]}"; do
         dir_out="${A_dirs[${dir_in}]}"  # echo "${dir_out}"
@@ -1419,19 +1735,23 @@ if ${set_up_test_parameters}; then
                         fi
                     done
 
-                    echo """
-                    iter .............................. ${iter}
-                    dir_in ............................ ${dir_in}
-                    dir_out ........................... ${dir_out}
-                    phase ............................. ${phase}
-                    resolution ........................ ${res}
-                    region ............................ ${region}
-                    type .............................. ${type}
-                    file_in ........................... ${file_in}
-                    file_out .......................... ${file_out}
-                    scratch ........................... ${scratch}
-                    HiCKRy ............................ ${HiCKRy}
-                    """
+                    if ${check_variables}; then
+                        echo """
+                        iter .............................. ${iter}
+                        dir_in ............................ ${dir_in}
+                        dir_out ........................... ${dir_out}
+                        phase ............................. ${phase}
+                        prefix ............................ ${prefix}
+                        resolution ........................ ${res}
+                        region ............................ ${region}
+                        type .............................. ${type}
+                        file_in ........................... ${file_in}
+                        file_out .......................... ${file_out}
+                        scratch ........................... ${scratch}
+                        HiCKRy ............................ ${HiCKRy}
+                        HiCKRy_pct ........................ ${HiCKRy_pct}
+                        """
+                    fi
                     sleep 0.1
                 fi
             done
@@ -1454,11 +1774,15 @@ fi
 
 
 #  Run workflow -------------------------------------------
+run_env_change_1=true
+
 check_command_1=true
 run_command_1=true
 
 check_command_2=true
 run_command_2=true
+
+run_env_change_2=true
 
 check_command_3=true
 run_command_3=true
@@ -1466,10 +1790,18 @@ run_command_3=true
 check_command_4=true
 run_command_4=true
 
+check_command_5=true
+run_command_5=true
+
+check_command_6=true
+run_command_6=true
+
 run_workflow=true
 if ${run_workflow}; then
     #  Step #1. Create FitHiC2 interactions text file
-    activate_env pairtools_env
+    [[ ${run_env_change_1} == true ]] \
+        && activate_env pairtools_env \
+        || true
 
     if ${check_command_1}; then
         echo """
@@ -1513,7 +1845,9 @@ if ${run_workflow}; then
 
 
     #  Step #3. Generate bias vector needed to run FitHiC2
-    activate_env fithic_env  # Source work environment with access to FitHiC2
+    [[ ${run_env_change_2} == true ]] \
+        && activate_env fithic_env \
+        || true
 
     if ${check_command_3}; then
         echo """
@@ -1521,7 +1855,7 @@ if ${run_workflow}; then
 
         generate_bias_vector \\
             -k "${HiCKRy}" \\
-            -p 0.05 \\
+            -p "${HiCKRy_pct}" \\
             -i "$(pwd)/${file_out}.ia.txt.gz" \\
             -f "$(pwd)/${file_out}.frag.txt.gz" \\
             -o "$(pwd)/${file_out}.bias.txt.gz"
@@ -1531,7 +1865,7 @@ if ${run_workflow}; then
     if ${run_command_3}; then
         generate_bias_vector \
             -k "${HiCKRy}" \
-            -p 0.05 \
+            -p "${HiCKRy_pct}" \
             -i "$(pwd)/${file_out}.ia.txt.gz" \
             -f "$(pwd)/${file_out}.frag.txt.gz" \
             -o "$(pwd)/${file_out}.bias.txt.gz"
@@ -1565,45 +1899,76 @@ if ${run_workflow}; then
             --biases "$(pwd)/${file_out}.bias.txt.gz" \
             --contactType "${type}" \
             --mappabilityThres "${map:-1}" \
+            --biasLowerBound "${lower:-0.01}" \
+            --biasUpperBound "${higher:-100}" \
             --lib "$(basename "${file_out}")" \
             --visual
     fi
 
-    test="13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.5000.ds-to-Q.genome-trans.spline_pass1.res5000.significances.txt.gz"
-    zcat "${test}" \
-        | awk 'BEGIN { 
-            OFS="\t" 
-        } NR==1 { 
-            print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 
-        } NR>1 && $7 <= 0.05 { 
-            print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 
-        }' \
-            > "${test%.txt.gz}.filt.txt"
+    #  Step #5. Filter significances file to exclude insignificant contacts
+    if ${check_command_5}; then
+        echo """
+        #  Step #5. Filter significances file to exclude insignificant contacts
 
-    less "${test%.txt.gz}.filt.txt"
+        filter_significances_file \\
+            --input-file "$(pwd)/${file_out}.spline_pass1.res${res}.significances.txt.gz" \\
+            --output-file "$(pwd)/${file_out}.spline_pass1.res${res}.significances.filt.txt.gz" \\
+            --q-value-threshold "${q:-"0.05"}"
+        """
+    fi
 
-    res=5000
-    cat "${test%.txt.gz}.filt.txt" \
-        | awk -v res="${res}" 'BEGIN { 
-            OFS="\t" 
-        } NR>1 { 
-            color="255,0,0"; 
-            if (-log($7)/log(10) > 5) color="0,255,0"; 
-            if (-log($7)/log(10) > 10) color="0,0,255"; 
-            print $1, $2, $2+res, $3, $4, $4+res, $1"_"$2"_"$2+res"__"$3"_"$4"_"$4+res, -log($7)/log(10), ".", ".", color 
-        }' \
-            > "${test%.txt.gz}.filt.bedpe"
+    if ${run_command_5}; then
+        filter_significances_file \
+            --input-file "$(pwd)/${file_out}.spline_pass1.res${res}.significances.txt.gz" \
+            --output-file "$(pwd)/${file_out}.spline_pass1.res${res}.significances.filt.txt.gz" \
+            --q-value-threshold "${q:-"0.05"}"
+    fi
 
-    less "${test%.txt.gz}.filt.bedpe"
+    #  Step #6. Create bedpe "arcs" file from filtered significances file
+    if ${check_command_6}; then
+        echo """
+        #  Step #6. Create bedpe \"arcs\" file from filtered significances file
 
-    #  Previous awk print statement
-    # print $1, $2, $2+res, $3, $4, $4+res, $7, -log($7)/log(10), $6, $8, $9, $10 
+        create_bedpe_file \\
+            -i "$(pwd)/${file_out}.spline_pass1.res${res}.significances.filt.txt.gz" \\
+            -o "$(pwd)/${file_out}.spline_pass1.res${res}.significances.filt.bedpe" \\
+            -r "${res}" \\
+            -c1 "${c1}" \\
+            -c2 "${c2}" \\
+            -c3 "${c3}" \\
+            -c4 "${c4}" \\
+            -c5 "${c5}" \\
+            -t1 "${t1}" \\
+            -t2 "${t2}" \\
+            -t3 "${t3}" \\
+            -t4 "${t4}"
+        """
+    fi
 
+    if ${run_command_6}; then
+        create_bedpe_file \
+            -i "$(pwd)/${file_out}.spline_pass1.res${res}.significances.filt.txt.gz" \
+            -o "$(pwd)/${file_out}.spline_pass1.res${res}.significances.filt.bedpe" \
+            -r "${res}" \
+            -c1 "${c1}" \
+            -c2 "${c2}" \
+            -c3 "${c3}" \
+            -c4 "${c4}" \
+            -c5 "${c5}" \
+            -t1 "${t1}" \
+            -t2 "${t2}" \
+            -t3 "${t3}" \
+            -t4 "${t4}"
+    fi
+
+    # #NOTE
+    # #  This and accompanying script CombineNearbyInteraction.py need
+    # #+ debugging; will be too time-consuming to do this now myself
     # if ${run_command_X}; then
     #     "${HiCKRy}/merge-filter.sh" \
-    #         "$(pwd)/${file_out}.spline_pass1.res5000.significances.txt.gz" \
+    #         "$(pwd)/${file_out}.spline_pass1.res${res}.significances.txt.gz" \
     #         "${res}" \
-    #         "$(pwd)/${file_out}.spline_pass1.res5000.significances.merge-filter.bed" \
+    #         "$(pwd)/${file_out}.spline_pass1.res${res}.significances.merge-filter.bed" \
     #         "0.05" \
     #         "/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils"
     # fi
@@ -1614,9 +1979,7 @@ if ${run_workflow}; then
     #         "$(pwd)/${file_out}.spline_pass1.res5000.significances.bed" \
     #         "0.05"
     # fi
-
 fi
-
 ```
 </details>
 <br />

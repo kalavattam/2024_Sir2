@@ -17,7 +17,7 @@ II. What needs to happen?
             i. Running merge-filter.sh is a high priority
             ii. Running visualize-UCSC.sh is a lower priority
             ii. Running createFitHiCHTMLout.sh is not a priority, so cut it if matplotlib bugs are encountered
-        c. #TODO #INPROGRESS Flesh out remainder of workflow using a test file, test conditions, etc.
+        c. #TODO #INPROGRESS Flesh out remainder of workflow using a test file, test conditions, etc.  #DONE genome-trans|interOnly  #INPROGRESS for
 
     1. Regime #1 requires that 11_cooler_XII_KR-filt-0.4/ contains files at the following resolutions: #DONE
         - 50
@@ -28,15 +28,16 @@ II. What needs to happen?
         - 400
         - 500
 
-    2. Regime #2a requires that 11_cooler_XII_KR-filt-0.4/ contains files at the following resolutions: #TODO
+    2. Regime #2a requires that 11_cooler_XII_KR-filt-0.4/ contains files at the following resolutions: #DONE
         - 800
         - 1600
         - 3200
         - 5000
         - 6400
         - 12800
-        a. #TODO These need to be converted from .hic files in 10_fanc_XII_KR-filt-0.4/
-        b. Run the FitHiC2 workflow on the .hic-to-.cool files (outdirectory: 13_FitHiC2_XII_KR-filt-0.4/)
+        a. These need to be converted from .hic files in 10_fanc_XII_KR-filt-0.4/  #DONE
+        b. Before running the workflow, check that the bedpe file can be used with IGV  #INPROGRESS
+        b. Run the FitHiC2 workflow on the hic-to-cool files (outdirectory: 13_FitHiC2_XII_KR-filt-0.4/)
 
     3. Regarding Regime #2b: I think the easiest thing to do here will be the following:
         a. Complete the tasks for 2a above

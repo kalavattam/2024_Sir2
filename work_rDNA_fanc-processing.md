@@ -29,11 +29,11 @@
     1. [Code](#code-7)
 1. [5. Draw example plots of the above-processed `.hic` files](#5-draw-example-plots-of-the-above-processed-hic-files)
     1. [Code](#code-8)
-1. [6. Draw whole-genome "square" plots in the style of Seungsoo Kim](#6-draw-whole-genome-square-plots-in-the-style-of-seungsoo-kim)
+1. [6. Convert `.hic` matrices of interest to `.cool` matrices](#6-convert-hic-matrices-of-interest-to-cool-matrices)
+    1. [Code](#code-9)
+1. [7. Draw whole-genome "square" plots in the style of Seungsoo Kim](#7-draw-whole-genome-square-plots-in-the-style-of-seungsoo-kim)
     1. [Strategy](#strategy)
         1. [Notes](#notes-1)
-    1. [Convert `.hic` matrices of interest to `.cool` matrices](#convert-hic-matrices-of-interest-to-cool-matrices)
-        1. [Code](#code-9)
     1. [HiCExplorer `plotHicMatrix` work](#hicexplorer-plothicmatrix-work)
         1. [Code](#code-10)
     1. [HiCExplorer `hicCompareMatrices` work](#hicexplorer-hiccomparematrices-work)
@@ -1271,40 +1271,87 @@ done
 </details>
 <br />
 
-<a id="6-draw-whole-genome-square-plots-in-the-style-of-seungsoo-kim"></a>
-### 6. Draw whole-genome "square" plots in the style of Seungsoo Kim
-<a id="strategy"></a>
-#### Strategy
-<a id="notes-1"></a>
-##### Notes
-<details>
-<summary><i>Notes: Strategy</i></summary>
-
-No native support of whole-genome "square" plots with FAN-C.
-
-Alternative strategy:
-1. Use `fanc to-cooler` to convert 5-kb balanced `.hic` files to `.cool` files
-2. Use converted `.cool` files with HiCExplorer `hicPlotMatrix`
-
-</details>
-<br />
-
-<a id="convert-hic-matrices-of-interest-to-cool-matrices"></a>
-#### Convert `.hic` matrices of interest to `.cool` matrices
+<a id="6-convert-hic-matrices-of-interest-to-cool-matrices"></a>
+### 6. Convert `.hic` matrices of interest to `.cool` matrices
 <a id="code-9"></a>
-##### Code
+#### Code
 <details>
-<summary><i>Code: Convert `.hic` matrices of interest to `.cool` matrices</i></summary>
+<summary><i>Code: 6. Convert `.hic` matrices of interest to `.cool` matrices</i></summary>
 
 ```bash
 #!/bin/bash
 
 #  Initialize functions =======================================================
+function check_requirements() {
+    local requirements=("$@")
+    local tag="is not installed or not in the system's PATH"
+    local help=$(
+cat << EOM
+Usage: check_requirements [command_1] [command_2] ...
+
+Checks that the specified commands are available on the system.
+
+check_requirements() iterates over all given commands and checks that they can
+be executed, ensuring all required dependencies are installed.
+
+Positional arguments:
+  command_1, command_2, ...  The command(s) to check for installation,
+                             availability in the system's PATH.
+
+Example #1:
+  check_requirements fithic python
+
+Example #2:
+  check_requirements cooler
+EOM
+    )
+
+    if [[ "${requirements[0]}" == "-h" || "${requirements[0]}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
+    if [[ -z "${requirements[@]}" ]]; then
+        echo "Error: No command(s) provided."
+        echo "${help}"
+        return 1
+    fi
+
+    for req in "${requirements[@]}"; do
+        if ! command -v "${req}" &> /dev/null; then
+            echo "Error: ${req} ${tag}."
+            return 1
+        fi
+    done
+
+    return 0
+}
+
+
 function change_dir() {
     local dir="${1}"
+    local help=$(
+cat << EOM
+Usage: change_dir [directory]
+
+Change the current working directory to the one specified.
+
+change_dir() checks if a directory is provided (as an argument), exists, and is
+accessible, and then changes to it.
+
+Positional argument:
+  directory  The directory to change to
+EOM
+    )
+
+    if [[ "${dir}" == "-h" || "${dir}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
 
     if [[ -z "${dir}" ]]; then
         echo "Error: No directory provided."
+        echo "${help}"
         return 1
     fi
 
@@ -1321,9 +1368,81 @@ function change_dir() {
 }
 
 
+function activate_env() {
+    local env="${1}"
+    local help=$(
+cat << EOM
+Usage: activate_env [environment]
+
+Activate a specified Conda environment.
+
+If another environment is already active, then activate_env() deactivates it
+before activating the desired one.
+
+Positional argument:
+  environment  The name of the Conda environment to activate
+EOM
+    )
+
+    if [[ "${env}" == "-h" || "${env}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
+    if ! check_requirements conda; then return 1; fi
+
+    if [[ -z "${env}" ]]; then
+        echo "Error: No environment provided."
+        echo "${help}"
+        return 1
+    fi
+
+    if ! conda info --envs | grep -q "^${env} *"; then
+        echo "Error: The environment '${env}' is not found. Please provide a"
+        echo "       valid Conda environment name."
+        return 1
+    fi
+
+    if [[ "${CONDA_DEFAULT_ENV}" != "${env}" ]]; then
+        if [[ ${CONDA_DEFAULT_ENV} != base ]]; then
+            conda deactivate
+        fi
+
+        source activate "${env}"
+    fi
+
+    return 0
+}
+
+
 function create_dir_if_none() {
-    local dir="${1}"
-    local sub_dir="${2:-err_out}"
+    local dir=""
+    local sub_dir="err_out"
+    local help=$(
+cat << EOM
+Usage: create_dir_if_none -d DIRECTORY [-s SUB_DIRECTORY]
+
+Creates a directory and subdirectory if they do not exist.
+
+Options:
+  -h, --help           Display this help message
+  -d, --directory      Specify the directory to be created
+  -s, --sub-directory  Specify the subdirectory to be created inside the main directory (default: err_out)
+
+Example:
+  create_dir_if_none -d /path/to/directory -s err_out
+EOM
+    )
+
+    if [[ -z "${1}" ]]; then echo "${help}"; return 0; fi
+    while [[ "$#" -gt 0 ]]; do
+        case "${1}" in
+            -h|--help) echo "${help}"; return 0 ;;
+            -d|--directory) dir="${2}"; shift 2 ;;
+            -s|--sub-directory) sub_dir="${2}"; shift 2 ;;
+            *) echo "Unknown parameter passed: ${1}"; return 1 ;;
+        esac
+    done
 
     if [[ -z "${dir}" ]]; then
         echo "Error: No directory name provided."
@@ -1356,34 +1475,32 @@ function run_fanc_to_cooler() {
     local err_out_dir=""
     local threads=""
     local dry_run=false
+    local help=$(
+cat << EOM
+Usage: run_fanc_to_cooler -i INPUT_FILE -o OUTPUT_FILE -j JOB_NAME -e ERR_OUT_DIR [-t THREADS] [-d]
 
-    if [[ "${1}" == "-h" || "${1}" == "--help" || -z "$1" ]]; then
-        echo """
-        Usage: run_fanc_to_cooler -i INPUT_FILE -o OUTPUT_FILE -j JOB_NAME -e ERR_OUT_DIR -t THREADS [-d]
-        
-        Converts a FAN-C format matrix to a cooler format matrix.
-        
-        Options:
-          -h, --help         Display this help message
-          -i, --input-file   Path to the input FAN-C format file
-          -o, --output-file  Path where the output cooler format file will be saved
-          -j, --job-name     Name of the job for sbatch
-          -e, --err-out-dir  Directory where error and output logs will be saved
-          -t, --threads      Number of threads to use (default: 1)
-          -d, --dry-run      Print the sbatch script without executing it
-        
-        Dependencies:
-          - fanc: Required for converting the matrix format
-          - sbatch: Used for job submission
+Converts a FAN-C format matrix to a cooler format matrix.
 
-        Example:
-          run_fanc_to_cooler \\
-              -i input.hic \\
-              -o output.cool \\
-              -j to_cool \\
-              -e path/to/logs \\
-              -t 4
-        """
+Options:
+  -h, --help         Display this help message
+  -i, --input-file   Path to the input FAN-C format file
+  -o, --output-file  Path where the output cooler format file will be saved
+  -j, --job-name     Name of the job for sbatch
+  -e, --err-out-dir  Directory where error and output logs will be saved
+  -t, --threads      Number of threads to use (default: 1)
+  -d, --dry-run      Print the sbatch script without executing it
+
+Dependencies:
+  fanc: Required for converting the matrix format
+  sbatch: Used for job submission
+
+Example:
+  run_fanc_to_cooler -i input.hic -o output.cool -j to_cool -e path/to/logs -t 4
+EOM
+    )
+
+    if [[ -z "${1}" || "${1}" == "-h" || "${1}" == "--help" ]]; then
+        echo "${help}"
         return 0
     fi
 
@@ -1392,22 +1509,14 @@ function run_fanc_to_cooler() {
             -i|--input-file) input_file="${2}"; shift 2 ;;
             -o|--output-file) output_file="${2}"; shift 2 ;;
             -j|--job-name) job_name="${2}"; shift 2 ;;
-            -e|--error-output-dir) err_out_dir="${2}"; shift 2 ;;
+            -e|--err-out-dir) err_out_dir="${2}"; shift 2 ;;
             -t|--threads) threads="${2}"; shift 2 ;;
             -d|--dry-run) dry_run=true; shift ;;
-            *) echo "Unknown parameter passed: ${1}"; return 1 ;;
+            *) echo "Unknown parameter passed: ${1}"; echo "${help}"; return 1 ;;
         esac
     done
 
-    if ! command -v fanc &> /dev/null; then
-        echo "Error: fanc is not installed or not in the system's PATH."
-        return 1
-    fi
-
-    if ! command -v sbatch &> /dev/null; then
-        echo "Error: sbatch is not installed or not in the system's PATH."
-        return 1
-    fi
+    if ! check_requirements fanc sbatch; then return 1; fi
 
     if [[ -z "${input_file}" ]]; then
         echo "Error: Input file is required."
@@ -1446,27 +1555,8 @@ function run_fanc_to_cooler() {
         return 1
     fi
 
-    if "${dry_run}"; then
-        echo """
-sbatch << EOF
-#!/bin/bash
-
-#SBATCH --job-name=\"${job_name}\"
-#SBATCH --nodes=1
-#SBATCH --cpus-per-task=${threads}
-#SBATCH --error=\"${err_out_dir}/${job_name}.%A.stderr.txt\"
-#SBATCH --output=\"${err_out_dir}/${job_name}.%A.stdout.txt\"
-
-fanc to-cooler \\
-    --threads ${threads} \\
-    --no-multi \\
-    ${input_file} \\
-    ${output_file}
-EOF
-        """
-    else
-        if [[ -f "${input_file}" && ! -f "${output_dir}/${output_file}" ]]; then
-            sbatch << EOF
+    local sbatch_script=$(
+cat << EOF
 #!/bin/bash
 
 #SBATCH --job-name="${job_name}"
@@ -1481,14 +1571,14 @@ fanc to-cooler \
     ${input_file} \
     ${output_file}
 EOF
-        else
-            echo """
-            Warning: Either infile ${input_file} was not found or
-                     outfile ${output_file} already exists.
+    )
 
-            Not running fanc to-cooler.
-            """
-        fi
+    if "${dry_run}"; then
+        echo "Dry run mode enabled. The following sbatch script would be executed:"
+        echo "${sbatch_script}"
+    else
+        echo "${sbatch_script}" | sbatch
+        echo "Job submitted with name '${job_name}'."
     fi
 
     return 0
@@ -1496,19 +1586,17 @@ EOF
 
 
 #  Configure work environment, directories, and variables =====================
-#  Load work environment
-if [[ ${CONDA_DEFAULT_ENV} != base ]]; then
-    conda deactivate
-fi
+# #  Start interactive job
+# grabnode  # 1, 20, 1, N
 
-if [[ ${CONDA_DEFAULT_ENV} != fanc_pip_env ]]; then
-    source activate fanc_pip_env
-fi
+#  Go to work directory
+change_dir \
+    "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process"
 
 #  Set variables, arrays
 unset dirs && typeset -a dirs=(
-    "11_cooler_XII_KR-filt-0.2"
-    "11_cooler_XII_KR-filt-0.3"
+    # "11_cooler_XII_KR-filt-0.2"
+    # "11_cooler_XII_KR-filt-0.3"
     "11_cooler_XII_KR-filt-0.4"
     # "11_cooler_genome_KR-filt-0.2"
     # "11_cooler_genome_KR-filt-0.3"
@@ -1542,30 +1630,51 @@ unset dirs && typeset -a dirs=(
 # )
 # # echo_test "${hics[@]}"
 
+# unset hics && typeset -a hics
+# while IFS=" " read -r -d $'\0'; do
+#     hics+=( "${REPLY}" )
+# done < <(
+#     find \
+#         10_fanc_XII_KR-filt-0.2 \
+#         10_fanc_XII_KR-filt-0.3 \
+#         10_fanc_XII_KR-filt-0.4 \
+#         -maxdepth 1 \
+#         -type f \
+#         \( \
+#             -name "*.50.*hic" -o \
+#             -name "*.100.*hic" -o \
+#             -name "*.150.*hic" -o \
+#             -name "*.200.*hic" -o \
+#             -name "*.300.*hic" -o \
+#             -name "*.400.*hic" -o \
+#             -name "*.500.*hic" \
+#         \) \
+#         -print0 |
+#             sort -z
+# )
+# # echo_test "${hics[@]}"
+
 unset hics && typeset -a hics
 while IFS=" " read -r -d $'\0'; do
     hics+=( "${REPLY}" )
 done < <(
     find \
-        10_fanc_XII_KR-filt-0.2 \
-        10_fanc_XII_KR-filt-0.3 \
         10_fanc_XII_KR-filt-0.4 \
         -maxdepth 1 \
         -type f \
         \( \
-            -name "*.50.*hic" -o \
-            -name "*.100.*hic" -o \
-            -name "*.150.*hic" -o \
-            -name "*.200.*hic" -o \
-            -name "*.300.*hic" -o \
-            -name "*.400.*hic" -o \
-            -name "*.500.*hic" \
+            -name "*.800.*" -o \
+            -name "*.1600.*" -o \
+            -name "*.3200.*" -o \
+            -name "*.5000.*" -o \
+            -name "*.6400.*" -o \
+            -name "*.12800.*" \
         \) \
         -print0 |
             sort -z
 )
 # echo_test "${hics[@]}"
-        
+
 check_array=false
 if ${check_array}; then
     #  Check if any files were found
@@ -1575,7 +1684,7 @@ if ${check_array}; then
     fi
 fi
 
-check_array=false
+check_array=true
 if ${check_array}; then
     #  Print found files
     for hic in "${hics[@]}"; do
@@ -1592,26 +1701,29 @@ fi
 change_dir \
     "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process"
 
+#  Source initial work environment that allows access to cooler
+activate_env fanc_pip_env
+
 #  Create outfile directories if they don't exist
-for dir in "${dirs[@]}"; do create_dir_if_none "${dir}"; done
+for dir in "${dirs[@]}"; do create_dir_if_none -d "${dir}"; done
 
 #  Convert FAN-C .hic files to .cool files for use with HiCExplorer
-iter=0
+iter=0                                                     # echo "${iter}"
 for hic in "${hics[@]}"; do
-    # hic="${hics[0]}"
-    input_file="${hic}"
+    # hic="${hics[0]}"                                     # echo "${hic}"
+    input_file="${hic}"                                    # echo "${input_file}"
     output_file="$(
         echo ${input_file} \
             | sed 's:10_fanc:11_cooler:g' \
             | sed 's:\.hic:\.cool:g'
-    )"
-    job_name="to-cooler.$(basename ${output_file%.cool})"
-    err_out_dir="$(dirname ${output_file})/err_out"
-    threads=4
+    )"                                                     # echo "${output_file}"
+    job_name="to-cooler.$(basename ${output_file%.cool})"  # echo "${job_name}"
+    err_out_dir="$(dirname ${output_file})/err_out"        # echo "${err_out_dir}"
+    threads=4                                              # echo "${threads}"
 
     (( iter ++ ))
-    check_variables=""
-    if [[ ${check_variables} ]]; then
+    check_variables=true
+    if ${check_variables}; then
         echo """
         ### iter ${iter} ###
          input_file  ${input_file}
@@ -1622,8 +1734,8 @@ for hic in "${hics[@]}"; do
         """
     fi
 
-    check_command=""
-    if [[ ${check_command} ]]; then
+    check_command=true
+    if ${check_command}; then
         echo """
         run_fanc_to_cooler \\
             --input-file \"${input_file}\" \\
@@ -1636,13 +1748,13 @@ for hic in "${hics[@]}"; do
     fi
 
     do_dry_run=true
-    if [[ ${do_dry_run} ]]; then
+    if ${do_dry_run}; then
         echo "### ${iter} ###"
         run_fanc_to_cooler \
             --input-file "${input_file}" \
             --output-file "${output_file}" \
             --job-name "${job_name}" \
-            --error-output-dir "${err_out_dir}" \
+            --err-out-dir "${err_out_dir}" \
             --threads ${threads} \
             --dry-run
     fi
@@ -1654,12 +1766,30 @@ for hic in "${hics[@]}"; do
             --input-file "${input_file}" \
             --output-file "${output_file}" \
             --job-name "${job_name}" \
-            --error-output-dir "${err_out_dir}" \
+            --err-out-dir "${err_out_dir}" \
             --threads ${threads}
     fi
     sleep 0.2
 done
 ```
+</details>
+<br />
+
+<a id="7-draw-whole-genome-square-plots-in-the-style-of-seungsoo-kim"></a>
+### 7. Draw whole-genome "square" plots in the style of Seungsoo Kim
+<a id="strategy"></a>
+#### Strategy
+<a id="notes-1"></a>
+##### Notes
+<details>
+<summary><i>Notes: Strategy</i></summary>
+<br />
+
+No native support of whole-genome "square" plots with FAN-C.
+
+Alternative strategy:
+1. Use `fanc to-cooler` to convert 5-kb balanced `.hic` files to `.cool` files
+2. Use converted `.cool` files with HiCExplorer `hicPlotMatrix`
 </details>
 <br />
 
@@ -1676,9 +1806,28 @@ done
 #  Initialize functions =======================================================
 function change_dir() {
     local dir="${1}"
+    local help=$(
+cat << EOM
+Usage: change_dir [directory]
+
+Change the current working directory to the one specified.
+
+change_dir() checks if a directory is provided (as an argument), exists, and is
+accessible, and then changes to it.
+
+Positional argument:
+  directory  The directory to change to
+EOM
+    )
+
+    if [[ "${dir}" == "-h" || "${dir}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
 
     if [[ -z "${dir}" ]]; then
         echo "Error: No directory provided."
+        echo "${help}"
         return 1
     fi
 
@@ -1697,6 +1846,39 @@ function change_dir() {
 
 function activate_env() {
     local env="${1}"
+    local help=$(
+cat << EOM
+Usage: activate_env [environment]
+
+Activate a specified Conda environment.
+
+If another environment is already active, then activate_env() deactivates it
+before activating the desired one.
+
+Positional argument:
+  environment  The name of the Conda environment to activate
+EOM
+    )
+
+    if [[ "${env}" == "-h" || "${env}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
+    if ! check_requirements conda; then return 1; fi
+
+    if [[ -z "${env}" ]]; then
+        echo "Error: No environment provided."
+        echo "${help}"
+        return 1
+    fi
+
+    if ! conda info --envs | grep -q "^${env} *"; then
+        echo "Error: The environment '${env}' is not found. Please provide a"
+        echo "       valid Conda environment name."
+        return 1
+    fi
+
     if [[ "${CONDA_DEFAULT_ENV}" != "${env}" ]]; then
         if [[ ${CONDA_DEFAULT_ENV} != base ]]; then
             conda deactivate
@@ -1704,6 +1886,8 @@ function activate_env() {
 
         source activate "${env}"
     fi
+
+    return 0
 }
 
 
