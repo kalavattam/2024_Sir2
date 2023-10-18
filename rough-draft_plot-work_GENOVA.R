@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-#  rough-draft_plot-work_2.R
+#  rough-draft_plot-work_GENOVA.R
 #  KA
 
 #  Load libraries, set options ------------------------------------------------
@@ -208,7 +208,9 @@ if(base::isTRUE(run_quant_RCP_XII)) {
         scale_color_manual(
             name = "State",
             values = c(
-                "Q" = "#00BFC498", "G1" = "#C77CFF98", "G2-M" = "#F8766D98"
+                "Q" = "#00BFC498",
+                "G1" = "#C77CFF98",
+                "G2-M" = "#F8766D98"
             )
         ) +
         labs(x = "Genomic distance (s)", y = "P(s)", color = "Sample") +
@@ -346,7 +348,11 @@ if(base::isTRUE(run_quant_RCP_all)) {
         scale_y_log10(labels = trans_format("log10", math_format(10^.x))) +
         scale_color_manual(
             name = "State",
-            values = c("Q" = "#00BFC498", "G1" = "#C77CFF98", "G2-M" = "#F8766D98")
+            values = c(
+                "Q" = "#00BFC498",
+                "G1" = "#C77CFF98",
+                "G2-M" = "#F8766D98"
+            )
         ) +
         labs(x = "P(s)", y = "Genomic distance (s)", color = "Sample") +
         ggtitle(title, subtitle = subtitle) +
@@ -444,7 +450,11 @@ if(base::isTRUE(run_quant_RCP_rDNA)) {
         scale_y_log10(labels = trans_format("log10", math_format(10^.x))) +
         scale_color_manual(
             name = "State",
-            values = c("Q" = "#00BFC498", "G1" = "#C77CFF98", "G2-M" = "#F8766D98")
+            values = c(
+                "Q" = "#00BFC498", 
+                "G1" = "#C77CFF98",
+                "G2-M" = "#F8766D98"
+            )
         ) +
         labs(x = "Genomic distance (s)", y = "P(s)", color = "Sample") +
         ggtitle(title, subtitle = subtitle) +
@@ -490,7 +500,11 @@ if(base::isTRUE(run_quant_RCP_rDNA_zoom)) {
         scale_y_log10(breaks = 10^(-6:0), labels = trans_format("log10", math_format(10^.x))) +
         scale_color_manual(
             name = "State",
-            values = c("Q" = "#00BFC498", "G1" = "#C77CFF98", "G2-M" = "#F8766D98")
+            values = c(
+                "Q" = "#00BFC498",
+                "G1" = "#C77CFF98",
+                "G2-M" = "#F8766D98"
+            )
         ) +
         labs(x = "Genomic distance (s)", y = "P(s)", color = "Sample") +
         ggtitle(title, subtitle = subtitle) +
@@ -551,39 +565,48 @@ if(base::isTRUE(run_draft_code)) {
     dev.off()
 }
 
-v4c <- virtual_4C(
-    explist = c(list(c_Q, c_1, c_2)),
-    viewpoint = "XII:451526-468980",
-    xlim = c(451525, 617176)
-)
 
-GENOVA::visualise(v4c)
-
-v4c <- v4c$data
-
-typeof(v4c)
-class(v4c)
-
-# Replace v4c$Q with your actual data column
-v4c$Q[is.nan(v4c$Q)] <- NA  # Convert NaN values to NA so ggplot can handle them
-v4c$G1[is.nan(v4c$Q)] <- NA  # Convert NaN values to NA so ggplot can handle them
-v4c$`G2-M`[is.nan(v4c$Q)] <- NA  # Convert NaN values to NA so ggplot can handle them
-
-ggplot(v4c, aes(x = mid, y = Q)) +
-    geom_line(color = "blue") + 
-    labs(x = "Mid", y = "Q") +
-    coord_cartesian(ylim = c(0, 6)) +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Optional: Rotate x-axis labels for better readability
-ggplot(v4c, aes(x = mid, y = G1)) +
-    geom_line(color = "red") + 
-    labs(x = "Mid", y = "G1") +
-    coord_cartesian(ylim = c(0, 6)) +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Optional: Rotate x-axis labels for better readability
-ggplot(v4c, aes(x = mid, y = `G2-M`)) +
-    geom_line(color = "green") + 
-    labs(x = "Mid", y = "G2-M") +
-    coord_cartesian(ylim = c(0, 6)) +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Optional: Rotate x-axis labels for better readability
+run_draft_code <- FALSE
+if(base::isTRUE(run_draft_code)) {
+    v4c <- virtual_4C(
+        explist = c(list(c_Q, c_1, c_2)),
+        viewpoint = "XII:451526-468980",
+        xlim = c(451525, 617176)
+    )
+    
+    GENOVA::visualise(v4c)
+    
+    v4c <- v4c$data
+    
+    typeof(v4c)
+    class(v4c)
+    
+    # Replace v4c$Q with your actual data column
+    v4c$Q[is.nan(v4c$Q)] <- NA  # Convert NaN values to NA so ggplot can handle them
+    v4c$G1[is.nan(v4c$Q)] <- NA  # Convert NaN values to NA so ggplot can handle them
+    v4c$`G2-M`[is.nan(v4c$Q)] <- NA  # Convert NaN values to NA so ggplot can handle them
+    
+    ggplot(v4c, aes(x = mid, y = Q)) +
+        geom_line(color = "blue") + 
+        labs(x = "Mid", y = "Q") +
+        coord_cartesian(ylim = c(0, 6)) +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1))
+        # Optional: Rotate x-axis labels for better readability
+    
+    ggplot(v4c, aes(x = mid, y = G1)) +
+        geom_line(color = "red") + 
+        labs(x = "Mid", y = "G1") +
+        coord_cartesian(ylim = c(0, 6)) +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1))
+        # Optional: Rotate x-axis labels for better readability
+    
+    ggplot(v4c, aes(x = mid, y = `G2-M`)) +
+        geom_line(color = "green") + 
+        labs(x = "Mid", y = "G2-M") +
+        coord_cartesian(ylim = c(0, 6)) +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1))
+        # Optional: Rotate x-axis labels for better readability
+}
