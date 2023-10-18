@@ -11,10 +11,10 @@ library(scales)
 
 #  Initialize functions -------------------------------------------------------
 load_cool <- function(
-    path = p_cool, file, name, color, balance = TRUE, resolution
+    file, name, color, balance = TRUE, resolution
 ) {
     cool <- GENOVA::load_contacts(
-        signal_path = paste(path, file, sep = "/"),
+        signal_path = file,
         sample_name = name,
         colour = color,
         balancing = balance,
@@ -52,21 +52,41 @@ setwd(paste(p_prj, p_exp, sep = "/"))  # getwd()  # list.dirs()
 
 
 #  Set up and load files ------------------------------------------------------
-p_cool <- "08_zoom"
-f_Q <- "MC-2019_Q_WT_repM.standard-rDNA-complete.mcool"
-f_1 <- "MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mcool"
-f_2 <- "MC-2020_nz_WT_repM.standard-rDNA-complete.mcool"
+# p_cool <- "08_zoom"
+# f_Q <- "MC-2019_Q_WT_repM.standard-rDNA-complete.mcool"
+# f_1 <- "MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mcool"
+# f_2 <- "MC-2020_nz_WT_repM.standard-rDNA-complete.mcool"
 
 # res <- 6400
-res <- 50
+# res <- 5000
+res <- 200
+# res <- 50
 bal <- TRUE
 
-c_Q <- GENOVA::load_contacts(
-    signal_path = paste(p_cool, f_Q, sep = "/"),
-    sample_name = "Q",
-    colour = "#800080",
-    balancing = bal,
-    resolution = res
+if(res %in% c(6400, 5000)) {
+    p_cool <- "11_cooler_genome_KR-filt-0.2_whole-matrix"
+    suf <- "downsample-to-Q"
+} else if(res %in% c(200, 50)) {
+    p_cool <- "11_cooler_XII_KR-filt-0.4"
+    suf <- "downsample-to-G1"
+}
+
+f_Q <- paste0(
+    p_cool, "/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.",
+    res, ".", suf, ".cool"
+)  # file.exists(f_Q)
+f_1 <- paste0(
+    p_cool, "/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.",
+    res, ".", suf, ".cool"
+)  # file.exists(f_1)
+f_2 <- paste0(
+    p_cool, "/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.",
+    res, ".", suf, ".cool"
+)  # file.exists(f_2)
+
+c_Q <- load_cool(
+    file = f_Q, name = "Q", color = "#800080",
+    balance = bal, resolution = res
 )
 c_1 <- load_cool(
     file = f_1, name = "G1", color = "#CBC3E3",
@@ -79,13 +99,14 @@ c_2 <- load_cool(
 
 
 #  Set up outfile directory for plots, etc. -----------------------------------
-p_out <- "pngs/2023-1003"
+# p_out <- "pngs/2023-1003"
+p_out <- "pngs/2023-1018"
 if(base::isFALSE(dir.exists(p_out))) dir.create(p_out)
 
 
 #  Quantify and plot sample-wise ratios of cis and trans interactions ---------
 #+ ...for the whole genome
-if(res == 6400) { lgl <- TRUE } else { lgl <- FALSE }
+if(res %in% c(5000, 6400)) { lgl <- TRUE } else { lgl <- FALSE }
 run_quant_cis_all <- lgl
 if(base::isTRUE(run_quant_cis_all)) {
     quant_cis_all <- GENOVA::cis_trans(list(c_Q, c_1, c_2))
@@ -102,7 +123,7 @@ if(base::isTRUE(run_quant_cis_all)) {
     )
     
     title <- "Proportions of cis and trans interactions\nacross cell states"
-    subtitle <- "6.4-kb resolution, all"
+    subtitle <- paste0(res, " bp resolution, all")
     plot_cis_all <- quant_cis_all %>%
         dplyr::rename(state = sample) %>% 
         ggplot2::ggplot(aes(x = state, y = percentage, fill = type)) +
@@ -117,13 +138,13 @@ if(base::isTRUE(run_quant_cis_all)) {
         ggtitle(title, subtitle = subtitle) +
         theme_minimal()
     
-    write_plot(list = plot_cis_all, w = 5, h = 2)
+    write_plot(path = p_out, list = plot_cis_all, w = 5, h = 2)
 }
 
 
 #  Quantify and plot sample-wise ratios of cis and trans interactions ---------
 #+ ...for the rDNA region with respect to the whole genome
-if(res == 6400) { lgl <- TRUE } else { lgl <- FALSE }
+if(res %in% c(5000, 6400)) { lgl <- TRUE } else { lgl <- FALSE }
 run_quant_cis_rDNA <- lgl
 if(base::isTRUE(run_quant_cis_rDNA)) {
     bed_rDNA <- data.frame(
@@ -146,7 +167,7 @@ if(base::isTRUE(run_quant_cis_rDNA)) {
     )
     
     title <- "Proportions of cis and trans interactions\nacross cell states"
-    subtitle <- "6.4-kb resolution, all"
+    subtitle <- paste0(res, " bp resolution, originating from rDNA locus")
     plot_cis_rDNA <- quant_cis_rDNA %>%
         dplyr::rename(state = sample) %>% 
         ggplot2::ggplot(aes(x = state, y = percentage, fill = type)) +
@@ -164,9 +185,10 @@ if(base::isTRUE(run_quant_cis_rDNA)) {
     write_plot(list = plot_cis_rDNA, w = 5, h = 2)
 }
 
+
 #  Identify and plot relative contact probabilities (RCPs) --------------------
 #+ ...for XII
-if(res == 6400) { lgl <- TRUE } else { lgl <- FALSE }
+if(res %in% c(5000, 6400)) { lgl <- TRUE } else { lgl <- FALSE }
 run_quant_RCP_XII <- lgl
 if(base::isTRUE(run_quant_RCP_XII)) {
     quant_RCP_XII <- GENOVA::RCP(
@@ -176,7 +198,7 @@ if(base::isTRUE(run_quant_RCP_XII)) {
     # GENOVA::visualise(quant_RCP_XII)
     
     title <- "cis-interaction frequency probabilities (P)\nstratified by distance (s)"
-    subtitle <- "XII, 6.4-kb resolution"
+    subtitle <- paste0("XII, ", res, "-bp resolution")
     plot_RCP_XII <- quant_RCP_XII$smooth %>%
         ggplot(aes(x = distance, y = P, color = samplename)) +
         annotation_logticks(sides = "lb", color = "grey92", outside = FALSE) +
@@ -185,7 +207,9 @@ if(base::isTRUE(run_quant_RCP_XII)) {
         scale_y_log10(labels = trans_format("log10", math_format(10^.x))) +
         scale_color_manual(
             name = "State",
-            values = c("Q" = "#00BFC498", "G1" = "#C77CFF98", "G2-M" = "#F8766D98")
+            values = c(
+                "Q" = "#00BFC498", "G1" = "#C77CFF98", "G2-M" = "#F8766D98"
+            )
         ) +
         labs(x = "Genomic distance (s)", y = "P(s)", color = "Sample") +
         ggtitle(title, subtitle = subtitle) +
@@ -205,27 +229,115 @@ if(base::isTRUE(run_quant_RCP_XII)) {
     # lr_Q <- lm(P ~ distance, data = filt[samplename == "Q", ])
     # lr_1 <- lm(P ~ distance, data = filt[samplename == "G1", ])
     # lr_2 <- lm(P ~ distance, data = filt[samplename == "G2-M", ])
-}
-
-draw_lfc_contrasts <- FALSE
-if(base::isTRUE(draw_lfc_contrasts)) {
-    visualise(quant_RCP_XII, contrast = 1, metric = "lfc")
-    visualise(quant_RCP_XII, contrast = 2, metric = "lfc")
-    visualise(quant_RCP_XII, contrast = 3, metric = "lfc")
-    #TODO Lear how to draw these plots with ggplot2
+    
+    # #  Plot the derivative of the contact-decay curve with respect to genomic
+    # #+ distance
+    # test <- quant_RCP_XII$smooth %>%
+    #     tibble::as_tibble() %>%
+    #     dplyr::arrange(samplename, distance) %>%
+    #     dplyr::group_by(samplename) %>%
+    #     dplyr::mutate(dP = c(0, diff(P)) / c(0, diff(distance)))  # Derivative
+    # 
+    # print(test, n = 1000)
+    # 
+    # title <- "Derivatives of cis-interaction frequency probabilities (dP)\nstratified by distance (s)"
+    # subtitle <- paste0("XII, ", res, "-bp resolution")
+    # p_test <- test %>%
+    #     ggplot(aes(x = distance, y = dP, color = samplename)) +
+    #     annotation_logticks(sides = "lb", color = "grey92", outside = FALSE) +
+    #     geom_line(linewidth = 1) +
+    #     scale_x_log10(labels = trans_format("log10", math_format(10^.x))) +
+    #     # scale_y_log10(labels = trans_format("log10", math_format(10^.x))) +
+    #     scale_color_manual(
+    #         name = "State",
+    #         values = c(
+    #             "Q" = "#00BFC498", "G1" = "#C77CFF98", "G2-M" = "#F8766D98"
+    #         )
+    #     ) +
+    #     labs(x = "Genomic distance (s)", y = "dP(s)", color = "Sample") +
+    #     ggtitle(title, subtitle = subtitle) +
+    #     theme_minimal() +
+    #     theme(panel.grid.minor = element_blank())
+    #  The above attempt to calculate and plot slope (derivative) values result
+    #+ in unexpectedly small slope values; thus, I should try to reproduce the
+    #+ work I did with values obtained from HiCExplorer hicPlotDistVsCounts;
+    #+ see the following links to my previous code:
+    #+ - github.com/Noble-Lab/2020_kga0_endothelial-diff/blob/master/bin/munge_tables_contact-decay_plots-data_unsampled-balanced.sh
+    #+ - github.com/Noble-Lab/2020_kga0_endothelial-diff/blob/master/bin/plot_slope_contact-decay.R
+    #+ - github.com/Noble-Lab/2020_kga0_endothelial-diff/blob/master/bin/perform_t-test_contact-decay_plots-data_unsampled-balanced.R
+    
+    draw_lfc_contrasts <- TRUE
+    if(base::isTRUE(draw_lfc_contrasts)) {
+        contrast_1 <- visualise(quant_RCP_XII, contrast = 1, metric = "lfc")
+        contrast_2 <- visualise(quant_RCP_XII, contrast = 2, metric = "lfc")
+        contrast_3 <- visualise(quant_RCP_XII, contrast = 3, metric = "lfc")
+        
+        G1_G2_v_Q <- contrast_1$data %>%
+            tibble::as_tibble() %>%
+            dplyr::mutate(samplename = dplyr::case_when(
+                samplename == "G1" ~ "G1 ÷ Q",
+                samplename == "G2-M" ~ "G2-M ÷ Q",
+                TRUE ~ samplename
+            ))
+        Q_G1_v_G2 <- contrast_3$data %>%
+            tibble::as_tibble() %>%
+            dplyr::mutate(samplename = dplyr::case_when(
+                samplename == "Q" ~ "Q ÷ G2-M",
+                samplename == "G1" ~ "G1 ÷ G2-M",
+                TRUE ~ samplename
+            ))
+        Q_G2_v_G1 <- contrast_2$data %>%
+            tibble::as_tibble() %>%
+            dplyr::mutate(samplename = dplyr::case_when(
+                samplename == "Q" ~ "Q ÷ G1",
+                samplename == "G2-M" ~ "G2-M ÷ G1",
+                TRUE ~ samplename
+            ))
+        
+        RCP_XII_contrasts <- dplyr::bind_rows(G1_G2_v_Q, Q_G1_v_G2, Q_G2_v_G1)
+        title <- "cis-interaction frequency probability contrasts\nstratified by distance (s)"
+        subtitle <- paste0("XII, ", res, "-bp resolution")
+        plot_RCP_XII_contrasts <- RCP_XII_contrasts %>%
+            dplyr::filter(!samplename %in% c("G1 ÷ Q", "G2-M ÷ Q", "G2-M ÷ G1")) %>%
+            ggplot(aes(x = distance, y = P, color = samplename)) +
+            annotation_logticks(sides = "b", color = "grey92", outside = FALSE) +
+            geom_line(linewidth = 1) +
+            scale_x_log10(
+                labels = function(x) ifelse(x %in% 10^(4:6), scales::trans_format("log10", scales::math_format(10^.x))(x), ''),
+                breaks = 10^(0:6)  # Adjust this range according to your data
+            ) +
+            labs(
+                x = "Genomic distance (s)",
+                y = "log2( P(s) sample ÷ P(s) contrast )",
+                color = "Sample"
+            ) +
+            scale_color_manual(
+                name = "State",
+                values = c(
+                    "Q ÷ G1" = "#C77CFF98",
+                    "Q ÷ G2-M" = "#F8766D98",
+                    "G1 ÷ G2-M" = "#00BFC498"
+                )
+            ) +
+            ggtitle(title, subtitle = subtitle) +
+            theme_minimal() +
+            theme(panel.grid.minor = element_blank())
+        
+        write_plot(list = plot_RCP_XII_contrasts, w = 5, h = 5)
+    }
 }
 
 
 #  Identify and plot relative contact probabilities (RCPs) --------------------
 #+ ...for all chromosomes
-if(res == 6400) { lgl <- TRUE } else { lgl <- FALSE }
+if(res %in% c(5000, 6400)) { lgl <- TRUE } else { lgl <- FALSE }
 run_quant_RCP_all <- lgl
 if(base::isTRUE(run_quant_RCP_all)) {
     quant_RCP_all <- GENOVA::RCP(list(c_Q, c_1, c_2))
     # GENOVA::visualise(quant_RCP_all)
     
     title <- "cis-interaction frequency probabilities (P)\nstratified by distance (s)"
-    subtitle <- "all, 6.4-kb resolution"
+    subtitle <- paste0("all, ", res, "-bp resolution")
     plot_RCP_all <- quant_RCP_all$smooth %>%
         ggplot(aes(x = distance, y = P, color = samplename)) +
         annotation_logticks(sides = "lb", color = "grey92", outside = FALSE) +
@@ -242,11 +354,72 @@ if(base::isTRUE(run_quant_RCP_all)) {
         theme(panel.grid.minor = element_blank())
     
     write_plot(list = plot_RCP_all, w = 5, h = 5)
+    
+    draw_lfc_contrasts <- TRUE
+    if(base::isTRUE(draw_lfc_contrasts)) {
+        contrast_1 <- visualise(quant_RCP_all, contrast = 1, metric = "lfc")
+        contrast_2 <- visualise(quant_RCP_all, contrast = 2, metric = "lfc")
+        contrast_3 <- visualise(quant_RCP_all, contrast = 3, metric = "lfc")
+        
+        G1_G2_v_Q <- contrast_1$data %>%
+            tibble::as_tibble() %>%
+            dplyr::mutate(samplename = dplyr::case_when(
+                samplename == "G1" ~ "G1 ÷ Q",
+                samplename == "G2-M" ~ "G2-M ÷ Q",
+                TRUE ~ samplename
+            ))
+        Q_G1_v_G2 <- contrast_3$data %>%
+            tibble::as_tibble() %>%
+            dplyr::mutate(samplename = dplyr::case_when(
+                samplename == "Q" ~ "Q ÷ G2-M",
+                samplename == "G1" ~ "G1 ÷ G2-M",
+                TRUE ~ samplename
+            ))
+        Q_G2_v_G1 <- contrast_2$data %>%
+            tibble::as_tibble() %>%
+            dplyr::mutate(samplename = dplyr::case_when(
+                samplename == "Q" ~ "Q ÷ G1",
+                samplename == "G2-M" ~ "G2-M ÷ G1",
+                TRUE ~ samplename
+            ))
+        
+        RCP_all_contrasts <- dplyr::bind_rows(G1_G2_v_Q, Q_G1_v_G2, Q_G2_v_G1)
+        title <- "cis-interaction frequency probability contrasts\nstratified by distance (s)"
+        subtitle <- paste0("all, ", res, "-bp resolution")
+        plot_RCP_all_contrasts <- RCP_all_contrasts %>%
+            dplyr::filter(!samplename %in% c("G1 ÷ Q", "G2-M ÷ Q", "G2-M ÷ G1")) %>%
+            ggplot(aes(x = distance, y = P, color = samplename)) +
+            annotation_logticks(sides = "b", color = "grey92", outside = FALSE) +
+            geom_line(linewidth = 1) +
+            scale_x_log10(
+                labels = function(x) ifelse(x %in% 10^(4:6), scales::trans_format("log10", scales::math_format(10^.x))(x), ''),
+                breaks = 10^(0:6)  # Adjust this range according to your data
+            ) +
+            labs(
+                x = "Genomic distance (s)",
+                y = "log2( P(s) sample ÷ P(s) contrast )",
+                color = "Sample"
+            ) +
+            scale_color_manual(
+                name = "State",
+                values = c(
+                    "Q ÷ G1" = "#C77CFF98",
+                    "Q ÷ G2-M" = "#F8766D98",
+                    "G1 ÷ G2-M" = "#00BFC498"
+                )
+            ) +
+            ggtitle(title, subtitle = subtitle) +
+            theme_minimal() +
+            theme(panel.grid.minor = element_blank())
+        
+        write_plot(list = plot_RCP_all_contrasts, w = 5, h = 5)
+    }
 }
+
 
 #  Identify and plot relative contact probabilities (RCPs) --------------------
 #+ ...for rDNA region
-if(res == 50) { lgl <- TRUE } else { lgl <- FALSE }
+if(res %in% c(50, 200)) { lgl <- TRUE } else { lgl <- FALSE }
 run_quant_RCP_rDNA <- lgl
 if(base::isTRUE(run_quant_RCP_rDNA)) {
     bed_rDNA <- data.frame(
@@ -292,7 +465,7 @@ if(base::isTRUE(run_quant_RCP_rDNA)) {
 
 #  Identify and plot relative contact probabilities (RCPs) --------------------
 #+ ...for rDNA region, 1-10,000 bp
-if(res == 50) { lgl <- TRUE } else { lgl <- FALSE }
+if(res %in% c(50, 200)) { lgl <- TRUE } else { lgl <- FALSE }
 run_quant_RCP_rDNA_zoom <- lgl
 if(base::isTRUE(run_quant_RCP_rDNA_zoom)) {
     bed_rDNA <- data.frame(
@@ -324,17 +497,17 @@ if(base::isTRUE(run_quant_RCP_rDNA_zoom)) {
         theme_minimal() +
         theme(panel.grid.minor = element_blank()) +
         coord_cartesian(
-            xlim = c(10^2, 10^3.75), ylim = c(10^-3, NA)
+            # xlim = c(10^2, 10^3.75), ylim = c(10^-3, NA)
+            xlim = c(10^2, 10^4), ylim = c(10^-3, NA)
         )
 
     write_plot(list = plot_RCP_rDNA_zoom, w = 5, h = 5)
     
-    draw_lfc_contrasts <- TRUE
+    draw_lfc_contrasts <- FALSE
     if(base::isTRUE(draw_lfc_contrasts)) {
         visualise(quant_RCP_rDNA_zoom, contrast = 1, metric = "lfc")
         visualise(quant_RCP_rDNA_zoom, contrast = 2, metric = "lfc")
         visualise(quant_RCP_rDNA_zoom, contrast = 3, metric = "lfc")
-        #TODO Lear how to draw these plots with ggplot2
     }
 }
 

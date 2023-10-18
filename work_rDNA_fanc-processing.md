@@ -19,27 +19,33 @@
 1. [2. Create binned, unbalanced FAN-C `.hic` files](#2-create-binned-unbalanced-fan-c-hic-files)
     1. [Code](#code-3)
 1. [3. Downsample Q, G1, G2/M `.hic` files to smallest matrix](#3-downsample-q-g1-g2m-hic-files-to-smallest-matrix)
-    1. [A. Draft `Python` code to dynamically handles the downsampling](#a-draft-python-code-to-dynamically-handles-the-downsampling)
+    1. [A. Draft `Python` code that dynamically handles the matrix subsampling](#a-draft-python-code-that-dynamically-handles-the-matrix-subsampling)
         1. [Code](#code-4)
     1. [B. Convert above test code to `Python` script](#b-convert-above-test-code-to-python-script)
         1. [Code](#code-5)
-    1. [C. Submit `Python` script `calculate_fanc-contact-sums.py` for resolution-wise trios of `.hic` files](#c-submit-python-script-calculate_fanc-contact-sumspy-for-resolution-wise-trios-of-hic-files)
+    1. [C. Submit `Python` script `calculate_fanc-contact-sums.py` for resolution-wise trios of `.hic` matrices](#c-submit-python-script-calculate_fanc-contact-sumspy-for-resolution-wise-trios-of-hic-matrices)
         1. [Code](#code-6)
-1. [4. Perform KR balancing matrices with `fanc hic` `--low-coverage-auto` mode](#4-perform-kr-balancing-matrices-with-fanc-hic---low-coverage-auto-mode)
+1. [4. Perform KR balancing matrices with `fanc hic` `--filter-low-coverage-relative "${thresh}"` mode](#4-perform-kr-balancing-matrices-with-fanc-hic---filter-low-coverage-relative-%24thresh-mode)
     1. [Code](#code-7)
 1. [5. Draw example plots of the above-processed `.hic` files](#5-draw-example-plots-of-the-above-processed-hic-files)
     1. [Code](#code-8)
-1. [6. Convert `.hic` matrices of interest to `.cool` matrices](#6-convert-hic-matrices-of-interest-to-cool-matrices)
+1. [6. Convert `.hic` matrices to `.cool` matrices](#6-convert-hic-matrices-to-cool-matrices)
     1. [Code](#code-9)
-1. [7. Draw whole-genome "square" plots in the style of Seungsoo Kim](#7-draw-whole-genome-square-plots-in-the-style-of-seungsoo-kim)
+1. [7. Draw whole-genome "square" plots of negative log-transformed counts](#7-draw-whole-genome-square-plots-of-negative-log-transformed-counts)
     1. [Strategy](#strategy)
         1. [Notes](#notes-1)
-    1. [HiCExplorer `plotHicMatrix` work](#hicexplorer-plothicmatrix-work)
+    1. [Run HiCExplorer `plotHicMatrix`](#run-hicexplorer-plothicmatrix)
         1. [Code](#code-10)
-    1. [HiCExplorer `hicCompareMatrices` work](#hicexplorer-hiccomparematrices-work)
+    1. [Run HiCExplorer `hicCompareMatrices`](#run-hicexplorer-hiccomparematrices)
         1. [Code](#code-11)
 1. [X. Documentation \(partial\)](#x-documentation-partial)
     1. [Notes](#notes-2)
+        1. [`fanc to-fanc --help`](#fanc-to-fanc---help)
+        1. [`fanc hic --help`](#fanc-hic---help)
+        1. [`fanc downsample --help`](#fanc-downsample---help)
+        1. [`fancplot -p square --help`](#fancplot--p-square---help)
+        1. [`fanc to-cooler --help`](#fanc-to-cooler---help)
+        1. [`hicPlotMatrix --help`](#hicplotmatrix---help)
 
 <!-- /MarkdownTOC -->
 </details>
@@ -605,12 +611,12 @@ done
 
 <a id="3-downsample-q-g1-g2m-hic-files-to-smallest-matrix"></a>
 ### 3. Downsample Q, G1, G2/M `.hic` files to smallest matrix
-<a id="a-draft-python-code-to-dynamically-handles-the-downsampling"></a>
-#### A. Draft `Python` code to dynamically handles the downsampling
+<a id="a-draft-python-code-that-dynamically-handles-the-matrix-subsampling"></a>
+#### A. Draft `Python` code that dynamically handles the matrix subsampling
 <a id="code-4"></a>
 ##### Code
 <details>
-<summary><i>Code: A. Draft `Python` code to dynamically handles the downsampling</i></summary>
+<summary><i>Code: A. Draft `Python` code that dynamically handles the matrix subsampling</i></summary>
 
 ```python
 #!/usr/bin/env python3
@@ -696,12 +702,12 @@ print(f"Downsampled G2 contact sum: {str(sum_samp_G2)}")
 </details>
 <br />
 
-<a id="c-submit-python-script-calculate_fanc-contact-sumspy-for-resolution-wise-trios-of-hic-files"></a>
-#### C. Submit `Python` script `calculate_fanc-contact-sums.py` for resolution-wise trios of `.hic` files
+<a id="c-submit-python-script-calculate_fanc-contact-sumspy-for-resolution-wise-trios-of-hic-matrices"></a>
+#### C. Submit `Python` script `calculate_fanc-contact-sums.py` for resolution-wise trios of `.hic` matrices
 <a id="code-6"></a>
 ##### Code
 <details>
-<summary><i>Code: C. Submit `Python` script `calculate_fanc-contact-sums.py` for resolution-wise trios of `.hic` files</i></summary>
+<summary><i>Code: C. Submit `Python` script `calculate_fanc-contact-sums.py` for resolution-wise trios of `.hic` matrices</i></summary>
 
 ```bash
 #!/bin/bash
@@ -880,12 +886,12 @@ done
 </details>
 <br />
 
-<a id="4-perform-kr-balancing-matrices-with-fanc-hic---low-coverage-auto-mode"></a>
-### 4. Perform KR balancing matrices with `fanc hic` `--low-coverage-auto` mode
+<a id="4-perform-kr-balancing-matrices-with-fanc-hic---filter-low-coverage-relative-%24thresh-mode"></a>
+### 4. Perform KR balancing matrices with `fanc hic` `--filter-low-coverage-relative "${thresh}"` mode
 <a id="code-7"></a>
 #### Code
 <details>
-<summary><i>Code: 4. Perform KR balancing matrices with `fanc hic` `--low-coverage-auto` mode</i></summary>
+<summary><i>Code: 4. Perform KR balancing matrices with `fanc hic` `--filter-low-coverage-relative "${thresh}"` mode</i></summary>
 
 ```bash
 #!/bin/bash
@@ -1271,12 +1277,12 @@ done
 </details>
 <br />
 
-<a id="6-convert-hic-matrices-of-interest-to-cool-matrices"></a>
-### 6. Convert `.hic` matrices of interest to `.cool` matrices
+<a id="6-convert-hic-matrices-to-cool-matrices"></a>
+### 6. Convert `.hic` matrices to `.cool` matrices
 <a id="code-9"></a>
 #### Code
 <details>
-<summary><i>Code: 6. Convert `.hic` matrices of interest to `.cool` matrices</i></summary>
+<summary><i>Code: 6. Convert `.hic` matrices to `.cool` matrices</i></summary>
 
 ```bash
 #!/bin/bash
@@ -1595,15 +1601,15 @@ change_dir \
 
 #  Set variables, arrays
 unset dirs && typeset -a dirs=(
-    # "11_cooler_XII_KR-filt-0.2"
-    # "11_cooler_XII_KR-filt-0.3"
+    "11_cooler_XII_KR-filt-0.2"
+    "11_cooler_XII_KR-filt-0.3"
     "11_cooler_XII_KR-filt-0.4"
-    # "11_cooler_genome_KR-filt-0.2"
-    # "11_cooler_genome_KR-filt-0.3"
-    # "11_cooler_genome_KR-filt-0.4"
-    # "11_cooler_genome_KR-filt-0.2_whole-matrix"
-    # "11_cooler_genome_KR-filt-0.3_whole-matrix"
-    # "11_cooler_genome_KR-filt-0.4_whole-matrix"
+    "11_cooler_genome_KR-filt-0.2"
+    "11_cooler_genome_KR-filt-0.3"
+    "11_cooler_genome_KR-filt-0.4"
+    "11_cooler_genome_KR-filt-0.2_whole-matrix"
+    "11_cooler_genome_KR-filt-0.3_whole-matrix"
+    "11_cooler_genome_KR-filt-0.4_whole-matrix"
 )
 
 # unset hics && typeset -a hics
@@ -1654,15 +1660,51 @@ unset dirs && typeset -a dirs=(
 # )
 # # echo_test "${hics[@]}"
 
+# unset hics && typeset -a hics
+# while IFS=" " read -r -d $'\0'; do
+#     hics+=( "${REPLY}" )
+# done < <(
+#     find \
+#         10_fanc_XII_KR-filt-0.4 \
+#         -maxdepth 1 \
+#         -type f \
+#         \( \
+#             -name "*.800.*" -o \
+#             -name "*.1600.*" -o \
+#             -name "*.3200.*" -o \
+#             -name "*.5000.*" -o \
+#             -name "*.6400.*" -o \
+#             -name "*.12800.*" \
+#         \) \
+#         -print0 |
+#             sort -z
+# )
+# # echo_test "${hics[@]}"
+
 unset hics && typeset -a hics
 while IFS=" " read -r -d $'\0'; do
     hics+=( "${REPLY}" )
 done < <(
     find \
+        10_fanc_XII_KR-filt-0.2 \
+        10_fanc_XII_KR-filt-0.3 \
         10_fanc_XII_KR-filt-0.4 \
+        10_fanc_genome_KR-filt-0.2 \
+        10_fanc_genome_KR-filt-0.3 \
+        10_fanc_genome_KR-filt-0.4 \
+        10_fanc_genome_KR-filt-0.2_whole-matrix \
+        10_fanc_genome_KR-filt-0.3_whole-matrix \
+        10_fanc_genome_KR-filt-0.4_whole-matrix \
         -maxdepth 1 \
         -type f \
         \( \
+            -name "*.50.*" -o \
+            -name "*.100.*" -o \
+            -name "*.150.*" -o \
+            -name "*.200.*" -o \
+            -name "*.300.*" -o \
+            -name "*.400.*" -o \
+            -name "*.500.*" -o \
             -name "*.800.*" -o \
             -name "*.1600.*" -o \
             -name "*.3200.*" -o \
@@ -1675,7 +1717,7 @@ done < <(
 )
 # echo_test "${hics[@]}"
 
-check_array=false
+check_array=true
 if ${check_array}; then
     #  Check if any files were found
     if [[ ${#hics[@]} -eq 0 ]]; then
@@ -1734,7 +1776,7 @@ for hic in "${hics[@]}"; do
         """
     fi
 
-    check_command=true
+    check_command=false
     if ${check_command}; then
         echo """
         run_fanc_to_cooler \\
@@ -1775,8 +1817,8 @@ done
 </details>
 <br />
 
-<a id="7-draw-whole-genome-square-plots-in-the-style-of-seungsoo-kim"></a>
-### 7. Draw whole-genome "square" plots in the style of Seungsoo Kim
+<a id="7-draw-whole-genome-square-plots-of-negative-log-transformed-counts"></a>
+### 7. Draw whole-genome "square" plots of negative log-transformed counts
 <a id="strategy"></a>
 #### Strategy
 <a id="notes-1"></a>
@@ -1793,12 +1835,12 @@ Alternative strategy:
 </details>
 <br />
 
-<a id="hicexplorer-plothicmatrix-work"></a>
-#### HiCExplorer `plotHicMatrix` work
+<a id="run-hicexplorer-plothicmatrix"></a>
+#### Run HiCExplorer `plotHicMatrix`
 <a id="code-10"></a>
 ##### Code
 <details>
-<summary><i>Code: HiCExplorer plotHicMatrix work</i></summary>
+<summary><i>Code: Run HiCExplorer `plotHicMatrix`</i></summary>
 
 ```bash
 #!/bin/bash
@@ -2209,12 +2251,12 @@ done
 </details>
 <br />
 
-<a id="hicexplorer-hiccomparematrices-work"></a>
-#### HiCExplorer `hicCompareMatrices` work
+<a id="run-hicexplorer-hiccomparematrices"></a>
+#### Run HiCExplorer `hicCompareMatrices`
 <a id="code-11"></a>
 ##### Code
 <details>
-<summary><i>Code: HiCExplorer `hicCompareMatrices` work</i></summary>
+<summary><i>Code: Run HiCExplorer `hicCompareMatrices`</i></summary>
 
 ```bash
 #!/bin/bash
@@ -2573,6 +2615,8 @@ done
 <details>
 <summary><i>Notes: X. Documentation (partial)</i></summary>
 
+<a id="fanc-to-fanc---help"></a>
+##### `fanc to-fanc --help`
 ```txt
 ❯ fanc to-fanc --help
 2023-10-09 08:54:12,612 INFO FAN-C version: 0.9.27
@@ -2590,8 +2634,12 @@ options:
   -I, --no-inter-chromosomal
                         Do not copy inter-chromosomal contacts.
   -tmp, --work-in-tmp   Work in temporary directory
+```
+<br />
 
-
+<a id="fanc-hic---help"></a>
+##### `fanc hic --help`
+```txt
 ❯ fanc hic --help
 2023-10-09 10:21:03,529 INFO FAN-C version: 0.9.27
 usage: fanc hic [-h] [-b BIN_SIZE] [-l FILTER_LOW_COVERAGE] [-r FILTER_LOW_COVERAGE_RELATIVE] [-a] [-d FILTER_DIAGONAL] [--marginals-plot MARGINALS_PLOT] [--reset-filters]
@@ -2651,8 +2699,12 @@ options:
   --deepcopy            Deep copy Hi-C file. Copies a Hi-C file to FAN-C format by duplicating individual bins, pixels, and bias information. Can be used to upgrade an existing FAN-C file
                         with an older version or to convert Cooler or Juicer files to FAN-C format.
   -tmp, --work-in-tmp   Work in temporary directory
+```
+<br />
 
-
+<a id="fanc-downsample---help"></a>
+##### `fanc downsample --help`
+```
 ❯ fanc downsample --help
 2023-10-09 10:23:42,612 INFO FAN-C version: 0.9.27
 *** fanc downsample is deprecated. Please use fanc hic --downsample instead! ***
@@ -2714,8 +2766,12 @@ options:
   --weight-field WEIGHT_FIELD
                         Which value to use for plotting. Default: weight
   -C, --no-colorbar     Do not show colorbar in plot
+```
+<br />
 
-
+<a id="fancplot--p-square---help"></a>
+##### `fancplot -p square --help`
+```
 ❯ fancplot -p square --help
 usage: fancplot <region> -p square [-h] [--aspect-ratio ASPECT_RATIO] [--title TITLE] [--fix-chromosome] [--hide-x] [--show-minor-ticks] [--hide-major-ticks] [--show-tick-legend]
                                    [-vmin VMIN] [-vmax VMAX] [-u] [-e] [-l] [-r] [-f] [-c COLORMAP] [-s COLORBAR_SYMMETRY] [-C] [--weight-field WEIGHT_FIELD]
@@ -2754,8 +2810,12 @@ options:
   -C, --no-colorbar     Do not show colorbar in plot
   --weight-field WEIGHT_FIELD
                         Which value to use for plotting. Default: weight
+```
+<br />
 
-
+<a id="fanc-to-cooler---help"></a>
+##### `fanc to-cooler --help`
+```
 ❯ fanc to-cooler --help
 2023-10-12 13:54:37,522 INFO FAN-C version: 0.9.27
 usage: fanc hic_to_cooler [-h] [-u] [-t THREADS] [-M] [-r RESOLUTIONS [RESOLUTIONS ...]] [-S] [--chromosomes CHROMOSOMES] [-tmp] input output
@@ -2783,8 +2843,12 @@ options:
   --chromosomes CHROMOSOMES
                         Comma-separated list of chromosomes to appear in the final Cooler file.
   -tmp, --work-in-tmp   Work in temporary directory
+```
+<br />
 
-
+<a id="hicplotmatrix---help"></a>
+##### `hicPlotMatrix --help`
+```txt
 ❯ hicPlotMatrix --help
 usage: hicPlotMatrix --matrix MATRIX --outFileName OUTFILENAME [--title TITLE] [--scoreName SCORENAME] [--perChromosome] [--clearMaskedBins]
                      [--chromosomeOrder CHROMOSOMEORDER [CHROMOSOMEORDER ...]] [--region REGION] [--region2 REGION2] [--log1p] [--log] [--colorMap COLORMAP] [--vMin VMIN]

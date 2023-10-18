@@ -3,8 +3,30 @@
 <br />
 <br />
 
+<details>
+<summary><b><font size="+2"><i>Table of contents</i></font></b></summary>
+<!-- MarkdownTOC -->
+
+1. [Install `FitHiC` environments](#install-fithic-environments)
+    1. [Create a KrisMac `FitHiC` environment](#create-a-krismac-fithic-environment)
+        1. [Printed](#printed)
+    1. [Create a `rhino`/`gizmo` `FitHiC` environment](#create-a-rhinogizmo-fithic-environment)
+        1. [Printed](#printed-1)
+1. [Establish and run workflow for `FitHiC` analyses](#establish-and-run-workflow-for-fithic-analyses)
+    1. [Code](#code)
+1. [Help messages](#help-messages)
+    1. [Printed](#printed-2)
+
+<!-- /MarkdownTOC -->
+</details>
+<br />
+<br />
+
+<a id="install-fithic-environments"></a>
 ## Install `FitHiC` environments
+<a id="create-a-krismac-fithic-environment"></a>
 ### Create a KrisMac `FitHiC` environment
+<a id="printed"></a>
 #### Printed
 <details>
 <summary><i>Printed: Create a KrisMac `FitHiC` environment</i></summary>
@@ -174,7 +196,9 @@ To deactivate an active environment, use
 </details>
 <br />
 
+<a id="create-a-rhinogizmo-fithic-environment"></a>
 ### Create a `rhino`/`gizmo` `FitHiC` environment
+<a id="printed-1"></a>
 #### Printed
 <details>
 <summary><i>Printed: Create a `rhino`/`gizmo` `FitHiC` environment</i></summary>
@@ -440,7 +464,9 @@ Executing transaction: done
 <br />
 <br />
 
+<a id="establish-and-run-workflow-for-fithic-analyses"></a>
 ## Establish and run workflow for `FitHiC` analyses
+<a id="code"></a>
 ### Code
 <details>
 <summary><i>Code: Establish and run workflow for `FitHiC` analyses</i></summary>
@@ -1399,131 +1425,130 @@ EOM
 }
 
 
-main() {
-    local region=""
-    local cool=""
-    local pct=0.05  # Default value
-    local ia=""
-    local frag=""
-    local out=""
-    local hickry=""
-    local scratch=""
-    local help=$(
-cat << EOM
-Usage: main -c COOL_FILE -i IA_FILE -f FRAG_FILE -o OUT_FILE -H HICKRY_PATH \\
-  [-p PERCENT] [-r REGION] [-s SCRATCH_DIR]
-        
-This function integrates the creation of interaction and fragment files, the
-generation of a bias vector, and other functionalities.
-
-main() validates the input parameters and handles errors.
-
-Options:
-  -h, --help         Display this help message
-  -c, --cool-file    Specify the .cool file
-  -i, --ia-file      Specify the interactions file
-  -f, --frag-file    Specify the fragment file
-  -o, --out-file     Specify the output file for bias vector
-  -H, --hickry-path  Specify the path to HiCKRy.py
-  -p, --percent      Specify percent of sparse matrix diagonal to remove (default: 0.05)
-  -r, --region       Specify the region (optional)
-  -s, --scratch-dir  Specify a scratch directory (optional)
-
-Example #1:
-  main
-      -c some.cool
-      -i some_ia.txt
-      -f some_frag.txt
-      -o some_bias.txt
-      -H /path/to/HiCKRy.py
-
-Example #2:
-  main
-      -c another.cool
-      -i another_ia.txt
-      -f another_frag.txt
-      -o another_bias.txt
-      -H /path/to/HiCKRy.py
-      -p 0.10
-      -r XII
-      -s /path/to/scratch
-EOM
-    )
-
-    if [[ -z "${1}" ]]; then echo "${help}"; return 0; fi
-    while [[ "$#" -gt 0 ]]; do
-        case "${1}" in
-            -h|--help) echo "${help}"; return 0 ;;
-            -c|--cool-file) cool="${2}"; shift 2 ;;
-            -i|--ia-file) ia="${2}"; shift 2 ;;
-            -f|--frag-file) frag="${2}"; shift 2 ;;
-            -o|--out-file) out="${2}"; shift 2 ;;
-            -H|--hickry-path) hickry="${2}"; shift 2 ;;
-            -p|--percent) pct="${2}"; shift 2 ;;
-            -r|--region) region="${2}"; shift 2 ;;
-            -s|--scratch-dir) scratch="${2}"; shift 2 ;;
-            *) echo "Unknown parameter passed: ${1}"; return 1 ;;
-        esac
-    done
-
-    # Validate required parameters
-    if [[ -z "${cool}" ]]; then
-        echo "Error: Missing .cool file. Use -c or --cool-file to specify it."
-        local missing_params=true
-    fi
-
-    if [[ -z "${ia}" ]]; then
-        echo "Error: Missing interactions file. Use -i or --ia-file to specify it."
-        local missing_params=true
-    fi
-
-    if [[ -z "${frag}" ]]; then
-        echo "Error: Missing fragment file. Use -f or --frag-file to specify it."
-        local missing_params=true
-    fi
-
-    if [[ -z "${out}" ]]; then
-        echo "Error: Missing output file for bias vector. Use -o or --out-file to specify it."
-        local missing_params=true
-    fi
-
-    if [[ -z "${hickry}" ]]; then
-        echo "Error: Missing path to HiCKRy.py. Use -H or --hickry-path to specify it."
-        local missing_params=true
-    fi
-
-    if ${missing_params}; then echo "${help}"; return 1; fi
-
-    # Create interactions file
-    if ! create_ia_file -c "${cool}" -o "${ia}" -r "${region}"; then
-        echo "Error: Failed to create interactions file."
-        return 1
-    fi
-
-    # Create fragments file
-    if ! create_frag_file -i "${ia}" -o "${frag}" -s "${scratch}"; then
-        echo "Error: Failed to create fragment file."
-        return 1
-    fi
-
-    # Generate bias vector values
-    if ! generate_bias_vector -H "${hickry}" -p "${pct}" -i "${ia}" -f "${frag}" -o "${out}"; then
-        echo "Error: Failed to generate bias vector."
-        return 1
-    fi
-
-    echo "All tasks completed successfully."
-    return 0
-}
+# main() {
+#     local region=""
+#     local cool=""
+#     local pct=0.05  # Default value
+#     local ia=""
+#     local frag=""
+#     local out=""
+#     local hickry=""
+#     local scratch=""
+#     local help=$(
+# cat << EOM
+# Usage: main -c COOL_FILE -i IA_FILE -f FRAG_FILE -o OUT_FILE -H HICKRY_PATH \\
+#   [-p PERCENT] [-r REGION] [-s SCRATCH_DIR]
+#        
+# This function integrates the creation of interaction and fragment files, the
+# generation of a bias vector, and other functionalities.
+#
+# main() validates the input parameters and handles errors.
+#
+# Options:
+#   -h, --help         Display this help message
+#   -c, --cool-file    Specify the .cool file
+#   -i, --ia-file      Specify the interactions file
+#   -f, --frag-file    Specify the fragment file
+#   -o, --out-file     Specify the output file for bias vector
+#   -H, --hickry-path  Specify the path to HiCKRy.py
+#   -p, --percent      Specify percent of sparse matrix diagonal to remove (default: 0.05)
+#   -r, --region       Specify the region (optional)
+#   -s, --scratch-dir  Specify a scratch directory (optional)
+#
+# Example #1:
+#   main
+#       -c some.cool
+#       -i some_ia.txt
+#       -f some_frag.txt
+#       -o some_bias.txt
+#       -H /path/to/HiCKRy.py
+#
+# Example #2:
+#   main
+#       -c another.cool
+#       -i another_ia.txt
+#       -f another_frag.txt
+#       -o another_bias.txt
+#       -H /path/to/HiCKRy.py
+#       -p 0.10
+#       -r XII
+#       -s /path/to/scratch
+# EOM
+#     )
+#
+#     if [[ -z "${1}" ]]; then echo "${help}"; return 0; fi
+#     while [[ "$#" -gt 0 ]]; do
+#         case "${1}" in
+#             -h|--help) echo "${help}"; return 0 ;;
+#             -c|--cool-file) cool="${2}"; shift 2 ;;
+#             -i|--ia-file) ia="${2}"; shift 2 ;;
+#             -f|--frag-file) frag="${2}"; shift 2 ;;
+#             -o|--out-file) out="${2}"; shift 2 ;;
+#             -H|--hickry-path) hickry="${2}"; shift 2 ;;
+#             -p|--percent) pct="${2}"; shift 2 ;;
+#             -r|--region) region="${2}"; shift 2 ;;
+#             -s|--scratch-dir) scratch="${2}"; shift 2 ;;
+#             *) echo "Unknown parameter passed: ${1}"; return 1 ;;
+#         esac
+#     done
+#
+#     # Validate required parameters
+#     if [[ -z "${cool}" ]]; then
+#         echo "Error: Missing .cool file. Use -c or --cool-file to specify it."
+#         local missing_params=true
+#     fi
+#
+#     if [[ -z "${ia}" ]]; then
+#         echo "Error: Missing interactions file. Use -i or --ia-file to specify it."
+#         local missing_params=true
+#     fi
+#
+#     if [[ -z "${frag}" ]]; then
+#         echo "Error: Missing fragment file. Use -f or --frag-file to specify it."
+#         local missing_params=true
+#     fi
+#
+#     if [[ -z "${out}" ]]; then
+#         echo "Error: Missing output file for bias vector. Use -o or --out-file to specify it."
+#         local missing_params=true
+#     fi
+#
+#     if [[ -z "${hickry}" ]]; then
+#         echo "Error: Missing path to HiCKRy.py. Use -H or --hickry-path to specify it."
+#         local missing_params=true
+#     fi
+#
+#     if ${missing_params}; then echo "${help}"; return 1; fi
+#
+#     # Create interactions file
+#     if ! create_ia_file -c "${cool}" -o "${ia}" -r "${region}"; then
+#         echo "Error: Failed to create interactions file."
+#         return 1
+#     fi
+#
+#     # Create fragments file
+#     if ! create_frag_file -i "${ia}" -o "${frag}" -s "${scratch}"; then
+#         echo "Error: Failed to create fragment file."
+#         return 1
+#     fi
+#
+#     # Generate bias vector values
+#     if ! generate_bias_vector -H "${hickry}" -p "${pct}" -i "${ia}" -f "${frag}" -o "${out}"; then
+#         echo "Error: Failed to generate bias vector."
+#         return 1
+#     fi
+#
+#     echo "All tasks completed successfully."
+#     return 0
+# }
 
 
 #  Configure work environment, directories, and variables =====================
 #  Main code ------------------------------------------------------------------
+#  Populate associative arrays ----------------------------
 unset A_dirs A_prefix
 typeset -A A_dirs A_prefix
 
-
-#  Populate associative arrays ----------------------------
 A_dirs["11_cooler_genome_KR-filt-0.4"]="13_FitHiC2_genome_KR-filt-0.4"
 A_dirs["11_cooler_genome_KR-filt-0.4_whole-matrix"]="13_FitHiC2_genome_KR-filt-0.4_whole-matrix"
 A_dirs["11_cooler_XII_KR-filt-0.4"]="13_FitHiC2_XII_KR-filt-0.4"
@@ -1985,7 +2010,9 @@ fi
 <br />
 <br />
 
+<a id="help-messages"></a>
 ## Help messages
+<a id="printed-2"></a>
 ### Printed
 <details>
 <summary><i>Printed: Help messages</i></summary>
