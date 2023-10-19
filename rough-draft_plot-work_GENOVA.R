@@ -25,11 +25,14 @@ load_cool <- function(
 }
 
 
-write_plot <- function(path = p_out, list, resolution = res, w, h) {
+write_plot <- function(
+    path = p_out, list,
+    resolution = res, w, h, ext = ".pdf"
+) {
     ggplot2::ggsave(
         paste(
             path,
-            paste0(deparse(substitute(list)), "_", resolution, ".png"),
+            paste0(deparse(substitute(list)), "_", resolution, ext),
             sep = "/"
         ),
         list,
@@ -73,7 +76,7 @@ if(res %in% c(6400, 5000)) {
 
 f_Q <- paste0(
     p_cool, "/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.",
-    res, ".", suf, ".XII-451500-460800.cool" # ".cool"
+    res, ".", suf, ".cool"
 )  # file.exists(f_Q)
 f_1 <- paste0(
     p_cool, "/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.",
@@ -474,7 +477,6 @@ if(base::isTRUE(run_quant_RCP_rDNA)) {
     }
 }
 
-class(quant_RCP_rDNA)
 
 #  Identify and plot relative contact probabilities (RCPs) --------------------
 #+ ...for rDNA region, 1-10,000 bp
