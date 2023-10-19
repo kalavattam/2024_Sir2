@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# vim:fenc=utf-8
+#
+# Copyright 2023 Kris Alavattam <kalavattam@gmail.com>
+# Usage: write-out_cool-bias-vector.py -i <input_cool_file> -o <output_bias_vector_file>
+# Description: This script extracts the bias vector from a balanced cool file. 
+# It ensures the input cool file exists and is readable, then uses the cooler 
+# library to extract the bias vector and writes it to the specified output file 
+# in tab-separated format. The output file can be plain text or gzipped.
+#
+# Distributed under terms of the MIT license.
 
 import cooler
 import argparse
@@ -34,6 +45,7 @@ def extract_bias_vector(cool_file, output_file):
         print(f"Bias vector has been saved to {output_file}")
     except Exception as e:
         print(f"Error writing to output file: {e}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract bias vector from a balanced cool file.")

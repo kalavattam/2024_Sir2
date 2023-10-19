@@ -34,10 +34,14 @@
 1. [7. Draw whole-genome "square" plots of negative log-transformed counts](#7-draw-whole-genome-square-plots-of-negative-log-transformed-counts)
     1. [Strategy](#strategy)
         1. [Notes](#notes-1)
-    1. [Run HiCExplorer `plotHicMatrix`](#run-hicexplorer-plothicmatrix)
+    1. [Run HiCExplorer `plotHicMatrix` for negative log-transformed heatmaps](#run-hicexplorer-plothicmatrix-for-negative-log-transformed-heatmaps)
         1. [Code](#code-10)
     1. [Run HiCExplorer `hicCompareMatrices`](#run-hicexplorer-hiccomparematrices)
         1. [Code](#code-11)
+    1. [Run HiCExplorer `plotHicMatrix` for log2 ratio heatmaps](#run-hicexplorer-plothicmatrix-for-log2-ratio-heatmaps)
+        1. [Code](#code-12)
+1. [8. Draw contact-decay plots for rDNA region](#8-draw-contact-decay-plots-for-rdna-region)
+    1. [Code](#code-13)
 1. [X. Documentation \(partial\)](#x-documentation-partial)
     1. [Notes](#notes-2)
         1. [`fanc to-fanc --help`](#fanc-to-fanc---help)
@@ -1830,22 +1834,68 @@ done
 No native support of whole-genome "square" plots with FAN-C.
 
 Alternative strategy:
-1. Use `fanc to-cooler` to convert 5-kb balanced `.hic` files to `.cool` files
-2. Use converted `.cool` files with HiCExplorer `hicPlotMatrix`
+1. Use `fanc to-cooler` to convert 5-kb balanced `.hic` files to `.cool` files  `#DONE`
+2. Use converted `.cool` files with HiCExplorer `hicPlotMatrix`  `#INPROGRESS`
 </details>
 <br />
 
-<a id="run-hicexplorer-plothicmatrix"></a>
-#### Run HiCExplorer `plotHicMatrix`
+<a id="run-hicexplorer-plothicmatrix-for-negative-log-transformed-heatmaps"></a>
+#### Run HiCExplorer `plotHicMatrix` for negative log-transformed heatmaps
 <a id="code-10"></a>
 ##### Code
 <details>
-<summary><i>Code: Run HiCExplorer `plotHicMatrix`</i></summary>
+<summary><i>Code: Run HiCExplorer `plotHicMatrix` for negative log-transformed heatmaps</i></summary>
 
 ```bash
 #!/bin/bash
 
 #  Initialize functions =======================================================
+function check_requirements() {
+    local requirements=("$@")
+    local tag="is not installed or not in the system's PATH"
+    local help=$(
+cat << EOM
+Usage: check_requirements [command_1] [command_2] ...
+
+Checks that the specified commands are available on the system.
+
+check_requirements() iterates over all given commands and checks that they can
+be executed, ensuring all required dependencies are installed.
+
+Positional arguments:
+  command_1, command_2, ...  The command(s) to check for installation,
+                             availability in the system's PATH.
+
+Example #1:
+  check_requirements fithic python
+
+Example #2:
+  check_requirements cooler
+EOM
+    )
+
+    if [[ "${requirements[0]}" == "-h" || "${requirements[0]}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
+    if [[ -z "${requirements[@]}" ]]; then
+        echo "Error: No command(s) provided."
+        echo "${help}"
+        return 1
+    fi
+
+    for req in "${requirements[@]}"; do
+        if ! command -v "${req}" &> /dev/null; then
+            echo "Error: ${req} ${tag}."
+            return 1
+        fi
+    done
+
+    return 0
+}
+
+
 function change_dir() {
     local dir="${1}"
     local help=$(
@@ -1934,58 +1984,66 @@ EOM
 
 
 function run_hicPlotMatrix() {
+    local help=$(
+cat << EOM
+Usage: run_hicPlotMatrix -i INPUT_FILE -o OUTPUT_FILE -j JOB_NAME
+  -e ERR_OUT_DIR -c COORDINATES [-r COLOR_MAP] [-n COLOR_MIN] [-x COLOR_MAX]
+  [-t TITLE] [-p DPI] [-d]
+
+Plots a cooler format matrix. File type determined by extension.
+
+Options:
+  -h, --help         Display this help message
+  -i, --input-file   Path to the input cooler matrix (required)
+  -o, --output-file  Path to the output file (required)
+  -j, --job-name     Name of the job (required)
+  -e, --err-out-dir  Directory for stderr and stdout logs (required)
+  -c, --coordinates  Chromosome order coordinates (required)
+  -r, --color-map    Color map for the plot (default: Oranges)
+  -l, --log-scale    Enable log scale for the plot (optional)
+  -n, --color-min    Minimum color value (default: 0.0001)
+  -x, --color-max    Maximum color value (default: 1)
+  -t, --title        Title of the plot (default: basename of input file)
+  -p, --dpi          Dots per inch for the plot (default: 300)
+  -d, --dry-run      Print the sbatch command without executing it
+
+Dependencies:
+  hicPlotMatrix: Required for plotting the matrix
+  sbatch: Used for job submission
+
+Example:
+  run_hicPlotMatrix
+      -i input.cool
+      -o output.png
+      -j plot.input
+      -e path/to/logs
+      -c "XII"
+      -r "Reds"
+      -l
+      -n 0.0001
+      -x 1
+      -t "XII"
+      -p 72
+EOM
+    )
+
+    if [[ -z "${1}" || "${1}" == "-h" || "${1}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
     local input_file=""
     local output_file=""
     local job_name=""
     local err_out_dir=""
     local coordinates=""
-    local color_map=""
-    local vmin=""
-    local vmax=""
+    local color_map="Oranges"
+    local log_scale=false
+    local vmin=0.0001
+    local vmax=1
     local title=""
-    local dpi=""
+    local dpi=300
     local dry_run=false
-
-    if [[ "${1}" == "-h" || "${1}" == "--help" || -z "${1}" ]]; then
-        echo """
-        Usage: run_hicPlotMatrix [OPTIONS]
-        
-        Plots a cooler format matrix. File type determined by extension.
-
-        Options:
-          -h, --help         Display this help message
-          -i, --input-file   Path to the input cooler matrix (required)
-          -o, --output-file  Path to the output file (required)
-          -j, --job-name     Name of the job (required)
-          -e, --err-out-dir  Directory for stderr and stdout logs (required)
-          -c, --coordinates  Chromosome order coordinates (required)
-          -r, --color-map    Color map for the plot (default: Oranges)
-          -n, --color-min    Minimum color value (default: 0.0001)
-          -x, --color-max    Maximum color value (default: 1)
-          -t, --title        Title of the plot (default: basename of input file)
-          -p, --dpi          Dots per inch for the plot (default: 300)
-          -d, --dry-run      Print the sbatch command without executing it
-        
-        Dependencies:
-          - hicPlotMatrix: Required for plotting the matrix
-          - sbatch: Used for job submission
-
-        Example:
-          run_hicPlotMatrix \\
-              -i input.cool \\
-              -o output.png \\
-              -j plot.input \\
-              -e path/to/logs \\
-              -c \"XII\" \\
-              -r \"Reds\" \\
-              -n 0.0001 \\
-              -x 1 \\
-              -t \"XII\" \\
-              -p 72 \\
-              -d
-        """
-        return 0
-    fi
 
     while [[ "$#" -gt 0 ]]; do
         case "${1}" in
@@ -1995,6 +2053,7 @@ function run_hicPlotMatrix() {
             -e|--err-out-dir) err_out_dir="${2}"; shift 2 ;;
             -c|--coordinates) coordinates="${2}"; shift 2 ;;
             -r|--color-map) color_map="${2}"; shift 2 ;;
+            -l|--log-scale) log_scale=true; shift ;;
             -n|--color-min) vmin="${2}"; shift 2 ;;
             -x|--color-max) vmax="${2}"; shift 2 ;;
             -t|--title) title="${2}"; shift 2 ;;
@@ -2004,15 +2063,7 @@ function run_hicPlotMatrix() {
         esac
     done
 
-    if ! command -v hicPlotMatrix &> /dev/null; then
-        echo "Error: hicPlotMatrix is not installed or not in the system's PATH."
-        return 1
-    fi
-
-    if ! command -v sbatch &> /dev/null; then
-        echo "Error: sbatch is not installed or not in the system's PATH."
-        return 1
-    fi
+    if ! check_requirements hicPlotMatrix sbatch; then return 1; fi
 
     if [[ -z "${input_file}" ]]; then
         echo "Error: Input file is required."
@@ -2050,31 +2101,8 @@ function run_hicPlotMatrix() {
     : ${title:="$(basename "${input_file}" .cool)"}
     : ${dpi:=300}
 
-    if "${dry_run}"; then
-        echo """
-sbatch << EOF
-#!/bin/bash
-
-#SBATCH --job-name=\"${job_name}\"
-#SBATCH --nodes=1
-#SBATCH --cpus-per-task=1
-#SBATCH --error=\"${err_out_dir}/${job_name}.%A.stderr.txt\"
-#SBATCH --output=\"${err_out_dir}/${job_name}.%A.stdout.txt\"
-
-hicPlotMatrix \\
-    --chromosomeOrder ${coordinates} \\
-    --colorMap \"${color_map}\" \\
-    --log \\
-    --vMin ${vmin} \\
-    --vMax ${vmax} \\
-    --title \"${title}\" \\
-    --dpi ${dpi} \\
-    --matrix \"${input_file}\" \\
-    --outFileName \"${output_file}\"
-EOF
-        """
-    else
-        sbatch << EOF
+    local sbatch_script=$(
+cat << EOF
 #!/bin/bash
 
 #SBATCH --job-name="${job_name}"
@@ -2086,7 +2114,7 @@ EOF
 hicPlotMatrix \
     --chromosomeOrder ${coordinates} \
     --colorMap "${color_map}" \
-    --log \
+    $(if ${log_scale}; then echo "--log"; fi) \
     --vMin ${vmin} \
     --vMax ${vmax} \
     --title "${title}" \
@@ -2094,6 +2122,14 @@ hicPlotMatrix \
     --matrix "${input_file}" \
     --outFileName "${output_file}"
 EOF
+    )
+
+    if "${dry_run}"; then
+        echo "Dry run mode enabled. The following sbatch script would be executed:"
+        echo "${sbatch_script}"
+    else
+        echo "${sbatch_script}" | sbatch
+        echo "Job submitted with name '${job_name}'."
     fi
 
     return 0
@@ -2105,27 +2141,35 @@ activate_env "hicexplorer_764_env"
 
 #  Set variables, arrays
 # res=5000                                                       # echo "${res}"
-res=300                                                        # echo "${res}"
+# res=300                                                        # echo "${res}"
+res=200                                                        # echo "${res}"
+
 # coord="I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI"  # echo "${coord}"
-coord="XII:451000-469000"                                      # echo "${coord}"
+# coord="XII:451000-469000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:452000-462000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451500-461500"                                      # echo "${coord}"  #BETTER
+# coord="XII:451000-461000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451500-460500"                                      # echo "${coord}"  #CLOSE
+# coord="XII:451200-460800"                                      # echo "${coord}"  #ALMOST
+coord="XII:451500-460800"                                      # echo "${coord}"  #GOOD
+
 vmin=0.0001                                                    # echo "${vmin}"
 vmax=1                                                         # echo "${vmax}"
+
 dpi=300                                                        # echo "${dpi}"
 matcol="RdPu"                                                  # echo "${matcol}"
 # outdir="pngs/2023-1013_XII-square_whole-genome"                # echo "${outdir}"
-outdir="pngs/2023-1013_$(sed 's/\:/-/g' <(echo "${coord}"))"   # echo "${outdir}"
+outdir="pngs/2023-1019_$(sed 's/\:/-/g' <(echo "${coord}"))"   # echo "${outdir}"
 
 unset cools && typeset -a cools
 while IFS=" " read -r -d $'\0'; do
     cools+=( "${REPLY}" )
 done < <(
     find \
-        11_cooler_XII_KR-filt-0.2 \
-        11_cooler_XII_KR-filt-0.3 \
         11_cooler_XII_KR-filt-0.4 \
         -maxdepth 1 \
         -type f \
-        -name MC*${res}*cool \
+        -name MC*.${res}.*cool \
         -print0 \
             | sort -z
 )
@@ -2199,11 +2243,30 @@ for i in "${cools[@]}"; do
             | awk -F '[;,\\ ]' '{ print $1"_ds-"$10"_"$3"-"$5"-"$6 }' \
             | sed 's/\:/-/g'
     )"                                                                           # echo "${suffix}"
-    outfile="${outdir}/$(basename ${i} .cool).${suffix}.pdf"                     # echo "${outfile}"
+    outfile="${outdir}/$(basename ${i} .cool).${suffix}.pdf"             # echo "${outfile}"
     job_name="hicPlotMatrix.$(basename ${outfile} .pdf)"                         # echo "${job_name}"
     err_out_dir="$(dirname ${outfile})/err_out"                                  # echo "${err_out_dir}"
 
     (( iter++ ))
+
+    check_variables=true
+    if ${check_command}; then
+        echo """
+                \${res}  ${res}
+              \${coord}  ${coord}
+               \${vmin}  ${vmin}
+               \${vmax}  ${vmax}
+                \${dpi}  ${dpi}
+             \${matcol}  ${matcol}
+              \${indir}  ${indir}
+             \${infile}  ${infile}
+             \${outdir}  ${outdir}
+            \${outfile}  ${outfile}
+              \${title}  ${title}
+           \${job_name}  ${job_name}
+        \${err_out_dir}  ${err_out_dir}
+        """
+    fi
 
     check_command=true
     if ${check_command}; then
@@ -2223,8 +2286,24 @@ for i in "${cools[@]}"; do
             -d
         """
     fi
+    
+    do_dry_run=true
+    if ${do_dry_run}; then
+        run_hicPlotMatrix \
+            -i "${indir}/${infile}" \
+            -o "${outfile}" \
+            -j "${job_name}" \
+            -e "${err_out_dir}" \
+            -c "${coord}" \
+            -r "${matcol}" \
+            -n ${vmin} \
+            -x ${vmax} \
+            -t "${title}" \
+            -p ${dpi} \
+            -d
+    fi
 
-    run_job=true
+    run_job=false
     if ${run_job}; then
         run_hicPlotMatrix \
             -i "${indir}/${infile}" \
@@ -2262,86 +2341,46 @@ done
 #!/bin/bash
 
 #  Initialize functions =======================================================
-function change_dir() {
-    local dir="${1}"
-
-    if [[ -z "${dir}" ]]; then
-        echo "Error: No directory provided."
-        return 1
-    fi
-
-    if [[ -d "${dir}" ]]; then
-        cd "${dir}" ||
-            {
-                echo "Error: Failed to change to ${dir} even though it exists."
-                return 1
-            }
-    else
-        echo "Error: Directory ${dir} does not exist."
-        return 1
-    fi
-}
-
-
-function activate_env() {
-    local env="${1}"
-    if [[ "${CONDA_DEFAULT_ENV}" != "${env}" ]]; then
-        if [[ ${CONDA_DEFAULT_ENV} != base ]]; then
-            conda deactivate
-        fi
-
-        source activate "${env}"
-    fi
-}
-
-
 function run_hicCompareMatrices() {
+    local help=$(
+cat << EOM
+Usage: run_hicCompareMatrices -1 MATRIX1 -2 MATRIX2 -o OUTPUT_FILE -j JOB_NAME -e ERR_OUT_DIR [-p OPERATION] [-n] [-d]
+
+Compares two Hi-C matrices.
+
+Options:
+  -h, --help         Display this help message
+  -1, --matrix-1     Path to the first matrix file (required)
+  -2, --matrix-2     Path to the second matrix file (required)
+  -o, --output-file  Path to the output file (required)
+  -j, --job-name     Name of the job (required)
+  -e, --err-out-dir  Directory for stderr and stdout logs (required)
+  -p, --operation    Operation to be performed on the matrices (default: log2ratio)
+  -n, --no-norm      Do not apply normalization before computing the operation
+  -d, --dry-run      Print the sbatch command without executing it
+
+Dependencies:
+  hicCompareMatrices: Required for comparing the matrices
+  sbatch: Used for job submission
+
+Example:
+  run_hicCompareMatrices -1 matrix_1.cool -2 matrix_2.cool -o output.cool -j compare.matrices -e path/to/logs -p log2ratio -n -d
+EOM
+    )
+
+    if [[ -z "${1}" || "${1}" == "-h" || "${1}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
     local matrix1=""
     local matrix2=""
     local output_file=""
     local job_name=""
     local err_out_dir=""
-    local operation=""
+    local operation="log2ratio"
     local no_norm=false
     local dry_run=false
-
-    if [[ "${1}" == "-h" || "${1}" == "--help" || -z "${1}" ]]; then
-        echo """
-        Usage: run_hicCompareMatrices [OPTIONS]
-        
-        Compares two Hi-C matrices.
-
-        Options:
-          -h, --help         Display this help message
-          -1, --matrix-1     Path to the first matrix file (required)
-          -2, --matrix-2     Path to the second matrix file (required)
-          -o, --output-file  Path to the output file (required)
-          -j, --job-name     Name of the job (required)
-          -e, --err-out-dir  Directory for stderr and stdout logs (required)
-          -p, --operation    Operation to be performed on the matrices
-                             (required: log2ratio, ratio, diff; default:
-                             log2ratio)
-          -n, --no-norm      Do not apply normalization before computing the
-                             operation
-          -d, --dry-run      Print the sbatch command without executing it
-        
-        Dependencies:
-          - hicCompareMatrices: Required for comparing the matrices
-          - sbatch: Used for job submission
-
-        Example:
-          run_hicCompareMatrices \\
-              -1 matrix_1.cool \\
-              -2 matrix_2.cool \\
-              -o output.cool \\
-              -j compare.matrices \\
-              -e path/to/logs \\
-              -p log2ratio \\
-              -n \\
-              -d
-        """
-        return 0
-    fi
 
     while [[ "$#" -gt 0 ]]; do
         case "${1}" in
@@ -2357,15 +2396,7 @@ function run_hicCompareMatrices() {
         esac
     done
 
-    if ! command -v hicCompareMatrices &> /dev/null; then
-        echo "Error: hicCompareMatrices is not installed or not in the system's PATH."
-        return 1
-    fi
-
-    if ! command -v sbatch &> /dev/null; then
-        echo "Error: sbatch is not installed or not in the system's PATH."
-        return 1
-    fi
+    if ! check_requirements hicCompareMatrices sbatch; then return 1; fi
 
     if [[ -z "${matrix_1}" ]]; then
         echo "Error: Input file #1 is required."
@@ -2406,26 +2437,8 @@ function run_hicCompareMatrices() {
 
     : ${operation:="log2ratio"}
 
-    if "${dry_run}"; then
-        echo """
-sbatch << EOF
-#!/bin/bash
-
-#SBATCH --job-name=\"${job_name}\"
-#SBATCH --nodes=1
-#SBATCH --cpus-per-task=1
-#SBATCH --error=\"${err_out_dir}/${job_name}.%A.stderr.txt\"
-#SBATCH --output=\"${err_out_dir}/${job_name}.%A.stdout.txt\"
-
-hicCompareMatrices \\
-    -m ${matrix_1} ${matrix_2} \\
-    -o ${output_file} \\
-    --operation ${operation} \\
-    $(if ${no_norm}; then echo "--noNorm"; fi)
-EOF
-        """
-    else
-        sbatch << EOF
+    local sbatch_script=$(
+cat << EOF
 #!/bin/bash
 
 #SBATCH --job-name="${job_name}"
@@ -2440,6 +2453,14 @@ hicCompareMatrices \
     --operation ${operation} \
     $(if ${no_norm}; then echo "--noNorm"; fi)
 EOF
+    )
+
+    if "${dry_run}"; then
+        echo "Dry run mode enabled. The following sbatch script would be executed:"
+        echo "${sbatch_script}"
+    else
+        echo "${sbatch_script}" | sbatch
+        echo "Job submitted with name '${job_name}'."
     fi
 
     return 0
@@ -2604,6 +2625,705 @@ for dir in "${dirs[@]}"; do
 
     echo ""
 done
+```
+</details>
+<br />
+
+<a id="run-hicexplorer-plothicmatrix-for-log2-ratio-heatmaps"></a>
+#### Run HiCExplorer `plotHicMatrix` for log2 ratio heatmaps
+<a id="code-12"></a>
+##### Code
+<details>
+<summary><i>Code: Run HiCExplorer `plotHicMatrix` for negative log-transformed heatmaps</i></summary>
+
+```bash
+#!/bin/bash
+
+#  Initialize functions =======================================================
+#  (See above.)
+
+
+#  Configure work environment, directories, and variables =====================
+activate_env "hicexplorer_764_env"
+
+#  Set variables, arrays
+
+#NOTE 2023-1019
+#  Choice of doing hicCompareMatrice internal normalization does not matter
+#+ because of how we have subsampled the matrices
+# choice="no-norm"                                               # echo "${choice}"
+choice="norm"                                                  # echo "${choice}"
+
+res=200                                                        # echo "${res}"
+calc="log2ratio"
+
+coord="XII:451500-460800"                                      # echo "${coord}"  #GOOD
+
+vmax=4                                                         # echo "${vmax}"
+vmin=-${vmax}                                                  # echo "${vmin}"
+
+dpi=300                                                        # echo "${dpi}"
+matcol="PuOr_r"                                                # echo "${matcol}"
+# outdir="pngs/2023-1013_XII-square_whole-genome"                # echo "${outdir}"
+outdir="pngs/2023-1019_$(sed 's/\:/-/g' <(echo "${coord}"))"   # echo "${outdir}"
+
+unset cools && typeset -a cools
+while IFS=" " read -r -d $'\0'; do
+    cools+=( "${REPLY}" )
+done < <(
+    find \
+        12_hicCompareMatrices_XII_KR-filt-0.4/${choice} \
+        -maxdepth 1 \
+        -type f \
+        -name *.${res}.${calc}.cool \
+        -print0 \
+            | sort -z
+)
+# echo_test "${cools[@]}"
+
+
+#  Execute main tasks =========================================================
+#  Go to work directory
+change_dir \
+    "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process"
+
+#  Make outfile directory if it doesn't exist
+[[ ! -d "${outdir}" ]] && mkdir -p "${outdir}/err_out" || true
+
+iter=0
+for i in "${cools[@]}"; do
+    # echo_test "${cools[@]}"
+    # i="${cools[0]}"                                                            # echo "${i}"
+    
+    indir="$(dirname ${i})"                                                      # echo "${indir}"
+    infile="$(basename ${i})"                                                    # echo "${infile}"
+    
+    if [[ ${coord} == "I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI" ]]; then
+        what="genome"
+    else
+        # what="$(echo ${coord} | awk -F ':' '{ print $1 }')"
+        what="${coord}"
+    fi
+    # echo "${what}"
+
+    if [[ ${indir} =~ "whole-matrix" ]]; then
+        how="$(
+            echo ${indir} \
+                | awk -F '_' '{ print $4" w all contacts, downsampled wrt "$3 }'
+        )"
+    else
+        how="$(
+            echo ${indir} \
+                | awk -F '_' '{ print $4" w cis contacts, downsampled wrt "$3 }'
+        )"
+    fi
+    # echo "${how}"
+
+    title="${what}; ${how}; ${res}-bp res"                                       # echo "${title}"
+    suffix="$(
+        echo ${title} \
+            | awk -F '[;,\\ ]' '{ print $1"_ds-"$10"_"$3"-"$5"-"$6 }' \
+            | sed 's/\:/-/g'
+    )"                                                                           # echo "${suffix}"
+    # echo "$(basename ${i} .cool)"
+    outfile="${outdir}/$(basename ${i} .cool).${vmax}.pdf"                       # echo "${outfile}"
+    job_name="hicPlotMatrix.$(basename ${outfile} .pdf)"                         # echo "${job_name}"
+    err_out_dir="$(dirname ${outfile})/err_out"                                  # echo "${err_out_dir}"
+
+    (( iter++ ))
+
+    check_variables=true
+    if ${check_command}; then
+        echo """
+                \${res}  ${res}
+              \${coord}  ${coord}
+               \${vmin}  ${vmin}
+               \${vmax}  ${vmax}
+                \${dpi}  ${dpi}
+             \${matcol}  ${matcol}
+              \${indir}  ${indir}
+             \${infile}  ${infile}
+             \${outdir}  ${outdir}
+            \${outfile}  ${outfile}
+              \${title}  ${title}
+           \${job_name}  ${job_name}
+        \${err_out_dir}  ${err_out_dir}
+        """
+    fi
+
+    check_command=true
+    if ${check_command}; then
+        echo """
+        ### ${iter} ###
+        run_hicPlotMatrix \\
+            -i \"${indir}/${infile}\" \\
+            -o \"${outfile}\" \\
+            -j \"${job_name}\" \\
+            -e \"${err_out_dir}\" \\
+            -c \"${coord}\" \\
+            -r \"${matcol}\" \\
+            -n ${vmin} \\
+            -x ${vmax} \\
+            -t \"${title}\" \\
+            -p ${dpi} \\
+            -d
+        """
+    fi
+
+    do_dry_run=true
+    if ${do_dry_run}; then
+        run_hicPlotMatrix \
+            -i "${indir}/${infile}" \
+            -o "${outfile}" \
+            -j "${job_name}" \
+            -e "${err_out_dir}" \
+            -c "${coord}" \
+            -r "${matcol}" \
+            -n ${vmin} \
+            -x ${vmax} \
+            -t "${title}" \
+            -p ${dpi} \
+            -d
+    fi
+
+    run_job=true
+    if ${run_job}; then
+        run_hicPlotMatrix \
+            -i "${indir}/${infile}" \
+            -o "${outfile}" \
+            -j "${job_name}" \
+            -e "${err_out_dir}" \
+            -c "${coord}" \
+            -r "${matcol}" \
+            -n ${vmin} \
+            -x ${vmax} \
+            -t "${title}" \
+            -p ${dpi}
+    fi
+
+    sleep 0.2
+done
+```
+</details>
+<br />
+
+<a id="8-draw-contact-decay-plots-for-rdna-region"></a>
+### 8. Draw contact-decay plots for rDNA region
+<a id="code-13"></a>
+#### Code
+<details>
+<summary><i>Code: Draw contact-decay plot for rDNA region</i></summary>
+
+```bash
+#!/bin/bash
+
+#  Initialize functions =======================================================
+function create_bed_file() {
+    local help=$(
+cat << EOM
+Usage: create_bed_file -f BED_FILE -c CHROMOSOME -s START -e END -n NAME
+
+Creates a BED file with the specified parameters.
+
+Options:
+  -h, --help        Display this help message
+  -f, --file        Path to the BED file to be created (required)
+  -c, --chromosome  Chromosome name (required)
+  -s, --start       Start position (required)
+  -e, --end         End position (required)
+  -n, --name        Name of the feature (required)
+
+Example:
+  create_bed_file
+      -f rDNA_array_left.bed
+      -c "XII"
+      -s 451500
+      -e 460800
+      -n rDNA_array_left
+EOM
+    )
+
+    if [[ -z "${1}" || "${1}" == "-h" || "${1}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
+    local bed_file=""
+    local chromosome=""
+    local start=""
+    local end=""
+    local name=""
+    local dry_run=false
+
+    while [[ "$#" -gt 0 ]]; do
+        case "${1}" in
+            -f|--file) bed_file="${2}"; shift 2 ;;
+            -c|--chromosome) chromosome="${2}"; shift 2 ;;
+            -s|--start) start="${2}"; shift 2 ;;
+            -e|--end) end="${2}"; shift 2 ;;
+            -n|--name) name="${2}"; shift 2 ;;
+            -d|--dry-run) dry_run=true; shift ;;
+            *) echo "Unknown parameter passed: ${1}"; return 1 ;;
+        esac
+    done
+
+    if [[ -z "${bed_file}" ]]; then
+        echo "Error: Parameter -f|--file is required."
+        echo "${help}"
+        return 1
+    fi
+
+    if [[ -z "${chromosome}" ]]; then
+        echo "Error: Parameter -c|--chromosome is required."
+        echo "${help}"
+        return 1
+    fi
+
+    if [[ -z "${start}" ]]; then
+        echo "Error: Parameter -s|--start is required."
+        echo "${help}"
+        return 1
+    fi
+
+    if [[ -z  "${end}" ]]; then
+        echo "Error: Parameter -e|--end is required."
+        echo "${help}"
+        return 1
+    fi
+
+    if [[ -z "${name}" ]]; then
+        echo "Error: Parameter -n|--name is required."
+        echo "${help}"
+        return 1
+    fi
+
+    if [[ -f "${bed_file}" && ! "${dry_run}" ]]; then
+        echo "Error: ${bed_file} already exists. To avoid overwriting, please"
+        echo "       specify a different file or delete the existing one."
+        return 1
+    fi
+
+    #TODO #FIXME
+    # if echo -e test | grep "-q -e"; then
+    #     #  echo -e is not supported
+    #     print_cmd="printf \"%s\\t%s\\t%s\\t%s\\n\""
+    # else
+    #     #  echo -e is supported
+    #     print_cmd="echo -e"
+    # fi
+
+    if "${dry_run}"; then
+        # ${print_cmd} "${chromosome}\t${start}\t${end}\t${name}"
+        
+        echo "Dry run mode enabled. The following entry would be added to ${bed_file}:"
+        echo -e "${chromosome}\t${start}\t${end}\t${name}"
+        echo ""
+
+        echo "Command that would be called:"
+        echo -e "echo -e \"${chromosome}\\\t${start}\\\t${end}\\\t${name}\" >> \"${bed_file}\""
+    else
+        # ${print_cmd} "${chromosome}\t${start}\t${end}\t${name}" >> "${bed_file}"
+        
+        echo -e "${chromosome}\t${start}\t${end}\t${name}" >> "${bed_file}"
+        
+        echo "Entry added to ${bed_file}."
+    fi
+}
+
+
+function run_hicPlotDistVsCounts() {
+    local help=$(
+cat << EOM
+Usage: run_hicPlotDistVsCounts -m MATRICES -p PLOT_FILE -t TXT_FILE -l LABELS
+  [-b BED_FILE] [-x MAX_DEPTH] [-s PLOT_SIZE] [-j JOB_NAME] [-e ERR_OUT_DIR]
+  [-d]
+
+Generates a contact-decay plot for Hi-C data.
+
+Options:
+  -h, --help          Display this help message
+  -m, --matrices      Paths to the input matrices, comma-separated (required)
+  -p, --plot-file     Path to the output plot file (required)
+  -t, --txt-file      Path to the output txt file (required)
+  -l, --labels        Labels for the matrices, comma-separated (required)
+  -b, --bed-file      Path to the BED file for domains (optional)
+  -x, --max-depth     Maximum depth for the plot (default: 2000000)
+  -s, --plot-size     Size of the plot (default: "5 4.2")
+  -j, --job-name      Name of the job (required)
+  -e, --err-out-dir   Directory for stderr and stdout logs (required)
+  -d, --dry-run       Print the sbatch command without executing it
+
+Dependencies:
+  hicPlotDistVsCounts: Required for generating the plot
+  sbatch: Used for job submission
+
+Example:
+  run_hicPlotDistVsCounts
+      -m "matrix_Q.cool,matrix_G1.cool,matrix_G2.cool"
+      -p "path/to/output_plot.png"
+      -t "path/to/output_data.txt"
+      -l "label_Q,label_G1,label_G2"
+      -b "path/to/rDNA_left_array.bed"
+      -x 10000
+      -s "5 4.2"
+      -j "plotDistVsCounts"
+      -e "path/to/logs"
+EOM
+    )
+
+    if [[ -z "${1}" || "${1}" == "-h" || "${1}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
+    local matrices=""
+    local plot_file=""
+    local txt_file=""
+    local labels=""
+    local bed_file=""
+    local max_depth=2000000
+    local plot_size="5 4.2"
+    local job_name=""
+    local err_out_dir=""
+    local dry_run=false
+    local debug=true  #  Hardcoded argument
+
+    while [[ "$#" -gt 0 ]]; do
+        case "${1}" in
+            -m|--matrices) matrices="${2}"; shift 2 ;;
+            -p|--plot-file) plot_file="${2}"; shift 2 ;;
+            -t|--data-file) txt_file="${2}"; shift 2 ;;
+            -l|--labels) labels="${2}"; shift 2 ;;
+            -b|--bed-file) bed_file="${2}"; shift 2 ;;
+            -x|--max-depth) max_depth="${2}"; shift 2 ;;
+            -s|--plot-size) plot_size="${2}"; shift 2 ;;
+            -j|--job-name) job_name="${2}"; shift 2 ;;
+            -e|--err-out-dir) err_out_dir="${2}"; shift 2 ;;
+            -d|--dry-run) dry_run=true; shift ;;
+            *) echo "Unknown parameter passed: ${1}"; return 1 ;;
+        esac
+    done
+
+    if ! check_requirements hicPlotDistVsCounts sbatch; then return 1; fi
+
+    #  Add validations for the required parameters here
+
+    if ${debug}; then
+        local sbatch_script=$(
+cat << EOF
+#!/bin/bash
+
+#SBATCH --job-name="${job_name}"
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=1
+#SBATCH --error="${err_out_dir}/${job_name}.%A.stderr.txt"
+#SBATCH --output="${err_out_dir}/${job_name}.%A.stdout.txt"
+
+echo "### HARDCODED DEBUG MODE ENABLED ###"
+echo "Started job submission."
+
+#  Print all variables
+echo "matrices .................... ${matrices}"
+echo "plot_file ................... ${plot_file}"
+echo "txt_file .................... ${txt_file}"
+echo "labels ...................... ${labels}"
+echo "bed_file .................... ${bed_file}"
+echo "max_depth ................... ${max_depth}"
+echo "plot_size ................... ${plot_size}"
+echo "job_name .................... ${job_name}"
+echo "err_out_dir ................. ${err_out_dir}"
+echo "dry_run ..................... ${dry_run}"
+
+#  Print the final command
+echo """
+Final command:
+
+hicPlotDistVsCounts \
+    --matrices $(echo "${matrices}" | tr ',' ' ') \
+    --plotFile "${plot_file}" \
+    --outFileData "${txt_file}" \
+    --labels $(echo "${labels}" | tr ',' ' ') \
+    --maxdepth ${max_depth} \
+    $(if [[ -n "${bed_file}" ]]; then echo "--domains ${bed_file}"; fi) \
+    --plotsize $(echo "${plot_size}" | tr ' ' ' ')
+"""
+
+#  Execute the command
+hicPlotDistVsCounts \
+    --matrices $(echo "${matrices}" | tr ',' ' ') \
+    --plotFile "${plot_file}" \
+    --outFileData "${txt_file}" \
+    --labels $(echo "${labels}" | tr ',' ' ') \
+    --maxdepth ${max_depth} \
+    $(if [[ -n "${bed_file}" ]]; then echo "--domains ${bed_file}"; fi) \
+    --plotsize $(echo "${plot_size}" | tr ' ' ' ')
+
+echo "Completed job submission."
+EOF
+        )
+    else
+        local sbatch_script=$(
+cat << EOF
+#!/bin/bash
+
+#SBATCH --job-name="${job_name}"
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=1
+#SBATCH --error="${err_out_dir}/${job_name}.%A.stderr.txt"
+#SBATCH --output="${err_out_dir}/${job_name}.%A.stdout.txt"
+
+hicPlotDistVsCounts \
+    --matrices $(echo "${matrices}" | tr ',' ' ') \
+    --plotFile "${plot_file}" \
+    --outFileData "${txt_file}" \
+    --labels $(echo "${labels}" | tr ',' ' ') \
+    --maxdepth ${max_depth} \
+    $(if [[ -n "${bed_file}" ]]; then echo "--domains ${bed_file}"; fi) \
+    --plotsize $(echo "${plot_size}" | tr ' ' ' ')
+EOF
+        )
+    fi
+
+    if "${dry_run}"; then
+        echo "Dry run mode enabled. The following sbatch script would be executed:"
+        echo "${sbatch_script}"
+    else
+        echo "${sbatch_script}" | sbatch
+        echo "Job submitted with name '${job_name}'."
+    fi
+
+    return 0
+}
+
+
+#  Configure work environment, directories, and variables =====================
+#  For generation of bed file -------------------------------------------------
+chrom="XII"                                          # echo "${chrom}"
+start="451400"                                       # echo "${start}"
+end="460800"                                         # echo "${end}"
+name="rDNA_left_array"                               # echo "${name}"
+bed="${chrom}-${start}-${end}.bed"                   # echo "${bed}"
+
+outdir=beds                                          # echo "${outdir}"
+[[ ! -d "${outdir}" ]] && mkdir "${outdir}" || true
+
+outbed="${outdir}/${bed}"
+
+
+#  For call to hicPlotDistVsCounts --------------------------------------------
+d_mat="11_cooler_XII_KR-filt-0.4"
+f_Q="MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.200.downsample-to-G1.cool"
+f_G1="MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.200.downsample-to-G1.cool"
+f_G2="MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.200.downsample-to-G1.cool"
+
+mat_Q="${d_mat}/${f_Q}"
+mat_G1="${d_mat}/${f_G1}"
+mat_G2="${d_mat}/${f_G2}"
+
+lab_Q="Q"
+lab_G1="G1"
+lab_G2="G2-M"
+
+coord="${chrom}:${start}-${end}"                                # echo "${coord}"
+string="$(sed 's/\:/-/g' <(echo "${coord}"))"            # echo "${string}"
+d_out="pngs/2023-1019_${string}"                         # ., "${d_out}"
+bed="beds/${string}.bed"                                 # ., "${bed}"  # cat "${bed}"
+plot="${d_out}/contact-decay_${string}.pdf"              # echo "${plot}"
+txt="${d_out}/contact-decay_${string}.txt"               # echo "${txt}"
+
+job_name="hicPlotDistVsCounts.$(basename ${plot} .pdf)"  # echo "${job_name}"
+err_out_dir="$(dirname ${plot})/err_out"                 # echo "${err_out_dir}"
+
+check_variables=true
+if ${check_command}; then
+    echo """
+          d_mat  ${d_mat}
+            f_Q  ${f_Q}
+           f_G1  ${f_G1}
+           f_G2  ${f_G2}
+
+          mat_Q  ${mat_Q}
+         mat_G1  ${mat_G1}
+         mat_G2  ${mat_G2}
+
+          lab_Q  ${lab_Q}
+         lab_G1  ${lab_G1}
+         lab_G2  ${lab_G2}
+
+          coord  ${coord}
+          d_out  ${d_out}
+            bed  ${bed}
+           plot  ${plot}
+            txt  ${txt}
+
+       job_name  ${job_name}
+    err_out_dir  ${err_out_dir}
+    """
+fi
+
+plot_size="5 4.2"
+
+#  Execute main tasks =========================================================
+#  Generation of bed file for contact-decay curve -----------------------------
+do_dry_run=true
+if ${do_dry_run}; then
+    create_bed_file \
+        -f "${outbed}" \
+        -c "${chrom}" \
+        -s ${start} \
+        -e ${end} \
+        -n "${name}" \
+        -d
+fi
+
+run_command=true
+if ${run_command}; then
+    create_bed_file \
+        -f "${outbed}" \
+        -c "${chrom}" \
+        -s ${start} \
+        -e ${end} \
+        -n "${name}"
+fi
+
+
+#  Generation of contact-decay curve for left rDNA array ----------------------
+[[ ! -d "${err_out_dir}" ]] && mkdir -p "${err_out_dir}"
+
+check_command=true
+if ${check_command}; then
+    echo """
+    run_hicPlotDistVsCounts \\
+        -m \"${mat_Q},${mat_G1},${mat_G2}\" \\
+        -p \"${plot}\" \\
+        -d \"${txt}\" \\
+        -l \"${lab_Q},${lab_G1},${lab_G2}\" \\
+        -b \"${bed}\" \\
+        -j \"${job_name}\" \\
+        -e \"${err_out_dir}\" \\
+        -d
+    """
+fi
+
+do_dry_run=true
+if ${do_dry_run}; then
+    run_hicPlotDistVsCounts \
+        -m "${mat_Q},${mat_G1},${mat_G2}" \
+        -p "${plot}" \
+        -t "${txt}" \
+        -l "${lab_Q},${lab_G1},${lab_G2}" \
+        -b "${bed}" \
+        -j "${job_name}" \
+        -e "${err_out_dir}" \
+        -d
+fi
+
+run_command=true
+if ${run_command}; then
+    run_hicPlotDistVsCounts \
+        -m "${mat_Q},${mat_G1},${mat_G2}" \
+        -p "${plot}" \
+        -t "${txt}" \
+        -l "${lab_Q},${lab_G1},${lab_G2}" \
+        -b "${bed}" \
+        -j "${job_name}" \
+        -e "${err_out_dir}"
+fi
+
+#FIXME
+#  From hicPlotDistVsCounts.contact-decay_XII-451500-460800.30570507.stderr:
+#+ INFO:hicexplorer.hicPlotDistVsCounts:processing chromosome all
+#+ 
+#+ Traceback (most recent call last):
+#+   File "/home/kalavatt/miniconda3/envs/hicexplorer_764_env/bin/hicPlotDistVsCounts", line 7, in <module>
+#+     main()
+#+   File "/home/kalavatt/miniconda3/envs/hicexplorer_764_env/lib/python3.7/site-packages/hicexplorer/hicPlotDistVsCounts.py", line 428, in main
+#+     custom_cut_interval = from_bed_to_cut_interval(hic_ma, args.domains)
+#+   File "/home/kalavatt/miniconda3/envs/hicexplorer_764_env/lib/python3.7/site-packages/hicexplorer/hicPlotDistVsCounts.py", line 393, in from_bed_to_cut_interval
+#+     "No region overlapped with bins."
+#+ AssertionError: No region overlapped with bins.
+
+
+activate_env pairtools_env
+python subset_cool-on-bed.py
+
+check_command=true
+if ${check_command}; then
+    echo """
+    python subset_cool-on-bed.py \\
+        ${mat_Q} \\
+        ${bed} \\
+        ${mat_Q%.cool}.${string}.cool
+        """
+fi
+
+run_command=true
+if ${run_command}; then
+    python subset_cool-on-bed.py \
+        ${mat_Q} \
+        ${bed} \
+        ${mat_Q%.cool}.${string}.cool
+fi
+
+# cat ${bed}
+# echo ${chrom}
+# echo ${start}-${end}
+# echo ${mat_Q}
+
+activate_env pairtools_env
+
+cooler dump --balanced --join -r ${chrom}:${start}-${end} ${mat_Q} > dumped_data.txt
+less dumped_data.txt
+cat dumped_data.txt | wc -l
+
+binsize=200
+chrom_sizes="${HOME}/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size"
+output_cool="${mat_Q%.cool}.${string}.cool"
+cooler load --format bg2 "${chrom_sizes}:${binsize}" dumped_data.txt "${output_cool}"
+
+python add_weights-to-cool.py -c "${output_cool}" -b dumped_data.txt
+rm "${output_cool}"
+
+# python create_cool-from-bedpe.py -i dumped_data.txt -o ${mat_Q%.cool}.${string}.cool
+# # rm ${mat_Q%.cool}.${string}.cool
+
+# binsize=200
+# chrom_sizes="${HOME}/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size"
+# cooler load \
+#     --format bg2 \
+#     --field chrom1=1:dtype=str \
+#     --field start1=2:dtype=int \
+#     --field end1=3:dtype=int \
+#     --field chrom2=4:dtype=str \
+#     --field start2=5:dtype=int \
+#     --field end2=6:dtype=int \
+#     --field count=7:dtype=int \
+#     --field balanced=8:dtype=float \
+#     ${chrom_sizes}:${binsize} \
+#     dumped_data.txt \
+#     ${mat_Q%.cool}.${string}.cool
+# # rm ${mat_Q%.cool}.${string}.cool
+
+# cooler dump --balanced --join -r ${chrom}:${start}-${end} ${mat_Q%.cool}.${string}.cool > dumped_data_2.txt
+# rm dumped_data_2.txt
+
+cooler dump --join -r ${chrom}:${start}-${end} ${mat_Q%.cool}.${string}.cool > dumped_data_2.txt
+# rm dumped_data_2.txt
+
+less dumped_data_2.txt
+cat dumped_data_2.txt | wc -l
+
+activate_env hicexplorer_764_env
+
+run_hicPlotDistVsCounts \
+    -m "${mat_Q%.cool}.${string}.cool" \
+    -p "${plot}" \
+    -t "${txt}" \
+    -l "${lab_Q}" \
+    -b "${bed}" \
+    -j "${job_name}" \
+    -e "${err_out_dir}"
+
 ```
 </details>
 <br />
