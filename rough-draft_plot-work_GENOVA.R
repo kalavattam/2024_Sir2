@@ -73,7 +73,7 @@ if(res %in% c(6400, 5000)) {
 
 f_Q <- paste0(
     p_cool, "/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.",
-    res, ".", suf, ".cool"
+    res, ".", suf, ".XII-451500-460800.cool" # ".cool"
 )  # file.exists(f_Q)
 f_1 <- paste0(
     p_cool, "/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.",
@@ -430,8 +430,10 @@ run_quant_RCP_rDNA <- lgl
 if(base::isTRUE(run_quant_RCP_rDNA)) {
     bed_rDNA <- data.frame(
         "chromosome" = "XII",
-        "start" = 451526,
-        "end" = 468980
+        # "start" = 451526,
+        # "end" = 468980,
+        "start" = 451500,
+        "end" = 460800
     )
     
     quant_RCP_rDNA <- GENOVA::RCP(
@@ -441,7 +443,7 @@ if(base::isTRUE(run_quant_RCP_rDNA)) {
     # GENOVA::visualise(quant_RCP_rDNA)
     
     title <- "cis-interaction frequency probabilities (P)\nstratified by distance (s)"
-    subtitle <- paste0("rDNA, resolution of ", res)
+    subtitle <- paste0("rDNA, left array; resolution of ", res)
     plot_RCP_rDNA <- quant_RCP_rDNA$smooth %>%
         ggplot(aes(x = distance, y = P, color = samplename)) +
         annotation_logticks(sides = "lb", color = "grey92", outside = FALSE) +
@@ -472,6 +474,7 @@ if(base::isTRUE(run_quant_RCP_rDNA)) {
     }
 }
 
+class(quant_RCP_rDNA)
 
 #  Identify and plot relative contact probabilities (RCPs) --------------------
 #+ ...for rDNA region, 1-10,000 bp
@@ -480,8 +483,10 @@ run_quant_RCP_rDNA_zoom <- lgl
 if(base::isTRUE(run_quant_RCP_rDNA_zoom)) {
     bed_rDNA <- data.frame(
         "chromosome" = "XII",
-        "start" = 451526,
-        "end" = 468980
+        # "start" = 451526,
+        # "end" = 468980,
+        "start" = 451500,
+        "end" = 460800
     )
     
     quant_RCP_rDNA_zoom <- GENOVA::RCP(
@@ -491,7 +496,7 @@ if(base::isTRUE(run_quant_RCP_rDNA_zoom)) {
     # GENOVA::visualise(quant_RCP_rDNA)
     
     title <- "cis-interaction frequency probabilities (P)\nstratified by distance (s)"
-    subtitle <- paste0("rDNA, resolution of ", res)
+    subtitle <- paste0("rDNA, left array; resolution of ", res)
     plot_RCP_rDNA_zoom <- quant_RCP_rDNA_zoom$smooth %>%
         ggplot(aes(x = distance, y = P, color = samplename)) +
         annotation_logticks(sides = "lb", color = "grey92", outside = FALSE) +
