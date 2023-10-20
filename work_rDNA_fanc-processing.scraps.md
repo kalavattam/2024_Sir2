@@ -521,3 +521,216 @@ for hic in hics:
 ```
 </details>
 <br />
+
+<a id="5-draw-example-plots-of-the-hic-files"></a>
+### 5. Draw example plots of the `.hic` files
+<a id="code-8"></a>
+#### Code
+<details>
+<summary><i>Code: Step 5. Draw example plots of `.hic` files</i></summary>
+
+```bash
+#!/bin/bash
+
+#DONE This chunk can be moved to work_rDNA_fanc-processing.scraps.md
+#NOTE We'll not use fancplot for visualizatons; instead, we'll use HiCExplorer
+run_chunk=false
+if ${run_chunk}; then
+    outdir="pngs/2023-1012_XII-triangle"
+    [[ ! -d ${outdir} ]] && mkdir ${outdir} || true
+
+    unset indir && typeset -a indir=(
+        "10_fanc_XII_KR-filt-0.2"
+        "10_fanc_XII_KR-filt-0.3"
+        "10_fanc_XII_KR-filt-0.4"
+        "10_fanc_genome_KR-filt-0.2"
+        "10_fanc_genome_KR-filt-0.3"
+        "10_fanc_genome_KR-filt-0.4"
+    )
+
+    res=6400
+
+    for j in "${indir[@]}"; do
+        unset hics && typeset -a hics
+        while IFS=" " read -r -d $'\0'; do
+            hics+=( "${REPLY}" )
+        done < <(
+            find "${j}" \
+                -maxdepth 1 \
+                -type f \
+                -name MC-*.${res}.*.hic \
+                -print0 \
+                    | sort -z
+        )
+
+        check_array=TRUE
+        [[ ${check_array} ]] && echo_test "${hics[@]}" || true
+
+        coord="XII:1-1078177"                                                    # echo "${coord}"
+        shape="triangular"                                                       # echo "${shape}"
+        # vmin=0.0001                                                              # echo "${vmin}"
+        # vmax=1                                                                   # echo "${vmax}"
+        vmin=1                                                                   # echo "${vmin}"
+        vmax=5000                                                                # echo "${vmax}"
+        how="$(echo ${j} | awk -F '_' '{ print $4" of downsampled "$3 }')"       # echo "${how}"
+        what="$(echo ${coord} | awk -F ':' '{ print $1 }')"                      # echo "${what}"
+        title="${what}, ${how}, ${res}-bp res"                                   # echo "${title}"
+        suffix="$(echo ${title} | awk -F '[,\\ ]' '{ print $1"_ds-"$6"_"$3 }')"  # echo "${suffix}"
+        matcol="RdPu"
+
+        #  XII, log_e-transformed, 10E-4 min, 10E1 max, balanced
+        for i in "${hics[@]}"; do
+            out="${outdir}/$(basename ${i} .hic).${suffix}.pdf"
+            
+            check_command_bal=FALSE
+            [[ ${check_command_bal} == TRUE ]] &&
+                {
+                    echo """
+                    fancplot \\
+                        -o \"${out}\" \\
+                        \"${coord}\" \\
+                        -p ${shape} -l -vmin ${vmin} -vmax ${vmax} \\
+                        --title \"${title}\" \\
+                        -c \"${matcol}\" \\
+                        \"${i}\"
+                    """
+                }
+
+            run_command_bal=FALSE
+            [[ ${run_command_bal} == TRUE ]] &&
+                {
+                    fancplot \
+                        -o "${out}" \
+                        "${coord}" \
+                        -p ${shape} -l -vmin ${vmin} -vmax ${vmax} \
+                        --title "${title}" \
+                        -c "${matcol}" \
+                        "${i}"
+                }
+
+            check_command_unbal=TRUE
+            [[ ${check_command_unbal} == TRUE ]] &&
+                {
+                    echo """
+                    fancplot \\
+                        -o \"${out%.pdf}.unbal.pdf\" \\
+                        \"${coord}\" \\
+                        -p ${shape} -u -l -vmin ${vmin} -vmax ${vmax} \\
+                        --title \"${title}\" \\
+                        -c \"${matcol}\" \\
+                        \"${i}\"
+                    """
+                }
+
+            run_command_unbal=TRUE
+            [[ ${run_command_unbal} == TRUE ]] &&
+                {
+                    fancplot \
+                        -o "${out%.pdf}.unbal.pdf" \
+                        "${coord}" \
+                        -p ${shape} -u -l -vmin ${vmin} -vmax ${vmax} \
+                        --title "${title}" \
+                        -c "${matcol}" \
+                        "${i}"
+                }
+
+            sleep 0.05
+        done
+    done
+
+    # #  XII, log_e-transformed, 1 min, 1000 max, uncorrected
+    # for i in "${downsample[@]}"; do
+    #     fancplot \
+    #         -o "${outdir}/$(basename ${i} .hic).log-unbal.pdf" \
+    #         "XII:1-1078177" \
+    #         -p triangular -u -l -vmin 1 -vmax 5000 \
+    #         --title "6400 bp, XII" \
+    #         -c Reds \
+    #         "${i}"
+    # done
+fi
+```
+</details>
+<br />
+
+<a id="x-initial-failed-subsetting-test-2023-1019"></a>
+### X. Initial failed subsetting test, 2023-1019
+<a id="code-14"></a>
+#### Code
+<details>
+<summary><i>Code: Initial failed subsetting test, 2023-1019</i></summary>
+
+```bash
+#!/bin/bash
+
+activate_env pairtools_env
+python subset_cool-on-bed.py
+
+check_command=true
+if ${check_command}; then
+    echo """
+    python subset_cool-on-bed.py \\
+        ${mat_Q} \\
+        ${bed} \\
+        ${mat_Q%.cool}.${string}.cool
+        """
+fi
+
+run_command=true
+if ${run_command}; then
+    python subset_cool-on-bed.py \
+        ${mat_Q} \
+        ${bed} \
+        ${mat_Q%.cool}.${string}.cool
+fi
+
+# cat ${bed}
+# echo ${chrom}
+# echo ${start}-${end}
+# echo ${mat_Q}
+
+activate_env pairtools_env
+
+cooler dump --balanced --join -r ${chrom}:${start}-${end} ${mat_Q} > dumped_data.txt
+less dumped_data.txt
+cat dumped_data.txt | wc -l
+
+binsize=200
+chrom_sizes="${HOME}/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size"
+output_cool="${mat_Q%.cool}.${string}.cool"
+cooler load --format bg2 "${chrom_sizes}:${binsize}" dumped_data.txt "${output_cool}"
+
+python add_weights-to-cool.py -c "${output_cool}" -b dumped_data.txt
+rm "${output_cool}"
+
+# python create_cool-from-bedpe.py -i dumped_data.txt -o ${mat_Q%.cool}.${string}.cool
+# # rm ${mat_Q%.cool}.${string}.cool
+
+# binsize=200
+# chrom_sizes="${HOME}/genomes/Saccharomyces_cerevisiae/fasta-processed/S288C_reference_sequence_R64-3-1_20210421.size"
+# cooler load \
+#     --format bg2 \
+#     --field chrom1=1:dtype=str \
+#     --field start1=2:dtype=int \
+#     --field end1=3:dtype=int \
+#     --field chrom2=4:dtype=str \
+#     --field start2=5:dtype=int \
+#     --field end2=6:dtype=int \
+#     --field count=7:dtype=int \
+#     --field balanced=8:dtype=float \
+#     ${chrom_sizes}:${binsize} \
+#     dumped_data.txt \
+#     ${mat_Q%.cool}.${string}.cool
+# # rm ${mat_Q%.cool}.${string}.cool
+
+# cooler dump --balanced --join -r ${chrom}:${start}-${end} ${mat_Q%.cool}.${string}.cool > dumped_data_2.txt
+# rm dumped_data_2.txt
+
+cooler dump --join -r ${chrom}:${start}-${end} ${mat_Q%.cool}.${string}.cool > dumped_data_2.txt
+# rm dumped_data_2.txt
+
+less dumped_data_2.txt
+cat dumped_data_2.txt | wc -l
+```
+</details>
+<br />
