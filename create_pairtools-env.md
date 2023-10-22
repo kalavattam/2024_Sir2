@@ -17,8 +17,8 @@
 ```bash
 #!/bin/bash
 
-install_env=FALSE
-if [[ "${install_env}" == TRUE ]]; then
+install_env_server=false
+if ${install_env_server}; then
     #  Get GNU parallel, which is used below
     mamba create \
         -n pairtools_env \
@@ -48,20 +48,25 @@ if [[ "${install_env}" == TRUE ]]; then
             r-tidyverse
 fi
 
-install_env_ARM=TRUE
-if [[ "${install_env_ARM}" == TRUE ]]; then
+install_env_ARM=true
+activate_env=true
+install_clodius=true
+if ${install_env_ARM}; then
     env_name="pairtools_env"
+    
     CONDA_SUBDIR=osx-64 \
     mamba create \
         -n "${env_name}" \
         -c conda-forge \
-            parallel
-
-    mamba activate "${env_name}"
-
-    CONDA_SUBDIR=osx-64 \
-    mamba install \
         -c bioconda \
+            parallel \
+            pbzip2 \
+            pigz \
+            r-argparse \
+            r-ggsci \
+            r-plotly \
+            r-tidyverse \
+            bedops \
             bioframe \
             cooler \
             coolpuppy \
@@ -73,15 +78,8 @@ if [[ "${install_env_ARM}" == TRUE ]]; then
             bioconductor-gviz \
             bioconductor-interactionset
 
-    CONDA_SUBDIR=osx-64 \
-    mamba install \
-        -c conda-forge \
-            pbzip2 \
-            pigz \
-            r-argparse \
-            r-ggsci \
-            r-plotly \
-            r-tidyverse
+    if ${activate_env}; then mamba activate "${env_name}"; fi
+    if ${install_clodius}; then pip install clodius; fi
 fi
 ```
 </details>
@@ -89,6 +87,7 @@ fi
 
 <a id="printed"></a>
 ##### Printed
+###### Install mamba packages (ARM, KrisMac)
 <details>
 <summary><i>Printed: Install mamba packages (ARM, KrisMac)</i></summary>
 
@@ -1158,6 +1157,873 @@ Executing transaction: done
 </details>
 <br />
 
+###### Install mamba packages (ARM, WorkMac)
+<details>
+<summary><i>Printed: Install mamba packages (ARM, WorkMac)</i></summary>
+
+```txt
+❯ env_name="pairtools_env"❯
+❯     CONDA_SUBDIR=osx-64 \
+>     mamba create \
+>         -n "${env_name}" \
+>         -c conda-forge \
+>         -c bioconda \
+>             parallel \
+>             pbzip2 \
+>             pigz \
+>             r-argparse \
+>             r-ggsci \
+>             r-plotly \
+>             r-tidyverse \
+>             bedops \
+>             bioframe \
+>             cooler \
+>             coolpuppy \
+>             cooltools \
+>             pairtools \
+>             rename \
+>             bioconductor-genomicinteractions \
+>             bioconductor-genomicranges \
+>             bioconductor-gviz \
+>             bioconductor-interactionset
+
+                  __    __    __    __
+                 /  \  /  \  /  \  /  \
+                /    \/    \/    \/    \
+███████████████/  /██/  /██/  /██/  /████████████████████████
+              /  / \   / \   / \   / \  \____
+             /  /   \_/   \_/   \_/   \    o \__,
+            / _/                       \_____/  `
+            |/
+        ███╗   ███╗ █████╗ ███╗   ███╗██████╗  █████╗
+        ████╗ ████║██╔══██╗████╗ ████║██╔══██╗██╔══██╗
+        ██╔████╔██║███████║██╔████╔██║██████╔╝███████║
+        ██║╚██╔╝██║██╔══██║██║╚██╔╝██║██╔══██╗██╔══██║
+        ██║ ╚═╝ ██║██║  ██║██║ ╚═╝ ██║██████╔╝██║  ██║
+        ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝
+
+        mamba (1.4.1) supported by @QuantStack
+
+        GitHub:  https://github.com/mamba-org/mamba
+        Twitter: https://twitter.com/QuantStack
+
+█████████████████████████████████████████████████████████████
+
+
+Looking for: ['parallel', 'pbzip2', 'pigz', 'r-argparse', 'r-ggsci', 'r-plotly', 'r-tidyverse', 'bedops', 'bioframe', 'cooler', 'coolpuppy', 'cooltools', 'pairtools', 'rename', 'bioconductor-genomicinteractions', 'bioconductor-genomicranges', 'bioconductor-gviz', 'bioconductor-interactionset']
+
+conda-forge/osx-64                                          Using cache
+conda-forge/noarch                                          Using cache
+bioconda/osx-64                                             Using cache
+bioconda/noarch                                             Using cache
+r/osx-64                                                    Using cache
+r/noarch                                                    Using cache
+pkgs/main/osx-64                                            Using cache
+pkgs/main/noarch                                            Using cache
+pkgs/r/osx-64                                               Using cache
+pkgs/r/noarch                                               Using cache
+Transaction
+
+  Prefix: /Users/kalavatt/mambaforge/envs/pairtools_env
+
+  Updating specs:
+
+   - parallel
+   - pbzip2
+   - pigz
+   - r-argparse
+   - r-ggsci
+   - r-plotly
+   - r-tidyverse
+   - bedops
+   - bioframe
+   - cooler
+   - coolpuppy
+   - cooltools
+   - pairtools
+   - rename
+   - bioconductor-genomicinteractions
+   - bioconductor-genomicranges
+   - bioconductor-gviz
+   - bioconductor-interactionset
+
+
+  Package                                   Version  Build                   Channel                  Size
+────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Install:
+────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  + _r-mutex                                  1.0.1  anacondar_1             conda-forge/noarch     Cached
+  + aom                                       3.6.1  he965462_0              conda-forge/osx-64        3MB
+  + argcomplete                               3.1.2  pyhd8ed1ab_0            conda-forge/noarch     Cached
+  + asciitree                                 0.3.3  py_2                    conda-forge/noarch        6kB
+  + aws-c-auth                                0.7.4  h671831e_6              conda-forge/osx-64       89kB
+  + aws-c-cal                                 0.6.7  h50c96e6_0              conda-forge/osx-64       45kB
+  + aws-c-common                              0.9.4  h10d778d_0              conda-forge/osx-64      205kB
+  + aws-c-compression                        0.2.17  h6cdfeff_4              conda-forge/osx-64       18kB
+  + aws-c-event-stream                        0.3.2  h74ccef4_4              conda-forge/osx-64       47kB
+  + aws-c-http                               0.7.13  h7fc0988_7              conda-forge/osx-64      163kB
+  + aws-c-io                                0.13.35  h3dcb58e_4              conda-forge/osx-64      137kB
+  + aws-c-mqtt                                0.9.8  hb951632_0              conda-forge/osx-64      138kB
+  + aws-c-s3                                 0.3.19  hc680d6c_1              conda-forge/osx-64       75kB
+  + aws-c-sdkutils                           0.1.12  h6cdfeff_3              conda-forge/osx-64       47kB
+  + aws-checksums                            0.1.17  h6cdfeff_3              conda-forge/osx-64       49kB
+  + aws-crt-cpp                              0.24.3  hd32531e_7              conda-forge/osx-64      275kB
+  + aws-sdk-cpp                            1.11.182  h5657ac1_1              conda-forge/osx-64        3MB
+  + bedops                                   2.4.41  h85dcccf_1              bioconda/osx-64        Cached
+  + bioconductor-annotationdbi               1.62.2  r43hdfd78af_0           bioconda/noarch        Cached
+  + bioconductor-annotationfilter            1.24.0  r43hdfd78af_0           bioconda/noarch         561kB
+  + bioconductor-biobase                     2.60.0  r43h4c50009_0           bioconda/osx-64        Cached
+  + bioconductor-biocfilecache                2.8.0  r43hdfd78af_0           bioconda/noarch        Cached
+  + bioconductor-biocgenerics                0.46.0  r43hdfd78af_0           bioconda/noarch        Cached
+  + bioconductor-biocio                      1.10.0  r43hdfd78af_0           bioconda/noarch         469kB
+  + bioconductor-biocparallel                1.34.2  r43hc0ef7c4_0           bioconda/osx-64        Cached
+  + bioconductor-biomart                     2.56.1  r43hdfd78af_0           bioconda/noarch         927kB
+  + bioconductor-biostrings                  2.68.1  r43h4c50009_0           bioconda/osx-64        Cached
+  + bioconductor-biovizbase                  1.48.0  r43h4c50009_0           bioconda/osx-64           3MB
+  + bioconductor-bsgenome                    1.68.0  r43hdfd78af_0           bioconda/noarch           7MB
+  + bioconductor-data-packages             20230718  hdfd78af_1              bioconda/noarch        Cached
+  + bioconductor-delayedarray                0.26.6  r43h4c50009_0           bioconda/osx-64        Cached
+  + bioconductor-ensembldb                   2.24.0  r43hdfd78af_0           bioconda/noarch           4MB
+  + bioconductor-genomeinfodb                1.36.1  r43hdfd78af_0           bioconda/noarch        Cached
+  + bioconductor-genomeinfodbdata            1.2.10  r43hdfd78af_0           bioconda/noarch        Cached
+  + bioconductor-genomicalignments           1.36.0  r43h4c50009_0           bioconda/osx-64           2MB
+  + bioconductor-genomicfeatures             1.52.1  r43hdfd78af_0           bioconda/noarch           2MB
+  + bioconductor-genomicinteractions         1.34.0  r43hdfd78af_0           bioconda/noarch           4MB
+  + bioconductor-genomicranges               1.52.0  r43h4c50009_0           bioconda/osx-64        Cached
+  + bioconductor-gviz                        1.44.0  r43hdfd78af_0           bioconda/noarch           7MB
+  + bioconductor-interactionset              1.28.1  r43hc0ef7c4_0           bioconda/osx-64           2MB
+  + bioconductor-iranges                     2.34.1  r43h4c50009_0           bioconda/osx-64        Cached
+  + bioconductor-keggrest                    1.40.0  r43hdfd78af_0           bioconda/noarch        Cached
+  + bioconductor-matrixgenerics              1.12.2  r43hdfd78af_0           bioconda/noarch        Cached
+  + bioconductor-protgenerics                1.32.0  r43hdfd78af_0           bioconda/noarch         249kB
+  + bioconductor-rhtslib                      2.2.0  r43h4c50009_0           bioconda/osx-64        Cached
+  + bioconductor-rsamtools                   2.16.0  r43hc0ef7c4_0           bioconda/osx-64        Cached
+  + bioconductor-rtracklayer                 1.60.0  r43h4c50009_0           bioconda/osx-64           6MB
+  + bioconductor-s4arrays                     1.0.4  r43h4c50009_0           bioconda/osx-64        Cached
+  + bioconductor-s4vectors                   0.38.1  r43h4c50009_0           bioconda/osx-64        Cached
+  + bioconductor-summarizedexperiment        1.30.2  r43hdfd78af_0           bioconda/noarch        Cached
+  + bioconductor-variantannotation           1.46.0  r43h4c50009_0           bioconda/osx-64           4MB
+  + bioconductor-xvector                     0.40.0  r43h4c50009_0           bioconda/osx-64        Cached
+  + bioconductor-zlibbioc                    1.46.0  r43h4c50009_0           bioconda/osx-64        Cached
+  + bioframe                                  0.5.0  pyhdfd78af_0            bioconda/noarch         128kB
+  + biopython                                  1.81  py39ha09f3b3_1          conda-forge/osx-64        3MB
+  + blosc                                    1.21.5  heccf04b_0              conda-forge/osx-64       50kB
+  + bokeh                                     3.3.0  pyhd8ed1ab_0            conda-forge/noarch        5MB
+  + brotli                                    1.1.0  h0dc2134_1              conda-forge/osx-64       20kB
+  + brotli-bin                                1.1.0  h0dc2134_1              conda-forge/osx-64       17kB
+  + brotli-python                             1.1.0  py39h840bb9f_1          conda-forge/osx-64      367kB
+  + brunsli                                     0.1  h046ec9c_0              conda-forge/osx-64      183kB
+  + bwidget                                  1.9.14  h694c41f_1              conda-forge/osx-64     Cached
+  + bzip2                                     1.0.8  h0d85af4_4              conda-forge/osx-64     Cached
+  + c-ares                                   1.20.1  h10d778d_1              conda-forge/osx-64      104kB
+  + c-blosc2                                 2.10.5  h354e526_0              conda-forge/osx-64      273kB
+  + ca-certificates                      2023.08.22  hecd8cb5_0              pkgs/main/osx-64       Cached
+  + cached-property                           1.5.2  hd8ed1ab_1              conda-forge/noarch        4kB
+  + cached_property                           1.5.2  pyha770c72_1            conda-forge/noarch       11kB
+  + cairo                                    1.18.0  h99e66fa_0              conda-forge/osx-64     Cached
+  + cctools_osx-64                          973.0.1  ha1c5b94_15             conda-forge/osx-64     Cached
+  + certifi                               2023.7.22  pyhd8ed1ab_0            conda-forge/noarch     Cached
+  + charls                                    2.4.2  he965462_0              conda-forge/osx-64      138kB
+  + charset-normalizer                        3.3.0  pyhd8ed1ab_0            conda-forge/noarch       46kB
+  + clang                                    16.0.6  hc177806_1              conda-forge/osx-64     Cached
+  + clang-16                                 16.0.6  default_h762fdd7_1      conda-forge/osx-64     Cached
+  + clang_impl_osx-64                        16.0.6  h8787910_5              conda-forge/osx-64       18kB
+  + clang_osx-64                             16.0.6  hb91bd55_5              conda-forge/osx-64       21kB
+  + clangxx                                  16.0.6  default_h762fdd7_1      conda-forge/osx-64     Cached
+  + clangxx_impl_osx-64                      16.0.6  h1b7723c_5              conda-forge/osx-64       18kB
+  + clangxx_osx-64                           16.0.6  hb91bd55_5              conda-forge/osx-64       19kB
+  + click                                     8.1.7  unix_pyh707e725_0       conda-forge/noarch       84kB
+  + cloudpickle                               3.0.0  pyhd8ed1ab_0            conda-forge/noarch       25kB
+  + compiler-rt                              16.0.6  he1888fc_1              conda-forge/osx-64     Cached
+  + compiler-rt_osx-64                       16.0.6  he1888fc_1              conda-forge/noarch     Cached
+  + contourpy                                 1.1.1  py39h8ee36c8_1          conda-forge/osx-64      218kB
+  + cooler                                    0.9.3  pyhdfd78af_0            bioconda/noarch          85kB
+  + coolpuppy                                 1.1.0  pyh086e186_0            bioconda/noarch          45kB
+  + cooltools                                 0.5.4  py39hc889f67_2          bioconda/osx-64         300kB
+  + coreutils                                   9.4  h0dc2134_0              conda-forge/osx-64        1MB
+  + curl                                      8.4.0  h726d00d_0              conda-forge/osx-64     Cached
+  + cycler                                   0.12.1  pyhd8ed1ab_0            conda-forge/noarch       13kB
+  + cytoolz                                  0.12.2  py39hdc70f33_1          conda-forge/osx-64      317kB
+  + dask                                  2023.10.0  pyhd8ed1ab_0            conda-forge/noarch        7kB
+  + dask-core                             2023.10.0  pyhd8ed1ab_0            conda-forge/noarch      863kB
+  + dav1d                                     1.2.1  h0dc2134_0              conda-forge/osx-64      668kB
+  + dill                                      0.3.7  pyhd8ed1ab_0            conda-forge/noarch       88kB
+  + distributed                           2023.10.0  pyhd8ed1ab_0            conda-forge/noarch      788kB
+  + docutils                                 0.20.1  py39h6e9494a_2          conda-forge/osx-64      707kB
+  + expat                                     2.5.0  hf0c8a7f_1              conda-forge/osx-64     Cached
+  + font-ttf-dejavu-sans-mono                  2.37  hab24e00_0              conda-forge/noarch     Cached
+  + font-ttf-inconsolata                      3.000  h77eed37_0              conda-forge/noarch     Cached
+  + font-ttf-source-code-pro                  2.038  h77eed37_0              conda-forge/noarch     Cached
+  + font-ttf-ubuntu                            0.83  hab24e00_0              conda-forge/noarch     Cached
+  + fontconfig                               2.14.2  h5bb23bf_0              conda-forge/osx-64     Cached
+  + fonts-conda-ecosystem                         1  0                       conda-forge/noarch     Cached
+  + fonts-conda-forge                             1  0                       conda-forge/noarch     Cached
+  + fonttools                                4.43.1  py39ha09f3b3_0          conda-forge/osx-64        2MB
+  + freetype                                 2.12.1  h60636b9_2              conda-forge/osx-64     Cached
+  + fribidi                                  1.0.10  hbcb3906_0              conda-forge/osx-64     Cached
+  + fsspec                                2023.10.0  pyhca7485f_0            conda-forge/noarch      125kB
+  + gdbm                                       1.18  h8a0c380_2              conda-forge/osx-64     Cached
+  + gettext                                  0.21.1  h8a4c099_0              conda-forge/osx-64     Cached
+  + gflags                                    2.2.2  hb1e8313_1004           conda-forge/osx-64       95kB
+  + gfortran_impl_osx-64                     12.3.0  h54fd467_1              conda-forge/osx-64     Cached
+  + gfortran_osx-64                          12.3.0  h18f7dce_1              conda-forge/osx-64     Cached
+  + giflib                                    5.2.1  hb7f2c08_3              conda-forge/osx-64     Cached
+  + glog                                      0.6.0  h8ac2a54_0              conda-forge/osx-64      101kB
+  + glpk                                        5.0  h3cb5acd_0              conda-forge/osx-64     Cached
+  + gmp                                       6.2.1  h2e338ed_0              conda-forge/osx-64     Cached
+  + graphite2                                1.3.14  he9d5cce_1              pkgs/main/osx-64       Cached
+  + h5py                                     3.10.0  nompi_py39hab254d4_100  conda-forge/osx-64      987kB
+  + h5sparse                                  0.1.0  pyh086e186_0            bioconda/noarch          12kB
+  + harfbuzz                                  8.2.1  h7666e2a_0              conda-forge/osx-64     Cached
+  + hdf5                                     1.14.2  nompi_hedada53_100      conda-forge/osx-64        4MB
+  + htslib                                     1.18  h365c357_0              bioconda/osx-64           2MB
+  + icu                                        73.2  hf5e326d_0              conda-forge/osx-64     Cached
+  + idna                                        3.4  pyhd8ed1ab_0            conda-forge/noarch     Cached
+  + imagecodecs                            2023.9.4  py39haa70d31_1          conda-forge/osx-64        2MB
+  + imageio                                  2.31.5  pyh8c1a49c_0            conda-forge/noarch      291kB
+  + importlib-metadata                        6.8.0  pyha770c72_0            conda-forge/noarch       26kB
+  + importlib-resources                       6.1.0  pyhd8ed1ab_0            conda-forge/noarch       10kB
+  + importlib_metadata                        6.8.0  hd8ed1ab_0              conda-forge/noarch        9kB
+  + importlib_resources                       6.1.0  pyhd8ed1ab_0            conda-forge/noarch       30kB
+  + isl                                        0.25  hb486fe8_0              conda-forge/osx-64     Cached
+  + jinja2                                    3.1.2  pyhd8ed1ab_1            conda-forge/noarch     Cached
+  + joblib                                    1.3.2  pyhd8ed1ab_0            conda-forge/noarch      221kB
+  + jq                                          1.6  hc929b4f_1000           conda-forge/osx-64     Cached
+  + jxrlib                                      1.1  h35c211d_2              conda-forge/osx-64      231kB
+  + kiwisolver                                1.4.5  py39h8ee36c8_1          conda-forge/osx-64       60kB
+  + krb5                                     1.21.2  hb884880_0              conda-forge/osx-64     Cached
+  + lazy_loader                                 0.3  pyhd8ed1ab_0            conda-forge/noarch       14kB
+  + lcms2                                      2.15  ha53face_2              conda-forge/osx-64      225kB
+  + ld64_osx-64                                 609  ha20a434_15             conda-forge/osx-64     Cached
+  + lerc                                      4.0.0  hb486fe8_0              conda-forge/osx-64     Cached
+  + libabseil                            20230802.1  cxx17_h048a20a_0        conda-forge/osx-64        1MB
+  + libaec                                    1.1.2  he965462_1              conda-forge/osx-64       29kB
+  + libarrow                                 13.0.0  h23351de_11_cpu         conda-forge/osx-64       20MB
+  + libavif16                                 1.0.1  h4fa63ff_2              conda-forge/osx-64       90kB
+  + libblas                                   3.9.0  19_osx64_openblas       conda-forge/osx-64     Cached
+  + libbrotlicommon                           1.1.0  h0dc2134_1              conda-forge/osx-64       67kB
+  + libbrotlidec                              1.1.0  h0dc2134_1              conda-forge/osx-64       30kB
+  + libbrotlienc                              1.1.0  h0dc2134_1              conda-forge/osx-64      299kB
+  + libcblas                                  3.9.0  19_osx64_openblas       conda-forge/osx-64       15kB
+  + libclang-cpp16                           16.0.6  default_h762fdd7_1      conda-forge/osx-64     Cached
+  + libcrc32c                                 1.1.2  he49afe7_0              conda-forge/osx-64       20kB
+  + libcurl                                   8.4.0  h726d00d_0              conda-forge/osx-64     Cached
+  + libcxx                                   16.0.6  hd57cbcb_0              conda-forge/osx-64     Cached
+  + libdeflate                                 1.18  hac1461d_0              conda-forge/osx-64     Cached
+  + libedit                            3.1.20221030  h6c40b1e_0              pkgs/main/osx-64       Cached
+  + libev                                      4.33  haf1e3a3_1              conda-forge/osx-64     Cached
+  + libevent                                 2.1.12  ha90c15b_1              conda-forge/osx-64      373kB
+  + libexpat                                  2.5.0  hf0c8a7f_1              conda-forge/osx-64     Cached
+  + libffi                                    3.4.4  hecd8cb5_0              pkgs/main/osx-64       Cached
+  + libgfortran                               5.0.0  13_2_0_h97931a8_1       conda-forge/osx-64     Cached
+  + libgfortran-devel_osx-64                 12.3.0  h0b6f5ec_1              conda-forge/noarch     Cached
+  + libgfortran5                             13.2.0  h2873a65_1              conda-forge/osx-64     Cached
+  + libglib                                  2.78.0  hc62aa5d_0              conda-forge/osx-64     Cached
+  + libgoogle-cloud                          2.12.0  h407922f_3              conda-forge/osx-64       31MB
+  + libgrpc                                  1.58.1  hecc90c7_2              conda-forge/osx-64        4MB
+  + libiconv                                   1.17  hac89ed1_0              conda-forge/osx-64     Cached
+  + libjpeg-turbo                           2.1.5.1  h0dc2134_1              conda-forge/osx-64      457kB
+  + liblapack                                 3.9.0  19_osx64_openblas       conda-forge/osx-64     Cached
+  + libllvm14                                14.0.6  hc8e404f_4              conda-forge/osx-64       22MB
+  + libllvm16                                16.0.6  he4b1e75_2              conda-forge/osx-64     Cached
+  + libnghttp2                               1.57.0  h9beae6a_0              pkgs/main/osx-64       Cached
+  + libopenblas                              0.3.24  openmp_h48a4ad5_0       conda-forge/osx-64     Cached
+  + libpng                                   1.6.39  ha978bb4_0              conda-forge/osx-64     Cached
+  + libprotobuf                              4.24.3  he0c2237_1              conda-forge/osx-64        2MB
+  + libre2-11                            2023.06.02  h4694dbf_0              conda-forge/osx-64      183kB
+  + libsqlite                                3.43.2  h92b6c6a_0              conda-forge/osx-64     Cached
+  + libssh2                                  1.11.0  hd019ec5_0              conda-forge/osx-64     Cached
+  + libthrift                                0.19.0  h064b379_1              conda-forge/osx-64      325kB
+  + libtiff                                   4.6.0  hf955e92_0              conda-forge/osx-64      260kB
+  + libutf8proc                               2.8.0  hb7f2c08_0              conda-forge/osx-64       99kB
+  + libwebp-base                              1.3.2  h0dc2134_0              conda-forge/osx-64     Cached
+  + libxcb                                     1.15  hb7f2c08_0              conda-forge/osx-64     Cached
+  + libxml2                                  2.11.5  h3346baf_1              conda-forge/osx-64     Cached
+  + libzlib                                  1.2.13  h8a1eda9_5              conda-forge/osx-64     Cached
+  + libzopfli                                 1.0.3  h046ec9c_0              conda-forge/osx-64      162kB
+  + llvm-openmp                              17.0.3  hb6ac08f_0              conda-forge/osx-64     Cached
+  + llvm-tools                               16.0.6  he4b1e75_2              conda-forge/osx-64     Cached
+  + llvmlite                                 0.41.1  py39he5a6977_0          conda-forge/osx-64      291kB
+  + locket                                    1.0.0  pyhd8ed1ab_0            conda-forge/noarch        8kB
+  + lz4                                       4.3.2  py39h2a14dfd_1          conda-forge/osx-64       34kB
+  + lz4-c                                     1.9.4  hf0c8a7f_0              conda-forge/osx-64      156kB
+  + m2r2                                0.3.3.post2  pyhd8ed1ab_0            conda-forge/noarch       16kB
+  + make                                        4.3  h22f3db7_1              conda-forge/osx-64     Cached
+  + markupsafe                                2.1.3  py39hdc70f33_1          conda-forge/osx-64       23kB
+  + matplotlib-base                           3.8.0  py39h7070ae8_2          conda-forge/osx-64        7MB
+  + mistune                                   0.8.4  py39h89e85a6_1005       conda-forge/osx-64       56kB
+  + more-itertools                           10.1.0  pyhd8ed1ab_0            conda-forge/noarch       54kB
+  + mpc                                       1.3.1  h81bd1dd_0              conda-forge/osx-64     Cached
+  + mpfr                                      4.2.0  h4f9bd69_0              conda-forge/osx-64     Cached
+  + msgpack-python                            1.0.6  py39h8ee36c8_0          conda-forge/osx-64      187kB
+  + multiprocess                            0.70.15  py39hdc70f33_1          conda-forge/osx-64      237kB
+  + multiprocessing-logging                   0.3.3  pyhd8ed1ab_0            conda-forge/noarch       13kB
+  + munkres                                   1.1.4  pyh9f0ad1d_0            conda-forge/noarch     Cached
+  + natsort                                   8.4.0  pyhd8ed1ab_0            conda-forge/noarch       37kB
+  + ncurses                                     6.4  hf0c8a7f_0              conda-forge/osx-64     Cached
+  + networkx                                    3.2  pyhd8ed1ab_1            conda-forge/noarch        1MB
+  + numba                                    0.58.0  py39h3ea8b11_0          pkgs/main/osx-64          5MB
+  + numexpr                                   2.8.7  py39h5d65943_4          conda-forge/osx-64      126kB
+  + numpy                                    1.23.5  py39hdfa1d0c_0          conda-forge/osx-64        6MB
+  + oniguruma                                 6.9.9  h10d778d_0              conda-forge/osx-64     Cached
+  + openjpeg                                  2.5.0  ha4da562_3              conda-forge/osx-64      336kB
+  + openssl                                   3.1.3  h8a1eda9_0              conda-forge/osx-64     Cached
+  + orc                                       1.9.0  hb037d9a_3              conda-forge/osx-64      423kB
+  + packaging                                  23.2  pyhd8ed1ab_0            conda-forge/noarch       49kB
+  + pairix                                    0.3.7  py39h66c2135_4          bioconda/osx-64         100kB
+  + pairtools                                 0.3.0  py39h33ca528_6          bioconda/osx-64         162kB
+  + pandas                                    1.5.3  py39hecff1ad_1          conda-forge/osx-64       11MB
+  + pandoc                                    3.1.3  h9d075a6_0              conda-forge/osx-64     Cached
+  + pango                                   1.50.14  h19c1c8a_2              conda-forge/osx-64     Cached
+  + parallel                               20230922  h694c41f_0              conda-forge/osx-64     Cached
+  + partd                                     1.4.1  pyhd8ed1ab_0            conda-forge/noarch       21kB
+  + patsy                                     0.5.3  pyhd8ed1ab_0            conda-forge/noarch      194kB
+  + pbgzip                               2016.08.04  h652314c_4              bioconda/osx-64          31kB
+  + pbzip2                                   1.1.13  h92b232e_2              conda-forge/osx-64       41kB
+  + pcre2                                     10.40  h1c4e4bc_0              conda-forge/osx-64     Cached
+  + perl                                     5.34.0  h435f0c2_2              pkgs/main/osx-64       Cached
+  + pigz                                        2.8  h92b6c6a_0              conda-forge/osx-64       70kB
+  + pillow                                   10.0.1  py39h0ada47f_1          conda-forge/osx-64       47MB
+  + pip                                      23.3.1  pyhd8ed1ab_0            conda-forge/noarch        1MB
+  + pixman                                   0.42.2  he965462_0              conda-forge/osx-64     Cached
+  + psutil                                    5.9.5  py39hdc70f33_1          conda-forge/osx-64      367kB
+  + pthread-stubs                               0.4  hc929b4f_1001           conda-forge/osx-64     Cached
+  + py-cpuinfo                                9.0.0  pyhd8ed1ab_0            conda-forge/noarch       25kB
+  + pyarrow                                  13.0.0  py39h8632116_11_cpu     conda-forge/osx-64        4MB
+  + pyfaidx                                 0.7.2.2  pyhdfd78af_0            bioconda/noarch          34kB
+  + pyparsing                                 3.1.1  pyhd8ed1ab_0            conda-forge/noarch       90kB
+  + pysam                                    0.22.0  py39hba326fb_0          bioconda/osx-64           4MB
+  + pysocks                                   1.7.1  py39h6e9494a_5          conda-forge/osx-64       29kB
+  + pytables                                  3.9.1  py39h24dbf18_0          conda-forge/osx-64        1MB
+  + python                                   3.9.18  h07e1443_0_cpython      conda-forge/osx-64       11MB
+  + python-dateutil                           2.8.2  pyhd8ed1ab_0            conda-forge/noarch     Cached
+  + python_abi                                  3.9  4_cp39                  conda-forge/osx-64        6kB
+  + pytz                               2023.3.post1  pyhd8ed1ab_0            conda-forge/noarch      187kB
+  + pyvcf3                                    1.0.3  pyhdfd78af_0            bioconda/noarch         980kB
+  + pywavelets                                1.4.1  py39hd01001f_1          conda-forge/osx-64        4MB
+  + pyyaml                                    6.0.1  py39hdc70f33_1          conda-forge/osx-64      162kB
+  + r-argparse                                2.2.2  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-askpass                                 1.2.0  r43h6dc245f_0           conda-forge/osx-64       31kB
+  + r-assertthat                              0.2.1  r43hc72bb7e_4           conda-forge/noarch     Cached
+  + r-backports                               1.4.1  r43h6dc245f_2           conda-forge/osx-64     Cached
+  + r-base                                    4.3.1  h61172b1_5              conda-forge/osx-64       25MB
+  + r-base64enc                               0.1_3  r43h6dc245f_1006        conda-forge/osx-64     Cached
+  + r-bh                                   1.81.0_1  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-bit                                     4.0.5  r43h6dc245f_1           conda-forge/osx-64     Cached
+  + r-bit64                                   4.0.5  r43h6dc245f_2           conda-forge/osx-64     Cached
+  + r-bitops                                  1.0_7  r43h6dc245f_2           conda-forge/osx-64     Cached
+  + r-blob                                    1.2.4  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-broom                                   1.0.5  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-bslib                                   0.5.1  r43hc72bb7e_0           conda-forge/noarch     Cached
+  + r-cachem                                  1.0.8  r43h6dc245f_1           conda-forge/osx-64     Cached
+  + r-callr                                   3.7.3  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-cellranger                              1.1.0  r43hc72bb7e_1006        conda-forge/noarch     Cached
+  + r-checkmate                               2.2.0  r43h6dc245f_1           conda-forge/osx-64      667kB
+  + r-cli                                     3.6.1  r43hac7d2d5_1           conda-forge/osx-64     Cached
+  + r-clipr                                   0.8.0  r43hc72bb7e_2           conda-forge/noarch     Cached
+  + r-cluster                                 2.1.4  r43hfe07776_1           conda-forge/osx-64      574kB
+  + r-codetools                              0.2_19  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-colorspace                              2.1_0  r43h6dc245f_1           conda-forge/osx-64     Cached
+  + r-conflicted                              1.2.0  r43h785f33e_1           conda-forge/noarch     Cached
+  + r-cpp11                                   0.4.6  r43hc72bb7e_0           conda-forge/noarch     Cached
+  + r-crayon                                  1.5.2  r43hc72bb7e_2           conda-forge/noarch     Cached
+  + r-crosstalk                               1.2.0  r43hc72bb7e_2           conda-forge/noarch     Cached
+  + r-curl                                    5.1.0  r43h0100ac3_0           conda-forge/osx-64      450kB
+  + r-data.table                             1.14.8  r43h7eccc33_2           conda-forge/osx-64     Cached
+  + r-dbi                                     1.1.3  r43hc72bb7e_2           conda-forge/noarch     Cached
+  + r-dbplyr                                  2.3.4  r43hc72bb7e_0           conda-forge/noarch     Cached
+  + r-deldir                                  1.0_9  r43hfe07776_1           conda-forge/osx-64      304kB
+  + r-dichromat                             2.0_0.1  r43ha770c72_2           conda-forge/noarch      161kB
+  + r-digest                                 0.6.33  r43hac7d2d5_0           conda-forge/osx-64     Cached
+  + r-dplyr                                   1.1.3  r43hac7d2d5_0           conda-forge/osx-64        1MB
+  + r-dtplyr                                  1.3.1  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-ellipsis                                0.3.2  r43h6dc245f_2           conda-forge/osx-64     Cached
+  + r-evaluate                                 0.22  r43hc72bb7e_0           conda-forge/noarch     Cached
+  + r-fansi                                   1.0.5  r43hb2c329c_0           conda-forge/osx-64      309kB
+  + r-farver                                  2.1.1  r43hac7d2d5_2           conda-forge/osx-64     Cached
+  + r-fastmap                                 1.1.1  r43hac7d2d5_1           conda-forge/osx-64     Cached
+  + r-filelock                                1.0.2  r43h6dc245f_1004        conda-forge/osx-64     Cached
+  + r-findpython                              1.0.8  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-fontawesome                             0.5.2  r43hc72bb7e_0           conda-forge/noarch     Cached
+  + r-forcats                                 1.0.0  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-foreign                                0.8_85  r43h6dc245f_0           conda-forge/osx-64      264kB
+  + r-formatr                                  1.14  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-formula                                 1.2_5  r43hc72bb7e_1           conda-forge/noarch      174kB
+  + r-fs                                      1.6.3  r43hac7d2d5_0           conda-forge/osx-64     Cached
+  + r-futile.logger                           1.4.3  r43hc72bb7e_1005        conda-forge/noarch     Cached
+  + r-futile.options                          1.0.1  r43hc72bb7e_1004        conda-forge/noarch     Cached
+  + r-gargle                                  1.5.2  r43h785f33e_0           conda-forge/noarch     Cached
+  + r-generics                                0.1.3  r43hc72bb7e_2           conda-forge/noarch     Cached
+  + r-ggplot2                                 3.4.4  r43hc72bb7e_0           conda-forge/noarch        4MB
+  + r-ggsci                                   3.0.0  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-glue                                    1.6.2  r43h6dc245f_2           conda-forge/osx-64     Cached
+  + r-googledrive                             2.1.1  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-googlesheets4                           1.1.1  r43h785f33e_1           conda-forge/noarch     Cached
+  + r-gridextra                                 2.3  r43hc72bb7e_1005        conda-forge/noarch        1MB
+  + r-gtable                                  0.3.4  r43hc72bb7e_0           conda-forge/noarch     Cached
+  + r-haven                                   2.5.3  r43hac7d2d5_0           conda-forge/osx-64     Cached
+  + r-hexbin                                 1.28.3  r43hfe07776_1           conda-forge/osx-64     Cached
+  + r-highr                                    0.10  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-hmisc                                   5.1_1  r43hfe07776_0           conda-forge/osx-64        4MB
+  + r-hms                                     1.1.3  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-htmltable                               2.4.1  r43hc72bb7e_2           conda-forge/noarch      406kB
+  + r-htmltools                             0.5.6.1  r43h64b2c41_0           conda-forge/osx-64      358kB
+  + r-htmlwidgets                             1.6.2  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-httr                                    1.4.7  r43hc72bb7e_0           conda-forge/noarch     Cached
+  + r-ids                                     1.0.1  r43hc72bb7e_3           conda-forge/noarch     Cached
+  + r-igraph                                  1.5.1  r43hedd5883_0           conda-forge/osx-64        4MB
+  + r-interp                                  1.1_4  r43ha1020dc_1           conda-forge/osx-64        2MB
+  + r-isoband                                 0.2.7  r43hac7d2d5_2           conda-forge/osx-64     Cached
+  + r-jpeg                                   0.1_10  r43he6a093d_3           conda-forge/osx-64       52kB
+  + r-jquerylib                               0.1.4  r43hc72bb7e_2           conda-forge/noarch     Cached
+  + r-jsonlite                                1.8.7  r43h6dc245f_0           conda-forge/osx-64     Cached
+  + r-knitr                                    1.44  r43hc72bb7e_0           conda-forge/noarch     Cached
+  + r-labeling                                0.4.3  r43hc72bb7e_0           conda-forge/noarch     Cached
+  + r-lambda.r                                1.2.4  r43hc72bb7e_3           conda-forge/noarch     Cached
+  + r-later                                   1.3.1  r43h670e93c_1           conda-forge/osx-64     Cached
+  + r-lattice                                0.22_4  r43hb2c329c_0           conda-forge/osx-64        1MB
+  + r-latticeextra                           0.6_30  r43hc72bb7e_2           conda-forge/noarch        2MB
+  + r-lazyeval                                0.2.2  r43h6dc245f_4           conda-forge/osx-64     Cached
+  + r-lifecycle                               1.0.3  r43hc72bb7e_2           conda-forge/noarch     Cached
+  + r-lubridate                               1.9.3  r43h6dc245f_0           conda-forge/osx-64      983kB
+  + r-magrittr                                2.0.3  r43h6dc245f_2           conda-forge/osx-64     Cached
+  + r-mass                                   7.3_60  r43h6dc245f_1           conda-forge/osx-64     Cached
+  + r-matrix                                1.6_1.1  r43hc46c21c_0           conda-forge/osx-64        4MB
+  + r-matrixstats                             1.0.0  r43h6dc245f_1           conda-forge/osx-64     Cached
+  + r-memoise                                 2.0.1  r43hc72bb7e_2           conda-forge/noarch     Cached
+  + r-mgcv                                    1.9_0  r43h9c380c6_0           conda-forge/osx-64     Cached
+  + r-mime                                     0.12  r43h6dc245f_2           conda-forge/osx-64     Cached
+  + r-modelr                                 0.1.11  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-munsell                                 0.5.0  r43hc72bb7e_1006        conda-forge/noarch     Cached
+  + r-nlme                                  3.1_163  r43hfe07776_0           conda-forge/osx-64     Cached
+  + r-nnet                                   7.3_19  r43h6dc245f_1           conda-forge/osx-64      135kB
+  + r-openssl                                 2.1.1  r43hc61a7e2_0           conda-forge/osx-64      680kB
+  + r-pillar                                  1.9.0  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-pkgconfig                               2.0.3  r43hc72bb7e_3           conda-forge/noarch     Cached
+  + r-plogr                                   0.2.0  r43hc72bb7e_1005        conda-forge/noarch     Cached
+  + r-plotly                                 4.10.3  r43hc72bb7e_0           conda-forge/noarch        3MB
+  + r-png                                     0.1_8  r43h9ae9e50_1           conda-forge/osx-64     Cached
+  + r-prettyunits                             1.2.0  r43hc72bb7e_0           conda-forge/noarch     Cached
+  + r-processx                                3.8.2  r43h6dc245f_0           conda-forge/osx-64     Cached
+  + r-progress                                1.2.2  r43hc72bb7e_4           conda-forge/noarch     Cached
+  + r-promises                                1.2.1  r43hac7d2d5_0           conda-forge/osx-64        2MB
+  + r-ps                                      1.7.5  r43h6dc245f_1           conda-forge/osx-64     Cached
+  + r-purrr                                   1.0.2  r43h6dc245f_0           conda-forge/osx-64     Cached
+  + r-r6                                      2.5.1  r43hc72bb7e_2           conda-forge/noarch     Cached
+  + r-ragg                                    1.2.5  r43h5126171_3           conda-forge/osx-64      399kB
+  + r-rappdirs                                0.3.3  r43h6dc245f_2           conda-forge/osx-64     Cached
+  + r-rcolorbrewer                            1.1_3  r43h785f33e_2           conda-forge/noarch     Cached
+  + r-rcpp                                   1.0.11  r43hac7d2d5_0           conda-forge/osx-64     Cached
+  + r-rcppeigen                           0.3.3.9.3  r43hfaea39f_1           conda-forge/osx-64        1MB
+  + r-rcurl                               1.98_1.12  r43h0100ac3_3           conda-forge/osx-64      816kB
+  + r-readr                                   2.1.4  r43hac7d2d5_1           conda-forge/osx-64     Cached
+  + r-readxl                                  1.4.3  r43h88814b1_0           conda-forge/osx-64     Cached
+  + r-rematch                                 2.0.0  r43hc72bb7e_0           conda-forge/noarch     Cached
+  + r-rematch2                                2.1.2  r43hc72bb7e_3           conda-forge/noarch     Cached
+  + r-reprex                                  2.0.2  r43hc72bb7e_2           conda-forge/noarch     Cached
+  + r-restfulr                               0.0.15  r43hfa19939_3           bioconda/osx-64         448kB
+  + r-rjson                                  0.2.21  r43hac7d2d5_3           conda-forge/osx-64      157kB
+  + r-rlang                                   1.1.1  r43hac7d2d5_1           conda-forge/osx-64     Cached
+  + r-rmarkdown                                2.25  r43hc72bb7e_0           conda-forge/noarch     Cached
+  + r-rpart                                  4.1.21  r43hb2c329c_0           conda-forge/osx-64      700kB
+  + r-rsqlite                                 2.3.1  r43hac7d2d5_1           conda-forge/osx-64     Cached
+  + r-rstudioapi                             0.15.0  r43hc72bb7e_0           conda-forge/noarch     Cached
+  + r-rvest                                   1.0.3  r43hc72bb7e_2           conda-forge/noarch     Cached
+  + r-sass                                    0.4.7  r43hac7d2d5_0           conda-forge/osx-64     Cached
+  + r-scales                                  1.2.1  r43hc72bb7e_2           conda-forge/noarch     Cached
+  + r-selectr                                 0.4_2  r43hc72bb7e_3           conda-forge/noarch     Cached
+  + r-snow                                    0.4_4  r43hc72bb7e_2           conda-forge/noarch     Cached
+  + r-stringi                                1.7.12  r43h480af0a_3           conda-forge/osx-64      855kB
+  + r-stringr                                 1.5.0  r43h785f33e_1           conda-forge/noarch     Cached
+  + r-survival                                3.5_7  r43h6dc245f_0           conda-forge/osx-64        6MB
+  + r-sys                                     3.4.2  r43h6dc245f_1           conda-forge/osx-64     Cached
+  + r-systemfonts                             1.0.5  r43hac8360d_0           conda-forge/osx-64      218kB
+  + r-textshaping                             0.3.7  r43hfe21e11_0           conda-forge/osx-64      101kB
+  + r-tibble                                  3.2.1  r43h6dc245f_2           conda-forge/osx-64     Cached
+  + r-tidyr                                   1.3.0  r43hac7d2d5_1           conda-forge/osx-64     Cached
+  + r-tidyselect                              1.2.0  r43hbe3e9c8_1           conda-forge/osx-64     Cached
+  + r-tidyverse                               2.0.0  r43h785f33e_1           conda-forge/noarch     Cached
+  + r-timechange                              0.2.0  r43hac7d2d5_1           conda-forge/osx-64     Cached
+  + r-tinytex                                  0.48  r43hc72bb7e_0           conda-forge/noarch      144kB
+  + r-tzdb                                    0.4.0  r43hac7d2d5_1           conda-forge/osx-64     Cached
+  + r-utf8                                    1.2.3  r43h6dc245f_1           conda-forge/osx-64     Cached
+  + r-uuid                                    1.1_1  r43h6dc245f_0           conda-forge/osx-64       49kB
+  + r-vctrs                                   0.6.4  r43h64b2c41_0           conda-forge/osx-64        1MB
+  + r-viridis                                 0.6.4  r43hc72bb7e_0           conda-forge/noarch        3MB
+  + r-viridislite                             0.4.2  r43hc72bb7e_1           conda-forge/noarch     Cached
+  + r-vroom                                   1.6.4  r43hac7d2d5_0           conda-forge/osx-64      805kB
+  + r-withr                                   2.5.1  r43hc72bb7e_0           conda-forge/noarch     Cached
+  + r-xfun                                     0.40  r43hac7d2d5_0           conda-forge/osx-64     Cached
+  + r-xml                                 3.99_0.14  r43hb8526f4_2           conda-forge/osx-64        2MB
+  + r-xml2                                    1.3.5  r43h2e0d1c5_0           conda-forge/osx-64     Cached
+  + r-yaml                                    2.3.7  r43h6dc245f_1           conda-forge/osx-64     Cached
+  + rav1e                                     0.6.6  h7205ca4_2              conda-forge/osx-64        2MB
+  + re2                                  2023.06.02  hd34609a_0              conda-forge/osx-64       27kB
+  + readline                                    8.2  h9e318b2_1              conda-forge/osx-64     Cached
+  + rename                                    1.601  hdfd78af_1              bioconda/noarch        Cached
+  + requests                                 2.31.0  pyhd8ed1ab_0            conda-forge/noarch     Cached
+  + samtools                                   1.18  hd510865_1              bioconda/osx-64         471kB
+  + scikit-image                             0.22.0  py39h5d65943_2          conda-forge/osx-64       10MB
+  + scikit-learn                              1.3.1  py39hecadb86_1          conda-forge/osx-64        7MB
+  + scipy                                    1.11.3  py39h2145d6e_1          conda-forge/osx-64       15MB
+  + seaborn                                  0.13.0  hd8ed1ab_0              conda-forge/noarch        7kB
+  + seaborn-base                             0.13.0  pyhd8ed1ab_0            conda-forge/noarch      234kB
+  + setuptools                               68.2.2  pyhd8ed1ab_0            conda-forge/noarch     Cached
+  + sigtool                                   0.1.3  h88f4db0_0              conda-forge/osx-64     Cached
+  + simplejson                               3.19.2  py39ha09f3b3_0          conda-forge/osx-64      106kB
+  + six                                      1.16.0  pyh6c4a22f_0            conda-forge/noarch     Cached
+  + snappy                                   1.1.10  h225ccf5_0              conda-forge/osx-64       35kB
+  + sortedcontainers                          2.4.0  pyhd8ed1ab_0            conda-forge/noarch     Cached
+  + statsmodels                              0.14.0  py39h5b4affa_2          conda-forge/osx-64       10MB
+  + svt-av1                                   1.7.0  he965462_0              conda-forge/osx-64        2MB
+  + tapi                                  1100.0.11  h9ce4665_0              conda-forge/osx-64     Cached
+  + tbb                                   2021.10.0  h1c7c39f_2              conda-forge/osx-64      160kB
+  + tblib                                     2.0.0  pyhd8ed1ab_0            conda-forge/noarch       17kB
+  + threadpoolctl                             3.2.0  pyha21a80b_0            conda-forge/noarch       21kB
+  + tifffile                              2023.9.26  pyhd8ed1ab_0            conda-forge/noarch      176kB
+  + tk                                       8.6.13  hef22860_0              conda-forge/osx-64     Cached
+  + tktable                                    2.10  ha166976_5              conda-forge/osx-64     Cached
+  + toml                                     0.10.2  pyhd8ed1ab_0            conda-forge/noarch     Cached
+  + tomlkit                                  0.12.1  pyha770c72_0            conda-forge/noarch     Cached
+  + toolz                                    0.12.0  pyhd8ed1ab_0            conda-forge/noarch     Cached
+  + tornado                                   6.3.3  py39hdc70f33_1          conda-forge/osx-64      631kB
+  + tzdata                                    2023c  h71feb2d_0              conda-forge/noarch     Cached
+  + unicodedata2                             15.1.0  py39hdc70f33_0          conda-forge/osx-64      370kB
+  + urllib3                                   2.0.7  pyhd8ed1ab_0            conda-forge/noarch       99kB
+  + wheel                                    0.41.2  pyhd8ed1ab_0            conda-forge/noarch     Cached
+  + xmltodict                                0.13.0  pyhd8ed1ab_0            conda-forge/noarch     Cached
+  + xorg-libxau                              1.0.11  h0dc2134_0              conda-forge/osx-64     Cached
+  + xorg-libxdmcp                             1.1.3  h35c211d_0              conda-forge/osx-64     Cached
+  + xyzservices                           2023.10.0  pyhd8ed1ab_0            conda-forge/noarch       36kB
+  + xz                                        5.4.2  h6c40b1e_0              pkgs/main/osx-64       Cached
+  + yaml                                      0.2.5  h0d85af4_2              conda-forge/osx-64     Cached
+  + yq                                        3.2.3  pyhd8ed1ab_0            conda-forge/noarch     Cached
+  + zfp                                       1.0.0  hf3d7188_4              conda-forge/osx-64      224kB
+  + zict                                      3.0.0  pyhd8ed1ab_0            conda-forge/noarch       36kB
+  + zipp                                     3.17.0  pyhd8ed1ab_0            conda-forge/noarch       19kB
+  + zlib                                     1.2.13  h8a1eda9_5              conda-forge/osx-64     Cached
+  + zlib-ng                                   2.0.7  hb7f2c08_0              conda-forge/osx-64       93kB
+  + zstd                                      1.5.5  h829000d_0              conda-forge/osx-64     Cached
+
+  Summary:
+
+  Install: 452 packages
+
+  Total download: 393MB
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+Confirm changes: [Y/n] Y
+python_abi                                           6.5kB @  94.8kB/s  0.1s
+libbrotlicommon                                     67.5kB @ 903.5kB/s  0.1s
+coreutils                                            1.4MB @  15.6MB/s  0.1s
+libjpeg-turbo                                      456.9kB @   4.8MB/s  0.1s
+aws-c-common                                       204.6kB @   1.8MB/s  0.0s
+pigz                                                70.4kB @ 603.6kB/s  0.0s
+zlib-ng                                             93.2kB @ 632.2kB/s  0.1s
+charls                                             138.1kB @ 914.2kB/s  0.0s
+libbrotlidec                                        30.3kB @ 190.8kB/s  0.0s
+pbzip2                                              40.8kB @ 204.7kB/s  0.0s
+aom                                                  2.9MB @  13.8MB/s  0.1s
+libre2-11                                          182.8kB @ 837.3kB/s  0.1s
+aws-checksums                                       48.7kB @ 208.8kB/s  0.1s
+blosc                                               49.9kB @ 210.4kB/s  0.0s
+orc                                                423.4kB @   1.6MB/s  0.0s
+aws-c-event-stream                                  47.2kB @ 176.5kB/s  0.0s
+libcblas                                            14.7kB @  53.7kB/s  0.0s
+aws-c-auth                                          89.4kB @ 289.9kB/s  0.1s
+libevent                                           372.7kB @   1.2MB/s  0.0s
+libthrift                                          325.4kB @ 994.0kB/s  0.1s
+fsspec                                             124.9kB @ 362.2kB/s  0.0s
+locket                                               8.2kB @  22.4kB/s  0.0s
+libtiff                                            260.4kB @ 695.5kB/s  0.1s
+charset-normalizer                                  46.2kB @ 117.5kB/s  0.1s
+dill                                                87.6kB @ 220.2kB/s  0.1s
+natsort                                             37.3kB @  92.1kB/s  0.0s
+libllvm14                                           22.5MB @  54.4MB/s  0.3s
+cycler                                              13.5kB @  31.8kB/s  0.0s
+packaging                                           49.5kB @ 112.2kB/s  0.0s
+partd                                               20.7kB @  46.7kB/s  0.0s
+importlib_metadata                                   9.4kB @  20.9kB/s  0.0s
+brotli-python                                      367.3kB @ 780.9kB/s  0.0s
+tornado                                            631.3kB @   1.3MB/s  0.0s
+llvmlite                                           290.6kB @ 581.6kB/s  0.1s
+joblib                                             221.2kB @ 421.8kB/s  0.1s
+multiprocess                                       237.1kB @ 449.0kB/s  0.0s
+contourpy                                          217.8kB @ 383.1kB/s  0.0s
+fonttools                                            2.1MB @   3.3MB/s  0.1s
+mistune                                             55.6kB @  75.3kB/s  0.3s
+h5py                                               986.9kB @   1.3MB/s  0.1s
+clangxx_impl_osx-64                                 17.8kB @  21.8kB/s  0.1s
+r-deldir                                           303.6kB @ 332.3kB/s  0.1s
+matplotlib-base                                      6.9MB @   6.6MB/s  0.3s
+r-uuid                                              49.1kB @  45.5kB/s  0.2s
+scipy                                               15.3MB @  14.0MB/s  0.5s
+r-curl                                             449.5kB @ 386.6kB/s  0.1s
+libgoogle-cloud                                     30.9MB @  25.3MB/s  0.7s
+r-askpass                                           30.6kB @  24.5kB/s  0.2s
+r-jpeg                                              52.4kB @  41.9kB/s  0.2s
+r-nnet                                             134.6kB @ 105.8kB/s  0.1s
+r-rcppeigen                                          1.3MB @ 987.0kB/s  0.1s
+bioconductor-protgenerics                          248.8kB @ 182.7kB/s  0.1s
+htslib                                               2.4MB @   1.8MB/s  0.1s
+tifffile                                           175.9kB @ 125.1kB/s  0.0s
+r-formula                                          174.2kB @ 120.9kB/s  0.0s
+m2r2                                                16.5kB @  10.7kB/s  0.2s
+bokeh                                                4.9MB @   3.1MB/s  0.1s
+r-restfulr                                         448.3kB @ 274.0kB/s  0.3s
+dask                                                 7.4kB @   4.5kB/s  0.1s
+pillow                                              46.8MB @  27.6MB/s  1.2s
+bioconductor-biocio                                469.4kB @ 277.0kB/s  0.1s
+r-interp                                             1.5MB @ 843.1kB/s  0.5s
+scikit-image                                        10.4MB @   5.7MB/s  0.2s
+r-dplyr                                              1.4MB @ 743.6kB/s  0.1s
+r-ragg                                             399.3kB @ 200.9kB/s  0.3s
+r-textshaping                                      100.7kB @  49.0kB/s  0.4s
+r-viridis                                            3.0MB @   1.5MB/s  0.1s
+bioconductor-annotationfilter                      561.2kB @ 271.0kB/s  0.3s
+statsmodels                                          9.9MB @   4.8MB/s  0.4s
+libutf8proc                                         98.9kB @  46.2kB/s  0.1s
+bioconductor-biomart                               927.3kB @ 417.7kB/s  0.2s
+jxrlib                                             231.0kB @ 103.9kB/s  0.1s
+libcrc32c                                           20.1kB @   8.9kB/s  0.0s
+libaec                                              29.0kB @  12.7kB/s  0.1s
+aws-c-sdkutils                                      47.4kB @  20.0kB/s  0.1s
+zfp                                                223.5kB @  93.7kB/s  0.1s
+brotli-bin                                          16.7kB @   6.9kB/s  0.0s
+brotli                                              19.5kB @   7.9kB/s  0.0s
+aws-c-mqtt                                         138.2kB @  55.4kB/s  0.0s
+libprotobuf                                          2.2MB @ 860.4kB/s  0.1s
+libgrpc                                              4.0MB @   1.5MB/s  0.2s
+cached_property                                     11.1kB @   4.1kB/s  0.1s
+bioconductor-genomicinteractions                     3.7MB @   1.4MB/s  0.7s
+bioconductor-rtracklayer                             5.6MB @   2.0MB/s  0.9s
+zipp                                                19.0kB @   6.9kB/s  0.0s
+pbgzip                                              30.8kB @  11.0kB/s  0.3s
+lazy_loader                                         14.3kB @   5.1kB/s  0.0s
+zict                                                36.3kB @  13.0kB/s  0.1s
+more-itertools                                      53.7kB @  19.1kB/s  0.1s
+click                                               84.4kB @  29.9kB/s  0.0s
+importlib_resources                                 30.0kB @  10.6kB/s  0.0s
+msgpack-python                                     187.0kB @  65.5kB/s  0.1s
+unicodedata2                                       369.8kB @ 128.9kB/s  0.1s
+bioconductor-variantannotation                       4.1MB @   1.4MB/s  0.8s
+markupsafe                                          22.9kB @   7.9kB/s  0.1s
+numexpr                                            125.8kB @  43.2kB/s  0.0s
+numpy                                                5.6MB @   1.9MB/s  0.1s
+clangxx_osx-64                                      19.4kB @   6.6kB/s  0.0s
+hdf5                                                 3.6MB @   1.2MB/s  0.1s
+pytables                                             1.3MB @ 422.4kB/s  0.1s
+r-stringi                                          855.2kB @ 282.7kB/s  0.1s
+r-foreign                                          264.0kB @  86.7kB/s  0.1s
+pyfaidx                                             34.1kB @  11.0kB/s  0.1s
+samtools                                           470.7kB @ 147.0kB/s  0.1s
+r-xml                                                1.7MB @ 540.4kB/s  0.3s
+dask-core                                          863.0kB @ 265.8kB/s  0.0s
+seaborn-base                                       233.8kB @  71.2kB/s  0.1s
+distributed                                        787.9kB @ 238.6kB/s  0.1s
+r-htmltools                                        357.5kB @ 107.4kB/s  0.3s
+pandas                                              11.3MB @   3.4MB/s  0.5s
+numba                                                4.5MB @   1.3MB/s  0.1s
+r-htmltable                                        405.5kB @ 116.3kB/s  0.1s
+r-rcurl                                            816.0kB @ 233.3kB/s  0.5s
+r-systemfonts                                      218.2kB @  61.3kB/s  0.3s
+tbb                                                159.8kB @  44.4kB/s  0.0s
+r-plotly                                             2.9MB @ 794.0kB/s  0.1s
+rav1e                                                1.8MB @ 483.3kB/s  0.1s
+bioconductor-ensembldb                               3.6MB @ 995.1kB/s  0.2s
+libabseil                                            1.1MB @ 312.1kB/s  0.1s
+lz4-c                                              156.4kB @  42.2kB/s  0.0s
+aws-c-cal                                           45.3kB @  12.2kB/s  0.0s
+c-blosc2                                           273.1kB @  73.4kB/s  0.0s
+aws-c-http                                         162.5kB @  43.5kB/s  0.0s
+r-lubridate                                        983.0kB @ 262.6kB/s  0.4s
+aws-crt-cpp                                        275.5kB @  73.3kB/s  0.1s
+xyzservices                                         36.4kB @   9.7kB/s  0.0s
+asciitree                                            6.2kB @   1.6kB/s  0.0s
+cached-property                                      4.1kB @   1.1kB/s  0.0s
+pytz                                               187.5kB @  49.1kB/s  0.1s
+docutils                                           707.3kB @ 183.8kB/s  0.0s
+clang_impl_osx-64                                   17.6kB @   4.5kB/s  0.0s
+pyyaml                                             162.4kB @  41.4kB/s  0.1s
+pywavelets                                           3.6MB @ 905.0kB/s  0.1s
+pysocks                                             28.6kB @   7.1kB/s  0.2s
+python                                              11.4MB @   2.8MB/s  0.3s
+r-lattice                                            1.4MB @ 332.4kB/s  0.1s
+r-rpart                                            699.6kB @ 169.6kB/s  0.1s
+scikit-learn                                         7.4MB @   1.8MB/s  0.2s
+r-matrix                                             4.0MB @ 971.3kB/s  0.1s
+pyvcf3                                             979.5kB @ 236.0kB/s  0.1s
+r-tinytex                                          143.9kB @  34.5kB/s  0.0s
+imageio                                            291.0kB @  69.5kB/s  0.1s
+bioframe                                           127.7kB @  30.4kB/s  0.1s
+seaborn                                              6.7kB @   1.6kB/s  0.0s
+bioconductor-genomicalignments                       2.4MB @ 571.4kB/s  0.9s
+r-igraph                                             4.5MB @   1.0MB/s  0.2s
+gflags                                              94.6kB @  21.7kB/s  0.0s
+snappy                                              34.7kB @   7.9kB/s  0.0s
+glog                                               100.6kB @  22.7kB/s  0.0s
+pairix                                             100.5kB @  22.3kB/s  0.4s
+re2                                                 27.0kB @   6.0kB/s  0.1s
+bioconductor-interactionset                          1.6MB @ 350.0kB/s  0.3s
+py-cpuinfo                                          24.9kB @   5.5kB/s  0.0s
+lcms2                                              225.4kB @  49.6kB/s  0.0s
+threadpoolctl                                       21.0kB @   4.6kB/s  0.0s
+lz4                                                 33.9kB @   7.4kB/s  0.0s
+kiwisolver                                          60.5kB @  13.2kB/s  0.0s
+clang_osx-64                                        20.7kB @   4.5kB/s  0.1s
+biopython                                            2.7MB @ 586.8kB/s  0.1s
+r-fansi                                            309.3kB @  65.9kB/s  0.0s
+r-checkmate                                        666.6kB @ 139.0kB/s  0.1s
+multiprocessing-logging                             13.4kB @   2.8kB/s  0.3s
+urllib3                                             98.5kB @  20.4kB/s  0.0s
+r-hmisc                                              3.5MB @ 713.3kB/s  0.7s
+h5sparse                                            12.2kB @   2.5kB/s  0.2s
+r-latticeextra                                       2.2MB @ 448.5kB/s  0.1s
+r-ggplot2                                            4.1MB @ 823.8kB/s  0.1s
+svt-av1                                              2.4MB @ 478.3kB/s  0.1s
+bioconductor-gviz                                    7.2MB @   1.4MB/s  0.8s
+libavif16                                           90.4kB @  17.7kB/s  0.0s
+tblib                                               16.6kB @   3.2kB/s  0.0s
+aws-c-s3                                            74.5kB @  14.4kB/s  0.1s
+networkx                                             1.1MB @ 221.7kB/s  0.0s
+coolpuppy                                           44.8kB @   8.6kB/s  0.3s
+psutil                                             366.6kB @  70.4kB/s  0.0s
+aws-sdk-cpp                                          3.2MB @ 601.9kB/s  0.1s
+r-promises                                           1.6MB @ 299.9kB/s  0.4s
+r-rjson                                            156.9kB @  29.7kB/s  0.1s
+r-vctrs                                              1.2MB @ 230.6kB/s  0.1s
+pyarrow                                              3.6MB @ 666.4kB/s  0.2s
+pysam                                                4.1MB @ 766.9kB/s  0.1s
+aws-c-compression                                   18.0kB @   3.3kB/s  0.0s
+dav1d                                              668.4kB @ 122.8kB/s  0.1s
+openjpeg                                           335.6kB @  61.4kB/s  0.0s
+pyparsing                                           89.5kB @  16.3kB/s  0.1s
+r-dichromat                                        160.8kB @  29.2kB/s  0.2s
+simplejson                                         106.3kB @  19.3kB/s  0.0s
+bioconductor-bsgenome                                7.3MB @   1.3MB/s  0.2s
+patsy                                              193.6kB @  34.9kB/s  0.0s
+c-ares                                             103.6kB @  18.5kB/s  0.0s
+aws-c-io                                           136.6kB @  24.3kB/s  0.0s
+cloudpickle                                         24.7kB @   4.4kB/s  0.0s
+bioconductor-genomicfeatures                         2.2MB @ 388.1kB/s  0.7s
+cytoolz                                            316.5kB @  55.5kB/s  0.0s
+r-cluster                                          574.3kB @ 100.3kB/s  0.1s
+r-gridextra                                          1.0MB @ 182.1kB/s  0.1s
+brunsli                                            183.1kB @  31.5kB/s  0.0s
+importlib-resources                                  9.7kB @   1.7kB/s  0.0s
+cooltools                                          300.1kB @  50.9kB/s  0.3s
+r-survival                                           6.2MB @   1.0MB/s  0.1s
+r-openssl                                          680.2kB @ 113.4kB/s  0.5s
+pip                                                  1.4MB @ 231.7kB/s  0.1s
+libzopfli                                          162.3kB @  26.8kB/s  0.0s
+r-vroom                                            805.5kB @ 128.0kB/s  0.4s
+libarrow                                            20.0MB @   3.2MB/s  0.8s
+libbrotlienc                                       299.1kB @  47.2kB/s  0.0s
+bioconductor-biovizbase                              2.7MB @ 430.2kB/s  0.6s
+importlib-metadata                                  25.9kB @   4.1kB/s  0.0s
+cooler                                              85.1kB @  13.1kB/s  0.2s
+imagecodecs                                          1.6MB @ 241.6kB/s  0.4s
+pairtools                                          161.5kB @  24.2kB/s  0.3s
+r-base                                              25.4MB @   3.8MB/s  0.7s
+
+Downloading and Extracting Packages
+
+Preparing transaction: done
+Verifying transaction: done
+Executing transaction: done
+
+To activate this environment, use
+
+     $ mamba activate pairtools_env
+
+To deactivate an active environment, use
+
+     $ mamba deactivate
+
+
+❯ if ${activate_env}; then mamba activate "${env_name}"; fi
+❯ if ${install_clodius}; then pip install clodius; fi
+Collecting clodius
+  Downloading clodius-0.20.1-py2.py3-none-any.whl.metadata (3.1 kB)
+Requirement already satisfied: click>=7 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from clodius) (8.1.7)
+Requirement already satisfied: cooler>0.9.0 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from clodius) (0.9.3)
+Requirement already satisfied: dask in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from clodius) (2023.10.0)
+Requirement already satisfied: h5py in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from clodius) (3.10.0)
+Collecting negspy (from clodius)
+  Downloading negspy-0.2.24.tar.gz (1.7 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 8.0 MB/s eta 0:00:00
+  Preparing metadata (setup.py) ... done
+Requirement already satisfied: numpy in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from clodius) (1.23.5)
+Requirement already satisfied: pandas>=1.0 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from clodius) (1.5.3)
+Collecting pybbi>=0.2.0 (from clodius)
+  Downloading pybbi-0.3.5-cp39-cp39-macosx_10_9_x86_64.whl.metadata (7.3 kB)
+Collecting pydantic (from clodius)
+  Downloading pydantic-2.4.2-py3-none-any.whl.metadata (158 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 158.6/158.6 kB 19.5 MB/s eta 0:00:00
+Requirement already satisfied: pyfaidx in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from clodius) (0.7.2.2)
+Requirement already satisfied: pysam in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from clodius) (0.22.0)
+Requirement already satisfied: requests in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from clodius) (2.31.0)
+Collecting slugid (from clodius)
+  Downloading slugid-2.0.0-py2.py3-none-any.whl (8.2 kB)
+Requirement already satisfied: sortedcontainers in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from clodius) (2.4.0)
+Collecting tqdm (from clodius)
+  Downloading tqdm-4.66.1-py3-none-any.whl.metadata (57 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 57.6/57.6 kB 6.0 MB/s eta 0:00:00
+Requirement already satisfied: asciitree in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from cooler>0.9.0->clodius) (0.3.3)
+Requirement already satisfied: cytoolz in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from cooler>0.9.0->clodius) (0.12.2)
+Requirement already satisfied: multiprocess in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from cooler>0.9.0->clodius) (0.70.15)
+Requirement already satisfied: pyyaml in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from cooler>0.9.0->clodius) (6.0.1)
+Requirement already satisfied: scipy>=0.16 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from cooler>0.9.0->clodius) (1.11.3)
+Requirement already satisfied: simplejson in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from cooler>0.9.0->clodius) (3.19.2)
+Requirement already satisfied: python-dateutil>=2.8.1 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from pandas>=1.0->clodius) (2.8.2)
+Requirement already satisfied: pytz>=2020.1 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from pandas>=1.0->clodius) (2023.3.post1)
+Requirement already satisfied: cloudpickle>=1.5.0 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from dask->clodius) (3.0.0)
+Requirement already satisfied: fsspec>=2021.09.0 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from dask->clodius) (2023.10.0)
+Requirement already satisfied: packaging>=20.0 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from dask->clodius) (23.2)
+Requirement already satisfied: partd>=1.2.0 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from dask->clodius) (1.4.1)
+Requirement already satisfied: toolz>=0.10.0 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from dask->clodius) (0.12.0)
+Requirement already satisfied: importlib-metadata>=4.13.0 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from dask->clodius) (6.8.0)
+Collecting annotated-types>=0.4.0 (from pydantic->clodius)
+  Downloading annotated_types-0.6.0-py3-none-any.whl.metadata (12 kB)
+Collecting pydantic-core==2.10.1 (from pydantic->clodius)
+  Downloading pydantic_core-2.10.1-cp39-cp39-macosx_10_7_x86_64.whl.metadata (6.5 kB)
+Collecting typing-extensions>=4.6.1 (from pydantic->clodius)
+  Downloading typing_extensions-4.8.0-py3-none-any.whl.metadata (3.0 kB)
+Requirement already satisfied: six in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from pyfaidx->clodius) (1.16.0)
+Requirement already satisfied: setuptools in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from pyfaidx->clodius) (68.2.2)
+Requirement already satisfied: charset-normalizer<4,>=2 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from requests->clodius) (3.3.0)
+Requirement already satisfied: idna<4,>=2.5 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from requests->clodius) (3.4)
+Requirement already satisfied: urllib3<3,>=1.21.1 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from requests->clodius) (2.0.7)
+Requirement already satisfied: certifi>=2017.4.17 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from requests->clodius) (2023.7.22)
+Requirement already satisfied: zipp>=0.5 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from importlib-metadata>=4.13.0->dask->clodius) (3.17.0)
+Requirement already satisfied: locket in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from partd>=1.2.0->dask->clodius) (1.0.0)
+Requirement already satisfied: dill>=0.3.7 in /Users/kalavatt/mambaforge/envs/pairtools_env/lib/python3.9/site-packages (from multiprocess->cooler>0.9.0->clodius) (0.3.7)
+Downloading clodius-0.20.1-py2.py3-none-any.whl (82 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 82.6/82.6 kB 10.7 MB/s eta 0:00:00
+Downloading pybbi-0.3.5-cp39-cp39-macosx_10_9_x86_64.whl (2.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.5/2.5 MB 9.5 MB/s eta 0:00:00
+Downloading pydantic-2.4.2-py3-none-any.whl (395 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 395.8/395.8 kB 15.6 MB/s eta 0:00:00
+Downloading pydantic_core-2.10.1-cp39-cp39-macosx_10_7_x86_64.whl (1.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.9/1.9 MB 64.4 MB/s eta 0:00:00
+Downloading tqdm-4.66.1-py3-none-any.whl (78 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 78.3/78.3 kB 5.5 MB/s eta 0:00:00
+Downloading annotated_types-0.6.0-py3-none-any.whl (12 kB)
+Downloading typing_extensions-4.8.0-py3-none-any.whl (31 kB)
+Building wheels for collected packages: negspy
+  Building wheel for negspy (setup.py) ... done
+  Created wheel for negspy: filename=negspy-0.2.24-py3-none-any.whl size=1725344 sha256=6d7f9c74803cce9f60feeb7cb37163689306a719d162c70b5d21042c961bb3bb
+  Stored in directory: /Users/kalavatt/Library/Caches/pip/wheels/44/2f/4b/b619e2ad6d52f174d31580951ee2002bcc1480426d38572268
+Successfully built negspy
+Installing collected packages: slugid, negspy, typing-extensions, tqdm, pybbi, annotated-types, pydantic-core, pydantic, clodius
+Successfully installed annotated-types-0.6.0 clodius-0.20.1 negspy-0.2.24 pybbi-0.3.5 pydantic-2.4.2 pydantic-core-2.10.1 slugid-2.0.0 tqdm-4.66.1 typing-extensions-4.8.0
+```
+</details>
+<br />
+
 <a id="install-atria"></a>
 #### Install [atria](https://github.com/cihga39871/Atria)
 <a id="code-1"></a>
@@ -1168,47 +2034,44 @@ Executing transaction: done
 ```bash
 #!/bin/bash
 
-install_julia=FALSE
-[[ "${install_julia}" == TRUE ]] &&
-    {
-        #  cd into "${HOME}"
-        cd ~
+install_julia=false
+if ${install_julia}; then
+    #  cd into "${HOME}"
+    cd ~
 
-        #  Obtain tar for the language Julia
-        wget "https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.5-linux-x86_64.tar.gz"
+    #  Obtain tar for the language Julia
+    wget "https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.5-linux-x86_64.tar.gz"
 
-        #  Decompress tar
-        tar zxvf julia-1.8.5-linux-x86_64.tar.gz
+    #  Decompress tar
+    tar zxvf julia-1.8.5-linux-x86_64.tar.gz
 
-        #  Add Julia to "${PATH}"
-        #+ 1. Permanent: Run, e.g., vi ~/.bashrc, then manually add
-        #+               "export PATH=$PATH:$HOME/julia-1.8.1/bin"
-        #+ 2. Temporary: export PATH=$PATH:$HOME/julia-1.8.1/bin
+    #  Add Julia to "${PATH}"
+    #+ 1. Permanent: Run, e.g., vi ~/.bashrc, then manually add
+    #+               "export PATH=$PATH:$HOME/julia-1.8.1/bin"
+    #+ 2. Temporary: export PATH=$PATH:$HOME/julia-1.8.1/bin
 
-        # which julia
-    } || true
+    # which julia
+fi
 
-install_atria=FALSE
-[[ "${install_atria}" == TRUE ]] &&
-    {
-        cd "${HOME}/2023_rDNA" || echo "cd'ing failed; check on this..."
+install_atria=false
+if ${install_atria}; then
+    cd "${HOME}/2023_rDNA" || echo "cd'ing failed; check on this..."
 
-        [[ -d software/ ]] || mkdir software/
+    [[ ! -d software/ ]] && mkdir software/
 
-        cd software/ || echo "cd'ing failed; check on this..."
-        git clone "https://github.com/cihga39871/Atria.git"
+    cd software/ || echo "cd'ing failed; check on this..."
+    git clone "https://github.com/cihga39871/Atria.git"
 
-        cd Atria/
+    cd Atria/
 
-        julia build_atria.jl
-    } || true
+    julia build_atria.jl
+fi
 
-alias_atria=FALSE
-[[ "${alias_atria}" == TRUE ]] &&
-    {
-        alias atria="\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
-        # atria
-    } || true
+alias_atria=false
+if ${alias_atria}; then
+    alias atria="\${HOME}/tsukiyamalab/kalavatt/2023_rDNA/software/Atria/app-3.2.2/bin/atria"
+    # atria
+fi
 ```
 </details>
 <br />
@@ -1223,25 +2086,24 @@ alias_atria=FALSE
 ```bash
 #!/bin/bash
 
-install_higlass=FALSE
-[[ "${install_higlass}" == TRUE ]] &&
-    {        
-        docker pull higlass/higlass-docker
+install_higlass=true
+if ${install_higlass}; then
+    docker pull higlass/higlass-docker
 
-        p_proj="${HOME}/projects-etc/2023_rDNA"
-        p_data="results/2023-0307_work_Micro-C_align-process/cool"
-        docker run \
-            --detach \
-            --publish 8888:80 \
-            --volume "${p_proj}/${p_data}":/data \
-            --volume /tmp:/tmp \
-            --name higlass-container \
-            higlass/higlass-docker
+    p_proj="${HOME}/projects-etc/2023_rDNA"
+    p_data="results/2023-0307_work_Micro-C_align-process/cool"
+    docker run \
+        --detach \
+        --publish 8888:80 \
+        --volume "${p_proj}/${p_data}":/data \
+        --volume /tmp:/tmp \
+        --name higlass-container \
+        higlass/higlass-docker
 
-        #  Check the mounts
-        # docker exec higlass-container ls /tmp
-        # docker exec higlass-container ls /data
-    } || true
+    #  Check the mounts
+    # docker exec higlass-container ls /tmp
+    # docker exec higlass-container ls /data
+fi
 ```
 </details>
 <br />
