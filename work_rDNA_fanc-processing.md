@@ -23,7 +23,7 @@
         1. [Code](#code-4)
     1. [B. Convert above test code to `Python` script](#b-convert-above-test-code-to-python-script)
         1. [Code](#code-5)
-    1. [C. Submit `Python` script `calculate_fanc-contact-sums.py` for resolution-wise trios of `.hic` matrices](#c-submit-python-script-calculate_fanc-contact-sumspy-for-resolution-wise-trios-of-hic-matrices)
+    1. [C. Submit `Python` script `calculate-downsample_fanc-contact-sums.py` for resolution-wise trios of `.hic` matrices](#c-submit-python-script-calculate-downsample_fanc-contact-sumspy-for-resolution-wise-trios-of-hic-matrices)
         1. [Code](#code-6)
 1. [4. Perform KR balancing matrices with `fanc hic` `--filter-low-coverage-relative "${thresh}"` mode](#4-perform-kr-balancing-matrices-with-fanc-hic---filter-low-coverage-relative-%24thresh-mode)
     1. [Code](#code-7)
@@ -33,7 +33,7 @@
     1. [Code](#code-9)
 1. [7. Run HiCExplorer `hicCompareMatrices`](#7-run-hicexplorer-hiccomparematrices)
     1. [Code](#code-10)
-1. [8. Draw whole-genome "square" plots of negative log-transformed counts](#8-draw-whole-genome-square-plots-of-negative-log-transformed-counts)
+1. [8. `#TODO` Come up with name for this section](#8-todo-come-up-with-name-for-this-section)
     1. [Strategy](#strategy)
         1. [Notes](#notes-1)
     1. [Run HiCExplorer `plotHicMatrix` for negative log-transformed heatmaps](#run-hicexplorer-plothicmatrix-for-negative-log-transformed-heatmaps)
@@ -101,8 +101,16 @@
 cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process" ||
     echo "cd'ing failed; check on this"
 
+[[ ! -d 09_fanc_VII ]] &&
+    mkdir -p 09_fanc_VII/err_out ||
+    true
+
 [[ ! -d 09_fanc_XII ]] &&
     mkdir -p 09_fanc_XII/err_out ||
+    true
+
+[[ ! -d 09_fanc_XV ]] &&
+    mkdir -p 09_fanc_XV/err_out ||
     true
 
 [[ ! -d 09_fanc_genome ]] &&
@@ -127,56 +135,87 @@ cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align
  cool_G1="${d_cool}/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.cool"
 cool_G2M="${d_cool}/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.cool"
 
-check_variables=TRUE
-[[ ${check_variables} == TRUE ]] &&
-    {
-        echo """
-          d_cool  ${d_cool}
-          cool_Q  ${cool_Q}
-         cool_G1  ${cool_G1}
-        cool_G2M  ${cool_G2M}
-        """
+check_variables=true
+if ${check_variables}; then
+    echo """
+      d_cool  ${d_cool}
+      cool_Q  ${cool_Q}
+     cool_G1  ${cool_G1}
+    cool_G2M  ${cool_G2M}
+    """
 
-        ., ${cool_Q}
-        ., ${cool_G1}
-        ., ${cool_G2M}
-    } || true
+    ., ${cool_Q}
+    ., ${cool_G1}
+    ., ${cool_G2M}
+fi
+
+  d_VII="09_fanc_VII"
+  VII_Q="${d_VII}/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.hic"
+ VII_G1="${d_VII}/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.hic"
+VII_G2M="${d_VII}/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.hic"
+
+check_variables=true
+if ${check_variables}; then
+    echo """
+      d_VII  ${d_VII}
+      VII_Q  ${VII_Q}
+     VII_G1  ${VII_G1}
+    VII_G2M  ${VII_G2M}
+    """
+
+    ., ${d_VII}
+fi
 
   d_XII="09_fanc_XII"
   XII_Q="${d_XII}/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.hic"
  XII_G1="${d_XII}/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.hic"
 XII_G2M="${d_XII}/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.hic"
 
-check_variables=TRUE
-[[ ${check_variables} == TRUE ]] &&
-    {
-        echo """
-          d_XII  ${d_XII}
-          XII_Q  ${XII_Q}
-         XII_G1  ${XII_G1}
-        XII_G2M  ${XII_G2M}
-        """
+check_variables=true
+if ${check_variables}; then
+    echo """
+      d_XII  ${d_XII}
+      XII_Q  ${XII_Q}
+     XII_G1  ${XII_G1}
+    XII_G2M  ${XII_G2M}
+    """
 
-        ., ${d_XII}
-    } || true
+    ., ${d_XII}
+fi
+
+  d_XV="09_fanc_XV"
+  XV_Q="${d_XV}/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.hic"
+ XV_G1="${d_XV}/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.hic"
+XV_G2M="${d_XV}/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.hic"
+
+check_variables=true
+if ${check_variables}; then
+    echo """
+      d_XV  ${d_XV}
+      XV_Q  ${XV_Q}
+     XV_G1  ${XV_G1}
+    XV_G2M  ${XV_G2M}
+    """
+
+    ., ${d_XV}
+fi
 
   d_gen="09_fanc_genome"
   gen_Q="${d_gen}/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.hic"
  gen_G1="${d_gen}/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.hic"
 gen_G2M="${d_gen}/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.hic"
 
-check_variables=TRUE
-[[ ${check_variables} == TRUE ]] &&
-    {
-        echo """
-          d_XII  ${d_gen}
-          XII_Q  ${gen_Q}
-         XII_G1  ${gen_G1}
-        XII_G2M  ${gen_G2M}
-        """
+check_variables=true
+if ${check_variables}; then
+    echo """
+      d_XII  ${d_gen}
+      gen_Q  ${gen_Q}
+     gen_G1  ${gen_G1}
+    gen_G2M  ${gen_G2M}
+    """
 
-        ., ${d_XII}
-    } || true
+    ., ${d_gen}
+fi
 ```
 </details>
 <br />
@@ -191,142 +230,146 @@ check_variables=TRUE
 ```bash
 #!/bin/bash
 
-check_test_command=FALSE
-[[ ${check_test_command} == TRUE ]] &&
-    {
-        [[ -f ${cool_Q} && ! -f ${XII_Q} ]] &&
-            {
-                echo """
-                fanc from-cooler \\
-                    ${cool_Q} \\
-                    ${XII_Q}
-                """
-            } || echo "Warning: Did not run command; check in/outfiles."
-    } || true
+check_test_command=true
+if ${check_test_command}; then
+    [[ -f ${cool_Q} && ! -f ${XII_Q} ]] &&
+        {
+            echo """
+            fanc from-cooler \\
+                ${cool_Q} \\
+                ${XII_Q}
+            """
+        } || echo "Warning: Did not run command; check in/outfiles."
+fi
 
-run_test_command=FALSE
-[[ ${run_test_command} == TRUE ]] &&
-    {
-        [[ -f ${cool_Q} && ! -f ${XII_Q} ]] &&
-            {
-                fanc from-cooler \
-                    ${cool_Q} \
-                    ${XII_Q}
-            } || echo "Warning: Did not run command; check in/outfiles."
-    } || true
+run_test_command=false
+if ${run_test_command}; then
+    [[ -f ${cool_Q} && ! -f ${XII_Q} ]] &&
+        {
+            fanc from-cooler \
+                ${cool_Q} \
+                ${XII_Q}
+        } || echo "Warning: Did not run command; check in/outfiles."
+fi
 
 #  Initialize associative array that pairs in- with outfiles
 unset conversion && typeset -A conversion
-conversion["${cool_Q}"]="${XII_Q}; ${gen_Q}"
-conversion["${cool_G1}"]="${XII_G1}; ${gen_G1}"
-conversion["${cool_G2M}"]="${XII_G2M}; ${gen_G2M}"
+# conversion["${cool_Q}"]="${VII_Q}; ${gen_Q}"
+# conversion["${cool_G1}"]="${VII_G1}; ${gen_G1}"
+# conversion["${cool_G2M}"]="${VII_G2M}; ${gen_G2M}"
+# conversion["${cool_Q}"]="${XII_Q}; ${gen_Q}"
+# conversion["${cool_G1}"]="${XII_G1}; ${gen_G1}"
+# conversion["${cool_G2M}"]="${XII_G2M}; ${gen_G2M}"
+conversion["${cool_Q}"]="${XV_Q}; ${gen_Q}"
+conversion["${cool_G1}"]="${XV_G1}; ${gen_G1}"
+conversion["${cool_G2M}"]="${XV_G2M}; ${gen_G2M}"
 
-check_array=TRUE
-[[ ${check_array} == TRUE ]] &&
-    {
-        for i in "${!conversion[@]}"; do
-            # [[ -f ${i} && ! -f ${conversion[${i}]} ]] &&
-            #    {
-                    echo """
-                          key (cool)  ${i}
-                    value (hic, XII)  $(echo ${conversion[${i}]} | awk -F '; ' '{ print $1 }')
-                    value (hic, gen)  $(echo ${conversion[${i}]} | awk -F '; ' '{ print $2 }')
-                    """
-            #    } ||
-            #     {
-            #         echo "Warning: Did not run command; check infile ${i}"
-            #         echo "         and/or outfile ${conversion[${i}]}."
-            #     }
-        done
-    } || true
 
-check_jobs=TRUE
-[[ ${check_jobs} == TRUE ]] &&
-    {
-        iter=0
-        for i in "${!conversion[@]}"; do
-            XII=$(echo ${conversion[${i}]} | awk -F '; ' '{ print $1 }')
-            gen=$(echo ${conversion[${i}]} | awk -F '; ' '{ print $2 }')
+check_array=true
+if ${check_array}; then
+    for i in "${!conversion[@]}"; do
+        # [[ -f ${i} && ! -f ${conversion[${i}]} ]] &&
+        #    {
+                echo """
+                      key (cool)  ${i}
+                value (hic, chr)  $(echo ${conversion[${i}]} | awk -F '; ' '{ print $1 }')
+                value (hic, gen)  $(echo ${conversion[${i}]} | awk -F '; ' '{ print $2 }')
+                """
+        #    } ||
+        #     {
+        #         echo "Warning: Did not run command; check infile ${i}"
+        #         echo "         and/or outfile ${conversion[${i}]}."
+        #     }
+    done
+fi
 
-            (( iter++ ))
-            [[ -f ${i} && ! -f ${XII} ]] &&
-                {
-                    job_name="to-fanc.$(basename ${i} .cool)"
-                    threads=1
-                    
-                    echo """
-                    ### ${iter} ###
+check_jobs=true
+if ${check_jobs}; then
+    iter=0
+    for i in "${!conversion[@]}"; do
+          chr=$(echo ${conversion[${i}]} | awk -F '; ' '{ print $1 }')
+        d_chr="$(dirname "${chr}")"
+          gen=$(echo ${conversion[${i}]} | awk -F '; ' '{ print $2 }')
 
-                    #HEREDOC
-                    sbatch << EOF
-                    #!/bin/bash
-
-                    #SBATCH --job-name="${job_name}"
-                    #SBATCH --nodes=1
-                    #SBATCH --cpus-per-task=${threads}
-                    #SBATCH --error="${d_XII}/err_out/${job_name}.%A.stderr.txt"
-                    #SBATCH --output="${d_XII}/err_out/${job_name}.%A.stdout.txt"
-
-                    fanc from-cooler \\
-                        ${i} \\
-                        ${XII}
-                    EOF
-                    """
-                    sleep 0.2
-                } ||
-                {
-                    echo "Warning: Did not run command; check infile ${i}"
-                    echo "         and/or outfile ${conversion[${i}]}."
-                }
+        (( iter++ ))
+        [[ -f ${i} && ! -f ${chr} ]] &&
+            {
+                job_name="to-fanc.$(basename ${i} .cool)"
+                threads=1
                 
-                (( iter++ ))
-                [[ -f ${i} && ! -f ${gen} ]] &&
-                {
-                    job_name="to-fanc.$(basename ${i} .cool)"
-                    threads=1
-                    
-                    echo """
-                    ### ${iter} ###
+                echo """
+                ### ${iter} ###
 
-                    #HEREDOC
-                    sbatch << EOF
-                    #!/bin/bash
+                #HEREDOC
+                sbatch << EOF
+                #!/bin/bash
 
-                    #SBATCH --job-name="${job_name}"
-                    #SBATCH --nodes=1
-                    #SBATCH --cpus-per-task=${threads}
-                    #SBATCH --error="${d_gen}/err_out/${job_name}.%A.stderr.txt"
-                    #SBATCH --output="${d_gen}/err_out/${job_name}.%A.stdout.txt"
+                #SBATCH --job-name="${job_name}"
+                #SBATCH --nodes=1
+                #SBATCH --cpus-per-task=${threads}
+                #SBATCH --error="${d_chr}/err_out/${job_name}.%A.stderr.txt"
+                #SBATCH --output="${d_chr}/err_out/${job_name}.%A.stdout.txt"
 
-                    fanc from-cooler \\
-                        ${i} \\
-                        ${gen}
-                    EOF
-                    """
-                    sleep 0.2
-                } ||
-                {
-                    echo "Warning: Did not run command; check infile ${i}"
-                    echo "         and/or outfile ${conversion[${i}]}."
-                }
-        done
-    }
-
-submit_jobs=TRUE
-[[ ${submit_jobs} == TRUE ]] &&
-    {
-        iter=0
-        for i in "${!conversion[@]}"; do
-            XII=$(echo ${conversion[${i}]} | awk -F '; ' '{ print $1 }')
-            gen=$(echo ${conversion[${i}]} | awk -F '; ' '{ print $2 }')
-
+                fanc from-cooler \\
+                    ${i} \\
+                    ${chr}
+                EOF
+                """
+                sleep 0.2
+            } ||
+            {
+                echo "Warning: Did not run command; check infile ${i}"
+                echo "         and/or outfile ${conversion[${i}]}."
+            }
+            
             (( iter++ ))
-            [[ -f ${i} && ! -f ${XII} ]] &&
-                {
-                    job_name="to-fanc.$(basename ${i} .cool)"
-                    threads=1
-                    
-                    echo "### ${iter} ###"
+            [[ -f ${i} && ! -f ${gen} ]] &&
+            {
+                job_name="to-fanc.$(basename ${i} .cool)"
+                threads=1
+                
+                echo """
+                ### ${iter} ###
+
+                #HEREDOC
+                sbatch << EOF
+                #!/bin/bash
+
+                #SBATCH --job-name="${job_name}"
+                #SBATCH --nodes=1
+                #SBATCH --cpus-per-task=${threads}
+                #SBATCH --error="${d_gen}/err_out/${job_name}.%A.stderr.txt"
+                #SBATCH --output="${d_gen}/err_out/${job_name}.%A.stdout.txt"
+
+                fanc from-cooler \\
+                    ${i} \\
+                    ${gen}
+                EOF
+                """
+                sleep 0.2
+            } ||
+            {
+                echo "Warning: Did not run command; check infile ${i}"
+                echo "         and/or outfile ${conversion[${i}]}."
+            }
+    done
+fi
+
+submit_jobs=true
+if ${submit_jobs}; then
+    iter=0
+    for i in "${!conversion[@]}"; do
+          chr=$(echo ${conversion[${i}]} | awk -F '; ' '{ print $1 }')
+        d_chr="$(dirname "${chr}")"
+          gen=$(echo ${conversion[${i}]} | awk -F '; ' '{ print $2 }')
+
+        (( iter++ ))
+        [[ -f ${i} && ! -f ${chr} ]] &&
+            {
+                job_name="to-fanc.$(basename ${i} .cool)"
+                threads=1
+                
+                echo "### ${iter} ###"
 
 #HEREDOC
 sbatch << EOF
@@ -335,27 +378,27 @@ sbatch << EOF
 #SBATCH --job-name="${job_name}"
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=${threads}
-#SBATCH --error="${d_XII}/err_out/${job_name}.%A.stderr.txt"
-#SBATCH --output="${d_XII}/err_out/${job_name}.%A.stdout.txt"
+#SBATCH --error="${d_chr}/err_out/${job_name}.%A.stderr.txt"
+#SBATCH --output="${d_chr}/err_out/${job_name}.%A.stdout.txt"
 
 fanc from-cooler \
     ${i} \
-    ${XII}
+    ${chr}
 EOF
-                    sleep 0.2
-                } ||
-                {
-                    echo "Warning: Did not run command; check infile ${i}"
-                    echo "         and/or outfile ${conversion[${i}]}."
-                }
+                sleep 0.2
+            } ||
+            {
+                echo "Warning: Did not run command; check infile ${i}"
+                echo "         and/or outfile ${conversion[${i}]}."
+            }
+            
+            (( iter++ ))
+            [[ -f ${i} && ! -f ${gen} ]] &&
+            {
+                job_name="to-fanc.$(basename ${i} .cool)"
+                threads=1
                 
-                (( iter++ ))
-                [[ -f ${i} && ! -f ${gen} ]] &&
-                {
-                    job_name="to-fanc.$(basename ${i} .cool)"
-                    threads=1
-                    
-                    echo "### ${iter} ###"
+                echo "### ${iter} ###"
 
 #HEREDOC
 sbatch << EOF
@@ -371,14 +414,14 @@ fanc from-cooler \
     ${i} \
     ${gen}
 EOF
-                    sleep 0.2
-                } ||
-                {
-                    echo "Warning: Did not run command; check infile ${i}"
-                    echo "         and/or outfile ${conversion[${i}]}."
-                }
-        done
-    }
+                sleep 0.2
+            } ||
+            {
+                echo "Warning: Did not run command; check infile ${i}"
+                echo "         and/or outfile ${conversion[${i}]}."
+            }
+    done
+fi
 ```
 </details>
 <br />
@@ -394,98 +437,127 @@ EOF
 #!/bin/bash
 
 threads=4
-unset chroms && typeset -a chroms=("XII" "gen")
+# unset chroms && typeset -a chroms=("XII" "gen")
+unset chroms && typeset -a chroms=("VII" "XV")
 unset res && typeset -a res=(
     50 100 150 200 300 400 500 800 1600 3200 5000 6400 12800
 )
 
-check_array=FALSE
-[[ ${check_array} == TRUE ]] &&
-    {
-        echo_test "${res[@]}"
-        echo ""
-        
-        echo_test "${chroms[@]}"
-        echo ""
-    } ||
-    true
+check_arrays=false
+if ${check_arrays}; then
+    echo_test "${res[@]}"
+    echo ""
+    
+    echo_test "${chroms[@]}"
+    echo ""
+fi
 
 for k in "${chroms[@]}"; do
+    # k="${chroms[0]}"  # echo "${k}"
     iter=0
-    if [[ "${k}" == "XII" ]]; then
+    if [[ "${k}" != "gen"  ]]; then
         # k="gen"
         for j in "${res[@]}"; do
             # j=${res[10]}  # echo "${j}"
 
-            unset Q_bin && typeset Q_bin="${XII_Q%.hic}.${j}.hic"        # echo "${Q_bin}"
-            unset G1_bin && typeset G1_bin="${XII_G1%.hic}.${j}.hic"     # echo "${G1_bin}"
-            unset G2M_bin && typeset G2M_bin="${XII_G2M%.hic}.${j}.hic"  # echo "${G2M_bin}"
+            if [[ ${k} == "VII" ]]; then
+                chr_Q="${VII_Q}"
+                chr_G1="${VII_G1}"
+                chr_G2M="${VII_G2M}"
+            elif [[ ${k} == "XII" ]]; then
+                chr_Q="${XII_Q}"
+                chr_G1="${XII_G1}"
+                chr_G2M="${XII_G2M}"
+            elif [[ ${k} == "XV" ]]; then
+                chr_Q="${XV_Q}"
+                chr_G1="${XV_G1}"
+                chr_G2M="${XV_G2M}"
+            fi
+
+            check_variables=false
+            if ${check_variables}; then
+                echo """
+                  chr_Q  ${chr_Q}
+                 chr_G1  ${chr_G1}
+                chr_G2M  ${chr_G2M}
+                """
+            fi
+
+            Q_bin="${chr_Q%.hic}.${j}.hic"      # echo "${Q_bin}"
+            G1_bin="${chr_G1%.hic}.${j}.hic"    # echo "${G1_bin}"
+            G2M_bin="${chr_G2M%.hic}.${j}.hic"  # echo "${G2M_bin}"
+
+            check_variables=false
+            if ${check_variables}; then
+                echo """
+                  Q_bin  ${Q_bin}
+                 G1_bin  ${G1_bin}
+                G2M_bin  ${G2M_bin}
+                """
+            fi
 
             unset bin && typeset -A bin
             bin["${XII_Q}"]="${Q_bin}"
             bin["${XII_G1}"]="${G1_bin}"
             bin["${XII_G2M}"]="${G2M_bin}"
 
-            check_array=FALSE
-            [[ ${check_array} == TRUE ]] &&
-                {
-                    for i in "${!bin[@]}"; do
-                        echo """
-                        key (all, 25)  ${i}
-                        value (${k}, ${j})  ${bin[${i}]}
-                        """
-                    done
-                } || true
+            check_array=false
+            if ${check_array}; then
+                for i in "${!bin[@]}"; do
+                    echo """
+                    key (all, 25)  ${i}
+                    value (${k}, ${j})  ${bin[${i}]}
+                    """
+                done
+            fi
 
-            check_jobs=TRUE
-            [[ ${check_jobs} == TRUE ]] &&
-                {
-                    for i in "${!bin[@]}"; do
-                        (( iter++ ))
-                        [[ -f ${i} && ! -f ${bin[${i}]} ]] &&
-                            {
-                                job_name="bin.$(basename ${bin[${i}]} .hic)"
+            check_jobs=true
+            if ${check_jobs}; then
+                for i in "${!bin[@]}"; do
+                    (( iter++ ))
+                    [[ -f ${i} && ! -f ${bin[${i}]} ]] &&
+                        {
+                            job_name="bin.$(basename ${bin[${i}]} .hic)"
 
-                                echo """
-                                ### ${iter} ###
+                            echo """
+                            ### ${iter} ###
 
-                                #HEREDOC
-                                sbatch << EOF
-                                #!/bin/bash
+                            #HEREDOC
+                            sbatch << EOF
+                            #!/bin/bash
 
-                                #SBATCH --job-name="${job_name}"
-                                #SBATCH --nodes=1
-                                #SBATCH --cpus-per-task=${threads}
-                                #SBATCH --error="${d_XII}/err_out/${job_name}.%A.stderr.txt"
-                                #SBATCH --output="${d_XII}/err_out/${job_name}.%A.stdout.txt"
+                            #SBATCH --job-name="${job_name}"
+                            #SBATCH --nodes=1
+                            #SBATCH --cpus-per-task=${threads}
+                            #SBATCH --error="${d_XII}/err_out/${job_name}.%A.stderr.txt"
+                            #SBATCH --output="${d_XII}/err_out/${job_name}.%A.stdout.txt"
 
-                                fanc hic \\
-                                    ${i} \\
-                                    ${bin[${i}]} \\
-                                    --threads ${threads} \\
-                                    --bin-size ${j} \\
-                                    --chromosomes \"${k}\"
-                                EOF
-                                """
-                                sleep 0.2
-                            } ||
-                            {
-                                echo "Warning: Did not run command; check infile ${i}"
-                                echo "         and/or outfile ${bin[${i}]}."
-                            }
-                    done
-                } || true
+                            fanc hic \\
+                                ${i} \\
+                                ${bin[${i}]} \\
+                                --threads ${threads} \\
+                                --bin-size ${j} \\
+                                --chromosomes \"${k}\"
+                            EOF
+                            """
+                            sleep 0.2
+                        } ||
+                        {
+                            echo "Warning: Did not run command; check infile ${i}"
+                            echo "         and/or outfile ${bin[${i}]}."
+                        }
+                done
+            fi
 
-            submit_jobs=TRUE
-            [[ ${submit_jobs} == TRUE ]] &&
-                {
-                    for i in "${!bin[@]}"; do
-                        (( iter++ ))
-                        [[ -f ${i} && ! -f ${bin[${i}]} ]] &&
-                            {
-                                job_name="bin.$(basename ${bin[${i}]} .hic)"
+            submit_jobs=true
+            if ${submit_jobs}; then
+                for i in "${!bin[@]}"; do
+                    (( iter++ ))
+                    [[ -f ${i} && ! -f ${bin[${i}]} ]] &&
+                        {
+                            job_name="bin.$(basename ${bin[${i}]} .hic)"
 
-                                echo "### ${iter} ###"
+                            echo "### ${iter} ###"
 
 #HEREDOC
 sbatch << EOF
@@ -504,87 +576,84 @@ fanc hic \
     --bin-size ${j} \
     --chromosomes "${k}"
 EOF
-                                sleep 0.2
-                            } ||
-                            {
-                                echo "Warning: Did not run command; check infile ${i}"
-                                echo "         and/or outfile ${bin[${i}]}."
-                            }
-                    done
-                } || true
+                            sleep 0.2
+                        } ||
+                        {
+                            echo "Warning: Did not run command; check infile ${i}"
+                            echo "         and/or outfile ${bin[${i}]}."
+                        }
+                done
+            fi
         done
     elif [[ "${k}" == "gen" ]]; then
         for j in "${res[@]}"; do
             # j=${res[10]}  # echo "${j}"
 
-            unset Q_bin && typeset Q_bin="${gen_Q%.hic}.${j}.hic"        # echo "${Q_bin}"
-            unset G1_bin && typeset G1_bin="${gen_G1%.hic}.${j}.hic"     # echo "${G1_bin}"
-            unset G2M_bin && typeset G2M_bin="${gen_G2M%.hic}.${j}.hic"  # echo "${G2M_bin}"
+              Q_bin="${gen_Q%.hic}.${j}.hic"    # echo "${Q_bin}"
+             G1_bin="${gen_G1%.hic}.${j}.hic"   # echo "${G1_bin}"
+            G2M_bin="${gen_G2M%.hic}.${j}.hic"  # echo "${G2M_bin}"
 
             unset bin && typeset -A bin
             bin["${gen_Q}"]="${Q_bin}"
             bin["${gen_G1}"]="${G1_bin}"
             bin["${gen_G2M}"]="${G2M_bin}"
 
-            check_array=FALSE
-            [[ ${check_array} == TRUE ]] &&
-                {
-                    for i in "${!bin[@]}"; do
-                        echo """
-                        key (all, 25)  ${i}
-                        value (${k}, ${j})  ${bin[${i}]}
-                        """
-                    done
-                } || true
+            check_array=false
+            if ${check_array}; then
+                for i in "${!bin[@]}"; do
+                    echo """
+                    key (all, 25)  ${i}
+                    value (${k}, ${j})  ${bin[${i}]}
+                    """
+                done
+            fi
 
-            check_jobs=TRUE
-            [[ ${check_jobs} == TRUE ]] &&
-                {
-                    for i in "${!bin[@]}"; do
-                        (( iter++ ))
-                        [[ -f ${i} && ! -f ${bin[${i}]} ]] &&
-                            {
-                                job_name="bin.$(basename ${bin[${i}]} .hic)"
+            check_jobs=true
+            if ${check_jobs}; then
+                for i in "${!bin[@]}"; do
+                    (( iter++ ))
+                    [[ -f ${i} && ! -f ${bin[${i}]} ]] &&
+                        {
+                            job_name="bin.$(basename ${bin[${i}]} .hic)"
 
-                                echo """
-                                ### ${iter} ###
+                            echo """
+                            ### ${iter} ###
 
-                                #HEREDOC
-                                sbatch << EOF
-                                #!/bin/bash
+                            #HEREDOC
+                            sbatch << EOF
+                            #!/bin/bash
 
-                                #SBATCH --job-name="${job_name}"
-                                #SBATCH --nodes=1
-                                #SBATCH --cpus-per-task=${threads}
-                                #SBATCH --error="${d_gen}/err_out/${job_name}.%A.stderr.txt"
-                                #SBATCH --output="${d_gen}/err_out/${job_name}.%A.stdout.txt"
+                            #SBATCH --job-name="${job_name}"
+                            #SBATCH --nodes=1
+                            #SBATCH --cpus-per-task=${threads}
+                            #SBATCH --error="${d_gen}/err_out/${job_name}.%A.stderr.txt"
+                            #SBATCH --output="${d_gen}/err_out/${job_name}.%A.stdout.txt"
 
-                                fanc hic \\
-                                    ${i} \\
-                                    ${bin[${i}]} \\
-                                    --threads ${threads} \\
-                                    --bin-size ${j}
-                                EOF
-                                """
-                                sleep 0.2
-                            } ||
-                            {
-                                echo "Warning: Did not run command; check infile ${i}"
-                                echo "         and/or outfile ${bin[${i}]}."
-                            }
-                    done
-                } || true
+                            fanc hic \\
+                                ${i} \\
+                                ${bin[${i}]} \\
+                                --threads ${threads} \\
+                                --bin-size ${j}
+                            EOF
+                            """
+                            sleep 0.2
+                        } ||
+                        {
+                            echo "Warning: Did not run command; check infile ${i}"
+                            echo "         and/or outfile ${bin[${i}]}."
+                        }
+                done
+            fi
 
-            submit_jobs=TRUE
-            [[ ${submit_jobs} == TRUE ]] &&
-                {
-                    for i in "${!bin[@]}"; do
-                        (( iter++ ))
-                        [[ -f ${i} && ! -f ${bin[${i}]} ]] &&
-                            {
-                                job_name="bin.$(basename ${bin[${i}]} .hic)"
+            submit_jobs=true
+            if ${submit_jobs}; then
+                for i in "${!bin[@]}"; do
+                    (( iter++ ))
+                    [[ -f ${i} && ! -f ${bin[${i}]} ]] &&
+                        {
+                            job_name="bin.$(basename ${bin[${i}]} .hic)"
 
-                                echo "### ${iter} ###"
+                            echo "### ${iter} ###"
 
 #HEREDOC
 sbatch << EOF
@@ -602,14 +671,14 @@ fanc hic \
     --threads ${threads} \
     --bin-size ${j}
 EOF
-                                sleep 0.2
-                            } ||
-                            {
-                                echo "Warning: Did not run command; check infile ${i}"
-                                echo "         and/or outfile ${bin[${i}]}."
-                            }
-                    done
-                } || true
+                            sleep 0.2
+                        } ||
+                        {
+                            echo "Warning: Did not run command; check infile ${i}"
+                            echo "         and/or outfile ${bin[${i}]}."
+                        }
+                done
+            fi
         done
     fi
 done
@@ -705,24 +774,25 @@ print(f"Downsampled G2 contact sum: {str(sum_samp_G2)}")
 ```python
 #!/usr/bin/env python3
 
-#  See 2023-0307_work_Micro-C_align-process/calculate_fanc-contact-sums.py
+#  See 2023-0307_work_Micro-C_align-process/calculate-downsample_fanc-contact-sums.py
 ```
 </details>
 <br />
 
-<a id="c-submit-python-script-calculate_fanc-contact-sumspy-for-resolution-wise-trios-of-hic-matrices"></a>
-#### C. Submit `Python` script `calculate_fanc-contact-sums.py` for resolution-wise trios of `.hic` matrices
+<a id="c-submit-python-script-calculate-downsample_fanc-contact-sumspy-for-resolution-wise-trios-of-hic-matrices"></a>
+#### C. Submit `Python` script `calculate-downsample_fanc-contact-sums.py` for resolution-wise trios of `.hic` matrices
 <a id="code-6"></a>
 ##### Code
 <details>
-<summary><i>Code: C. Submit `Python` script `calculate_fanc-contact-sums.py` for resolution-wise trios of `.hic` matrices</i></summary>
+<summary><i>Code: C. Submit `Python` script `calculate-downsample_fanc-contact-sums.py` for resolution-wise trios of `.hic` matrices</i></summary>
 
 ```bash
 #!/bin/bash
 
-python calculate_fanc-contact-sums.py -h
-# ❯ python calculate_fanc-contact-sums.py -h
-# usage: calculate_fanc-contact-sums.py [-h] -Q Q_INFILE -G1 G1_INFILE -G2 G2_INFILE [-s SEED] [--Q_outfile Q_OUTFILE] [--G1_outfile G1_OUTFILE] [--G2_outfile G2_OUTFILE]
+python calculate-downsample_fanc-contact-sums.py -h
+# ❯ python calculate-downsample_fanc-contact-sums.py -h
+# usage: calculate-downsample_fanc-contact-sums.py [-h] -Q Q_INFILE -G1 G1_INFILE -G2 G2_INFILE [-s SEED] [--Q_outfile Q_OUTFILE] [--G1_outfile G1_OUTFILE]
+#                                                  [--G2_outfile G2_OUTFILE]
 #
 # Calculate contact sums for Q, G1, and G2/M FAN-C .hic infiles and downsample the three .hic files to the file with the smallest sum.
 #
@@ -742,116 +812,131 @@ python calculate_fanc-contact-sums.py -h
 #   --G2_outfile G2_OUTFILE
 #                         Path and name for the G2/M downsampled FAN-C .hic outfile; if not specified, then path and name is derived from corresponding infile <chr>
 
+d_VII="09_fanc_VII"
 d_XII="09_fanc_XII"
+d_XV="09_fanc_XV"
 d_gen="09_fanc_genome"
 threads=1
-unset chroms && typeset -a chroms=("XII" "gen")
+# unset chroms && typeset -a chroms=("XII" "gen")
+unset chroms && typeset -a chroms=("VII" "XV")
 unset res && typeset -a res=(
     50 100 150 200 300 400 500 800 1600 3200 5000 6400 12800
 )
 
-check_array=TRUE
-[[ ${check_array} == TRUE ]] &&
-    {
-        echo_test "${res[@]}"
-        echo ""
+check_array=true
+if ${check_array}; then
+    echo_test "${res[@]}"
+    echo ""
 
-        echo_test "${chroms[@]}"
-        echo ""
-    } || true
+    echo_test "${chroms[@]}"
+    echo ""
+fi
 
 iter=0
 for k in "${chroms[@]}"; do
-    if [[ "${k}" == "XII" ]]; then
+    # k="${chroms[0]}"  # echo "${k}"
+    
+    if [[ "${k}" == "VII" ]]; then
+        unset dir && typeset dir="${d_VII}"
+    elif [[ "${k}" == "XII" ]]; then
         unset dir && typeset dir="${d_XII}"
+    elif [[ "${k}" == "XV" ]]; then
+        unset dir && typeset dir="${d_XV}"
     elif [[ "${k}" == "gen" ]]; then
         unset dir && typeset dir="${d_gen}"
     fi
+    # echo "${dir}"
 
     for j in "${res[@]}"; do
         # j=${res[10]}  # echo "${j}"
 
-        Q_bin="$( find ${dir} -name MC-2019_Q_*.${j}.hic )"         # echo "${Q_bin}"
-        G1_bin="$( find ${dir} -name MC-2020_30C-a15_*.${j}.hic )"  # echo "${G1_bin}"
-        G2M_bin="$( find ${dir} -name MC-2020_nz_*.${j}.hic )"      # echo "${G2M_bin}"
+          Q_bin="$( find ${dir} -name MC-2019_Q_*.${j}.hic )"        # echo "${Q_bin}"
+         G1_bin="$( find ${dir} -name MC-2020_30C-a15_*.${j}.hic )"  # echo "${G1_bin}"
+        G2M_bin="$( find ${dir} -name MC-2020_nz_*.${j}.hic )"       # echo "${G2M_bin}"
 
-        check_files=FALSE
-        [[ ${check_files} == TRUE ]] &&
-            {
-                ls -lhaFG "${Q_bin}"
-                ls -lhaFG "${G1_bin}"
-                ls -lhaFG "${G2M_bin}"
-            } || true
+        check_variables=false
+        if ${check_variables}; then
+            echo """
+              Q_bin  ${Q_bin}
+             G1_bin  ${G1_bin}
+            G2M_bin  ${G2M_bin}
+            """
+        fi
 
-        check_jobs=TRUE
-        [[ ${check_jobs} == TRUE ]] &&
-            {
-                (( iter++ ))
-                Q_out="${Q_bin%.hic}.downsample-to-G1.hic"      # echo "${Q_out}"
-                G1_out="${G1_bin%.hic}.downsample-to-G1.hic"    # echo "${G1_out}"
-                G2M_out="${G2M_bin%.hic}.downsample-to-G1.hic"  # echo "${G2M_out}"
-                [[ 
-                      -f ${Q_bin} &&   -f ${G1_bin} &&   -f ${G2M_bin} &&
-                    ! -f ${Q_out} && ! -f ${G1_out} && ! -f ${G2M_out}
-                ]] &&
-                    {
-                        job_name="downsample_files-hic-${j}"
+        check_files=false
+        if ${check_files}; then
+            ls -lhaFG "${Q_bin}"
+            ls -lhaFG "${G1_bin}"
+            ls -lhaFG "${G2M_bin}"
+        fi
 
-                        echo """
-                        ### ${iter} ###
+        check_jobs=true
+        if ${check_jobs}; then
+            (( iter++ ))
+            #   Q_out="${Q_bin%.hic}.downsample-to-G1.hic"      # echo "${Q_out}"
+            #  G1_out="${G1_bin%.hic}.downsample-to-G1.hic"    # echo "${G1_out}"
+            # G2M_out="${G2M_bin%.hic}.downsample-to-G1.hic"  # echo "${G2M_out}"
+            # [[ 
+            #       -f ${Q_bin} &&   -f ${G1_bin} &&   -f ${G2M_bin} &&
+            #     ! -f ${Q_out} && ! -f ${G1_out} && ! -f ${G2M_out}
+            # ]] &&
+            #     {
+                    job_name="downsample_files-hic-${j}"
 
-                        #HEREDOC
-                        sbatch << EOF
-                        #!/bin/bash
+                    echo """
+                    ### ${iter} ###
 
-                        #SBATCH --job-name=\"${job_name}\"
-                        #SBATCH --nodes=1
-                        #SBATCH --cpus-per-task=${threads}
-                        #SBATCH --error=\"${dir}/err_out/${job_name}.%A.stderr.txt\"
-                        #SBATCH --output=\"${dir}/err_out/${job_name}.%A.stdout.txt\"
+                    #HEREDOC
+                    sbatch << EOF
+                    #!/bin/bash
 
-                        python calculate_fanc-contact-sums.py \\
-                            --Q_infile \"${Q_bin}\" \\
-                            --G1_infile \"${G1_bin}\" \\
-                            --G2_infile \"${G2M_bin}\"
-                        EOF
-                        """
-                        sleep 0.2
-                    } ||
-                    {
-                        echo """
-                        Warning: Did not run command.
+                    #SBATCH --job-name=\"${job_name}\"
+                    #SBATCH --nodes=1
+                    #SBATCH --cpus-per-task=${threads}
+                    #SBATCH --error=\"${dir}/err_out/${job_name}.%A.stderr.txt\"
+                    #SBATCH --output=\"${dir}/err_out/${job_name}.%A.stdout.txt\"
 
-                        Check the following infiles, one or more of which may
-                        not exist:
-                            - ${Q_bin}
-                            - ${G1_bin}
-                            - ${G2M_bin}
+                    python calculate-downsample_fanc-contact-sums.py \\
+                        --Q_infile \"${Q_bin}\" \\
+                        --G1_infile \"${G1_bin}\" \\
+                        --G2_infile \"${G2M_bin}\"
+                    EOF
+                    """
+                    sleep 0.2
+                # } ||
+                # {
+                #     echo """
+                #     Warning: Did not run command.
+                # 
+                #     Check the following infiles, one or more of which may
+                #     not exist:
+                #         - ${Q_bin}
+                #         - ${G1_bin}
+                #         - ${G2M_bin}
+                # 
+                #     Or check the following outfiles, one or more of which
+                #     may already exist:
+                #         - ${Q_out}
+                #         - ${G1_out}
+                #         - ${G2M_out}
+                #     """
+                # }
+        fi
 
-                        Or check the following outfiles, one or more of which
-                        may already exist:
-                            - ${Q_out}
-                            - ${G1_out}
-                            - ${G2M_out}
-                        """
-                    }
-            } || true
+        submit_jobs=true
+        if ${submit_jobs}; then
+            (( iter++ ))
+            #   Q_out="${Q_bin%.hic}.downsample-to-G1.hic"    # echo "${Q_out}"
+            #  G1_out="${G1_bin%.hic}.downsample-to-G1.hic"   # echo "${G1_out}"
+            # G2M_out="${G2M_bin%.hic}.downsample-to-G1.hic"  # echo "${G2M_out}"
+            # [[ 
+            #       -f ${Q_bin} &&   -f ${G1_bin} &&   -f ${G2M_bin} &&
+            #     ! -f ${Q_out} && ! -f ${G1_out} && ! -f ${G2M_out}
+            # ]] &&
+            #     {
+                    job_name="downsample_files-hic-${j}"
 
-        submit_jobs=TRUE
-        [[ ${submit_jobs} == TRUE ]] &&
-            {
-                (( iter++ ))
-                Q_out="${Q_bin%.hic}.downsample-to-G1.hic"      # echo "${Q_out}"
-                G1_out="${G1_bin%.hic}.downsample-to-G1.hic"    # echo "${G1_out}"
-                G2M_out="${G2M_bin%.hic}.downsample-to-G1.hic"  # echo "${G2M_out}"
-                [[ 
-                      -f ${Q_bin} &&   -f ${G1_bin} &&   -f ${G2M_bin} &&
-                    ! -f ${Q_out} && ! -f ${G1_out} && ! -f ${G2M_out}
-                ]] &&
-                    {
-                        job_name="downsample_files-hic-${j}"
-
-                        echo "### ${iter} ###"
+                    echo "### ${iter} ###"
 
 #HEREDOC
 sbatch << EOF
@@ -863,31 +948,31 @@ sbatch << EOF
 #SBATCH --error="${dir}/err_out/${job_name}.%A.stderr.txt"
 #SBATCH --output="${dir}/err_out/${job_name}.%A.stdout.txt"
 
-python calculate_fanc-contact-sums.py \
+python calculate-downsample_fanc-contact-sums.py \
 --Q_infile "${Q_bin}" \
 --G1_infile "${G1_bin}" \
 --G2_infile "${G2M_bin}"
 EOF
-                        sleep 0.2
-                    } ||
-                    {
-                        echo """
-                        Warning: Did not run command.
-
-                        Check the following infiles, one or more of which may
-                        not exist:
-                            - ${Q_bin}
-                            - ${G1_bin}
-                            - ${G2M_bin}
-
-                        Or check the following outfiles, one or more of which
-                        may already exist:
-                            - ${Q_out}
-                            - ${G1_out}
-                            - ${G2M_out}
-                        """
-                    }
-            } || true
+                    sleep 0.2
+                # } ||
+                # {
+                #     echo """
+                #     Warning: Did not run command.
+                #     
+                #     Check the following infiles, one or more of which may
+                #     not exist:
+                #         - ${Q_bin}
+                #         - ${G1_bin}
+                #         - ${G2M_bin}
+                #     
+                #     Or check the following outfiles, one or more of which
+                #     may already exist:
+                #         - ${Q_out}
+                #         - ${G1_out}
+                #         - ${G2M_out}
+                #     """
+                # }
+        fi
     done
 done
 ```
@@ -915,17 +1000,26 @@ cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align
 unset filt && typeset -a filt=(
     # 0.2
     # 0.3
-    # 0.4
-    0.2_whole-matrix
-    0.3_whole-matrix
-    0.4_whole-matrix
+    0.4
+    # 0.2_whole-matrix
+    # 0.3_whole-matrix
+    # 0.4_whole-matrix
 )
 for i in "${filt[@]}"; do
     if [[ ! "${i}" =~ "whole-matrix" ]]; then
+        [[ ! -d 10_fanc_VII_KR-filt-${i} ]] &&
+            mkdir -p 10_fanc_VII_KR-filt-${i}/err_out ||
+            true
+
         [[ ! -d 10_fanc_XII_KR-filt-${i} ]] &&
-            mkrmr dir -p 10_fanc_XII_KR-filt-${i}/err_out ||
+            mkdir -p 10_fanc_XII_KR-filt-${i}/err_out ||
+            true
+
+        [[ ! -d 10_fanc_XV_KR-filt-${i} ]] &&
+            mkdir -p 10_fanc_XV_KR-filt-${i}/err_out ||
             true
     fi
+
     [[ ! -d 10_fanc_genome_KR-filt-${i} ]] &&
         mkdir -p 10_fanc_genome_KR-filt-${i}/err_out ||
         true
@@ -933,54 +1027,64 @@ done
 
 threads=1
 # unset chroms && typeset -a chroms=("XII" "gen")
-unset chroms && typeset chroms="gen"
+# unset chroms && typeset chroms="gen"
+unset chroms && typeset chroms=("VII" "XV")
 unset res && typeset -a res=(
     50 100 150 200 300 400 500 800 1600 3200 5000 6400 12800
 )
 
-check_array=TRUE
-[[ ${check_array} == TRUE ]] &&
-    {
-        echo_test "${filt[@]}"
-        echo ""
+check_array=true
+if ${check_array}; then
+    echo_test "${filt[@]}"
+    echo ""
 
-        echo_test "${chroms[@]}"
-        echo ""
+    echo_test "${chroms[@]}"
+    echo ""
 
-        echo_test "${res[@]}"
-        echo ""
-    } || true
+    echo_test "${res[@]}"
+    echo ""
+fi
 
 
 #  Copy over files to balance
 iter=0
 for j in "${chroms[@]}"; do
-    if [[ "${j}" == "XII" ]]; then
+    # j="${chroms[0]}"  # echo "${j}"
+    if [[ "${j}" == "VII" ]]; then
+        unset d_in && typeset d_in="09_fanc_VII"
+        unset a_out && typeset -a a_out=(
+            "10_fanc_VII_KR-filt-0.4"
+        )
+    elif [[ "${j}" == "XII" ]]; then
         unset d_in && typeset d_in="09_fanc_XII"
         unset a_out && typeset -a a_out=(
             # "10_fanc_XII_KR-filt-0.2"
             # "10_fanc_XII_KR-filt-0.3"
-            # "10_fanc_XII_KR-filt-0.4"
+            "10_fanc_XII_KR-filt-0.4"
+        )
+    elif [[ "${j}" == "XV" ]]; then
+        unset d_in && typeset d_in="09_fanc_XV"
+        unset a_out && typeset -a a_out=(
+            "10_fanc_XV_KR-filt-0.4"
         )
     elif [[ "${j}" == "gen" ]]; then
         unset d_in && typeset d_in="09_fanc_genome"
         unset a_out && typeset -a a_out=(
             # "10_fanc_genome_KR-filt-0.2"
             # "10_fanc_genome_KR-filt-0.3"
-            # "10_fanc_genome_KR-filt-0.4"
-            "10_fanc_genome_KR-filt-0.2_whole-matrix"
-            "10_fanc_genome_KR-filt-0.3_whole-matrix"
-            "10_fanc_genome_KR-filt-0.4_whole-matrix"
+            "10_fanc_genome_KR-filt-0.4"
+            # "10_fanc_genome_KR-filt-0.2_whole-matrix"
+            # "10_fanc_genome_KR-filt-0.3_whole-matrix"
+            # "10_fanc_genome_KR-filt-0.4_whole-matrix"
         )
     fi
 
-    check_things=FALSE
-    [[ ${check_things} == TRUE ]] &&
-        {
-            echo "${d_in}"
-            echo_test "${a_out[@]}"
-            echo ""
-        } || true
+    check_things=false
+    if ${check_things}; then
+        echo "${d_in}"
+        echo_test "${a_out[@]}"
+        echo ""
+    fi
 
     for i in "${res[@]}"; do
         # i="${res[1]}"  # echo "${i}"
@@ -997,18 +1101,17 @@ for j in "${chroms[@]}"; do
                     | sort -z
         )
 
-        check_things=FALSE
-        [[ ${check_things} == TRUE ]] &&
-            {
-                echo "${d_in}"
-                echo ""
-                
-                echo_test "${a_out[@]}"
-                echo ""
-                
-                echo_test "${a_hic[@]}"
-                echo ""
-            } || true
+        check_things=true
+        if ${check_things}; then
+            echo "${d_in}"
+            echo ""
+            
+            echo_test "${a_out[@]}"
+            echo ""
+            
+            echo_test "${a_hic[@]}"
+            echo ""
+        fi
 
         for h in "${a_hic[@]}"; do
             for g in "${a_out[@]}"; do
@@ -1027,20 +1130,28 @@ iter=0
 for l in "${chroms[@]}"; do
     # l="${chroms[0]}"  # echo "${l}"  # echo_test "${chroms[@]}"
 
-    if [[ "${l}" == "XII" ]]; then
+    if [[ "${l}" == "VII" ]]; then
+        unset a_in && typeset -a a_in=(
+            "10_fanc_VII_KR-filt-0.4"
+        )
+    elif [[ "${l}" == "XII" ]]; then
         unset a_in && typeset -a a_in=(
             # "10_fanc_XII_KR-filt-0.2"
             # "10_fanc_XII_KR-filt-0.3"
-            # "10_fanc_XII_KR-filt-0.4"
+            "10_fanc_XII_KR-filt-0.4"
+        )
+    elif [[ "${l}" == "XV" ]]; then
+        unset a_in && typeset -a a_in=(
+            "10_fanc_XV_KR-filt-0.4"
         )
     elif [[ "${l}" == "gen" ]]; then
         unset a_in && typeset -a a_in=(
             # "10_fanc_genome_KR-filt-0.2"
             # "10_fanc_genome_KR-filt-0.3"
-            # "10_fanc_genome_KR-filt-0.4"
-            "10_fanc_genome_KR-filt-0.2_whole-matrix"
-            "10_fanc_genome_KR-filt-0.3_whole-matrix"
-            "10_fanc_genome_KR-filt-0.4_whole-matrix"
+            "10_fanc_genome_KR-filt-0.4"
+            # "10_fanc_genome_KR-filt-0.2_whole-matrix"
+            # "10_fanc_genome_KR-filt-0.3_whole-matrix"
+            # "10_fanc_genome_KR-filt-0.4_whole-matrix"
         )
     fi
     # echo_test "${a_in[@]}"
@@ -1064,33 +1175,31 @@ for l in "${chroms[@]}"; do
             )
             # echo_test "${a_bal[@]}"
             
-            check_array=FALSE
-            [[ ${check_array} == TRUE ]] && echo_test "${a_bal[@]}" || true
+            check_array=false
+            if ${check_array}; then echo_test "${a_bal[@]}"; fi
 
-            check_command_marginals=FALSE
-            [[ ${check_command_marginals} == TRUE ]] &&
-                {
-                    for i in "${a_bal[@]}"; do
-                        echo """
-                        fanc hic \\
-                            ${i} \\
-                            --marginals-plot ${i/.hic/.marginals.pdf}
-                        """
-                        sleep 0.2
-                    done
-                } || true
+            check_command_marginals=false
+            if ${check_command_marginals}; then
+                for i in "${a_bal[@]}"; do
+                    echo """
+                    fanc hic \\
+                        ${i} \\
+                        --marginals-plot ${i/.hic/.marginals.pdf}
+                    """
+                    sleep 0.2
+                done
+            fi
 
-            run_command_marginals=FALSE
-            [[ ${run_command_marginals} == TRUE ]] &&
-                {
-                    for i in "${a_bal[@]}"; do
-                        fanc hic \
-                            ${i} \
-                            --marginals-plot ${i/.hic/.marginals.pdf}
+            run_command_marginals=false
+            if ${run_command_marginals}; then
+                for i in "${a_bal[@]}"; do
+                    fanc hic \
+                        ${i} \
+                        --marginals-plot ${i/.hic/.marginals.pdf}
 
-                        sleep 0.2
-                    done
-                } || true
+                    sleep 0.2
+                done
+            fi
 
             thresh=$(echo "${k}" | awk -F '[_-]' '{ print $6 }')  # echo "${thresh}"
 
@@ -1102,38 +1211,37 @@ for l in "${chroms[@]}"; do
             # echo "${arguments}"
 
             for i in "${a_bal[@]}"; do
-                check_jobs_balance=TRUE
-                [[ ${check_jobs_balance} == TRUE ]] &&
-                    {
-                        (( iter++ ))
-                        job_name="balance.$(basename ${i} .hic)"
-                        threads=1
+                # i="${a_bal[0]}"  # echo "${i}"
+                check_jobs_balance=true
+                if ${check_jobs_balance}; then
+                    (( iter++ ))
+                    job_name="balance.$(basename ${i} .hic)"
+                    threads=1
 
-                        echo """
-                        ### ${iter} ###
+                    echo """
+                    ### ${iter} ###
 
-                        #HEREDOC
-                        sbatch << EOF
-                        #!/bin/bash
+                    #HEREDOC
+                    sbatch << EOF
+                    #!/bin/bash
 
-                        #SBATCH --job-name="${job_name}"
-                        #SBATCH --nodes=1
-                        #SBATCH --cpus-per-task=${threads}
-                        #SBATCH --error="${k}/err_out/${job_name}.%A.stderr.txt"
-                        #SBATCH --output="${k}/err_out/${job_name}.%A.stdout.txt"
+                    #SBATCH --job-name="${job_name}"
+                    #SBATCH --nodes=1
+                    #SBATCH --cpus-per-task=${threads}
+                    #SBATCH --error="${k}/err_out/${job_name}.%A.stderr.txt"
+                    #SBATCH --output="${k}/err_out/${job_name}.%A.stdout.txt"
 
-                        fanc hic \\
-                            ${i} \\
-                            --filter-low-coverage-relative ${thresh} \\
-                            ${arguments}
-                        EOF
-                        """
-                        sleep 0.2
-                    } || true
+                    fanc hic \\
+                        ${i} \\
+                        --filter-low-coverage-relative ${thresh} \\
+                        ${arguments}
+                    EOF
+                    """
+                    sleep 0.2
+                fi
 
-                submit_jobs_balance=TRUE
-                [[ ${submit_jobs_balance} == TRUE ]] &&
-                    {
+                submit_jobs_balance=true
+                if ${submit_jobs_balance}; then
 #HEREDOC
 sbatch << EOF
 #!/bin/bash
@@ -1149,8 +1257,8 @@ fanc hic \
     --filter-low-coverage-relative ${thresh} \
     ${arguments}
 EOF
-                        sleep 0.2
-                    } || true
+                    sleep 0.2
+                fi
             done
         done
     done
@@ -1942,10 +2050,12 @@ change_dir \
 
 #  Set variables, arrays
 unset dirs && typeset -a dirs=(
+    "11_cooler_VII_KR-filt-0.4"
     # "11_cooler_XII_KR-filt-0.2"
     # "11_cooler_XII_KR-filt-0.3"
     # "11_cooler_XII_KR-filt-0.4"
-    "11_cooler_XII_KR-filt-0.4_rDNA-left-array"
+    # "11_cooler_XII_KR-filt-0.4_rDNA-left-array"
+    "11_cooler_XV_KR-filt-0.4"
     # "11_cooler_genome_KR-filt-0.2"
     # "11_cooler_genome_KR-filt-0.3"
     # "11_cooler_genome_KR-filt-0.4"
@@ -1953,6 +2063,7 @@ unset dirs && typeset -a dirs=(
     # "11_cooler_genome_KR-filt-0.3_whole-matrix"
     # "11_cooler_genome_KR-filt-0.4_whole-matrix"
 )
+#  echo_test "${dirs[@]}"
 
 # unset hics && typeset -a hics
 # while IFS=" " read -r -d $'\0'; do
@@ -2059,12 +2170,41 @@ unset dirs && typeset -a dirs=(
 # )
 # # echo_test "${hics[@]}"
 
+# unset hics && typeset -a hics
+# while IFS=" " read -r -d $'\0'; do
+#     hics+=( "${REPLY}" )
+# done < <(
+#     find \
+#         10_fanc_XII_KR-filt-0.4_rDNA-left-array \
+#         -maxdepth 1 \
+#         -type f \
+#         \( \
+#             -name "*.50.*" -o \
+#             -name "*.100.*" -o \
+#             -name "*.150.*" -o \
+#             -name "*.200.*" -o \
+#             -name "*.300.*" -o \
+#             -name "*.400.*" -o \
+#             -name "*.500.*" -o \
+#             -name "*.800.*" -o \
+#             -name "*.1600.*" -o \
+#             -name "*.3200.*" -o \
+#             -name "*.5000.*" -o \
+#             -name "*.6400.*" -o \
+#             -name "*.12800.*" \
+#         \) \
+#         -print0 |
+#             sort -z
+# )
+# # echo_test "${hics[@]}"
+
 unset hics && typeset -a hics
 while IFS=" " read -r -d $'\0'; do
     hics+=( "${REPLY}" )
 done < <(
     find \
-        10_fanc_XII_KR-filt-0.4_rDNA-left-array \
+        10_fanc_VII_KR-filt-0.4 \
+        10_fanc_XV_KR-filt-0.4 \
         -maxdepth 1 \
         -type f \
         \( \
@@ -2113,8 +2253,9 @@ fi
 change_dir \
     "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process"
 
-#  Source initial work environment that allows access to cooler
+#  Source initial work environment that allows access to FAN-C
 activate_env fanc_pip_env
+# activate_env pairtools_env
 
 #  Create outfile directories if they don't exist
 for dir in "${dirs[@]}"; do create_dir_if_none -d "${dir}"; done
@@ -2160,6 +2301,7 @@ for hic in "${hics[@]}"; do
     fi
 
     #FIXME Dry runs submit commands; dry runs shouldn't be submitted.
+    #  2023-1023 Still need to do fix this...
     do_dry_run=true
     if ${do_dry_run}; then
         echo "### ${iter} ###"
@@ -2334,9 +2476,11 @@ activate_env "hicexplorer_764_env"
 
 # Directories containing the cooler files
 dirs=(
-    "11_cooler_genome_KR-filt-0.4"
-    "11_cooler_genome_KR-filt-0.4_whole-matrix"
-    "11_cooler_XII_KR-filt-0.4"
+    # "11_cooler_genome_KR-filt-0.4"
+    # "11_cooler_genome_KR-filt-0.4_whole-matrix"
+    "11_cooler_VII_KR-filt-0.4"
+    # "11_cooler_XII_KR-filt-0.4"
+    "11_cooler_XV_KR-filt-0.4"
 )
 # echo_test "${dirs[@]}"
 
@@ -2347,7 +2491,7 @@ operation="log2ratio"
 #  Execute main tasks =========================================================
 iter=0
 for dir in "${dirs[@]}"; do
-    # dir="${dirs[0]}"
+    # dir="${dirs[0]}"  # echo "${dir}"
     echo "Processing directory: ${dir}"
     
     #  Get all cooler files in the directory
@@ -2379,7 +2523,7 @@ for dir in "${dirs[@]}"; do
                 | awk -F '/' '{ print $NF }' \
                 | awk -F '.' '{ print $1 }' \
                 | grep -oP '(Q|30C-a15|nz)'
-            )  # echo "${phase_1}"
+        )  # echo "${phase_1}"
 
         for (( j=0; j<${#files[@]}; j++ )); do
             # j=4
@@ -2459,9 +2603,9 @@ for dir in "${dirs[@]}"; do
                         -j "${job_name}" \
                         -e "${err_out_dir}" \
                         -p "${operation}" \
+                        -n \
                         -d
                         
-                        # -n \
                 fi
 
                 run_jobs=true
@@ -2472,9 +2616,9 @@ for dir in "${dirs[@]}"; do
                         -o "${outfile}" \
                         -j "${job_name}" \
                         -e "${err_out_dir}" \
-                        -p "${operation}"
+                        -p "${operation}" \
+                        -n
 
-                        # -n
                 fi
 
                 sleep 0.1
@@ -2488,8 +2632,8 @@ done
 </details>
 <br />
 
-<a id="8-draw-whole-genome-square-plots-of-negative-log-transformed-counts"></a>
-### 8. Draw whole-genome "square" plots of negative log-transformed counts
+<a id="8-todo-come-up-with-name-for-this-section"></a>
+### 8. `#TODO` Come up with name for this section
 <a id="strategy"></a>
 #### Strategy
 <a id="notes-1"></a>
@@ -2814,10 +2958,10 @@ EOF
 #  Configure work environment, directories, and variables =====================
 #  Set variables, arrays
 # res=6400                                                       # echo "${res}"
-res=5000                                                       # echo "${res}"
+# res=5000                                                       # echo "${res}"
 # res=3200                                                       # echo "${res}"
 # res=1600                                                       # echo "${res}"
-# res=800                                                        # echo "${res}"
+res=800                                                        # echo "${res}"
 # res=300                                                        # echo "${res}"
 # res=200                                                        # echo "${res}"
 
@@ -2830,18 +2974,21 @@ res=5000                                                       # echo "${res}"
 # coord="XII:451200-460800"                                      # echo "${coord}"  #ALMOST
 # coord="XII:451500-460800"                                      # echo "${coord}"  #GOOD
 # coord="XII:451400-460800"                                      # echo "${coord}"  #GOOD #USE
+coord="VII"                                                    # echo "${coord}"
 # coord="XII"                                                    # echo "${coord}"
-coord="XI XII XIII"                                            # echo "${coord}"
+# coord="XV"                                                     # echo "${coord}"
+# coord="XI XII XIII"                                            # echo "${coord}"
 
-# vmin=0.0000001                                                 # echo "${vmin}"
-vmin=0.0000003162278                                           # echo "${vmin}"
-# vmin=0.000001                                                  # echo "${vmin}"
+
+# vmin=0.0000001  # 10e-7                                        # echo "${vmin}"
+# vmin=0.0000003162278                                           # echo "${vmin}"
+# vmin=0.000001  # 10e-6                                         # echo "${vmin}"
 # vmin=0.000003162278                                            # echo "${vmin}"
-# vmin=0.00001                                                   # echo "${vmin}"
+# vmin=0.00001  # 10e-5                                          # echo "${vmin}"
 # vmin=0.00003162278                                             # echo "${vmin}"
-# vmin=0.0001                                                    # echo "${vmin}"
+# vmin=0.0001  # 10e-4                                           # echo "${vmin}"
 # vmin=0.0003162278                                              # echo "${vmin}"
-# vmin=0.001                                                     # echo "${vmin}"
+vmin=0.001  # 10e-3                                            # echo "${vmin}"
 vmax=1                                                         # echo "${vmax}"
 
 dpi=300                                                        # echo "${dpi}"
@@ -2849,7 +2996,8 @@ matcol="RdPu"                                                  # echo "${matcol}
 # outdir="pngs/2023-1013_XII-square_whole-genome"                # echo "${outdir}"
 
 # date="2023-1019"                                               # echo "${date}"
-date="2023-1020"                                               # echo "${date}"
+# date="2023-1020"                                               # echo "${date}"
+date="2023-1023"                                               # echo "${date}"
 
 if [[ ${coord} == "XI XII XIII" ]]; then
     outdir="pngs/${date}_$(sed 's/ /-/g' <(echo "${coord}"))"  # echo "${outdir}"
@@ -2857,12 +3005,26 @@ else
     outdir="pngs/${date}_$(sed 's/\:/-/g' <(echo "${coord}"))" # echo "${outdir}"
 fi
 
+check_variables=true
+if ${check_variables}; then
+    echo """
+       res  ${res}
+     coord  ${coord}
+      vmin  ${vmin}
+      vmax  ${vmax}
+       dpi  ${dpi}
+    matcol  ${matcol}
+      date  ${date}
+    outdir  ${outdir}
+    """
+fi
+
 unset cools && typeset -a cools
 while IFS=" " read -r -d $'\0'; do
     cools+=( "${REPLY}" )
-done < <(
+done  < <(
     find \
-        11_cooler_genome_KR-filt-0.4_whole-matrix \
+        11_cooler_VII_KR-filt-0.4 \
         -maxdepth 1 \
         -type f \
         -name MC*.${res}.*cool \
@@ -2872,6 +3034,16 @@ done < <(
 
 check_array=true
 if ${check_array}; then echo_test "${cools[@]}"; fi
+
+# < <(
+#     find \
+#         11_cooler_genome_KR-filt-0.4_whole-matrix \
+#         -maxdepth 1 \
+#         -type f \
+#         -name MC*.${res}.*cool \
+#         -print0 \
+#             | sort -z
+# )
 
 # < <(
 #     find \
@@ -2919,15 +3091,15 @@ change_dir \
 #  Make outfile directory if it doesn't exist
 [[ ! -d "${outdir}" ]] && mkdir -p "${outdir}/err_out" || true
 
-# vmin=0.0000001                                                  # echo "${vmin}"
-# vmin=0.0000003162278                                             # echo "${vmin}"
-# vmin=0.000001                                                   # echo "${vmin}"
-# vmin=0.000003162278                                             # echo "${vmin}"
-# vmin=0.00001                                                   # echo "${vmin}"
+# vmin=0.0000001  # 10e-7                                        # echo "${vmin}"
+# vmin=0.0000003162278                                           # echo "${vmin}"
+# vmin=0.000001  # 10e-6                                         # echo "${vmin}"
+# vmin=0.000003162278                                            # echo "${vmin}"
+# vmin=0.00001  # 10e-5                                          # echo "${vmin}"
 # vmin=0.00003162278                                             # echo "${vmin}"
-# vmin=0.0001                                                    # echo "${vmin}"
+# vmin=0.0001  # 10e-4                                           # echo "${vmin}"
 # vmin=0.0003162278                                              # echo "${vmin}"
-# vmin=0.001                                                     # echo "${vmin}"
+# vmin=0.001  # 10e-3                                            # echo "${vmin}"
 
 iter=0
 for i in "${cools[@]}"; do
