@@ -3092,10 +3092,10 @@ activate_env "hicexplorer_764_env"
 # choice="no-norm"                                               # echo "${choice}"
 choice="norm"                                                  # echo "${choice}"
 
-# res=6400                                                       # echo "${res}"
+res=6400                                                       # echo "${res}"
 # res=5000                                                       # echo "${res}"
 # res=3200                                                       # echo "${res}"
-res=1600                                                       # echo "${res}"
+# res=1600                                                       # echo "${res}"
 # res=200                                                        # echo "${res}"
 calc="log2ratio"
 
@@ -3133,7 +3133,9 @@ done < <(
         -print0 \
             | sort -z
 )
-# echo_test "${cools[@]}"
+
+check_array=true
+if ${check_array}; then echo_test "${cools[@]}"; fi
 
 # < <(
 #     find \
@@ -3154,7 +3156,7 @@ change_dir \
 #  Make outfile directory if it doesn't exist
 [[ ! -d "${outdir}" ]] && mkdir -p "${outdir}/err_out" || true
 
-vmax=1.5                                                         # echo "${vmax}"
+vmax=10                                                         # echo "${vmax}"
 vmin=-${vmax}                                                  # echo "${vmin}"
 
 iter=0

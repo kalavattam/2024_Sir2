@@ -116,6 +116,31 @@ if(base::isTRUE(draw_test_plots)) {
     plot_contact_decay_slope(cd_2$xl, cd_2$dl, "G2-M", (length(cd_2$xl) * 0.15))
 }
 
+#  Calculate the coefficients of lines of best fit (i.e., the power-law
+#+ relationships)
+range_end <- 3.3
+coefficients <- c_all %>%
+    dplyr::filter(log10(as.numeric(dist)) <= range_end, as.numeric(dist) > 0) %>%  # Exclude zeroes in dist
+    dplyr::group_by(phase) %>%
+    dplyr::summarize(
+        intercept = coef(lm(log10(as.numeric(cont)) ~ log10(as.numeric(dist))))[1],
+        slope = coef(lm(log10(as.numeric(cont)) ~ log10(as.numeric(dist))))[2]
+    )
+
+# Calculate the coefficients of lines of best fit for the second range
+range_start_2 <- 3.5
+range_end_2 <- 4
+coefficients_2 <- c_all %>%
+    dplyr::filter(
+        log10(as.numeric(dist)) >= range_start_2,
+        log10(as.numeric(dist)) <= range_end_2
+    ) %>%
+    dplyr::group_by(phase) %>%
+    dplyr::summarize(
+        intercept = coef(lm(log10(as.numeric(cont)) ~ log10(as.numeric(dist))))[1],
+        slope = coef(lm(log10(as.numeric(cont)) ~ log10(as.numeric(dist))))[2]
+    )
+
 #  Plot publication-quality contact decay curve using ggplot2
 title <- "Contact decay curves for the first rDNA array"
 subtitle <- "Subsampled, balanced matrix counts, 50-bp resolution"
@@ -126,7 +151,43 @@ p_rDNA <- c_all %>%
         color = phase
     )) +
     annotation_logticks(sides = "lb", color = "grey92", outside = FALSE) +
-    geom_line() +
+    # geom_line() +  # Draw raw, "unsmoothed" curves
+    # geom_smooth(  # Draw smoothed curves via GAM
+    #     aes(fill = phase),
+    #     method = "gam",
+    #     se = TRUE,
+    #     linewidth = 0.5,
+    #     alpha = 0.25
+    # ) +
+    geom_smooth(  # Draw smoothed curves via LOESS
+        aes(fill = phase),
+        method = "loess",
+        se = TRUE,
+        linewidth = 0.5,
+        span = 1,
+        alpha = 0.1
+    ) +
+    stat_smooth(  # Add lines of best fit for the smoothed values
+        data = . %>%
+            dplyr::filter(log10(as.numeric(dist)) <= range_end),
+        aes(color = phase),
+        method = "lm",
+        se = FALSE,
+        linetype = "dashed",
+        linewidth = 0.5
+    ) +
+    stat_smooth(  # Add second set of lines of best fit for the specified range
+        data = . %>%
+            dplyr::filter(
+                log10(as.numeric(dist)) >= range_start_2,
+                log10(as.numeric(dist)) <= range_end_2
+        ),
+        aes(color = phase),
+        method = "lm",
+        se = FALSE,
+        linetype = "dashed",
+        linewidth = 0.5
+    ) +
     labs(
         title = title,
         subtitle = subtitle,
@@ -149,48 +210,92 @@ p_rDNA <- c_all %>%
     theme_minimal() +
     theme(panel.grid.minor = element_blank())
 
+#  Add power-law equations to the plot
+for(i in 1:nrow(coefficients)) {
+    p_rDNA <- p_rDNA +
+        annotate(
+            "text",
+            x = 3,
+            y = -2 + (0.5 * i),  # Adjust these coordinates to place the text where you want
+            label = sprintf(
+                "y = %.2fx + %.2f",
+                coefficients$slope[i],
+                coefficients$intercept[i]
+            ),
+            color = scales::hue_pal()(nrow(coefficients))[i],  # Match the color to the phase
+            size = 4
+        ) +
+        annotate(
+            "text", 
+            x = 3.5,  # Adjust x-coordinate to avoid overlap with the first set of equations
+            y = -2 + (0.5 * i), 
+            label = sprintf(
+                "y = %.2fx + %.2f", 
+                coefficients_2$slope[i], 
+                coefficients_2$intercept[i]
+            ),
+            color = scales::hue_pal()(nrow(coefficients_2))[i], 
+            size = 4
+        )
+}
+p_rDNA
+
 ggplot2::ggsave(
     paste(
-        p_txt, "contact-decay_XII-451400-460800.ggplot2-main.pdf", sep = "/"
+        p_txt, "contact-decay_XII-451400-460800.ggplot2-main.loess-span-1.power-law-both.pdf", sep = "/"
     ),
     p_rDNA
 )
 
 #  Plot publication-quality contact decay curve slopes using ggplot2
-span <- 0.5
+# span <- 0.5
 c_all <- c_all %>%
     dplyr::arrange(phase, dist) %>%  # Ensure the data is sorted by phase and distance
     dplyr::group_by(phase) %>%  # Group by phase to calculate the slope within each phase
     dplyr::mutate(
         slope = (
-            log10(lead(as.numeric(cont), order_by = dist)) - 
+            log10(lead(as.numeric(cont), order_by = dist)) -
             log10(as.numeric(cont))
         ) / (
-            log10(lead(as.numeric(dist), order_by = dist)) - 
+            log10(lead(as.numeric(dist), order_by = dist)) -
             log10(as.numeric(dist))
         ),
-        smooth = predict(loess(as.numeric(cont) ~ as.numeric(dist), span = span)),
-        slope_smooth = (
-            log10(lead(as.numeric(smooth), order_by = dist)) - 
-            log10(as.numeric(smooth))
-        ) / (
-            log10(lead(as.numeric(dist), order_by = dist)) - 
-            log10(as.numeric(dist))
-        )
+        # smooth = predict(loess(as.numeric(cont) ~ as.numeric(dist), span = span)),
+        # slope_smooth = (
+        #     log10(lead(as.numeric(smooth), order_by = dist)) -
+        #     log10(as.numeric(smooth))
+        # ) / (
+        #     log10(lead(as.numeric(dist), order_by = dist)) -
+        #     log10(as.numeric(dist))
+        # )
     ) %>%  # Calculate the slope
     dplyr::filter(
-        (!is.na(slope) & !is.infinite(slope)) |
-        (!is.na(slope_smooth) & !is.infinite(slope_smooth))
+        (!is.na(slope) & !is.infinite(slope)) # |
+        # (!is.na(slope_smooth) & !is.infinite(slope_smooth))
     ) %>%  # Remove NA and -Inf values
     ungroup()
 
-#  Unsmoothed values
 title <- "Slope of contact decay curves for the first rDNA array"
 subtitle <- "Subsampled, balanced matrix counts, 50-bp resolution"
 p_slope <- c_all %>%
     ggplot(aes(x = log10(as.numeric(dist)), y = slope, color = phase)) +
     annotation_logticks(sides = "b", color = "grey92", outside = FALSE) +
-    geom_line() +
+    # geom_line() +  # Draw raw, "unsmoothed" curves
+    # geom_smooth(  # Draw smoothed curves via GAM
+    #     aes(fill = phase),
+    #     method = "gam",
+    #     se = TRUE,
+    #     linewidth = 0.5,
+    #     alpha = 0.25
+    # ) +
+    geom_smooth(  # Draw smoothed curves via LOESS
+        aes(fill = phase),
+        method = "loess",
+        se = TRUE,
+        linewidth = 0.5,
+        span = 1,
+        alpha = 0.2
+    ) +
     labs(
         title = title,
         subtitle = subtitle,
@@ -205,33 +310,35 @@ p_slope <- c_all %>%
     ylim(c(-2, 2)) +
     theme_minimal() +
     theme(panel.grid.minor = element_blank())
+p_slope
 
 ggplot2::ggsave(
     paste(
-        p_txt, "contact-decay_XII-451400-460800.ggplot2-slope.pdf", sep = "/"
+        p_txt,
+        "contact-decay_XII-451400-460800.ggplot2-slope.GAM-default.pdf",
+        sep = "/"
     ),
     p_slope
 )
 
-#  Smoothed values
-title <- "Slope of contact decay curves for the first rDNA array"
-subtitle <- "Subsampled, balanced matrix counts, 50-bp resolution"
-p_smooth <- c_all %>%
-    ggplot(aes(x = log10(as.numeric(dist)), y = slope_smooth, color = phase)) +
-    annotation_logticks(sides = "b", color = "grey92", outside = FALSE) +
-    geom_line() +
-    labs(
-        title = title,
-        subtitle = subtitle,
-        x = "Genomic distance (s)",
-        y = "Slope P(s)",
-        color = "State"
-    ) +
-    scale_x_continuous(
-        breaks = log10(c(100, 1000, 10000)), 
-        labels = c(expression(10^2), expression(10^3), expression(10^4))
-    ) +
-    ylim(c(-10, 10)) +
-    theme_minimal() +
-    theme(panel.grid.minor = element_blank())
-
+# #  Smoothed values
+# title <- "Slope of contact decay curves for the first rDNA array"
+# subtitle <- "Subsampled, balanced matrix counts, 50-bp resolution"
+# p_smooth <- c_all %>%
+#     ggplot(aes(x = log10(as.numeric(dist)), y = slope_smooth, color = phase)) +
+#     annotation_logticks(sides = "b", color = "grey92", outside = FALSE) +
+#     geom_line() +
+#     labs(
+#         title = title,
+#         subtitle = subtitle,
+#         x = "Genomic distance (s)",
+#         y = "Slope P(s)",
+#         color = "State"
+#     ) +
+#     scale_x_continuous(
+#         breaks = log10(c(100, 1000, 10000)), 
+#         labels = c(expression(10^2), expression(10^3), expression(10^4))
+#     ) +
+#     ylim(c(-10, 10)) +
+#     theme_minimal() +
+#     theme(panel.grid.minor = element_blank())
