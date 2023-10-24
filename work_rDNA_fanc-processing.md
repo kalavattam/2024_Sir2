@@ -2959,9 +2959,9 @@ EOF
 #  Set variables, arrays
 # res=6400                                                       # echo "${res}"
 # res=5000                                                       # echo "${res}"
-# res=3200                                                       # echo "${res}"
+res=3200                                                       # echo "${res}"
 # res=1600                                                       # echo "${res}"
-res=800                                                        # echo "${res}"
+# res=800                                                        # echo "${res}"
 # res=300                                                        # echo "${res}"
 # res=200                                                        # echo "${res}"
 
@@ -2993,12 +2993,12 @@ vmax=1                                                         # echo "${vmax}"
 
 dpi=300                                                        # echo "${dpi}"
 matcol="RdPu"                                                  # echo "${matcol}"
-# outdir="pngs/2023-1013_XII-square_whole-genome"                # echo "${outdir}"
 
 # date="2023-1019"                                               # echo "${date}"
 # date="2023-1020"                                               # echo "${date}"
 date="2023-1023"                                               # echo "${date}"
 
+# outdir="pngs/2023-1013_XII-square_whole-genome"                # echo "${outdir}"
 if [[ ${coord} == "XI XII XIII" ]]; then
     outdir="pngs/${date}_$(sed 's/ /-/g' <(echo "${coord}"))"  # echo "${outdir}"
 else
