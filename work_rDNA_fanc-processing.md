@@ -2974,9 +2974,9 @@ res=800                                                        # echo "${res}"
 # coord="XII:451200-460800"                                      # echo "${coord}"  #ALMOST
 # coord="XII:451500-460800"                                      # echo "${coord}"  #GOOD
 # coord="XII:451400-460800"                                      # echo "${coord}"  #GOOD #USE
-coord="VII"                                                    # echo "${coord}"
+# coord="VII"                                                    # echo "${coord}"
 # coord="XII"                                                    # echo "${coord}"
-# coord="XV"                                                     # echo "${coord}"
+coord="XV"                                                     # echo "${coord}"
 # coord="XI XII XIII"                                            # echo "${coord}"
 
 
@@ -3024,13 +3024,14 @@ while IFS=" " read -r -d $'\0'; do
     cools+=( "${REPLY}" )
 done  < <(
     find \
-        11_cooler_VII_KR-filt-0.4 \
+        11_cooler_XV_KR-filt-0.4 \
         -maxdepth 1 \
         -type f \
         -name MC*.${res}.*cool \
         -print0 \
             | sort -z
 )
+# 11_cooler_VII_KR-filt-0.4 \
 
 check_array=true
 if ${check_array}; then echo_test "${cools[@]}"; fi
