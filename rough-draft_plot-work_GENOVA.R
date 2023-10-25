@@ -62,12 +62,14 @@ setwd(paste(p_prj, p_exp, sep = "/"))  # getwd()  # list.dirs()
 
 # res <- 6400
 # res <- 5000
-res <- 200
+res <- 1600
+# res <- 200
 # res <- 50
 bal <- TRUE
 
-if(res %in% c(6400, 5000)) {
-    p_cool <- "11_cooler_genome_KR-filt-0.2_whole-matrix"
+if(res %in% c(6400, 5000, 1600)) {
+    # p_cool <- "11_cooler_genome_KR-filt-0.2_whole-matrix"
+    p_cool <- "11_cooler_genome_KR-filt-0.4_whole-matrix"
     suf <- "downsample-to-Q"
 } else if(res %in% c(200, 50)) {
     p_cool <- "11_cooler_XII_KR-filt-0.4"
@@ -103,7 +105,8 @@ c_2 <- load_cool(
 
 #  Set up outfile directory for plots, etc. -----------------------------------
 # p_out <- "pngs/2023-1003"
-p_out <- "pngs/2023-1018"
+# p_out <- "pngs/2023-1018"
+p_out <- "pngs/2023-1023"
 if(base::isFALSE(dir.exists(p_out))) dir.create(p_out)
 
 
@@ -575,45 +578,129 @@ if(base::isTRUE(run_draft_code)) {
 
 run_draft_code <- FALSE
 if(base::isTRUE(run_draft_code)) {
-    v4c <- virtual_4C(
+    chrom <- "XII"
+    
+    chrom_start <- 1
+    rDNA_start <- 451400
+    
+    chrom_end <- 1078177
+    rDNA_end <- 469200
+    
+    xlim_start <- rDNA_start - chrom_start
+    xlim_end <- chrom_end - rDNA_end
+    
+    viewpoint <- paste0(chrom, ":", rDNA_start, "-", rDNA_end)
+    
+    v4c <- GENOVA::virtual_4C(
         explist = c(list(c_Q, c_1, c_2)),
-        viewpoint = "XII:451526-468980",
-        xlim = c(451525, 617176)
+        viewpoint = viewpoint,
+        xlim = c(paste0("XII:", xlim_start), paste0("XII:", xlim_end))
+        # xlim = c(xlim_start, xlim_end)
+        # viewpoint = "XII:451526-468980",
+        # xlim = c(451525, 617176)
     )
     
-    GENOVA::visualise(v4c)
+    draw_rough_plots <- FALSE
+    if(base::isTRUE(draw_rough_plots)) GENOVA::visualise(v4c)
     
-    v4c <- v4c$data
+    v4c <- v4c$data %>% tibble::as_tibble()
     
-    typeof(v4c)
-    class(v4c)
+    check_v4c_object <- TRUE
+    if(base::isTRUE(check_v4c_object)) {
+        typeof(v4c) %>% print()
+        class(v4c) %>% print()
+    }
     
-    # Replace v4c$Q with your actual data column
-    v4c$Q[is.nan(v4c$Q)] <- NA  # Convert NaN values to NA so ggplot can handle them
-    v4c$G1[is.nan(v4c$Q)] <- NA  # Convert NaN values to NA so ggplot can handle them
-    v4c$`G2-M`[is.nan(v4c$Q)] <- NA  # Convert NaN values to NA so ggplot can handle them
+    #  Replace v4c$Q with your actual data column; convert NaN values to NA so
+    #+ ggplot can handle them
+    v4c$Q[is.nan(v4c$Q)] <- NA
+    v4c$G1[is.nan(v4c$G1)] <- NA
+    v4c$`G2-M`[is.nan(v4c$`G2-M`)] <- NA
     
-    ggplot(v4c, aes(x = mid, y = Q)) +
-        geom_line(color = "blue") + 
-        labs(x = "Mid", y = "Q") +
-        coord_cartesian(ylim = c(0, 6)) +
+    draw_v4c <- function(
+        tbl = v4c, x = mid, y = Q, lab_x = "mid", lab_y = "Q",
+        adjust_coord = FALSE, coord_start = 0, coord_end = 100
+    ) {
+        plot_v4c <- ggplot2::ggplot(v4c, aes(x = mid, y = Q)) +
+            geom_line(color = "#F8766D95") + 
+            labs(x = "mid", y = "Q") +
+            {
+                if(base::isTRUE(adjust_coord)) {
+                    coord_cartesian(ylim = c(coord_start, coord_end))
+                }
+            } +
+            theme_minimal() +
+            theme(axis.text.x = element_text(angle = 90, hjust = 1))
+        
+        return(plot_v4c)
+    }
+    
+    check <- draw_v4c(
+        tbl = v4c, x = mid, y = Q, lab_x = "mid", lab_y = "Q",
+        adjust_coord = TRUE, coord_start = 0, coord_end = 70
+    )
+    check
+    
+    adjust_coord <- FALSE
+    ggplot2::ggplot(v4c, aes(x = mid, y = Q)) +
+        geom_line(color = "#F8766D95") + 
+        labs(x = "mid", y = "Q") +
+        { if(base::isTRUE(adjust_coord)) coord_cartesian(ylim = c(0, 100)) } +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 90, hjust = 1))
         # Optional: Rotate x-axis labels for better readability
     
-    ggplot(v4c, aes(x = mid, y = G1)) +
-        geom_line(color = "red") + 
-        labs(x = "Mid", y = "G1") +
-        coord_cartesian(ylim = c(0, 6)) +
+    ggplot2:: ggplot(v4c, aes(x = mid, y = G1)) +
+        geom_line(color = "#00BA3895") + 
+        labs(x = "mid", y = "G1") +
+        coord_cartesian(ylim = c(0, 100)) +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 90, hjust = 1))
         # Optional: Rotate x-axis labels for better readability
     
-    ggplot(v4c, aes(x = mid, y = `G2-M`)) +
-        geom_line(color = "green") + 
-        labs(x = "Mid", y = "G2-M") +
-        coord_cartesian(ylim = c(0, 6)) +
+    ggplot2::ggplot(v4c, aes(x = mid, y = `G2-M`)) +
+        geom_line(color = "#619CFF95") + 
+        labs(x = "mid", y = "G2-M") +
+        coord_cartesian(ylim = c(0, 100)) +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 90, hjust = 1))
         # Optional: Rotate x-axis labels for better readability
 }
+
+list.files()
+
+
+bg <- readr::read_tsv(
+    "MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.XII-451400-469200_ds-genome_KR-filt-0.4-cis-contacts.bedgraph",
+    col_names = c("chr_a", "start_a", "end_a", "chr_r", "start_r", "end_r", "value")
+)
+head(bg)
+tail(bg)
+
+
+bg_avg <- bg %>%
+    dplyr::group_by(chr_r, start_r, end_r) %>%
+    dplyr::summarize(
+        chr_a = "XII",
+        start_a = min(start_a),
+        end_a = max(end_a),
+        value = mean(value, na.rm = TRUE)
+    ) %>%
+    ungroup()
+
+head(bg_avg)
+
+
+# p <- ggplot(bg, aes(x = ((start_r + end_r) / 2), y = value)) +
+p <- ggplot(bg_avg, aes(x = ((start_r + end_r) / 2), y = value)) +
+# p <- ggplot(bg_avg, aes(x = start_r, y = value)) +
+    geom_line(aes(color = chr_a)) +  # Color by chr_a to differentiate viewpoints, if there are multiple
+    labs(
+        title = "v4C plot, Q",
+        subtitle = "1600-bp resolution",
+        x = "Genomic position",
+        y = "Interactions (KR-balanced values)"
+    ) +
+    coord_cartesian(ylim = c(0, 0.0015)) +
+    theme_minimal()
+print(p)

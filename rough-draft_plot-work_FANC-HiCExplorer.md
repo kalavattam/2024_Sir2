@@ -1658,6 +1658,8 @@ mamba create \
         hicexplorer=3.7.2 \
         python=3.7 \
         matplotlib=3.2.2
+
+mamba install -c bioconda rename
 ```
 </details>
 <br />
@@ -2128,6 +2130,91 @@ Transaction
 
 
 Confirm changes: [Y/n] Y
+
+Downloading and Extracting Packages
+
+Preparing transaction: done
+Verifying transaction: done
+Executing transaction: done
+
+
+❯ mamba install -c bioconda rename
+
+                  __    __    __    __
+                 /  \  /  \  /  \  /  \
+                /    \/    \/    \/    \
+███████████████/  /██/  /██/  /██/  /████████████████████████
+              /  / \   / \   / \   / \  \____
+             /  /   \_/   \_/   \_/   \    o \__,
+            / _/                       \_____/  `
+            |/
+        ███╗   ███╗ █████╗ ███╗   ███╗██████╗  █████╗
+        ████╗ ████║██╔══██╗████╗ ████║██╔══██╗██╔══██╗
+        ██╔████╔██║███████║██╔████╔██║██████╔╝███████║
+        ██║╚██╔╝██║██╔══██║██║╚██╔╝██║██╔══██╗██╔══██║
+        ██║ ╚═╝ ██║██║  ██║██║ ╚═╝ ██║██████╔╝██║  ██║
+        ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝
+
+        mamba (1.3.1) supported by @QuantStack
+
+        GitHub:  https://github.com/mamba-org/mamba
+        Twitter: https://twitter.com/QuantStack
+
+█████████████████████████████████████████████████████████████
+
+
+Looking for: ['rename']
+
+bioconda/linux-64                                           Using cache
+bioconda/noarch                                             Using cache
+pkgs/main/linux-64                                          Using cache
+pkgs/main/noarch                                              No change
+pkgs/r/linux-64                                               No change
+pkgs/r/noarch                                                 No change
+conda-forge/noarch                                  14.3MB @   6.1MB/s  2.8s
+conda-forge/linux-64                                35.3MB @   5.4MB/s  7.2s
+
+Pinned packages:
+  - python 3.7.*
+
+
+Transaction
+
+  Prefix: /home/kalavatt/miniconda3/envs/hicexplorer_764_env
+
+  Updating specs:
+
+   - rename
+   - ca-certificates
+   - openssl
+
+
+  Package    Version  Build             Channel                    Size
+─────────────────────────────────────────────────────────────────────────
+  Install:
+─────────────────────────────────────────────────────────────────────────
+
+  + perl      5.32.1  4_hd590300_perl5  conda-forge/linux-64     Cached
+  + rename     1.601  hdfd78af_1        bioconda/noarch          Cached
+
+  Upgrade:
+─────────────────────────────────────────────────────────────────────────
+
+  - openssl    3.1.3  hd590300_0        conda-forge
+  + openssl    3.1.4  hd590300_0        conda-forge/linux-64        3MB
+
+  Summary:
+
+  Install: 2 packages
+  Upgrade: 1 packages
+
+  Total download: 3MB
+
+─────────────────────────────────────────────────────────────────────────
+
+
+Confirm changes: [Y/n] Y
+openssl                                              2.6MB @  25.8MB/s  0.1s
 
 Downloading and Extracting Packages
 

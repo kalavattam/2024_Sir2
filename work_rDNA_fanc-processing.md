@@ -41,12 +41,15 @@
     1. [Run HiCExplorer `plotHicMatrix` for log2 ratio heatmaps](#run-hicexplorer-plothicmatrix-for-log2-ratio-heatmaps)
         1. [Code](#code-12)
 1. [9. Draw contact-decay plots for rDNA region](#9-draw-contact-decay-plots-for-rdna-region)
+    1. [Notes](#notes-2)
     1. [Call HiCExplorer `hicPlotDistVsCounts`](#call-hicexplorer-hicplotdistvscounts)
         1. [Code](#code-13)
     1. [Wrangle contact-decay table output by `hicPlotDistVsCounts`](#wrangle-contact-decay-table-output-by-hicplotdistvscounts)
         1. [Code](#code-14)
+1. [10. Obtain virtual 4C \(v4C\) data](#10-obtain-virtual-4c-v4c-data)
+    1. [Code](#code-15)
 1. [X. Documentation \(partial\)](#x-documentation-partial)
-    1. [Notes](#notes-2)
+    1. [Notes](#notes-3)
         1. [`fanc to-fanc --help`](#fanc-to-fanc---help)
         1. [`fanc hic --help`](#fanc-hic---help)
         1. [`fanc downsample --help`](#fanc-downsample---help)
@@ -54,6 +57,7 @@
         1. [`fanc to-cooler --help`](#fanc-to-cooler---help)
         1. [`fanc subset --help`](#fanc-subset---help)
         1. [`hicPlotMatrix --help`](#hicplotmatrix---help)
+        1. [`hicPlotViewpoint --help`](#hicplotviewpoint---help)
 
 <!-- /MarkdownTOC -->
 </details>
@@ -2957,16 +2961,26 @@ EOF
 
 #  Configure work environment, directories, and variables =====================
 #  Set variables, arrays
-# res=6400                                                       # echo "${res}"
-# res=5000                                                       # echo "${res}"
-res=3200                                                       # echo "${res}"
-# res=1600                                                       # echo "${res}"
-# res=800                                                        # echo "${res}"
-# res=300                                                        # echo "${res}"
-# res=200                                                        # echo "${res}"
-
 # coord="I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI"  # echo "${coord}"
 # coord="XII:451000-469000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451000-469000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451000-469400"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451000-470000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451000-472000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451200-469000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451200-469400"                                      # echo "${coord}"  #GOOD
+# coord="XII:451200-470000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451200-476000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451200-480000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451200-484000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451200-490000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451200-491000"                                      # echo "${coord}"  #GOOD
+# coord="XII:451200-492000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451200-493000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451200-494000"                                      # echo "${coord}"  #NOGOOD
+# coord="XII:451200-500000"                                      # echo "${coord}"  #NOGOOD
+coord="XII:451400-469200"                                      # echo "${coord}"  #GOOD
+# coord="XII:451400-490800"                                      # echo "${coord}"  #GOOD
 # coord="XII:452000-462000"                                      # echo "${coord}"  #NOGOOD
 # coord="XII:451500-461500"                                      # echo "${coord}"  #BETTER
 # coord="XII:451000-461000"                                      # echo "${coord}"  #NOGOOD
@@ -2976,9 +2990,16 @@ res=3200                                                       # echo "${res}"
 # coord="XII:451400-460800"                                      # echo "${coord}"  #GOOD #USE
 # coord="VII"                                                    # echo "${coord}"
 # coord="XII"                                                    # echo "${coord}"
-coord="XV"                                                     # echo "${coord}"
+# coord="XV"                                                     # echo "${coord}"
 # coord="XI XII XIII"                                            # echo "${coord}"
 
+# res=6400                                                       # echo "${res}"
+# res=5000                                                       # echo "${res}"
+# res=3200                                                       # echo "${res}"
+# res=1600                                                       # echo "${res}"
+# res=800                                                        # echo "${res}"
+# res=300                                                        # echo "${res}"
+res=200                                                        # echo "${res}"
 
 # vmin=0.0000001  # 10e-7                                        # echo "${vmin}"
 # vmin=0.0000003162278                                           # echo "${vmin}"
@@ -2986,9 +3007,9 @@ coord="XV"                                                     # echo "${coord}"
 # vmin=0.000003162278                                            # echo "${vmin}"
 # vmin=0.00001  # 10e-5                                          # echo "${vmin}"
 # vmin=0.00003162278                                             # echo "${vmin}"
-# vmin=0.0001  # 10e-4                                           # echo "${vmin}"
+vmin=0.0001  # 10e-4                                           # echo "${vmin}"
 # vmin=0.0003162278                                              # echo "${vmin}"
-vmin=0.001  # 10e-3                                            # echo "${vmin}"
+# vmin=0.001  # 10e-3                                            # echo "${vmin}"
 vmax=1                                                         # echo "${vmax}"
 
 dpi=300                                                        # echo "${dpi}"
@@ -3024,61 +3045,17 @@ while IFS=" " read -r -d $'\0'; do
     cools+=( "${REPLY}" )
 done  < <(
     find \
-        11_cooler_XV_KR-filt-0.4 \
+        11_cooler_XII_KR-filt-0.4 \
         -maxdepth 1 \
         -type f \
         -name MC*.${res}.*cool \
         -print0 \
             | sort -z
 )
-# 11_cooler_VII_KR-filt-0.4 \
+# 11_cooler_${coord}_KR-filt-0.4 \
 
 check_array=true
 if ${check_array}; then echo_test "${cools[@]}"; fi
-
-# < <(
-#     find \
-#         11_cooler_genome_KR-filt-0.4_whole-matrix \
-#         -maxdepth 1 \
-#         -type f \
-#         -name MC*.${res}.*cool \
-#         -print0 \
-#             | sort -z
-# )
-
-# < <(
-#     find \
-#         11_cooler_XII_KR-filt-0.4 \
-#         -maxdepth 1 \
-#         -type f \
-#         -name MC*.${res}.*cool \
-#         -print0 \
-#             | sort -z
-# )
-
-# < <(
-#     find \
-#         11_cooler_genome_KR-filt-0.2 \
-#         11_cooler_genome_KR-filt-0.3 \
-#         11_cooler_genome_KR-filt-0.4 \
-#         -maxdepth 1 \
-#         -type f \
-#         -name MC*${res}*cool \
-#         -print0 \
-#             | sort -z
-# )
-
-# < <(
-#     find \
-#         11_cooler_genome_KR-filt-0.2_whole-matrix \
-#         11_cooler_genome_KR-filt-0.3_whole-matrix \
-#         11_cooler_genome_KR-filt-0.4_whole-matrix \
-#         -maxdepth 1 \
-#         -type f \
-#         -name MC*${res}*cool \
-#         -print0 \
-#             | sort -z
-# )
 
 
 #  Execute main tasks =========================================================
@@ -3101,6 +3078,7 @@ change_dir \
 # vmin=0.0001  # 10e-4                                           # echo "${vmin}"
 # vmin=0.0003162278                                              # echo "${vmin}"
 # vmin=0.001  # 10e-3                                            # echo "${vmin}"
+# vmin=0.003162278                                               # echo "${vmin}"
 
 iter=0
 for i in "${cools[@]}"; do
@@ -3265,19 +3243,22 @@ activate_env "hicexplorer_764_env"
 # choice="no-norm"                                               # echo "${choice}"
 choice="norm"                                                  # echo "${choice}"
 
-res=6400                                                       # echo "${res}"
+# res=6400                                                       # echo "${res}"
 # res=5000                                                       # echo "${res}"
 # res=3200                                                       # echo "${res}"
-# res=1600                                                       # echo "${res}"
+res=1600                                                       # echo "${res}"
 # res=200                                                        # echo "${res}"
+
 calc="log2ratio"
 
-chr="XII"                                                      # echo "${chr}"
+# chr="XII"                                                      # echo "${chr}"
+# chr="VII"                                                      # echo "${chr}"
+chr="XV"                                                      # echo "${chr}"
 start=451400                                                   # echo "${start}"
 end=460800                                                     # echo "${end}"
 # coord="${chr}:${start}-${end}"                                 # echo "${coord}"  #GOOD
-# coord="${chr}"                                                 # echo "${coord}"
-coord="XI XII XIII"                                            # echo "${coord}"
+# coord="XI XII XIII"                                            # echo "${coord}"
+coord="${chr}"                                                 # echo "${coord}"
 
 vmax=4                                                         # echo "${vmax}"
 vmin=-${vmax}                                                  # echo "${vmin}"
@@ -3286,7 +3267,8 @@ dpi=300                                                        # echo "${dpi}"
 matcol="PuOr_r"                                                # echo "${matcol}"
 
 # date="2023-1019"                                               # echo "${date}"
-date="2023-1020"                                               # echo "${date}"
+# date="2023-1020"                                               # echo "${date}"
+date="2023-1023"                                               # echo "${date}"
 
 if [[ ${coord} == "XI XII XIII" ]]; then
     outdir="pngs/${date}_$(sed 's/ /-/g' <(echo "${coord}"))"  # echo "${outdir}"
@@ -3299,26 +3281,17 @@ while IFS=" " read -r -d $'\0'; do
     cools+=( "${REPLY}" )
 done < <(
     find \
-        12_hicCompareMatrices_genome_KR-filt-0.4_whole-matrix//${choice} \
+        12_hicCompareMatrices_${coord}_KR-filt-0.4/${choice} \
         -maxdepth 1 \
         -type f \
         -name *.${res}.${calc}.cool \
         -print0 \
             | sort -z
 )
+# 12_hicCompareMatrices_genome_KR-filt-0.4_whole-matrix/${choice} \
 
 check_array=true
 if ${check_array}; then echo_test "${cools[@]}"; fi
-
-# < <(
-#     find \
-#         12_hicCompareMatrices_XII_KR-filt-0.4/${choice} \
-#         -maxdepth 1 \
-#         -type f \
-#         -name *.${res}.${calc}.cool \
-#         -print0 \
-#             | sort -z
-# )
 
 
 #  Execute main tasks =========================================================
@@ -3329,10 +3302,10 @@ change_dir \
 #  Make outfile directory if it doesn't exist
 [[ ! -d "${outdir}" ]] && mkdir -p "${outdir}/err_out" || true
 
-vmax=10                                                         # echo "${vmax}"
-vmin=-${vmax}                                                  # echo "${vmin}"
+vmax=2.5
+vmin=-${vmax}
 
-iter=0
+iter=0                                                                           # echo "${iter}"
 for i in "${cools[@]}"; do
     # echo_test "${cools[@]}"
     # i="${cools[0]}"                                                            # echo "${i}"
@@ -3462,6 +3435,44 @@ done
 
 <a id="9-draw-contact-decay-plots-for-rdna-region"></a>
 ### 9. Draw contact-decay plots for rDNA region
+<a id="notes-2"></a>
+#### Notes
+<details>
+<summary><i>Code: Draw contact-decay plots for rDNA region</i></summary>
+
+```txt
+#NOTE
+#  Error from attempting to call run_hicPlotDistVsCounts with left rDNA array
+#+ supplied as region in bed file:
+#+ 
+#+ From hicPlotDistVsCounts.contact-decay_XII-451500-460800.30570507.stderr:
+#+ INFO:hicexplorer.hicPlotDistVsCounts:processing chromosome all
+#+ 
+#+ Traceback (most recent call last):
+#+   File "/home/kalavatt/miniconda3/envs/hicexplorer_764_env/bin/hicPlotDistVsCounts", line 7, in <module>
+#+     main()
+#+   File "/home/kalavatt/miniconda3/envs/hicexplorer_764_env/lib/python3.7/site-packages/hicexplorer/hicPlotDistVsCounts.py", line 428, in main
+#+     custom_cut_interval = from_bed_to_cut_interval(hic_ma, args.domains)
+#+   File "/home/kalavatt/miniconda3/envs/hicexplorer_764_env/lib/python3.7/site-packages/hicexplorer/hicPlotDistVsCounts.py", line 393, in from_bed_to_cut_interval
+#+     "No region overlapped with bins."
+#+ AssertionError: No region overlapped with bins.
+
+#NOTE
+#  Was finally able to get this working by
+#+     1. Making FAN-C .hic files subset to XII:451400-460800 via fanc subset
+#+     2. Converting the subset .hic files to .cool files with fanc to-cooler
+#+     3. Since the related underlying functions in the FAN-C Python API retain
+#+        bias weights by default, was able to supply the subsetted, balanced
+#+        .cool to hicPlotDistVsCounts via run_hicPlotDistVsCounts called sans
+#+        --bed-file argument
+
+#TODO #LATER
+#  Try the above approach with a regional subset that encompasses both rDNA
+#+ arrays, not just the left one
+```
+</details>
+<br />
+
 <a id="call-hicexplorer-hicplotdistvscounts"></a>
 #### Call HiCExplorer `hicPlotDistVsCounts`
 <a id="code-13"></a>
@@ -3908,31 +3919,6 @@ if ${run_command}; then
         
         # -b "${bed}" \
 fi
-
-#NOTE
-#  Error from attempting to call run_hicPlotDistVsCounts with left rDNA array
-#+ supplied as region in bed file:
-#+ 
-#+ From hicPlotDistVsCounts.contact-decay_XII-451500-460800.30570507.stderr:
-#+ INFO:hicexplorer.hicPlotDistVsCounts:processing chromosome all
-#+ 
-#+ Traceback (most recent call last):
-#+   File "/home/kalavatt/miniconda3/envs/hicexplorer_764_env/bin/hicPlotDistVsCounts", line 7, in <module>
-#+     main()
-#+   File "/home/kalavatt/miniconda3/envs/hicexplorer_764_env/lib/python3.7/site-packages/hicexplorer/hicPlotDistVsCounts.py", line 428, in main
-#+     custom_cut_interval = from_bed_to_cut_interval(hic_ma, args.domains)
-#+   File "/home/kalavatt/miniconda3/envs/hicexplorer_764_env/lib/python3.7/site-packages/hicexplorer/hicPlotDistVsCounts.py", line 393, in from_bed_to_cut_interval
-#+     "No region overlapped with bins."
-#+ AssertionError: No region overlapped with bins.
-
-#NOTE
-#  Was finally able to get this working by
-#+     1. Making FAN-C .hic files subset to XII:451400-460800 via fanc subset
-#+     2. Converting the subset .hic files to .cool files with fanc to-cooler
-#+     3. Since the related underlying functions in the FAN-C Python API retain
-#+        bias weights by default, was able to supply the subsetted, balanced
-#+        .cool to hicPlotDistVsCounts via run_hicPlotDistVsCounts called sans
-#+        --bed-file argument
 ```
 </details>
 <br />
@@ -4021,9 +4007,664 @@ cat "${a_txt}" \
 </details>
 <br />
 
+<a id="10-obtain-virtual-4c-v4c-data"></a>
+### 10. Obtain virtual 4C (v4C) data
+<a id="code-15"></a>
+#### Code
+<details>
+<summary><i>Code: 10. Obtain virtual 4C (v4C) data</i></summary>
+
+```bash
+#!/bin/bash
+
+#  Initialize functions =======================================================
+function check_requirements() {
+    local requirements=("$@")
+    local tag="is not installed or not in the system's PATH"
+    local help=$(
+cat << EOM
+Usage: check_requirements [command_1] [command_2] ...
+
+Checks that the specified commands are available on the system.
+
+check_requirements() iterates over all given commands and checks that they can
+be executed, ensuring all required dependencies are installed.
+
+Positional arguments:
+  command_1, command_2, ...  The command(s) to check for installation,
+                             availability in the system's PATH.
+
+Example #1:
+  check_requirements fithic python
+
+Example #2:
+  check_requirements cooler
+EOM
+    )
+
+    if [[ "${requirements[0]}" == "-h" || "${requirements[0]}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
+    if [[ -z "${requirements[@]}" ]]; then
+        echo "Error: No command(s) provided."
+        echo "${help}"
+        return 1
+    fi
+
+    for req in "${requirements[@]}"; do
+        if ! command -v "${req}" &> /dev/null; then
+            echo "Error: ${req} ${tag}."
+            return 1
+        fi
+    done
+
+    return 0
+}
+
+
+function change_dir() {
+    local dir="${1}"
+    local help=$(
+cat << EOM
+Usage: change_dir [directory]
+
+Change the current working directory to the one specified.
+
+change_dir() checks if a directory is provided (as an argument), exists, and is
+accessible, and then changes to it.
+
+Positional argument:
+  directory  The directory to change to
+EOM
+    )
+
+    if [[ "${dir}" == "-h" || "${dir}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
+    if [[ -z "${dir}" ]]; then
+        echo "Error: No directory provided."
+        echo "${help}"
+        return 1
+    fi
+
+    if [[ -d "${dir}" ]]; then
+        cd "${dir}" ||
+            {
+                echo "Error: Failed to change to ${dir} even though it exists."
+                return 1
+            }
+    else
+        echo "Error: Directory ${dir} does not exist."
+        return 1
+    fi
+}
+
+
+function activate_env() {
+    local env="${1}"
+    local help=$(
+cat << EOM
+Usage: activate_env [environment]
+
+Activate a specified Conda environment.
+
+If another environment is already active, then activate_env() deactivates it
+before activating the desired one.
+
+Positional argument:
+  environment  The name of the Conda environment to activate
+EOM
+    )
+
+    if [[ "${env}" == "-h" || "${env}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
+    if ! check_requirements conda; then return 1; fi
+
+    if [[ -z "${env}" ]]; then
+        echo "Error: No environment provided."
+        echo "${help}"
+        return 1
+    fi
+
+    if ! conda info --envs | grep -q "^${env} *"; then
+        echo "Error: The environment '${env}' is not found. Please provide a"
+        echo "       valid Conda environment name."
+        return 1
+    fi
+
+    if [[ "${CONDA_DEFAULT_ENV}" != "${env}" ]]; then
+        if [[ ${CONDA_DEFAULT_ENV} != base ]]; then
+            conda deactivate
+        fi
+
+        source activate "${env}"
+    fi
+
+    return 0
+}
+
+
+function run_hicPlotViewpoint() {
+    local help=$(
+cat << EOM
+Usage: run_hicPlotViewpoint -i INPUT_FILE -o OUTPUT_FILE -b OUTPUT_BG
+  -j JOB_NAME -e ERR_OUT_DIR -a ANCHOR -r REGION [-p DPI] [-n] [-d]
+
+Plots a cooler format matrix using hicPlotViewpoint. File type determined by extension.
+
+Options:
+  -h, --help         Display this help message
+  -i, --input-file   Path to the input cooler matrix (required)
+  -o, --output-file  Path to the output image file (required)
+  -b, --output-bg    Path to the output bedgraph file (required)
+  -j, --job-name     Name of the job (required)
+  -e, --err-out-dir  Directory for stderr and stdout logs (required)
+  -a, --anchor       Reference point, a.k.a. "anchor" (required; default:
+                     "XII:451400-469200")
+  -r, --region       Region to examine interactions originating from the
+                     "anchor" (required; default: "XII:1-1078176")
+  -p, --dpi          Dots per inch for the plot (default: 300)
+  -n, --rename       Correct the buggy naming of bedgraph files by HiCExplorer
+                     hicPlotViewpoint (optional)
+  -d, --dry-run      Print the sbatch command without executing it
+
+Dependencies:
+  hicPlotViewpoint: Required for plotting the matrix
+  sbatch: Used for job submission
+
+Example:
+  run_hicPlotViewpoint
+      -i input.cool
+      -o output.png
+      -b output.bedgraph
+      -j hicPlotViewpoint.input
+      -e path/to/logs
+      -a "XII:451400-469200"
+      -r "XII:1-1078176"
+      -p 300
+      -n
+EOM
+    )
+
+    if [[ -z "${1}" || "${1}" == "-h" || "${1}" == "--help" ]]; then
+        echo "${help}"
+        return 0
+    fi
+
+    local input_file=""
+    local output_file=""
+    local job_name=""
+    local err_out_dir=""
+    local anchor="XII:451400-469200"
+    local region=""
+    local dpi=300
+    local rename=false
+    local dry_run=false
+
+    while [[ "$#" -gt 0 ]]; do
+        case "${1}" in
+            -i|--input-file) input_file="${2}"; shift 2 ;;
+            -o|--output-file) output_file="${2}"; shift 2 ;;
+            -b|--output-bg) output_bg="${2}"; shift 2 ;;
+            -j|--job-name) job_name="${2}"; shift 2 ;;
+            -e|--err-out-dir) err_out_dir="${2}"; shift 2 ;;
+            -a|--anchor) anchor="${2}"; shift 2 ;;
+            -r|--region) region="${2}"; shift 2 ;;
+            -n|--rename) rename=true; shift ;;
+            -p|--dpi) dpi="${2}"; shift 2 ;;
+            -d|--dry-run) dry_run=true; shift ;;
+            *) echo "Unknown parameter passed: ${1}"; return 1 ;;
+        esac
+    done
+
+    if ! check_requirements hicPlotViewpoint sbatch rename; then return 1; fi
+
+    if [[ -z "${input_file}" ]]; then
+        echo "Error: Input file is required."
+        return 1
+    elif [[ ! -f "${input_file}" ]]; then
+        echo "Error: ${input_file} does not exist."
+        return 1
+    fi
+
+    if [[ -z "${output_file}" ]]; then
+        echo "Error: Output file path is required."
+        return 1
+    elif [[ -f "${output_file}" ]]; then
+        echo "Error: ${output_file} already exists."
+        return 1
+    fi
+
+    if [[ -z "${output_bg}" ]]; then
+        echo "Error: Output bedgraph path is required."
+        return 1
+    elif [[ -f "${output_bg}" ]]; then
+        echo "Error: ${output_bg} already exists."
+        return 1
+    fi
+
+    if [[ -z "${job_name}" ]]; then
+        echo "Error: Job name is required."
+        return 1
+    fi
+
+    if [[ -z "${err_out_dir}" ]]; then
+        echo "Error: Error and output directory is required."
+        return 1
+    elif [[ ! -d "${err_out_dir}" ]]; then
+        echo "Error: ${err_out_dir} does not exist."
+        return 1
+    fi
+
+    if [[ -z "${anchor}" ]]; then
+        echo "Error: Anchor is required."
+        return 1
+    fi
+
+    if [[ -z "${region}" ]]; then
+        echo "Error: Region is required."
+        return 1
+    fi
+
+    if ! [[ "${dpi}" =~ ^[1-9][0-9]*$ ]]; then
+        echo "Error: DPI must be a positive integer greater than 0."
+        return 1
+    fi
+
+    local sbatch_script=$(
+cat << EOF
+#!/bin/bash
+
+#SBATCH --job-name="${job_name}"
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=1
+#SBATCH --error="${err_out_dir}/${job_name}.%A.stderr.txt"
+#SBATCH --output="${err_out_dir}/${job_name}.%A.stdout.txt"
+
+hicPlotViewpoint \
+    --referencePoint "${anchor}" \
+    --region "${region}" \
+    --matrix "${input_file}" \
+    --outFileName "${output_file}" \
+    --interactionOutFileName "${outfile_bg}" \
+    --dpi ${dpi}
+EOF
+    )
+
+    if ${rename}; then
+        sbatch_script+=$(
+cat << EOF
+
+find $(dirname "${output_bg}") \
+    -maxdepth 1 \
+    -type f \
+    -name "*.cool.bedgraph" \
+    -exec rename "s/.bg_$(basename "${input_file}")//g" {} \;
+EOF
+        )
+    fi
+
+    if "${dry_run}"; then
+        echo "Dry run mode enabled. The following sbatch script would be executed:"
+        echo "${sbatch_script}"
+    else
+        echo "${sbatch_script}" | sbatch
+        echo "Job submitted with name '${job_name}'."
+    fi
+
+    return 0
+}
+
+
+#  Configure work environment, directories, and variables =====================
+#  Set variables, arrays
+a_chr="XII"                                                     # echo "${a_chr}"
+a_start=451400                                                  # echo "${a_start}"
+a_end=469200                                                    # echo "${a_end}"
+anchor="${a_chr}:${a_start}-${a_end}"                           # echo "${coord}"
+
+# res=3200                                                        # echo "${res}"
+res=1600                                                        # echo "${res}"
+
+date="2023-1023"                                                # echo "${date}"
+
+outdir="pngs/${date}_$(sed 's/\:/-/g' <(echo "${coord}"))_v4C"  # echo "${outdir}"
+
+check_variables=true
+if ${check_variables}; then
+    echo """
+    anchor  ${anchor}
+       res  ${res}
+      date  ${date}
+    outdir  ${outdir}
+    """
+fi
+
+unset cools && typeset -a cools
+while IFS=" " read -r -d $'\0'; do
+    cools+=( "${REPLY}" )
+done  < <(
+    find \
+        11_cooler_genome_KR-filt-0.4_whole-matrix \
+        -maxdepth 1 \
+        -type f \
+        -name MC*.${res}.*cool \
+        -print0 \
+            | sort -z
+)
+# 11_cooler_XII_KR-filt-0.4 \
+# 11_cooler_genome_KR-filt-0.4_whole-matrix \
+
+check_array=true
+if ${check_array}; then echo_test "${cools[@]}"; fi
+
+unset ar_regions && typeset -a ar_regions=(
+    "I" "II" "III" "IV" "V" "VI" "VII" "VIII" "IX" "X" "XI" "XII" "XIII" "XIV"
+    "XV" "XVI"
+)
+
+#  For each chromosome, setting the end position as the last bp - 1
+unset Ar_regions && typeset -A Ar_regions=(
+    ["I"]=230217
+    ["II"]=813183
+    ["III"]=316619
+    ["IV"]=1531932
+    ["V"]=576873
+    ["VI"]=270160
+    ["VII"]=1090939
+    ["VIII"]=562642
+    ["IX"]=439887
+    ["X"]=745750
+    ["XI"]=666815
+    ["XII"]=1078176
+    ["XIII"]=924430
+    ["XIV"]=784332
+    ["XV"]=1091290
+    ["XVI"]=948065
+)
+
+check_arrays=true
+if ${check_arrays}; then
+    for i in "${ar_regions[@]}"; do
+        r_chr="${i}"
+        r_end="${Ar_regions[${i}]}"
+
+        echo """
+          r_chr (key)  ${r_chr}
+              r_start  ${r_start:-1}
+        r_end (value)  ${r_end}
+        """
+    done
+fi
+
+unset r_chr
+unset r_start
+unset r_end
+
+
+#  Execute main tasks =========================================================
+#  Activate environment
+activate_env "hicexplorer_764_env"
+
+#  Go to work directory
+change_dir \
+    "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process"
+
+#  Make outfile directory if it doesn't exist
+[[ ! -d "${outdir}" ]] && mkdir -p "${outdir}/err_out" || true
+
+iter=0
+for j in in "${a_chromosomes[@]}"; do
+    # j="${a_chromosomes[0]}"                                                        # echo "${j}"
+    
+    r_chr="${j}"                                                                     # echo "${r_chr}"
+    r_start=1                                                                        # echo "${r_start}"
+    r_end="${Ar_regions[${j}]}"                                                      # echo "${r_end}"
+    region="${r_chr}:${r_start}-${r_end}"                                            # echo "${region}"
+
+    for i in "${cools[@]}"; do
+        # i="${cools[0]}"                                                            # echo "${i}"
+        
+        indir="$(dirname ${i})"                                                      # echo "${indir}"
+        infile="$(basename ${i})"                                                    # echo "${infile}"
+        
+        if [[ "${anchor}" == *" "* ]]; then
+            what="$(
+                echo "${anchor}" | sed 's/ /-/g'
+            ), $(
+                echo "${region}" | sed 's/ /-/g'
+            )"
+        else
+            # what="$(echo ${anchor} | awk -F ':' '{ print $1 }')"
+            what="${anchor}, ${region}"
+        fi                                                                           # echo "${what}"
+
+        if [[ ${indir} =~ "whole-matrix" ]]; then
+            how="$(
+                echo ${indir} \
+                    | awk -F '_' '{ print $4" w all contacts, downsampled wrt "$3 }'
+            )"
+        else
+            how="$(
+                echo ${indir} \
+                    | awk -F '_' '{ print $4" w cis contacts, downsampled wrt "$3 }'
+            )"
+        fi                                                                           # echo "${how}"
+
+        title="${what}; ${how}; ${res}-bp res"                                       # echo "${title}"
+        suffix="$(
+            echo "${title}" \
+                | awk -F '[:;,\\ ]' '{ print $1":"$2"_"$4":"$5"_"$7"-"$9"-"$10 }' \
+                | sed 's/:/-/g'
+        )"                                                                           # echo "${suffix}"
+        
+        outfile_pdf="${outdir}/$(basename ${i} .cool).${suffix}.pdf"                 # echo "${outfile_pdf}"
+        outfile_bg="${outdir}/$(basename ${i} .cool).${suffix}.bg"                   # echo "${outfile_bg}"
+        job_name="hicPlotViewpoint.$(basename ${outfile_pdf} .pdf)"                  # echo "${job_name}"
+        err_out_dir="$(dirname ${outfile_pdf})/err_out"                              # echo "${err_out_dir}"
+
+        (( iter++ ))
+
+        check_variables=true
+        if ${check_command}; then
+            echo """
+                    \${res}  ${res}
+                 \${anchor}  ${anchor}
+                 \${region}  ${region}
+                    \${dpi}  ${dpi}
+                  \${indir}  ${indir}
+                 \${infile}  ${infile}
+                 \${outdir}  ${outdir}
+            \${outfile_pdf}  ${outfile_pdf}
+             \${outfile_bg}  ${outfile_bg}
+                  \${title}  ${title}
+               \${job_name}  ${job_name}
+            \${err_out_dir}  ${err_out_dir}
+            """
+        fi
+
+        check_command=true
+        if ${check_command}; then
+            echo """
+            ### ${iter} ###
+            run_hicPlotViewpoint \\
+                -i \"${indir}/${infile}\" \\
+                -o \"${outfile_pdf}\" \\
+                -b \"${outfile_bg}\" \\
+                -j \"${job_name}\" \\
+                -e \"${err_out_dir}\" \\
+                -a \"${anchor}\" \\
+                -r \"${region}\" \\
+                -p ${dpi} \\
+                -n \\
+                -d
+            """
+        fi
+        
+        do_dry_run=true
+        if ${do_dry_run}; then
+            run_hicPlotViewpoint \
+                -i "${indir}/${infile}" \
+                -o "${outfile_pdf}" \
+                -b "${outfile_bg}" \
+                -j "${job_name}" \
+                -e "${err_out_dir}" \
+                -a "${anchor}" \
+                -r "${region}" \
+                -p ${dpi} \
+                -n \
+                -d
+        fi
+
+        run_job=true
+        if ${run_job}; then
+            run_hicPlotViewpoint \
+                -i "${indir}/${infile}" \
+                -o "${outfile_pdf}" \
+                -b "${outfile_bg}" \
+                -j "${job_name}" \
+                -e "${err_out_dir}" \
+                -a "${anchor}" \
+                -r "${region}" \
+                -n \
+                -p ${dpi}
+        fi
+
+        sleep 0.2
+    done
+done
+
+
+#  Run small workflow to clean up v4C outdirectory ============================
+#TODO #TOMORROW
+#  Rerun all of the above and the below; in the final concatenated bedgraph
+#+ outfilenames, we need to record the resolution of the data
+
+#  Navigate to the output directory
+cd "${outdir}" || echo "cd'ing failed; check on this"
+
+#  Define the sample groups
+unset samples && typeset -a samples=("Q_WT" "30C-a15_WT" "nz_WT")
+
+check_array=true
+if ${check_array}; then echo_test "${samples[@]}"; fi
+
+#  Loop through each sample group
+for i in "${samples[@]}"; do
+    # i=${samples[2]}  # echo "${i}"
+    
+    #  Store the current sample name
+    sample="${i}"  # echo "${sample}"
+
+    #  Determine the prefix based on the sample name
+    if [[ "${sample}" == "Q_WT" ]]; then
+        prefix="Q"
+    elif [[ "${sample}" == "30C-a15_WT" ]]; then
+        prefix="G1"
+    elif [[ "${sample}" == "nz_WT" ]]; then
+        prefix="G2-M"
+    fi
+    # echo "${name}"
+
+    #  Create an associative array to map file names to their corresponding
+    #+ Roman numeral "regions" (i.e., chromosomes)
+    unset map && typeset -A map
+    
+    #  Loop through bedgraph files with the current sample in the name
+    for j in *${sample}*.bedgraph; do
+        # echo "${j}"
+
+        #  Extract Roman numerals followed by "-1" using sed
+        roman=$(echo "${j}" | sed -n 's/.*_\([IVXLCDM]\+-1\)\b.*/\1/p')
+        
+        #  Add the file to the map if a Roman numeral (followed by "-1") is
+        #+ found
+        if [[ -n "${roman}" ]]; then map["${j}"]=${roman}; fi
+    done
+    
+    #  Use the last element assigned to variable j to determine the suffix
+    #+ for concatenated bedgraph outfiles
+    suffix=$(echo ${j} | awk -F '_' '{ print $6 }')
+    # echo "${suffix}"
+    
+    check_array=false
+    if ${check_array}; then
+        #  Output the contents of the map for debugging
+        for k in "${!map[@]}"; do
+              key="${k}"
+            value="${map[${k}]}"
+        
+            echo """
+              key  ${key}
+            value  ${value}
+            """
+        done
+    fi
+
+    #  Sort the files based on Roman numerals and concatenate them (only kind
+    #+ of works, but that's fine for the time being)
+    for l in $(echo ${!map[*]} | tr ' ' '\n' | sort -V); do
+        check_command=true
+        if ${check_command}; then
+            echo "\"${l}\" >> \"${prefix}_${suffix/bedgraph/bg}\""
+        fi
+
+        run_command=true
+        if ${run_command}; then
+            cat "${l}" >> "${prefix}_${suffix/bedgraph/bg}"
+        fi
+    done
+
+    #  Check that the concatenated file is not empty
+    if [[ ! -s "${prefix}_${suffix/bedgraph/bg}" ]]; then
+        echo "Error: Concatenation failed for ${sample}. Exiting."
+        return 1
+    else
+        run_clean_up=true
+        # echo "${run_clean_up}"
+    fi
+
+    if ${run_command}; then
+        echo "Concatenation was successful for ${sample}."
+        
+        #  If concatenation is successful, remove individual sample bedgraphs
+        #+ and, below, pdfs
+        for l in ${!map[*]}; do
+            rm "${l}"
+            echo "Deleted ${l}"
+
+            pdf_file="${l%.bedgraph}.pdf"
+            if [[ -e "${pdf_file}" ]]; then
+                rm "${pdf_file}"
+                echo "Deleted ${pdf_file}"
+            fi
+        done
+    else
+        echo "Error: Concatenation failed for ${sample}. Exiting."
+        return 1
+    fi
+done
+
+#  Check the exit status of the last operation; if it's zero, then return to
+#+ the previous directory
+if [[ $? -eq 0 ]]; then
+    echo "Cleanup complete. Individual bedgraphs and pdfs removed."
+    cd -
+fi
+```
+</details>
+<br />
+
 <a id="x-documentation-partial"></a>
 ### X. Documentation (partial)
-<a id="notes-2"></a>
+<a id="notes-3"></a>
 #### Notes
 <details>
 <summary><i>Notes: X. Documentation (partial)</i></summary>
@@ -4343,5 +4984,43 @@ Optional arguments:
   --help, -h            show this help message and exit
   --version             show program's version number and exit
 ```
+
+<a id="hicplotviewpoint---help"></a>
+##### `hicPlotViewpoint --help`
+```txt
+❯ hicPlotViewpoint --help
+usage: hicPlotViewpoint --matrix MATRIX [MATRIX ...] --region REGION
+                        --outFileName OUTFILENAME --referencePoint
+                        REFERENCEPOINT [--chromosome CHROMOSOME]
+                        [--interactionOutFileName INTERACTIONOUTFILENAME]
+                        [--dpi DPI] [--version] [--help]
+
+Plots the number of interactions around a given reference point in a region.
+
+Required arguments:
+  --matrix MATRIX [MATRIX ...], -m MATRIX [MATRIX ...]
+                        Hi-C matrix to plot.
+  --region REGION       The format is chr:start-end.
+  --outFileName OUTFILENAME, -o OUTFILENAME
+                        File name of the image to save.
+  --referencePoint REFERENCEPOINT, -rp REFERENCEPOINT
+                        Reference point. Needs to be in the format: 'chr:100'
+                        for a single reference point or 'chr:100-200' for a
+                        reference region.
+
+Optional arguments:
+  --chromosome CHROMOSOME, -C CHROMOSOME
+                        Optional parameter: Only show results for this
+                        chromosome.
+  --interactionOutFileName INTERACTIONOUTFILENAME, -i INTERACTIONOUTFILENAME
+                        Optional parameter: If set, a bedgraph file with all
+                        interaction will be created.
+  --dpi DPI             Optional parameter: Resolution for the image in case
+                        theouput is a raster graphics image (e.g png, jpg)
+                        (Default: 300).
+  --version             show program's version number and exit
+  --help, -h            show this help message and exit
+```
 </details>
 <br />
+
