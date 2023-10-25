@@ -669,16 +669,11 @@ if(base::isTRUE(run_draft_code)) {
 
 list.files()
 
-
 bg <- readr::read_tsv(
-    "MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.XII-451400-469200_ds-genome_KR-filt-0.4-cis-contacts.bedgraph",
+    # "MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.XII-451400-469200_ds-genome_KR-filt-0.4-cis-contacts.bedgraph",
+    "MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.XII-451400-469200_I-1-230217_KR-filt-0.4-all-contacts.bedgraph",
     col_names = c("chr_a", "start_a", "end_a", "chr_r", "start_r", "end_r", "value")
-)
-head(bg)
-tail(bg)
-
-
-bg_avg <- bg %>%
+) %>%
     dplyr::group_by(chr_r, start_r, end_r) %>%
     dplyr::summarize(
         chr_a = "XII",
@@ -688,11 +683,11 @@ bg_avg <- bg %>%
     ) %>%
     ungroup()
 
-head(bg_avg)
+head(bg)
 
 
-# p <- ggplot(bg, aes(x = ((start_r + end_r) / 2), y = value)) +
-p <- ggplot(bg_avg, aes(x = ((start_r + end_r) / 2), y = value)) +
+p <- ggplot(bg, aes(x = ((start_r + end_r) / 2), y = value)) +
+# p <- ggplot(bg_avg, aes(x = ((start_r + end_r) / 2), y = value)) +
 # p <- ggplot(bg_avg, aes(x = start_r, y = value)) +
     geom_line(aes(color = chr_a)) +  # Color by chr_a to differentiate viewpoints, if there are multiple
     labs(
