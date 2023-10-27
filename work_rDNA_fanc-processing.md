@@ -4325,17 +4325,18 @@ EOF
 
 #  Configure work environment, directories, and variables =====================
 #  Set variables, arrays
-a_chr="XII"                                                     # echo "${a_chr}"
-a_start=451400                                                  # echo "${a_start}"
-a_end=469200                                                    # echo "${a_end}"
-anchor="${a_chr}:${a_start}-${a_end}"                           # echo "${coord}"
+a_chr="XII"                                                      # echo "${a_chr}"
+a_start=451400                                                   # echo "${a_start}"
+a_end=469200                                                     # echo "${a_end}"
+anchor="${a_chr}:${a_start}-${a_end}"                            # echo "${coord}"
 
-# res=3200                                                        # echo "${res}"
-res=1600                                                        # echo "${res}"
+# res=3200                                                         # echo "${res}"
+res=1600                                                         # echo "${res}"
 
-date="2023-1023"                                                # echo "${date}"
+# date="2023-1023"                                                 # echo "${date}"
+date="2023-1025"                                                 # echo "${date}"
 
-outdir="pngs/${date}_$(sed 's/\:/-/g' <(echo "${coord}"))_v4C"  # echo "${outdir}"
+outdir="pngs/${date}_$(sed 's/\:/-/g' <(echo "${anchor}"))_v4C"  # echo "${outdir}"
 
 check_variables=true
 if ${check_variables}; then
@@ -4421,8 +4422,8 @@ change_dir \
 [[ ! -d "${outdir}" ]] && mkdir -p "${outdir}/err_out" || true
 
 iter=0
-for j in in "${a_chromosomes[@]}"; do
-    # j="${a_chromosomes[0]}"                                                        # echo "${j}"
+for j in in "${ar_regions[@]}"; do
+    # j="${ar_regions[0]}"                                                           # echo "${j}"
     
     r_chr="${j}"                                                                     # echo "${r_chr}"
     r_start=1                                                                        # echo "${r_start}"
@@ -4461,8 +4462,12 @@ for j in in "${a_chromosomes[@]}"; do
         title="${what}; ${how}; ${res}-bp res"                                       # echo "${title}"
         suffix="$(
             echo "${title}" \
-                | awk -F '[:;,\\ ]' '{ print $1":"$2"_"$4":"$5"_"$7"-"$9"-"$10 }' \
-                | sed 's/:/-/g'
+                | awk -F '[:;,\\ ]' '{ 
+                    print "anch-"$1":"$2"_reg-"$4":"$5"_res-"$16"_"$7"-"$9"-"$10 
+                }' \
+                | sed \
+                    -e 's/:/-/g' \
+                    -e 's/-bp//g'
         )"                                                                           # echo "${suffix}"
         
         outfile_pdf="${outdir}/$(basename ${i} .cool).${suffix}.pdf"                 # echo "${outfile_pdf}"
@@ -4478,7 +4483,7 @@ for j in in "${a_chromosomes[@]}"; do
                     \${res}  ${res}
                  \${anchor}  ${anchor}
                  \${region}  ${region}
-                    \${dpi}  ${dpi}
+                    \${dpi}  ${dpi:-300}
                   \${indir}  ${indir}
                  \${infile}  ${infile}
                  \${outdir}  ${outdir}
@@ -4502,7 +4507,7 @@ for j in in "${a_chromosomes[@]}"; do
                 -e \"${err_out_dir}\" \\
                 -a \"${anchor}\" \\
                 -r \"${region}\" \\
-                -p ${dpi} \\
+                -p ${dpi:-300} \\
                 -n \\
                 -d
             """
@@ -4518,7 +4523,7 @@ for j in in "${a_chromosomes[@]}"; do
                 -e "${err_out_dir}" \
                 -a "${anchor}" \
                 -r "${region}" \
-                -p ${dpi} \
+                -p ${dpi:-300} \
                 -n \
                 -d
         fi
@@ -4533,8 +4538,8 @@ for j in in "${a_chromosomes[@]}"; do
                 -e "${err_out_dir}" \
                 -a "${anchor}" \
                 -r "${region}" \
-                -n \
-                -p ${dpi}
+                -p ${dpi:-300} \
+                -n
         fi
 
         sleep 0.2
@@ -4543,7 +4548,7 @@ done
 
 
 #  Run small workflow to clean up v4C outdirectory ============================
-#TODO #TOMORROW
+#TODO #INPROGRESS
 #  Rerun all of the above and the below; in the final concatenated bedgraph
 #+ outfilenames, we need to record the resolution of the data
 
@@ -4553,15 +4558,15 @@ cd "${outdir}" || echo "cd'ing failed; check on this"
 #  Define the sample groups
 unset samples && typeset -a samples=("Q_WT" "30C-a15_WT" "nz_WT")
 
-check_array=true
+check_array=false
 if ${check_array}; then echo_test "${samples[@]}"; fi
 
 #  Loop through each sample group
 for i in "${samples[@]}"; do
-    # i=${samples[2]}  # echo "${i}"
+    # i=${samples[2]}                                          # echo "${i}"
     
     #  Store the current sample name
-    sample="${i}"  # echo "${sample}"
+    sample="${i}"                                              # echo "${sample}"
 
     #  Determine the prefix based on the sample name
     if [[ "${sample}" == "Q_WT" ]]; then
@@ -4570,8 +4575,7 @@ for i in "${samples[@]}"; do
         prefix="G1"
     elif [[ "${sample}" == "nz_WT" ]]; then
         prefix="G2-M"
-    fi
-    # echo "${name}"
+    fi                                                         # echo "${prefix}"
 
     #  Create an associative array to map file names to their corresponding
     #+ Roman numeral "regions" (i.e., chromosomes)
@@ -4582,18 +4586,17 @@ for i in "${samples[@]}"; do
         # echo "${j}"
 
         #  Extract Roman numerals followed by "-1" using sed
-        roman=$(echo "${j}" | sed -n 's/.*_\([IVXLCDM]\+-1\)\b.*/\1/p')
+        roman=$(echo "${j}" | sed -n 's/.*reg-\([IVXLCDM]\+-1\)\b.*/\1/p')
         
         #  Add the file to the map if a Roman numeral (followed by "-1") is
         #+ found
         if [[ -n "${roman}" ]]; then map["${j}"]=${roman}; fi
-    done
+    done                                                       # echo_test "${map[@]}"
     
     #  Use the last element assigned to variable j to determine the suffix
     #+ for concatenated bedgraph outfiles
-    suffix=$(echo ${j} | awk -F '_' '{ print $6 }')
-    # echo "${suffix}"
-    
+    suffix=$(echo ${j} | awk -F '_' '{ print $6"_"$7 }')       # echo "${suffix}"
+
     check_array=false
     if ${check_array}; then
         #  Output the contents of the map for debugging

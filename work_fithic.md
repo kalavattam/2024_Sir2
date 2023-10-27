@@ -12,10 +12,22 @@
         1. [Printed](#printed)
     1. [Create a `rhino`/`gizmo` `FitHiC` environment](#create-a-rhinogizmo-fithic-environment)
         1. [Printed](#printed-1)
-1. [Establish and run workflow for `FitHiC` analyses](#establish-and-run-workflow-for-fithic-analyses)
-    1. [Code](#code)
+1. [Establish, test, and run workflow for `FitHiC` analyses](#establish-test-and-run-workflow-for-fithic-analyses)
+    1. [Initialize functions](#initialize-functions)
+        1. [Code](#code)
+    1. [Configure work environment, directories, and variables](#configure-work-environment-directories-and-variables)
+        1. [Code](#code-1)
+    1. [Establish and test workflow](#establish-and-test-workflow)
+        1. [Code](#code-2)
+        1. [Printed](#printed-2)
+            1. [Workflow test 2023-1026: mito-free and rDNA interactions, etc.](#workflow-test-2023-1026-mito-free-and-rdna-interactions-etc)
+    1. [Run workflow proper](#run-workflow-proper)
+        1. [Code](#code-3)
+        1. [Printed](#printed-3)
+            1. [Run workflow test, 2023-1025: Steps #1&ndash;3](#run-workflow-test-2023-1025-steps-1ndash3)
+            1. [Run workflow test, 2023-1025: Steps #4&ndash;6](#run-workflow-test-2023-1025-steps-4ndash6)
 1. [Help messages](#help-messages)
-    1. [Printed](#printed-2)
+    1. [Printed](#printed-4)
 
 <!-- /MarkdownTOC -->
 </details>
@@ -464,17 +476,18 @@ Executing transaction: done
 <br />
 <br />
 
-<a id="establish-and-run-workflow-for-fithic-analyses"></a>
-## Establish and run workflow for `FitHiC` analyses
+<a id="establish-test-and-run-workflow-for-fithic-analyses"></a>
+## Establish, test, and run workflow for `FitHiC` analyses
+<a id="initialize-functions"></a>
+### Initialize functions
 <a id="code"></a>
-### Code
+#### Code
 <details>
-<summary><i>Code: Establish and run workflow for `FitHiC` analyses</i></summary>
+<summary><i>Code: Initialize functions</i></summary>
 
 ```bash
 #!/bin/bash
 
-#  Initialize functions =======================================================
 function change_dir() {
     local dir="${1}"
     local help=$(
@@ -709,14 +722,22 @@ EOM
 
 
 function create_ia_file() {
-    local region=""
     local cool=""
     local out=""
+    local mito_free_out=""
+    local rDNA_out=""
+    local rDNA_cis_out=""
+    local rDNA_trans_out=""
+    local region=""
+    # local keep_rDNA_self=false
     local scratch=""
+    local write_cmd="cat"
     local help=$(
 cat << EOM
-Usage: create_ia_file -c COOL_FILE -o OUT_FILE [-r REGION] [-s SCRATCH_DIR]
-        
+Usage: create_ia_file -c COOL_FILE -o OUT_FILE [-m MITO_FREE_OUT_FILE]
+       [-d RDNA_OUT_FILE] [-i RDNA_CIS_OUT_FILE] [-t RDNA_TRANS_OUT_FILE]
+       [-r REGION] [-s SCRATCH_DIR]
+
 Creates a FitHiC2 interactions file from a given .cool file. The output file
 will be in bedpe format.
 
@@ -731,17 +752,68 @@ for experiments that specifically examine XII-associated cis interactions).
 
 Operations can optionally be performed in a specified scratch directory.
 
+An additional optional argument (-m or --mito-free-out-file) allows for the
+creation of a second output file that excludes interactions where columns 1
+or 3 are "Mito", thereby filtering out mitochondrial interactions, which tend
+to be noise.
+
+An additional optional argument (-d or --rDNA-out-file) enables the creation of
+a third output file that specifically retains interactions involving the rDNA
+region on chromosome XII (positions 451400 to 469200). This option filters the
+mito-free output to include only those interactions where at least one end maps
+to this specified rDNA region. This feature is useful for focusing on
+interactions originating from the rDNA locus. Note that this option requires
+the --mito-free-out-file to be specified, as it operates on the mito-free
+output.
+
+Two further optional arguments, --rDNA-trans-out-file (-t) and
+--rDNA-cis-out-file (-i), allow for more specific filtering of rDNA
+interactions. The --rDNA-trans-out-file argument creates an output file
+containing only trans interactions that originate from the rDNA region. This
+means one end of the interaction is within the rDNA region on chromosome XII,
+and the other end is on a different chromosome. This filter is particularly
+useful for homing in on genome-wide interactions originating from the rDNA
+locus.
+
+Similarly, the --rDNA-cis-out-file argument creates an output file containing
+only cis interactions that originate from the rDNA region. In this case, both
+ends of the interaction are within the specified rDNA region on chromosome XII.
+This filter is crucial for understanding the local chromatin dynamics
+originating from the rDNA locus.
+
+Note that both --rDNA-trans-out-file and --rDNA-cis-out-file require the
+--mito-free-out-file and --rDNA-out-file switches to be specified. They operate
+on the rDNA-filtered output to further segregate the interactions into trans
+and cis categories, respectively.
+
 create_ia_file() checks for required dependencies, validates input files, and
 handles errors appropriately.
 
 Options:
-  -h, --help         Display this help message
-  -c, --cool-file    Specify the .cool file
-  -o, --out-file     Specify the output file
-  -r, --region       Specify the region (optional); accepts Roman numerals
-                     I-XVI; chr:start-end; or "genome-trans", "genome_trans",
-                     or "genome" for the entire genome
-  -s, --scratch-dir  Specify a scratch directory (optional)
+  -h, --help                 Display this help message.
+  -c, --cool-file            Specify the .cool file.
+  -o, --out-file             Specify the output file.
+  -m, --mito-free-out-file   Specify the output file for interactions excluding
+                             those where columns 1 or 3 are "Mito" (optional).
+  -d, --rDNA-out-file        Specify the output file for interactions retaining
+                             only rDNA interactions. Requires the specification
+                             of --mito-free-out-file. This option filters the
+                             mito-free output to include only interactions (cis
+                             and trans) where at least one end maps to the rDNA
+                             region on chromosome XII (positions 451400 to
+                             469200).
+  -i, --rDNA-cis-out-file    Specify the output file for rDNA-originating cis
+                             interactions only. Requires --mito-free-out-file
+                             and --rDNA-out-file to be specified.
+  -t, --rDNA-trans-out-file  Specify the output file for rDNA-originating trans
+                             interactions only. Requires --mito-free-out-file
+                             and --rDNA-out-file to be specified.
+  -r, --region               Specify the region (optional); accepts Roman 
+                             numerals I-XVI; chr:start-end; "genome-trans",
+                             "genome_trans", "genome", or "XII-all" for the
+                             entire genome; or "XII-cis" for chromosome XII
+                             only.
+  -s, --scratch-dir          Specify a scratch directory (optional).
 
 Dependencies:
   cooler: Required for processing .cool files
@@ -764,14 +836,14 @@ Example #1:
 Example #2:
   create_ia_file
       -c another.cool
-      -o another_ia.txt
-      -r I
+      -o another_ia.txt.gz
+      -r "I"
       -s /path/to/scratch
 
 Example #3:
   create_ia_file
       -c and_another.cool
-      -o and_another_ia.txt
+      -o and_another_ia.txt.gz
       -r "genome-trans"
       -s /path/to/scratch
 
@@ -780,7 +852,52 @@ Example #4:
       -c other.cool
       -o other_ia.txt
       -r "XII:451000-469000"
+
+Example #5:
+  create_ia_file
+      -c yet_another.cool
+      -o yet_another_ia.txt
+      -m yet_another_ia.sans_mito.txt
+      -r "genome"
       -s /path/to/scratch
+
+Example #6:
+  create_ia_file
+      -c yet_another_other.cool
+      -o yet_another_other_ia.txt.gz
+      -m yet_another_other_ia.sans_mito.txt.gz
+      -d yet_another_other_ia.rDNA.txt.gz
+      -r "XII-all"
+
+Example #7:
+  create_ia_file
+      -c sample.cool
+      -o sample_ia.txt.gz
+      -m sample_ia.mito-free.txt.gz
+      -d sample_ia.rDNA.txt.gz
+      -i sample_ia.rDNA_cis.txt.gz
+      -r "XII-all"
+      -s /path/to/scratch
+
+Example #8:
+  create_ia_file
+      -c example.cool
+      -o example_ia.txt.gz
+      -m example_ia.mito-free.txt.gz
+      -d example_ia.rDNA.txt
+      -t example_ia.rDNA_trans.txt
+      -r "XII-all"
+      -s /path/to/scratch
+
+Example #9"
+  create_ia_file
+      -c dataset.cool
+      -o dataset_ia.txt.gz
+      -m dataset_ia.sans_mito.txt.gz
+      -d dataset_ia.rDNA.txt.gz
+      -t dataset_ia.rDNA_trans.txt.gz
+      -i dataset_ia.rDNA_cis.txt.gz
+      -r "genome"
 
 FitHiC2 interactions file example (header not in file):
   +-----+------------+-------------+--------------------------+-----------------+
@@ -790,6 +907,22 @@ FitHiC2 interactions file example (header not in file):
   |  1  |     0      |    25000    |             0            |        0        |
   | ... |    ...     |     ...     |            ...           |       ...       |
   +-----+------------+-------------+--------------------------+-----------------+
+
+From the FitHiC2 GitHub repo documentation:
+  The interactions file contains a list of mid-range contacts between the
+  fragments/windows/meta-fragments listed in the first file above. Each
+  fragment will be represented by its chromosome and midpoint coordinate. Each
+  line will have 5 fields. The first two will represent first fragment, the
+  following two will represent the second and the fifth field will correspond
+  to number of contacts between these two fragments. The fields can be
+  separated by space or tab. Only the fragment pairs with non-zero contact
+  counts are listed in this file.
+
+#TODO:
+  - Argument to retain only rDNA self-interactions
+  - Logic to exit function with error if user selects a specific region
+    -r|--region and also selects -m|--mito-free-out-file or -d|--rDNA-out-file
+    if -m or -d is not applicable to the region
 EOM
     )
 
@@ -799,6 +932,10 @@ EOM
             -h|--help) echo "${help}"; return 0 ;;
             -c|--cool-file) cool="${2}"; shift 2 ;;
             -o|--out-file) out="${2}"; shift 2 ;;
+            -m|--mito-free-out-file) mito_free_out="${2}"; shift 2 ;;
+            -d|--rDNA-out-file) rDNA_out="${2}"; shift 2 ;;
+            -i|--rDNA-cis-out-file) rDNA_cis_out="${2}"; shift 2 ;;
+            -t|--rDNA-trans-out-file) rDNA_trans_out="${2}"; shift 2 ;;
             -r|--region) 
                 region="${2}"
                 if [[ "${region}" == "XII-cis" || "${region}" == "XII_cis" ]]; then
@@ -827,6 +964,11 @@ EOM
             || "${region}" == "genome" 
         ]]; then
             echo "Note: The option '-r ${region}' is used. Interactions will be extracted for the entire genome."
+            
+            #CODEREVIEW
+            #  Once a variable is declared as local at its first occurrence, it
+            #+ remains local to that function for all subsequent assignments or
+            #+ modifications
             region_option="--join"
         else
             region_option="--join -r ${region}"
@@ -838,11 +980,13 @@ EOM
     if [[ "${out: -3}" == ".gz" ]]; then
         if ! check_requirements gzip; then return 1; fi
         local write_cmd="gzip"
-    else
-        local write_cmd="cat"
     fi
 
     local out_final="${out}"
+    local mito_free_out_final="${mito_free_out}"
+    local rDNA_out_final="${rDNA_out}"
+    local rDNA_cis_out_final="${rDNA_cis_out}"
+    local rDNA_trans_out_final="${rDNA_trans_out}"
     if [[ -n "${scratch}" ]]; then
         if [[ ! -d "${scratch}" || ! -w "${scratch}" ]]; then
             echo "Error: The scratch directory ${scratch} does not exist or is not writable."
@@ -850,12 +994,16 @@ EOM
         fi
 
         if ! cp "${cool}" "${scratch}/"; then
-            echo "Error: Failed to copy ${cool} to the scratch directory ${scratch}."
+            echo "Error: Failed to copy $(basename "${cool}") to the scratch directory ${scratch}."
             return 1
         fi
 
         local cool="${scratch}/$(basename ${cool})"
         local out="${scratch}/$(basename ${out})"
+        local mito_free_out="${scratch}/$(basename "${mito_free_out}")"
+        local rDNA_out="${scratch}/$(basename "${rDNA_out}")"
+        local rDNA_cis_out="${scratch}/$(basename "${rDNA_cis_out}")"
+        local rDNA_trans_out="${scratch}/$(basename "${rDNA_trans_out}")"
     fi
 
     #  Not actually getting the fragment midpoints; instead, getting the
@@ -876,40 +1024,259 @@ EOM
         return 1
     fi
 
+    ### NEW CODE ###
+    #  Filter out "Mito" interactions if the -m option is used
+    if [[ -n "${mito_free_out}" ]]; then
+        local mito_free_read_cmd="cat"
+        local mito_free_write_cmd="cat"
+
+        #  Check if the input file is gzipped
+        if [[ "${out: -3}" == ".gz" ]]; then
+            mito_free_read_cmd="zcat"
+        fi
+
+        #  Check if the mito-free output file should be gzipped
+        if [[ "${mito_free_out: -3}" == ".gz" ]]; then
+            mito_free_write_cmd="gzip"
+        fi
+
+        #  Apply an awk filter to exclude "Mito"-associated records; use the
+        #+ appropriate commands to read and write files, gzipped or not
+        if ! ${mito_free_read_cmd} "${out}" \
+            | awk -F '\t' '{
+                if ($1 != "Mito" && $3 != "Mito") { print $0 }
+            }' \
+            | ${mito_free_write_cmd} \
+                > "${mito_free_out}"
+        then
+            echo "Error: Failed to create mito-free interactions file."
+            return 1
+        fi
+
+        echo "Mito-free interactions file $(basename "${mito_free_out}") was created successfully."
+    fi
+
+    if [[ -n "${rDNA_out}" ]]; then
+        local rDNA_read_cmd="cat"
+        local rDNA_write_cmd="cat"
+        
+        #  Exit with code 1 if --rDNA-out-file is called without
+        #+ --mito-free-out-file
+        if [[ -z "${mito_free_out}" ]]; then
+            echo "Error: --rDNA-out-file requires --mito-free-out-file to be specified."
+            return 1
+        fi
+
+        #  Check if the input file is gzipped
+        if [[ "${mito_free_out: -3}" == ".gz" ]]; then
+            rDNA_read_cmd="zcat"
+        fi
+
+        #  Check if the mito-free output file should be gzipped
+        if [[ "${rDNA_out: -3}" == ".gz" ]]; then
+            rDNA_write_cmd="gzip"
+        fi
+
+        #  Apply the awk filter to create the rDNA interactions file; use the
+        #+ appropriate commands to read and write files, gzipped or not
+        if ! ${rDNA_read_cmd} "${mito_free_out}" \
+            | awk -F'\t' '{
+                if ((($1 == "XII" && $2 >= 451400 && $2 <= 469200) && ($3 != "XII" || ($3 == "XII" && ($4 < 451400 || $4 > 469200)))) ||
+                    (($3 == "XII" && $4 >= 451400 && $4 <= 469200) && ($1 != "XII" || ($1 == "XII" && ($2 < 451400 || $2 > 469200)))))
+                    print
+            }' \
+            | ${rDNA_write_cmd} \
+                > "${rDNA_out}"
+        then
+            echo "Error: Failed to create rDNA interactions file."
+            return 1
+        fi
+
+        echo "rDNA interactions file $(basename "${rDNA_out}") was created successfully."
+    fi
+    ### NEW CODE ###
+
+    ### NEWER CODE ###
+    if [[ -n "${rDNA_cis_out}" ]]; then
+        local rDNA_cis_read_cmd="cat"
+        local rDNA_cis_write_cmd="cat"
+        
+        #  Check for rDNA cis outfile
+        if [[ -z "${mito_free_out}" ]] || [[ -z "${rDNA_out}" ]]; then
+            echo "Error: --rDNA-cis-out-file requires both --mito-free-out-file and --rDNA-out-file to be specified."
+            return 1
+        fi
+
+        if [[ "${rDNA_out: -3}" == ".gz" ]]; then
+            rDNA_cis_read_cmd="zcat"
+        fi
+
+        if [[ "${rDNA_cis_out: -3}" == ".gz" ]]; then
+            rDNA_cis_write_cmd="gzip"
+        fi
+
+        #  Apply awk filter for rDNA-originating cis interactions
+        if ! ${rDNA_cis_read_cmd} "${rDNA_out}" \
+            | awk -F '\t' '{ if ($1 == "XII" && $3 == "XII") print }' \
+            | ${rDNA_cis_write_cmd} \
+                > "${rDNA_cis_out}"
+        then
+            echo "Error: Failed to create rDNA cis interactions file."
+            return 1
+        fi
+
+        echo "rDNA cis interactions file $(basename "${rDNA_cis_out}") was created successfully."
+    fi
+    
+    if [[ -n "${rDNA_trans_out}" ]]; then
+        local rDNA_trans_read_cmd="cat"
+        local rDNA_trans_write_cmd="cat"
+        
+        #  Check for rDNA trans outfile
+        if [[ -z "${mito_free_out}" ]] || [[ -z "${rDNA_out}" ]]; then
+            echo "Error: --rDNA-trans-out-file requires both --mito-free-out-file and --rDNA-out-file to be specified."
+            return 1
+        fi
+
+        if [[ "${rDNA_out: -3}" == ".gz" ]]; then
+            rDNA_trans_read_cmd="zcat"
+        fi
+
+        if [[ "${rDNA_trans_out: -3}" == ".gz" ]]; then
+            rDNA_trans_write_cmd="gzip"
+        fi
+
+        # Apply awk filter for rDNA-originating trans interactions
+        if ! ${rDNA_trans_read_cmd} "${rDNA_out}" \
+            | awk -F'\t' '{
+                if ((($1 == "XII" && $2 >= 451400 && $2 <= 469200) && $3 != "XII") ||
+                    (($3 == "XII" && $4 >= 451400 && $4 <= 469200) && $1 != "XII"))
+                    print
+            }' \
+            | ${rDNA_trans_write_cmd} \
+                > "${rDNA_trans_out}"
+        then
+            echo "Error: Failed to create rDNA trans interactions file."
+            return 1
+        fi
+
+        echo "rDNA trans interactions file $(basename "${rDNA_trans_out}") was created successfully."
+    fi
+    ### NEWER CODE ###
+
+    #  If both the -m and -f options are used, retain only those interactions
+    #+ that originate from the rDNA locus 
     if [[ -n "${scratch}" ]]; then
         #  Copy outfile from scratch to user-specified storage directory
         if ! cp "${out}" "${out_final}"; then
-            echo "Error: Failed to copy the interactions file to the output directory."
+            echo "Error: Failed to copy the interactions file from scratch to the output directory."
             return 1
         fi
+
+        ### NEW CODE ###
+        #  If it was created, then copy the mito-free outfile to the user-
+        #+ specified storage directory
+        if [[ -n "${mito_free_out}" ]]; then
+            if ! cp "${mito_free_out}" "${mito_free_out_final}"; then
+                echo "Error: Failed to copy the mito-free interactions file from scratch to the output directory."
+                return 1
+            fi
+        fi
+
+        #  If it was created, then copy the rDNA outfile to the user-specified
+        #+ storage directory
+        if [[ -n "${rDNA_out}" ]]; then
+            if ! cp "${rDNA_out}" "${rDNA_out_final}"; then
+                echo "Error: Failed to copy the rDNA interactions file from scratch to the output directory."
+                return 1
+            fi
+        fi
+        ### NEW CODE ###
+
+        ### NEWER CODE ###
+        if [[ -n "${rDNA_cis_out}" ]]; then
+            if ! cp "${rDNA_cis_out}" "${rDNA_cis_out_final}"; then
+                echo "Error: Failed to copy the cis rDNA interactions file from scratch to the output directory."
+                return 1
+            fi
+        fi
+
+        if [[ -n "${rDNA_trans_out}" ]]; then
+            if ! cp "${rDNA_trans_out}" "${rDNA_trans_out_final}"; then
+                echo "Error: Failed to copy the trans rDNA interactions file from scratch to the output directory."
+                return 1
+            fi
+        fi
+        ### NEWER CODE ###
 
         #  Remove specific .cool from the scratch directory
         if [[ -e "${cool}" ]]; then
             if ! rm "${cool}"; then
-                echo "Warning: Failed to clean up the cool file ${cool} in the scratch directory."
-                echo "         Please remove the file manually."
+                echo "Warning: Failed to clean up the cool file $(basename "${cool}") in the scratch directory. Please remove the file manually."
             fi
         else
-            echo "Warning: The cool file ${cool} does not exist in the scratch directory. No cleanup needed."
+            echo "Warning: The cool file $(basename "${cool}")"
+            echo "         does not exist in the scratch directory. No cleanup needed."
         fi
 
         #  Remove specific .bedpe outfile from the scratch directory
         if [[ -e "${out}" ]]; then
             if ! rm "${out}"; then
-                echo "Warning: Failed to clean up the interactions file ${out} in the scratch directory."
-                echo "         Please remove the file manually."
+                echo "Warning: Failed to clean up the interactions file $(basename "${out}") in the scratch directory. Please remove the file manually."
             fi
         else
-            echo "Warning: The interactions file ${out} does not exist in the scratch directory. No cleanup needed."
+            echo "Warning: The interactions file $(basename "${out}") does not exist in the scratch directory. No cleanup needed."
         fi
     fi
 
-    if [[ $? -eq 0 ]]; then
-        echo "Interactions file ${out_final} was created successfully."
-        return 0
-    else
-        echo "Error: Failed to create interactions file."
-        return 1
+    # if [[ $? -eq 0 ]]; then
+    #     echo "Interactions file ${out_final} was created successfully."
+    #     return 0
+    # else
+    #     echo "Error: Failed to create interactions file."
+    #     return 1
+    # fi
+
+    #  If it exists, then remove the mito-free outfile from the scratch
+    #+ directory
+    if [[ -n "${mito_free_out}" && -e "${mito_free_out_final}" ]]; then
+        if ! rm "${mito_free_out}"; then
+            echo "Warning: Failed to clean up the mito-free interactions file $(basename "${mito_free_out}") in the scratch directory. Please remove the file manually."
+        fi
+    fi
+
+    # if [[ $? -eq 0 ]]; then
+    #     echo "Interactions file ${mito_free_out} was created successfully."
+    #     return 0
+    # else
+    #     echo "Error: Failed to create mito-free interactions file."
+    #     return 1
+    # fi
+
+    #CODEREVIEW
+    #  The final checks for the exit status (if [[ $? -eq 0 ]]; then) after the
+    #+ removal of files from the scratch directory might be redundant or
+    #+ misplaced. The $? variable captures the exit status of the last command
+    #+ executed, which in this case would be rm commands for cleanup. This
+    #+ might not reflect the overall success of the function. Consider revising
+    #+ this to focus on the success of the main file creation processes.
+
+    if [[ -n "${rDNA_out}" && -e "${rDNA_out_final}" ]]; then
+        if ! rm "${rDNA_out}"; then
+            echo "Warning: Failed to clean up the rDNA interactions file $(basename "${rDNA_out}") in the scratch directory. Please remove the file manually."
+        fi
+    fi
+
+    if [[ -n "${rDNA_cis_out}" && -e "${rDNA_cis_out_final}" ]]; then
+        if ! rm "${rDNA_cis_out}"; then
+            echo "Warning: Failed to clean up the cis rDNA interactions file $(basename "${rDNA_cis_out}") in the scratch directory. Please remove the file manually."
+        fi
+    fi
+
+    if [[ -n "${rDNA_trans_out}" && -e "${rDNA_trans_out_final}" ]]; then
+        if ! rm "${rDNA_trans_out}"; then
+            echo "Warning: Failed to clean up the trans rDNA interactions file $(basename "${rDNA_trans_out}") in the scratch directory. Please remove the file manually."
+        fi
     fi
 }
 
@@ -957,6 +1324,16 @@ FitHiC2 fragment file example (header not in file):
   |  1   |    15000     |  1   |    55000     |      12      |
   | ...  |     ...      | ...  |     ...      |      ...     |
   +------+--------------+------+--------------+--------------+
+
+From the FitHiC2 GitHub repo documentation:
+  The -f argument is used to pass in a full path to what we deem a 'fragments
+  file,' Each line will have 5 entries. The second and fifth fields can be any
+  integer as they are not needed in most cases. The first field is the
+  chromosome name or number, the third field is the coordinate of the midpoint
+  of the fragment on that chromosome, the fourth field is the total number of
+  observed mid-range reads (contact counts) that involve the specified
+  fragment. The fields can be separated by space or tab. All possible fragments
+  need to be listed in this file.
 EOM
     )
 
@@ -1176,7 +1553,7 @@ Dependencies:
 Example:
   filter_significances_file
       -i some.significances.txt.gz
-      -o some.significances.filtered.txt.gz
+      -o some.significances.filt.txt.gz
       -q 0.05
 EOM
     )
@@ -1247,23 +1624,23 @@ Usage: create_bedpe_file -i INPUT_FILE -o OUTPUT_FILE -r RESOLUTION
 Creates a bedpe file with color annotations based on the significance values.
 
 Options:
-  -h, --help                Display this help message
-  -i, --input-file          Specify the input file
-  -o, --output-file         Specify the output bedpe file
-  -r, --resolution          Specify the resolution
-  -c1, --color-1            Specify the first RGB color (default: 255,0,0 (red))
-  -c2, --color-2            Specify the second RGB color (default: 255,255,0 (yellow))
-  -c3, --color-3            Specify the third RGB color (default: 0,255,0 (green))
-  -c4, --color-4            Specify the fourth RGB color (default: 0,255,255 (cyan))
-  -c5, --color-5            Specify the fifth RGB color (default: 0,0,255 (blue))
-  -t1, --threshold-1        Specify the first -log10(q) threshold (default: 5; below t1 = c1; above t1 = c2)
-  -t2, --threshold-2        Specify the second -log10(q) threshold (default: 10; above t2 = c3)
-  -t3, --threshold-3        Specify the third -log10(q) threshold (default: 50; above t3 = c4)
-  -t4, --threshold-4        Specify the fourth -log10(q) threshold (default: 100; above t4 = c5)
-  -n, --in-region           Specify whether to perform in-region check (default: yes)
-  -c, --chromosome          Specify the chromosome for in-region check (default: XII)
-  -s, --start               Specify the start position for in-region check (default: 435000)
-  -e, --end                 Specify the end position for in-region check (default: 500000)
+  -h, --help          Display this help message
+  -i, --input-file    Specify the input file
+  -o, --output-file   Specify the output bedpe file
+  -r, --resolution    Specify the resolution
+  -c1, --color-1      Specify the first RGB color (default: 255,0,0 (red))
+  -c2, --color-2      Specify the second RGB color (default: 255,255,0 (yellow))
+  -c3, --color-3      Specify the third RGB color (default: 0,255,0 (green))
+  -c4, --color-4      Specify the fourth RGB color (default: 0,255,255 (cyan))
+  -c5, --color-5      Specify the fifth RGB color (default: 0,0,255 (blue))
+  -t1, --threshold-1  Specify the first -log10(q) threshold (default: 5; below t1 = c1; above t1 = c2)
+  -t2, --threshold-2  Specify the second -log10(q) threshold (default: 10; above t2 = c3)
+  -t3, --threshold-3  Specify the third -log10(q) threshold (default: 50; above t3 = c4)
+  -t4, --threshold-4  Specify the fourth -log10(q) threshold (default: 100; above t4 = c5)
+  -n, --in-region     Specify whether to perform in-region check (default: yes)
+  -c, --chromosome    Specify the chromosome for in-region check (default: XII)
+  -s, --start         Specify the start position for in-region check (default: 435000)
+  -e, --end           Specify the end position for in-region check (default: 500000)
 
 Dependencies:
   gzip: Required for processing gzipped in- and outfiles
@@ -1541,22 +1918,36 @@ EOM
 #     echo "All tasks completed successfully."
 #     return 0
 # }
+```
+</details>
+<br />
 
+<a id="configure-work-environment-directories-and-variables"></a>
+### Configure work environment, directories, and variables
+<a id="code-1"></a>
+#### Code
+<details>
+<summary><i>Code: Configure work environment, directories, and variables</i></summary>
 
-#  Configure work environment, directories, and variables =====================
+```bash
+#!/bin/bash
+
 #  Main code ------------------------------------------------------------------
 #  Populate associative arrays ----------------------------
 unset A_dirs A_prefix
 typeset -A A_dirs A_prefix
 
-A_dirs["11_cooler_genome_KR-filt-0.4"]="13_FitHiC2_genome_KR-filt-0.4"
-A_dirs["11_cooler_genome_KR-filt-0.4_whole-matrix"]="13_FitHiC2_genome_KR-filt-0.4_whole-matrix"
-A_dirs["11_cooler_XII_KR-filt-0.4"]="13_FitHiC2_XII_KR-filt-0.4"
+A_dirs=(
+    ["11_cooler_genome_KR-filt-0.4"]="13_FitHiC2_genome_KR-filt-0.4"
+    ["11_cooler_genome_KR-filt-0.4_whole-matrix"]="13_FitHiC2_genome_KR-filt-0.4_whole-matrix"
+    # ["11_cooler_XII_KR-filt-0.4"]="13_FitHiC2_XII_KR-filt-0.4"
+)
 
-A_prefix["MC-2020_30C-a15_WT_repM"]="G1"
-A_prefix["MC-2019_Q_WT_repM"]="Q"
-A_prefix["MC-2020_nz_WT_repM"]="G2"
-
+A_prefix=(
+    ["MC-2020_30C-a15_WT_repM"]="G1"
+    ["MC-2019_Q_WT_repM"]="Q"
+    ["MC-2020_nz_WT_repM"]="G2"
+)
 
 #  Check associative arrays
 check_array=true
@@ -1583,12 +1974,16 @@ check_array=true
 
 
 #  Initialize other configurations ------------------------
-unset resolutions && typeset -a resolutions=(800 1600 3200 5000 6400)
-unset regions && typeset -a regions=("XII-cis" "XII-all" "genome-trans")
+# unset resolutions && typeset -a resolutions=(800 1600 3200 5000 6400)
+unset resolutions && typeset -a resolutions=(1600)
+
+# unset regions && typeset -a regions=("XII-cis" "XII-all" "genome-trans")
+unset regions && typeset -a regions=("XII-all")
 
 scratch="/fh/scratch/delete30/tsukiyama_t"
 HiCKRy="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils"
 
+#NOTE This is test code
 iter=0
 for dir_in in "${!A_dirs[@]}"; do
     dir_out="${A_dirs[${dir_in}]}"  # echo "${dir_out}"
@@ -1659,9 +2054,21 @@ for dir_in in "${!A_dirs[@]}"; do
         done
     done
 done
+```
+</details>
+<br />
 
+<a id="establish-and-test-workflow"></a>
+### Establish and test workflow
+<a id="code-2"></a>
+#### Code
+<details>
+<summary><i>Code: Establish and test workflow</i></summary>
 
-#  Execute main tasks =========================================================
+```bash
+#!/bin/bash
+
+#  Execute main (test) tasks ==================================================
 # #  Start interactive job
 # grabnode  # 1, 20, 1, N
 
@@ -1672,50 +2079,100 @@ change_dir \
 #  Source initial work environment that allows access to cooler
 activate_env pairtools_env
 
-#  Set up test parameters
+#  Set up test parameters (#TODO Use the chunk to submit jobs to the scheduler)
 set_up_test_parameters=true
-check_variables=true
+check_variables=false
+check_array=false
+debug=false
 if ${set_up_test_parameters}; then
-    unset A_dirs A_prefix
+    unset A_dirs a_dirs A_prefix a_prefix
     typeset -A A_dirs A_prefix
-    # A_dirs["11_cooler_genome_KR-filt-0.4_whole-matrix"]="13_FitHiC2_genome_KR-filt-0.4_whole-matrix"
-    A_dirs["11_cooler_XII_KR-filt-0.4"]="13_FitHiC2_XII_KR-filt-0.4"
+    typeset -a a_dirs a_prefix
     
-    # A_prefix["MC-2019_Q_WT_repM"]="Q"
-    # A_prefix["MC-2020_30C-a15_WT_repM"]="G1"
-    A_prefix["MC-2020_nz_WT_repM"]="G2"
+    a_dirs=(
+        "11_cooler_genome_KR-filt-0.4_whole-matrix"
+        # "11_cooler_XII_KR-filt-0.4"
+    )
+
+    A_dirs=(
+        ["11_cooler_genome_KR-filt-0.4_whole-matrix"]="13_FitHiC2_genome_KR-filt-0.4_whole-matrix"
+        # ["11_cooler_XII_KR-filt-0.4"]="13_FitHiC2_XII_KR-filt-0.4"
+    )
+
+    a_prefix=(
+        "MC-2019_Q_WT_repM"
+        "MC-2020_30C-a15_WT_repM"
+        "MC-2020_nz_WT_repM"
+    )
+
+    A_prefix=(
+        ["MC-2019_Q_WT_repM"]="Q"
+        ["MC-2020_30C-a15_WT_repM"]="G1"
+        ["MC-2020_nz_WT_repM"]="G2"
+    )
+
+    if ${check_array}; then
+        for i in "${a_dirs[@]}"; do
+              key="${i}"
+            value="${A_dirs[${key}]}"
+
+            echo """
+              key  ${key}
+            value  ${value}
+            """
+        done
+    fi
+
+    if ${check_array}; then
+        for i in "${a_prefix[@]}"; do
+              key="${i}"
+            value="${A_prefix[${key}]}"
+
+            echo """
+              key  ${key}
+            value  ${value}
+            """
+        done
+    fi
 
     # unset resolutions && typeset -a resolutions=(5000)
     unset resolutions && typeset -a resolutions=(1600)
 
     # unset regions && typeset -a regions=("genome-trans")
-    unset regions && typeset -a regions=("XII-cis")
+    # unset regions && typeset -a regions=("XII-cis")
+    unset regions && typeset -a regions=("XII-all")
 
-    scratch="/fh/scratch/delete30/tsukiyama_t"
+    scratch="/fh/scratch/delete30/tsukiyama_t"                          # echo "${scratch}"
     HiCKRy="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils"
-    HiCKRy_pct=0.05
+    HiCKRy_pct=0.05                                                     # echo "${HiCKRy_pct}"
     
-    c1="255,0,0"
-    c2="255,255,0"
-    c3="0,255,0"
-    c4="0,255,255"
-    c5="0,0,255"
-    t1=5
-    t2=10
-    t3=50
-    t4=100
+    c1="255,0,0"                                                        # echo "${c1}"
+    c2="255,255,0"                                                      # echo "${c2}"
+    c3="0,255,0"                                                        # echo "${c3}"
+    c4="0,255,255"                                                      # echo "${c4}"
+    c5="0,0,255"                                                        # echo "${c5}"
+    t1=5                                                                # echo "${t1}"
+    t2=10                                                               # echo "${t2}"
+    t3=50                                                               # echo "${t3}"
+    t4=100                                                              # echo "${t4}"
     
     iter=0
-    for dir_in in "${!A_dirs[@]}"; do
-        dir_out="${A_dirs[${dir_in}]}"  # echo "${dir_out}"
+    for dir_in in "${a_dirs[@]}"; do
+        # dir_in=${a_dirs[0]}                                           # echo "${dir_in}"
+        dir_out="${A_dirs[${dir_in}]}"                                  # echo "${dir_out}"
 
-        debug=false
-        [[ ${debug} == true ]] && echo "dir_out=${dir_out}"
+        [[ ${debug} == true ]] \
+            && echo "dir_out=${dir_out}"
 
-        for phase in "${!A_prefix[@]}"; do
+        for phase in "${a_prefix[@]}"; do
+            # phase="${a_prefix[0]}"                                    # echo "${phase}"
+            prefix="${A_prefix[${phase}]}"                              # echo "${prefix}"
+
+            [[ ${debug} == true ]] \
+                && echo -e "key\t${phase}\nvalue\t${prefix}\n"
+
             for res in "${resolutions[@]}"; do
-                # res="${resolutions[0]}"  # echo "${res}"
-                (( iter++ ))
+                # res="${resolutions[0]}"                               # echo "${res}"
 
                 file_in=$(
                     find \
@@ -1723,42 +2180,29 @@ if ${set_up_test_parameters}; then
                         -maxdepth 1 \
                         -type f \
                         -name "${phase}*.${res}.*cool"
-                    )
-                # echo "${file_in}"
+                    )                                                   # echo "${file_in}"
 
-                if [[ ! -z "${file_in}" ]]; then
-                    for region in "${regions[@]}"; do
-                        if [[ "${region}" == "XII-cis" ]]; then
-                            type="intraOnly"
-                        elif [[ "${region}" == "XII-all" ]]; then
-                            type="All"
-                        elif [[ "${region}" == "genome-trans" ]]; then
-                            type="interOnly"
-                            # type="All"
-                        fi
-                    done
-
-                    for key in "${!A_prefix[@]}"; do
-                        prefix="${A_prefix[${key}]}"
-                        
-                        debug=false
-                        [[ ${debug} == true ]] \
-                            && echo -e "key\t${key}\nvalue\t${prefix}\n"
-
-                        run_conditional_statement=true
-                        if ${run_conditional_statement}; then
-                            if [[ "${file_in}" =~ "${key}" ]]; then
-                                file_out="$(
-                                    echo "${file_in%.cool}" \
-                                        | sed -E -e 's:11_cooler:13_FitHiC2:g' \
-                                                 -e 's:.standard-rDNA-complete.mapped::g' \
-                                                 -e 's:downsample:ds:g' \
-                                                 -e "s:${key}:${prefix}:g"
-                                ).${region}"
-                                # echo "${file_out}"
-                            fi
-                        fi
-                    done
+                for region in "${regions[@]}"; do
+                    # region="${regions[0]}"                            # echo "${region}"
+                    if [[ "${region}" == "XII-cis" ]]; then
+                        type="intraOnly"
+                    elif [[ "${region}" == "XII-all" ]]; then
+                        type="All"
+                    elif [[ "${region}" == "genome-trans" ]]; then
+                        type="interOnly"
+                    fi                                                  # echo "${type}"
+                
+                    if [[ "${file_in}" =~ "${phase}" ]]; then
+                        file_out="$(
+                            echo "${file_in%.cool}" \
+                                | sed -E -e 's:11_cooler:13_FitHiC2:g' \
+                                         -e 's:.standard-rDNA-complete.mapped::g' \
+                                         -e 's:downsample:ds:g' \
+                                         -e "s:${phase}:${prefix}:g"
+                        ).${region}"                                    # echo "${file_out}"
+                    fi
+                    
+                    (( iter++ ))
 
                     if ${check_variables}; then
                         echo """
@@ -1777,8 +2221,9 @@ if ${set_up_test_parameters}; then
                         HiCKRy_pct ........................ ${HiCKRy_pct}
                         """
                     fi
-                    sleep 0.1
-                fi
+                done
+                
+                sleep 0.1
             done
         done
     done
@@ -1798,30 +2243,31 @@ if ${make_outfile_directories}; then
 fi
 
 
-#  Run workflow -------------------------------------------
-run_env_change_1=true
+#  Test workflow ------------------------------------------
+run_workflow=true
 
-check_command_1=true
-run_command_1=true
+run_env_change_1=false
 
-check_command_2=true
-run_command_2=true
+check_command_1=false
+run_command_1=false
+
+check_command_2=false
+run_command_2=false
 
 run_env_change_2=true
 
-check_command_3=true
-run_command_3=true
+check_command_3=false
+run_command_3=false
 
 check_command_4=true
 run_command_4=true
 
-check_command_5=true
-run_command_5=true
+check_command_5=false
+run_command_5=false
 
-check_command_6=true
-run_command_6=true
+check_command_6=false
+run_command_6=false
 
-run_workflow=true
 if ${run_workflow}; then
     #  Step #1. Create FitHiC2 interactions text file
     [[ ${run_env_change_1} == true ]] \
@@ -1835,6 +2281,8 @@ if ${run_workflow}; then
         create_ia_file \\
             -c "$(pwd)/${file_in}" \\
             -o "$(pwd)/${file_out}.ia.txt.gz" \\
+            -m "$(pwd)/${file_out}.mito-free.ia.txt.gz" \\
+            -d "$(pwd)/${file_out}.rDNA.ia.txt.gz" \\
             -r "${region}" \\
             -s "${scratch}"
         """
@@ -1844,10 +2292,11 @@ if ${run_workflow}; then
         create_ia_file \
             -c "$(pwd)/${file_in}" \
             -o "$(pwd)/${file_out}.ia.txt.gz" \
+            -m "$(pwd)/${file_out}.mito-free.ia.txt.gz" \
+            -d "$(pwd)/${file_out}.rDNA.ia.txt.gz" \
             -r "${region}" \
             -s "${scratch}"
     fi
-
 
     #  Step #2. Create FitHiC2 fragments text file
     if ${check_command_2}; then
@@ -1855,16 +2304,26 @@ if ${run_workflow}; then
         #  Step #2. Create FitHiC2 fragments text file
 
         create_frag_file \\
-            -i "$(pwd)/${file_out}.ia.txt.gz" \\
-            -o "$(pwd)/${file_out}.frag.txt.gz" \\
+            -i "$(pwd)/${file_out}.mito-free.ia.txt.gz" \\
+            -o "$(pwd)/${file_out}.mito-free.frag.txt.gz" \\
+            -s "${scratch}"
+
+        create_frag_file \\
+            -i "$(pwd)/${file_out}.rDNA.ia.txt.gz" \\
+            -o "$(pwd)/${file_out}.rDNA.frag.txt.gz" \\
             -s "${scratch}"
         """
     fi
 
     if ${run_command_2}; then
         create_frag_file \
-            -i "$(pwd)/${file_out}.ia.txt.gz" \
-            -o "$(pwd)/${file_out}.frag.txt.gz" \
+            -i "$(pwd)/${file_out}.mito-free.ia.txt.gz" \
+            -o "$(pwd)/${file_out}.mito-free.frag.txt.gz" \
+            -s "${scratch}"
+
+        create_frag_file \
+            -i "$(pwd)/${file_out}.rDNA.ia.txt.gz" \
+            -o "$(pwd)/${file_out}.rDNA.frag.txt.gz" \
             -s "${scratch}"
     fi
 
@@ -1881,9 +2340,16 @@ if ${run_workflow}; then
         generate_bias_vector \\
             -k "${HiCKRy}" \\
             -p "${HiCKRy_pct}" \\
-            -i "$(pwd)/${file_out}.ia.txt.gz" \\
-            -f "$(pwd)/${file_out}.frag.txt.gz" \\
-            -o "$(pwd)/${file_out}.bias.txt.gz"
+            -i "$(pwd)/${file_out}.mito-free.ia.txt.gz" \\
+            -f "$(pwd)/${file_out}.mito-free.frag.txt.gz" \\
+            -o "$(pwd)/${file_out}.mito-free.bias.txt.gz"
+
+        generate_bias_vector \\
+            -k "${HiCKRy}" \\
+            -p "${HiCKRy_pct}" \\
+            -i "$(pwd)/${file_out}.rDNA.ia.txt.gz" \\
+            -f "$(pwd)/${file_out}.rDNA.frag.txt.gz" \\
+            -o "$(pwd)/${file_out}.rDNA.bias.txt.gz"
         """
     fi
 
@@ -1891,9 +2357,16 @@ if ${run_workflow}; then
         generate_bias_vector \
             -k "${HiCKRy}" \
             -p "${HiCKRy_pct}" \
-            -i "$(pwd)/${file_out}.ia.txt.gz" \
-            -f "$(pwd)/${file_out}.frag.txt.gz" \
-            -o "$(pwd)/${file_out}.bias.txt.gz"
+            -i "$(pwd)/${file_out}.mito-free.ia.txt.gz" \
+            -f "$(pwd)/${file_out}.mito-free.frag.txt.gz" \
+            -o "$(pwd)/${file_out}.mito-free.bias.txt.gz"
+
+        generate_bias_vector \
+            -k "${HiCKRy}" \
+            -p "${HiCKRy_pct}" \
+            -i "$(pwd)/${file_out}.rDNA.ia.txt.gz" \
+            -f "$(pwd)/${file_out}.rDNA.frag.txt.gz" \
+            -o "$(pwd)/${file_out}.rDNA.bias.txt.gz"
     fi
 
 
@@ -1903,30 +2376,58 @@ if ${run_workflow}; then
         #  Step #4. Run FitHiC2
 
         fithic \\
-            --interactions "$(pwd)/${file_out}.ia.txt.gz" \\
-            --fragments "$(pwd)/${file_out}.frag.txt.gz" \\
+            --interactions "$(pwd)/${file_out}.mito-free.ia.txt.gz" \\
+            --fragments "$(pwd)/${file_out}.mito-free.frag.txt.gz" \\
             --outdir "$(pwd)/$(dirname "${file_out}")" \\
             --resolution "${res}" \\
-            --biases "$(pwd)/${file_out}.bias.txt.gz" \\
+            --biases "$(pwd)/${file_out}.mito-free.bias.txt.gz" \\
             --contactType "${type}" \\
             --mappabilityThres "${map:-1}" \\
-            --lib "$(basename "${file_out}")" \\
+            --biasLowerBound "${lower:-0.01}" \\
+            --biasUpperBound "${higher:-100}" \\
+            --lib "$(basename "${file_out}").mito-free" \\
+            --visual
+
+        fithic \\
+            --interactions "$(pwd)/${file_out}.rDNA.ia.txt.gz" \\
+            --fragments "$(pwd)/${file_out}.rDNA.frag.txt.gz" \\
+            --outdir "$(pwd)/$(dirname "${file_out}")" \\
+            --resolution "${res}" \\
+            --biases "$(pwd)/${file_out}.mito-free.bias.txt.gz" \\
+            --contactType "${type}" \\
+            --mappabilityThres "${map:-1}" \\
+            --biasLowerBound "${lower:-0.01}" \\
+            --biasUpperBound "${higher:-100}" \\
+            --lib "$(basename "${file_out}").rDNA" \\
             --visual
         """
     fi
 
     if ${run_command_4}; then
         fithic \
-            --interactions "$(pwd)/${file_out}.ia.txt.gz" \
-            --fragments "$(pwd)/${file_out}.frag.txt.gz" \
+            --interactions "$(pwd)/${file_out}.mito-free.ia.txt.gz" \
+            --fragments "$(pwd)/${file_out}.mito-free.frag.txt.gz" \
             --outdir "$(pwd)/$(dirname "${file_out}")" \
             --resolution "${res}" \
-            --biases "$(pwd)/${file_out}.bias.txt.gz" \
+            --biases "$(pwd)/${file_out}.mito-free.bias.txt.gz" \
             --contactType "${type}" \
             --mappabilityThres "${map:-1}" \
             --biasLowerBound "${lower:-0.01}" \
             --biasUpperBound "${higher:-100}" \
-            --lib "$(basename "${file_out}")" \
+            --lib "$(basename "${file_out}").mito-free" \
+            --visual
+
+        fithic \
+            --interactions "$(pwd)/${file_out}.rDNA.ia.txt.gz" \
+            --fragments "$(pwd)/${file_out}.rDNA.frag.txt.gz" \
+            --outdir "$(pwd)/$(dirname "${file_out}")" \
+            --resolution "${res}" \
+            --biases "$(pwd)/${file_out}.mito-free.bias.txt.gz" \
+            --contactType "${type}" \
+            --mappabilityThres "${map:-1}" \
+            --biasLowerBound "${lower:-0.01}" \
+            --biasUpperBound "${higher:-100}" \
+            --lib "$(basename "${file_out}").rDNA" \
             --visual
     fi
 
@@ -2008,11 +2509,1538 @@ fi
 ```
 </details>
 <br />
+
+<a id="printed-2"></a>
+#### Printed
+<a id="workflow-test-2023-1026-mito-free-and-rdna-interactions-etc"></a>
+##### Workflow test 2023-1026: mito-free and rDNA interactions, etc.
+<details>
+<summary><i>Printed: Workflow test 2023-1026: mito-free and rDNA (cis and trans) interactions, etc.</i></summary>
+
+```txt
+#  Step #1. Create FitHiC2 interactions text file
+
+create_ia_file \
+    -c /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/11_cooler_genome_KR-filt-0.4_whole-matrix/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool \
+    -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.ia.txt.gz \
+    -m /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.ia.txt.gz \
+    -d /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.ia.txt.gz \
+    -r XII-all \
+    -s /fh/scratch/delete30/tsukiyama_t
+
+Note: The option '-r genome-trans' is used. Interactions will be extracted for the entire genome.
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/11_cooler_genome_KR-filt-0.4_whole-matrix/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool' -> '/fh/scratch/delete30/tsukiyama_t/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool'
+Mito-free interactions file Q.1600.ds-to-Q.XII-all.mito-free.ia.txt.gz was created successfully.
+rDNA interactions file Q.1600.ds-to-Q.XII-all.rDNA.ia.txt.gz was created successfully.
+'/fh/scratch/delete30/tsukiyama_t/Q.1600.ds-to-Q.XII-all.ia.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.ia.txt.gz'
+'/fh/scratch/delete30/tsukiyama_t/Q.1600.ds-to-Q.XII-all.mito-free.ia.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.ia.txt.gz'
+'/fh/scratch/delete30/tsukiyama_t/Q.1600.ds-to-Q.XII-all.rDNA.ia.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.ia.txt.gz'
+
+
+#  Step #2. Create FitHiC2 fragments text file
+
+create_frag_file \
+    -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.ia.txt.gz \
+    -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.frag.txt.gz \
+    -s /fh/scratch/delete30/tsukiyama_t
+
+create_frag_file \
+    -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.ia.txt.gz \
+    -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.frag.txt.gz \
+    -s /fh/scratch/delete30/tsukiyama_t
+
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.ia.txt.gz' -> '/fh/scratch/delete30/tsukiyama_t/Q.1600.ds-to-Q.XII-all.mito-free.ia.txt.gz'
+'/fh/scratch/delete30/tsukiyama_t/Q.1600.ds-to-Q.XII-all.mito-free.frag.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.frag.txt.gz'
+Fragment file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.frag.txt.gz was created successfully.
+
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.ia.txt.gz' -> '/fh/scratch/delete30/tsukiyama_t/Q.1600.ds-to-Q.XII-all.rDNA.ia.txt.gz'
+'/fh/scratch/delete30/tsukiyama_t/Q.1600.ds-to-Q.XII-all.rDNA.frag.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.frag.txt.gz'
+Fragment file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.frag.txt.gz was created successfully.
+
+
+#  Step #3. Generate bias vector needed to run FitHiC2
+
+generate_bias_vector \
+    -k /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils \
+    -p 0.05 \
+    -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.ia.txt.gz \
+    -f /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.frag.txt.gz \
+    -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.bias.txt.gz
+
+generate_bias_vector \
+    -k /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils \
+    -p 0.05 \
+    -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.ia.txt.gz \
+    -f /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.frag.txt.gz \
+    -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.bias.txt.gz
+
+Python 3 is installed and accessible.
+Creating sparse matrix...
+Sparse matrix creation took 11.376466751098633 seconds
+Removing 0.05 percent of most sparse bins
+... corresponds to 355 total rows
+... corresponds to all bins with less than or equal to 5314.0 total interactions
+Sparse rows removed
+Initial matrix size: 7108 rows and 7108 columns
+New matrix size: 6752 rows and 6752 columns
+Normalizing with KR Algorithm
+Bias vector file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.bias.txt.gz was created successfully.
+
+Python 3 is installed and accessible.
+Creating sparse matrix...
+Sparse matrix creation took 0.11100339889526367 seconds
+Removing 0.05 percent of most sparse bins
+... corresponds to 355 total rows
+... corresponds to all bins with less than or equal to 79.0 total interactions
+Sparse rows removed
+Initial matrix size: 7108 rows and 7108 columns
+New matrix size: 6721 rows and 6721 columns
+Normalizing with KR Algorithm
+/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils/HiCKRy.py:214: RuntimeWarning: invalid value encountered in multiply
+  rk -= alpha * w
+WARNING... Bias vector has a median outside of typical range (0.5, 2).
+Consider running with a larger -x option if problems occur
+Mean    0.8911086100168822
+Median  0.0
+Std. Dev.   26.24067074100285
+Bias vector file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.bias.txt.gz was created successfully.
+
+
+#  Step #4. Run FitHiC2
+
+fithic \
+--interactions /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.ia.txt.gz \
+--fragments /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.frag.txt.gz \
+--outdir /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix \
+--resolution 1600 \
+--biases /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.bias.txt.gz \
+--contactType All \
+--mappabilityThres 1 \
+--biasLowerBound 0.01 \
+--biasUpperBound 100 \
+--lib Q.1600.ds-to-Q.XII-all.mito-free \
+--visual
+
+fithic \
+--interactions /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.ia.txt.gz \
+--fragments /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.frag.txt.gz \
+--outdir /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix \
+--resolution 1600 \
+--biases /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.bias.txt.gz \
+--contactType All \
+--mappabilityThres 1 \
+--biasLowerBound 0.01 \
+--biasUpperBound 100 \
+--lib Q.1600.ds-to-Q.XII-all.rDNA \
+--visual
+
+GIVEN FIT-HI-C ARGUMENTS
+=========================
+Reading fragments file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.frag.txt.gz
+Reading interactions file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.ia.txt.gz
+Output path being used from /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix
+Fixed size option detected... Fast version of FitHiC will be used
+Resolution is 1.6 kb
+Reading bias file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.bias.txt.gz
+The number of spline passes is 1
+The number of bins is 100
+The number of reads required to consider an interaction is 1
+The name of the library for outputted files will be Q.1600.ds-to-Q.XII-all.mito-free
+Upper Distance threshold is inf
+Lower Distance threshold is 0
+Graphs will be outputted
+All genomic regions will be analyzed
+Lower bound of bias values is 0.01
+Upper bound of bias values is 100.0
+All arguments processed. Running FitHiC now...
+=========================
+
+
+Reading the contact counts file to generate bins...
+Interactions file read. Time took 15.934495210647583
+Fragments file read. Time took 0.025197505950927734
+Bias file read. Time took 0.0332791805267334
+Writing /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.fithic_pass1.res1600.txt
+Spline fit Pass 1 starting...
+Plotting /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.spline_pass1.png
+Outlier threshold is... 7.757360319224687e-08
+Writing p-values and q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.spline_pass1.significances.txt
+Plotting q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.spline_pass1.qplot.png
+Number of outliers is... 958
+Spline fit Pass 1 completed. Time took 201.2330722808838
+=========================
+Fit-Hi-C completed successfully
+
+
+
+
+GIVEN FIT-HI-C ARGUMENTS
+=========================
+Reading fragments file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.frag.txt.gz
+Reading interactions file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.ia.txt.gz
+Output path being used from /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix
+Fixed size option detected... Fast version of FitHiC will be used
+Resolution is 1.6 kb
+Reading bias file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.mito-free.bias.txt.gz
+The number of spline passes is 1
+The number of bins is 100
+The number of reads required to consider an interaction is 1
+The name of the library for outputted files will be Q.1600.ds-to-Q.XII-all.rDNA
+Upper Distance threshold is inf
+Lower Distance threshold is 0
+Graphs will be outputted
+All genomic regions will be analyzed
+Lower bound of bias values is 0.01
+Upper bound of bias values is 100.0
+All arguments processed. Running FitHiC now...
+=========================
+
+
+Reading the contact counts file to generate bins...
+Interactions file read. Time took 0.13882851600646973
+Fragments file read. Time took 0.024142742156982422
+Bias file read. Time took 0.03300976753234863
+Writing /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.fithic_pass1.res1600.txt
+Spline fit Pass 1 starting...
+Plotting /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.spline_pass1.png
+Outlier threshold is... 2.5714357714487317e-07
+Writing p-values and q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.spline_pass1.significances.txt
+Plotting q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.rDNA.spline_pass1.qplot.png
+Number of outliers is... 4717
+Spline fit Pass 1 completed. Time took 2.0850911140441895
+=========================
+Fit-Hi-C completed successfully
+```
+</details>
+<br />
+
+<a id="run-workflow-proper"></a>
+### Run workflow proper
+<a id="code-3"></a>
+#### Code
+<details>
+<summary><i>Code: Run workflow proper</i></summary>
+
+```bash
+#!/bin/bash
+
+#  Execute main (test) tasks ==================================================
+# #  Start interactive job
+# grabnode  # 1, 20, 1, N
+
+#  Go to work directory
+change_dir \
+    "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process"
+
+#  Source initial work environment that allows access to cooler
+activate_env pairtools_env
+
+
+#  Set up necessary variables and arrays ------------------
+check_variables=true
+check_array=false
+debug=false
+
+run_env_change_1=false
+
+check_command_1=false
+run_command_1=false
+
+check_command_2=false
+run_command_2=false
+
+run_env_change_2=true
+
+check_command_3=false
+run_command_3=false
+
+check_command_4=true
+run_command_4=true
+
+check_command_5=true
+run_command_5=true
+
+check_command_6=true
+run_command_6=true
+
+unset A_dirs a_dirs A_prefix a_prefix
+typeset -A A_dirs A_prefix
+typeset -a a_dirs a_prefix
+
+a_dirs=(
+    "11_cooler_genome_KR-filt-0.4_whole-matrix"
+    # "11_cooler_XII_KR-filt-0.4"
+)
+
+A_dirs=(
+    ["11_cooler_genome_KR-filt-0.4_whole-matrix"]="13_FitHiC2_genome_KR-filt-0.4_whole-matrix"
+    # ["11_cooler_XII_KR-filt-0.4"]="13_FitHiC2_XII_KR-filt-0.4"
+)
+
+a_prefix=(
+    "MC-2019_Q_WT_repM"
+    "MC-2020_30C-a15_WT_repM"
+    "MC-2020_nz_WT_repM"
+)
+
+A_prefix=(
+    ["MC-2019_Q_WT_repM"]="Q"
+    ["MC-2020_30C-a15_WT_repM"]="G1"
+    ["MC-2020_nz_WT_repM"]="G2"
+)
+
+if ${check_array}; then
+    for i in "${a_dirs[@]}"; do
+          key="${i}"
+        value="${A_dirs[${key}]}"
+
+        echo """
+          key  ${key}
+        value  ${value}
+        """
+    done
+fi
+
+if ${check_array}; then
+    for i in "${a_prefix[@]}"; do
+          key="${i}"
+        value="${A_prefix[${key}]}"
+
+        echo """
+          key  ${key}
+        value  ${value}
+        """
+    done
+fi
+
+# unset resolutions && typeset -a resolutions=(5000)
+# unset resolutions && typeset -a resolutions=(1600 3200)
+unset resolutions && typeset -a resolutions=(1600)
+
+# unset regions && typeset -a regions=("genome-trans")
+# unset regions && typeset -a regions=("XII-cis")
+unset regions && typeset -a regions=("XII-all")
+
+scratch="/fh/scratch/delete30/tsukiyama_t"
+HiCKRy="${HOME}/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils"
+HiCKRy_pct=0.05
+
+c1="255,0,0"
+c2="255,255,0"
+c3="0,255,0"
+c4="0,255,255"
+c5="0,0,255"
+t1=5
+t2=10
+t3=50
+t4=100
+
+
+#  Dynamically run commands -------------------------------
+iter=0
+for dir_in in "${a_dirs[@]}"; do
+    # dir_in=${a_dirs[0]}                                           # echo "${dir_in}"
+    dir_out="${A_dirs[${dir_in}]}"                                  # echo "${dir_out}"
+
+    [[ ${debug} == true ]] && echo "dir_out=${dir_out}"
+
+    for phase in "${a_prefix[@]}"; do
+        # phase="${a_prefix[0]}"                                    # echo "${phase}"
+        prefix="${A_prefix[${phase}]}"                              # echo "${prefix}"
+
+        [[ ${debug} == true ]] \
+            && echo -e "key\t${phase}\nvalue\t${prefix}\n"
+
+        for res in "${resolutions[@]}"; do
+            # res="${resolutions[0]}"                               # echo "${res}"
+
+            file_in=$(
+                find \
+                    "${dir_in}" \
+                    -maxdepth 1 \
+                    -type f \
+                    -name "${phase}*.${res}.*cool"
+                )                                                   # echo "${file_in}"
+
+            for region in "${regions[@]}"; do
+                # region="${regions[0]}"                            # echo "${region}"
+                if [[ "${region}" == "XII-cis" ]]; then
+                    type="intraOnly"                                # echo "${type}"
+                elif [[ "${region}" == "XII-all" ]]; then
+                    type="All"                                      # echo "${type}"
+                elif [[ "${region}" == "genome-trans" ]]; then
+                    type="interOnly"                                # echo "${type}"
+                fi
+            
+                if [[ "${file_in}" =~ "${phase}" ]]; then
+                    file_out="$(
+                        echo "${file_in%.cool}" \
+                            | sed -E -e 's:11_cooler:13_FitHiC2:g' \
+                                     -e 's:.standard-rDNA-complete.mapped::g' \
+                                     -e 's:downsample:ds:g' \
+                                     -e "s:${phase}:${prefix}:g"
+                    ).${region}"                                    # echo "${file_out}"
+                fi
+                
+                (( iter++ ))
+
+                if ${check_variables}; then
+                    echo """
+                    iter .............................. ${iter}
+                    dir_in ............................ ${dir_in}
+                    dir_out ........................... ${dir_out}
+                    phase ............................. ${phase}
+                    prefix ............................ ${prefix}
+                    resolution ........................ ${res}
+                    region ............................ ${region}
+                    type .............................. ${type}
+                    file_in ........................... ${file_in}
+                    file_out .......................... ${file_out}
+                    scratch ........................... ${scratch}
+                    HiCKRy ............................ ${HiCKRy}
+                    HiCKRy_pct ........................ ${HiCKRy_pct}
+                    """
+                fi
+
+                #  ----------------------------------------
+                #  Drawing on the the above, submit 
+                #+ specific steps of the workflow to the
+                #+ job scheduler
+                #  ----------------------------------------
+                #  Step #1. Create FitHiC2 interactions text file
+                [[ ${run_env_change_1} == true ]] \
+                    && activate_env pairtools_env \
+                    || true
+
+                if ${check_command_1}; then
+                    echo """
+                    #  Step #1. Create FitHiC2 interactions text file
+
+                    create_ia_file \\
+                        -c "$(pwd)/${file_in}" \\
+                        -o "$(pwd)/${file_out}.ia.txt.gz" \\
+                        -r "${region}" \\
+                        -s "${scratch}"
+                    """
+                fi
+
+                if ${run_command_1}; then
+                    create_ia_file \
+                        -c "$(pwd)/${file_in}" \
+                        -o "$(pwd)/${file_out}.ia.txt.gz" \
+                        -r "${region}" \
+                        -s "${scratch}"
+                fi
+
+
+                #  Step #2. Create FitHiC2 fragments text file
+                if ${check_command_2}; then
+                    echo """
+                    #  Step #2. Create FitHiC2 fragments text file
+
+                    create_frag_file \\
+                        -i "$(pwd)/${file_out}.ia.txt.gz" \\
+                        -o "$(pwd)/${file_out}.frag.txt.gz" \\
+                        -s "${scratch}"
+                    """
+                fi
+
+                if ${run_command_2}; then
+                    create_frag_file \
+                        -i "$(pwd)/${file_out}.ia.txt.gz" \
+                        -o "$(pwd)/${file_out}.frag.txt.gz" \
+                        -s "${scratch}"
+                fi
+
+
+                #  Step #3. Generate bias vector needed to run FitHiC2
+                [[ ${run_env_change_2} == true ]] \
+                    && activate_env fithic_env \
+                    || true
+
+                if ${check_command_3}; then
+                    echo """
+                    #  Step #3. Generate bias vector needed to run FitHiC2
+
+                    generate_bias_vector \\
+                        -k "${HiCKRy}" \\
+                        -p "${HiCKRy_pct}" \\
+                        -i "$(pwd)/${file_out}.ia.txt.gz" \\
+                        -f "$(pwd)/${file_out}.frag.txt.gz" \\
+                        -o "$(pwd)/${file_out}.bias.txt.gz"
+                    """
+                fi
+
+                if ${run_command_3}; then
+                    generate_bias_vector \
+                        -k "${HiCKRy}" \
+                        -p "${HiCKRy_pct}" \
+                        -i "$(pwd)/${file_out}.ia.txt.gz" \
+                        -f "$(pwd)/${file_out}.frag.txt.gz" \
+                        -o "$(pwd)/${file_out}.bias.txt.gz"
+                fi
+
+
+                #  Step #4. Run FitHiC2
+                if ${check_command_4}; then
+                    echo """
+                    #  Step #4. Run FitHiC2
+
+                    fithic \\
+                        --interactions "$(pwd)/${file_out}.ia.txt.gz" \\
+                        --fragments "$(pwd)/${file_out}.frag.txt.gz" \\
+                        --outdir "$(pwd)/$(dirname "${file_out}")" \\
+                        --resolution "${res}" \\
+                        --biases "$(pwd)/${file_out}.bias.txt.gz" \\
+                        --contactType "${type}" \\
+                        --mappabilityThres "${map:-1}" \\
+                        --biasLowerBound "${lower:-0.01}" \
+                        --biasUpperBound "${higher:-100}" \
+                        --lib "$(basename "${file_out}")" \\
+                        --visual
+                    """
+                fi
+
+                if ${run_command_4}; then
+                    fithic \
+                        --interactions "$(pwd)/${file_out}.ia.txt.gz" \
+                        --fragments "$(pwd)/${file_out}.frag.txt.gz" \
+                        --outdir "$(pwd)/$(dirname "${file_out}")" \
+                        --resolution "${res}" \
+                        --biases "$(pwd)/${file_out}.bias.txt.gz" \
+                        --contactType "${type}" \
+                        --mappabilityThres "${map:-1}" \
+                        --biasLowerBound "${lower:-0.01}" \
+                        --biasUpperBound "${higher:-100}" \
+                        --lib "$(basename "${file_out}")" \
+                        --visual
+                fi
+
+                #  Step #5. Filter significances file to exclude insignificant contacts
+                if ${check_command_5}; then
+                    echo """
+                    #  Step #5. Filter significances file to exclude insignificant contacts
+
+                    filter_significances_file \\
+                        --input-file "$(pwd)/${file_out}.spline_pass1.res${res}.significances.txt.gz" \\
+                        --output-file "$(pwd)/${file_out}.spline_pass1.res${res}.significances.filt.txt.gz" \\
+                        --q-value-threshold "${q:-"0.05"}"
+                    """
+                fi
+
+                if ${run_command_5}; then
+                    filter_significances_file \
+                        --input-file "$(pwd)/${file_out}.spline_pass1.res${res}.significances.txt.gz" \
+                        --output-file "$(pwd)/${file_out}.spline_pass1.res${res}.significances.filt.txt.gz" \
+                        --q-value-threshold "${q:-"0.05"}"
+                fi
+
+                #  Step #6. Create bedpe "arcs" file from filtered significances file
+                if ${check_command_6}; then
+                    echo """
+                    #  Step #6. Create bedpe \"arcs\" file from filtered significances file
+
+                    create_bedpe_file \\
+                        -i "$(pwd)/${file_out}.spline_pass1.res${res}.significances.filt.txt.gz" \\
+                        -o "$(pwd)/${file_out}.spline_pass1.res${res}.significances.filt.bedpe" \\
+                        -r "${res}" \\
+                        -c1 "${c1}" \\
+                        -c2 "${c2}" \\
+                        -c3 "${c3}" \\
+                        -c4 "${c4}" \\
+                        -c5 "${c5}" \\
+                        -t1 "${t1}" \\
+                        -t2 "${t2}" \\
+                        -t3 "${t3}" \\
+                        -t4 "${t4}"
+                    """
+                fi
+
+                if ${run_command_6}; then
+                    create_bedpe_file \
+                        -i "$(pwd)/${file_out}.spline_pass1.res${res}.significances.filt.txt.gz" \
+                        -o "$(pwd)/${file_out}.spline_pass1.res${res}.significances.filt.bedpe" \
+                        -r "${res}" \
+                        -c1 "${c1}" \
+                        -c2 "${c2}" \
+                        -c3 "${c3}" \
+                        -c4 "${c4}" \
+                        -c5 "${c5}" \
+                        -t1 "${t1}" \
+                        -t2 "${t2}" \
+                        -t3 "${t3}" \
+                        -t4 "${t4}"
+                fi
+            done
+            
+            sleep 0.2
+        done
+    done
+done
+```
+</details>
+<br />
+
+<a id="printed-3"></a>
+#### Printed
+<a id="run-workflow-test-2023-1025-steps-1ndash3"></a>
+##### Run workflow test, 2023-1025: Steps #1&ndash;3
+<details>
+<summary><i>Printed: Run workflow test, 2023-1025: Steps #1&ndash;3</i></summary>
+
+```txt
+
+                    iter .............................. 1
+                    dir_in ............................ 11_cooler_genome_KR-filt-0.4
+                    dir_out ........................... 13_FitHiC2_genome_KR-filt-0.4
+                    phase ............................. MC-2019_Q_WT_repM
+                    prefix ............................ Q
+                    resolution ........................ 1600
+                    region ............................ XII-all
+                    type .............................. All
+                    file_in ........................... 11_cooler_genome_KR-filt-0.4/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool
+                    file_out .......................... 13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all
+                    scratch ........................... /fh/scratch/delete30/tsukiyama_t
+                    HiCKRy ............................ /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils
+                    HiCKRy_pct ........................ 0.05
+
+
+                    #  Step #1. Create FitHiC2 interactions text file
+
+                    create_ia_file \
+                        -c /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/11_cooler_genome_KR-filt-0.4/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -r XII-all \
+                        -s /fh/scratch/delete30/tsukiyama_t
+
+Note: The option '-r genome-trans' is used. Interactions will be extracted for the entire genome.
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/11_cooler_genome_KR-filt-0.4/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool' -> '/fh/scratch/delete30/tsukiyama_t/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool'
+'/fh/scratch/delete30/tsukiyama_t/Q.1600.ds-to-Q.XII-all.ia.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.ia.txt.gz'
+Interactions file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.ia.txt.gz was created successfully.
+
+                    #  Step #2. Create FitHiC2 fragments text file
+
+                    create_frag_file \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        -s /fh/scratch/delete30/tsukiyama_t
+
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.ia.txt.gz' -> '/fh/scratch/delete30/tsukiyama_t/Q.1600.ds-to-Q.XII-all.ia.txt.gz'
+'/fh/scratch/delete30/tsukiyama_t/Q.1600.ds-to-Q.XII-all.frag.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.frag.txt.gz'
+Fragment file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.frag.txt.gz was created successfully.
+
+                    #  Step #3. Generate bias vector needed to run FitHiC2
+
+                    generate_bias_vector \
+                        -k /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils \
+                        -p 0.05 \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -f /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.bias.txt.gz
+
+Python 3 is installed and accessible.
+Creating sparse matrix...
+Sparse matrix creation took 11.391151428222656 seconds
+Removing 0.05 percent of most sparse bins
+... corresponds to 356 total rows
+... corresponds to all bins with less than or equal to 5285.0 total interactions
+Sparse rows removed
+Initial matrix size: 7132 rows and 7132 columns
+New matrix size: 6775 rows and 6775 columns
+Normalizing with KR Algorithm
+Bias vector file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.bias.txt.gz was created successfully.
+
+                    iter .............................. 2
+                    dir_in ............................ 11_cooler_genome_KR-filt-0.4
+                    dir_out ........................... 13_FitHiC2_genome_KR-filt-0.4
+                    phase ............................. MC-2020_30C-a15_WT_repM
+                    prefix ............................ G1
+                    resolution ........................ 1600
+                    region ............................ XII-all
+                    type .............................. All
+                    file_in ........................... 11_cooler_genome_KR-filt-0.4/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool
+                    file_out .......................... 13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all
+                    scratch ........................... /fh/scratch/delete30/tsukiyama_t
+                    HiCKRy ............................ /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils
+                    HiCKRy_pct ........................ 0.05
+
+
+                    #  Step #1. Create FitHiC2 interactions text file
+
+                    create_ia_file \
+                        -c /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/11_cooler_genome_KR-filt-0.4/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -r XII-all \
+                        -s /fh/scratch/delete30/tsukiyama_t
+
+Note: The option '-r genome-trans' is used. Interactions will be extracted for the entire genome.
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/11_cooler_genome_KR-filt-0.4/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool' -> '/fh/scratch/delete30/tsukiyama_t/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool'
+'/fh/scratch/delete30/tsukiyama_t/G1.1600.ds-to-Q.XII-all.ia.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.ia.txt.gz'
+Interactions file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.ia.txt.gz was created successfully.
+
+                    #  Step #2. Create FitHiC2 fragments text file
+
+                    create_frag_file \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        -s /fh/scratch/delete30/tsukiyama_t
+
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.ia.txt.gz' -> '/fh/scratch/delete30/tsukiyama_t/G1.1600.ds-to-Q.XII-all.ia.txt.gz'
+'/fh/scratch/delete30/tsukiyama_t/G1.1600.ds-to-Q.XII-all.frag.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.frag.txt.gz'
+Fragment file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.frag.txt.gz was created successfully.
+
+                    #  Step #3. Generate bias vector needed to run FitHiC2
+
+                    generate_bias_vector \
+                        -k /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils \
+                        -p 0.05 \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -f /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.bias.txt.gz
+
+Python 3 is installed and accessible.
+Creating sparse matrix...
+Sparse matrix creation took 9.47139048576355 seconds
+Removing 0.05 percent of most sparse bins
+... corresponds to 356 total rows
+... corresponds to all bins with less than or equal to 7399.0 total interactions
+Sparse rows removed
+Initial matrix size: 7136 rows and 7136 columns
+New matrix size: 6778 rows and 6778 columns
+Normalizing with KR Algorithm
+Bias vector file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.bias.txt.gz was created successfully.
+
+                    iter .............................. 3
+                    dir_in ............................ 11_cooler_genome_KR-filt-0.4
+                    dir_out ........................... 13_FitHiC2_genome_KR-filt-0.4
+                    phase ............................. MC-2020_nz_WT_repM
+                    prefix ............................ G2
+                    resolution ........................ 1600
+                    region ............................ XII-all
+                    type .............................. All
+                    file_in ........................... 11_cooler_genome_KR-filt-0.4/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool
+                    file_out .......................... 13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all
+                    scratch ........................... /fh/scratch/delete30/tsukiyama_t
+                    HiCKRy ............................ /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils
+                    HiCKRy_pct ........................ 0.05
+
+
+                    #  Step #1. Create FitHiC2 interactions text file
+
+                    create_ia_file \
+                        -c /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/11_cooler_genome_KR-filt-0.4/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -r XII-all \
+                        -s /fh/scratch/delete30/tsukiyama_t
+
+Note: The option '-r genome-trans' is used. Interactions will be extracted for the entire genome.
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/11_cooler_genome_KR-filt-0.4/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool' -> '/fh/scratch/delete30/tsukiyama_t/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool'
+'/fh/scratch/delete30/tsukiyama_t/G2.1600.ds-to-Q.XII-all.ia.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.ia.txt.gz'
+Interactions file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.ia.txt.gz was created successfully.
+
+                    #  Step #2. Create FitHiC2 fragments text file
+
+                    create_frag_file \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        -s /fh/scratch/delete30/tsukiyama_t
+
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.ia.txt.gz' -> '/fh/scratch/delete30/tsukiyama_t/G2.1600.ds-to-Q.XII-all.ia.txt.gz'
+'/fh/scratch/delete30/tsukiyama_t/G2.1600.ds-to-Q.XII-all.frag.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.frag.txt.gz'
+Fragment file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.frag.txt.gz was created successfully.
+
+                    #  Step #3. Generate bias vector needed to run FitHiC2
+
+                    generate_bias_vector \
+                        -k /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils \
+                        -p 0.05 \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -f /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.bias.txt.gz
+
+Python 3 is installed and accessible.
+Creating sparse matrix...
+Sparse matrix creation took 3.9702727794647217 seconds
+Removing 0.05 percent of most sparse bins
+... corresponds to 354 total rows
+... corresponds to all bins with less than or equal to 6279.0 total interactions
+Sparse rows removed
+Initial matrix size: 7095 rows and 7095 columns
+New matrix size: 6740 rows and 6740 columns
+Normalizing with KR Algorithm
+Bias vector file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.bias.txt.gz was created successfully.
+
+                    iter .............................. 4
+                    dir_in ............................ 11_cooler_genome_KR-filt-0.4_whole-matrix
+                    dir_out ........................... 13_FitHiC2_genome_KR-filt-0.4_whole-matrix
+                    phase ............................. MC-2019_Q_WT_repM
+                    prefix ............................ Q
+                    resolution ........................ 1600
+                    region ............................ XII-all
+                    type .............................. All
+                    file_in ........................... 11_cooler_genome_KR-filt-0.4_whole-matrix/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool
+                    file_out .......................... 13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all
+                    scratch ........................... /fh/scratch/delete30/tsukiyama_t
+                    HiCKRy ............................ /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils
+                    HiCKRy_pct ........................ 0.05
+
+
+                    #  Step #1. Create FitHiC2 interactions text file
+
+                    create_ia_file \
+                        -c /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/11_cooler_genome_KR-filt-0.4_whole-matrix/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -r XII-all \
+                        -s /fh/scratch/delete30/tsukiyama_t
+
+Note: The option '-r genome-trans' is used. Interactions will be extracted for the entire genome.
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/11_cooler_genome_KR-filt-0.4_whole-matrix/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool' -> '/fh/scratch/delete30/tsukiyama_t/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool'
+'/fh/scratch/delete30/tsukiyama_t/Q.1600.ds-to-Q.XII-all.ia.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.ia.txt.gz'
+Interactions file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.ia.txt.gz was created successfully.
+
+                    #  Step #2. Create FitHiC2 fragments text file
+
+                    create_frag_file \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        -s /fh/scratch/delete30/tsukiyama_t
+
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.ia.txt.gz' -> '/fh/scratch/delete30/tsukiyama_t/Q.1600.ds-to-Q.XII-all.ia.txt.gz'
+'/fh/scratch/delete30/tsukiyama_t/Q.1600.ds-to-Q.XII-all.frag.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.frag.txt.gz'
+Fragment file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.frag.txt.gz was created successfully.
+
+                    #  Step #3. Generate bias vector needed to run FitHiC2
+
+                    generate_bias_vector \
+                        -k /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils \
+                        -p 0.05 \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -f /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.bias.txt.gz
+
+Python 3 is installed and accessible.
+Creating sparse matrix...
+Sparse matrix creation took 11.281103134155273 seconds
+Removing 0.05 percent of most sparse bins
+... corresponds to 356 total rows
+... corresponds to all bins with less than or equal to 5285.0 total interactions
+Sparse rows removed
+Initial matrix size: 7132 rows and 7132 columns
+New matrix size: 6775 rows and 6775 columns
+Normalizing with KR Algorithm
+Bias vector file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.bias.txt.gz was created successfully.
+
+                    iter .............................. 5
+                    dir_in ............................ 11_cooler_genome_KR-filt-0.4_whole-matrix
+                    dir_out ........................... 13_FitHiC2_genome_KR-filt-0.4_whole-matrix
+                    phase ............................. MC-2020_30C-a15_WT_repM
+                    prefix ............................ G1
+                    resolution ........................ 1600
+                    region ............................ XII-all
+                    type .............................. All
+                    file_in ........................... 11_cooler_genome_KR-filt-0.4_whole-matrix/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool
+                    file_out .......................... 13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all
+                    scratch ........................... /fh/scratch/delete30/tsukiyama_t
+                    HiCKRy ............................ /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils
+                    HiCKRy_pct ........................ 0.05
+
+
+                    #  Step #1. Create FitHiC2 interactions text file
+
+                    create_ia_file \
+                        -c /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/11_cooler_genome_KR-filt-0.4_whole-matrix/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -r XII-all \
+                        -s /fh/scratch/delete30/tsukiyama_t
+
+Note: The option '-r genome-trans' is used. Interactions will be extracted for the entire genome.
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/11_cooler_genome_KR-filt-0.4_whole-matrix/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool' -> '/fh/scratch/delete30/tsukiyama_t/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool'
+'/fh/scratch/delete30/tsukiyama_t/G1.1600.ds-to-Q.XII-all.ia.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.ia.txt.gz'
+Interactions file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.ia.txt.gz was created successfully.
+
+                    #  Step #2. Create FitHiC2 fragments text file
+
+                    create_frag_file \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        -s /fh/scratch/delete30/tsukiyama_t
+
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.ia.txt.gz' -> '/fh/scratch/delete30/tsukiyama_t/G1.1600.ds-to-Q.XII-all.ia.txt.gz'
+'/fh/scratch/delete30/tsukiyama_t/G1.1600.ds-to-Q.XII-all.frag.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.frag.txt.gz'
+Fragment file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.frag.txt.gz was created successfully.
+
+                    #  Step #3. Generate bias vector needed to run FitHiC2
+
+                    generate_bias_vector \
+                        -k /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils \
+                        -p 0.05 \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -f /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.bias.txt.gz
+
+Python 3 is installed and accessible.
+Creating sparse matrix...
+Sparse matrix creation took 9.580523014068604 seconds
+Removing 0.05 percent of most sparse bins
+... corresponds to 356 total rows
+... corresponds to all bins with less than or equal to 7399.0 total interactions
+Sparse rows removed
+Initial matrix size: 7136 rows and 7136 columns
+New matrix size: 6778 rows and 6778 columns
+Normalizing with KR Algorithm
+Bias vector file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.bias.txt.gz was created successfully.
+
+                    iter .............................. 6
+                    dir_in ............................ 11_cooler_genome_KR-filt-0.4_whole-matrix
+                    dir_out ........................... 13_FitHiC2_genome_KR-filt-0.4_whole-matrix
+                    phase ............................. MC-2020_nz_WT_repM
+                    prefix ............................ G2
+                    resolution ........................ 1600
+                    region ............................ XII-all
+                    type .............................. All
+                    file_in ........................... 11_cooler_genome_KR-filt-0.4_whole-matrix/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool
+                    file_out .......................... 13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all
+                    scratch ........................... /fh/scratch/delete30/tsukiyama_t
+                    HiCKRy ............................ /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils
+                    HiCKRy_pct ........................ 0.05
+
+
+                    #  Step #1. Create FitHiC2 interactions text file
+
+                    create_ia_file \
+                        -c /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/11_cooler_genome_KR-filt-0.4_whole-matrix/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -r XII-all \
+                        -s /fh/scratch/delete30/tsukiyama_t
+
+Note: The option '-r genome-trans' is used. Interactions will be extracted for the entire genome.
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/11_cooler_genome_KR-filt-0.4_whole-matrix/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool' -> '/fh/scratch/delete30/tsukiyama_t/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool'
+'/fh/scratch/delete30/tsukiyama_t/G2.1600.ds-to-Q.XII-all.ia.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.ia.txt.gz'
+Interactions file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.ia.txt.gz was created successfully.
+
+                    #  Step #2. Create FitHiC2 fragments text file
+
+                    create_frag_file \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        -s /fh/scratch/delete30/tsukiyama_t
+
+'/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.ia.txt.gz' -> '/fh/scratch/delete30/tsukiyama_t/G2.1600.ds-to-Q.XII-all.ia.txt.gz'
+'/fh/scratch/delete30/tsukiyama_t/G2.1600.ds-to-Q.XII-all.frag.txt.gz' -> '/home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.frag.txt.gz'
+Fragment file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.frag.txt.gz was created successfully.
+
+                    #  Step #3. Generate bias vector needed to run FitHiC2
+
+                    generate_bias_vector \
+                        -k /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils \
+                        -p 0.05 \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        -f /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.bias.txt.gz
+
+Python 3 is installed and accessible.
+Creating sparse matrix...
+Sparse matrix creation took 4.009113311767578 seconds
+Removing 0.05 percent of most sparse bins
+... corresponds to 354 total rows
+... corresponds to all bins with less than or equal to 6279.0 total interactions
+Sparse rows removed
+Initial matrix size: 7095 rows and 7095 columns
+New matrix size: 6740 rows and 6740 columns
+Normalizing with KR Algorithm
+Bias vector file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.bias.txt.gz was created successfully.
+```
+</details>
+<br />
+
+<a id="run-workflow-test-2023-1025-steps-4ndash6"></a>
+##### Run workflow test, 2023-1025: Steps #4&ndash;6
+<details>
+<summary><i>Printed: Run workflow test, 2023-1025: Steps #4&ndash;6</i></summary>
+
+```txt
+
+                    iter .............................. 1
+                    dir_in ............................ 11_cooler_genome_KR-filt-0.4
+                    dir_out ........................... 13_FitHiC2_genome_KR-filt-0.4
+                    phase ............................. MC-2019_Q_WT_repM
+                    prefix ............................ Q
+                    resolution ........................ 1600
+                    region ............................ XII-all
+                    type .............................. All
+                    file_in ........................... 11_cooler_genome_KR-filt-0.4/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool
+                    file_out .......................... 13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all
+                    scratch ........................... /fh/scratch/delete30/tsukiyama_t
+                    HiCKRy ............................ /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils
+                    HiCKRy_pct ........................ 0.05
+
+
+                    #  Step #4. Run FitHiC2
+
+                    fithic \
+                        --interactions /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        --fragments /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        --outdir /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4 \
+                        --resolution 1600 \
+                        --biases /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.bias.txt.gz \
+                        --contactType All \
+                        --mappabilityThres 1 \
+                        --lib Q.1600.ds-to-Q.XII-all \
+                        --visual
+
+
+
+GIVEN FIT-HI-C ARGUMENTS
+=========================
+Reading fragments file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.frag.txt.gz
+Reading interactions file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.ia.txt.gz
+Output path being used from /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4
+Fixed size option detected... Fast version of FitHiC will be used
+Resolution is 1.6 kb
+Reading bias file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.bias.txt.gz
+The number of spline passes is 1
+The number of bins is 100
+The number of reads required to consider an interaction is 1
+The name of the library for outputted files will be Q.1600.ds-to-Q.XII-all
+Upper Distance threshold is inf
+Lower Distance threshold is 0
+Graphs will be outputted
+All genomic regions will be analyzed
+Lower bound of bias values is 0.01
+Upper bound of bias values is 100.0
+All arguments processed. Running FitHiC now...
+=========================
+
+
+Reading the contact counts file to generate bins...
+Interactions file read. Time took 16.06958246231079
+Fragments file read. Time took 0.023310184478759766
+Bias file read. Time took 0.031537771224975586
+Writing /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.fithic_pass1.res1600.txt
+Spline fit Pass 1 starting...
+Plotting /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.spline_pass1.png
+Outlier threshold is... 7.726765500239298e-08
+Writing p-values and q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.spline_pass1.significances.txt
+Plotting q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.spline_pass1.qplot.png
+Number of outliers is... 1071
+Spline fit Pass 1 completed. Time took 198.78543329238892
+=========================
+Fit-Hi-C completed successfully
+
+
+
+                    #  Step #5. Filter significances file to exclude insignificant contacts
+
+                    filter_significances_file \
+                        --input-file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.txt.gz \
+                        --output-file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz \
+                        --q-value-threshold 0.05
+
+Filtered file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz was created successfully.
+
+                    #  Step #6. Create bedpe "arcs" file from filtered significances file
+
+                    create_bedpe_file \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.bedpe \
+                        -r 1600 \
+                        -c1 255,0,0 \
+                        -c2 255,255,0 \
+                        -c3 0,255,0 \
+                        -c4 0,255,255 \
+                        -c5 0,0,255 \
+                        -t1 5 \
+                        -t2 10 \
+                        -t3 50 \
+                        -t4 100
+
+Bedpe file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/Q.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.bedpe was created successfully.
+
+                    iter .............................. 2
+                    dir_in ............................ 11_cooler_genome_KR-filt-0.4
+                    dir_out ........................... 13_FitHiC2_genome_KR-filt-0.4
+                    phase ............................. MC-2020_30C-a15_WT_repM
+                    prefix ............................ G1
+                    resolution ........................ 1600
+                    region ............................ XII-all
+                    type .............................. All
+                    file_in ........................... 11_cooler_genome_KR-filt-0.4/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool
+                    file_out .......................... 13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all
+                    scratch ........................... /fh/scratch/delete30/tsukiyama_t
+                    HiCKRy ............................ /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils
+                    HiCKRy_pct ........................ 0.05
+
+
+                    #  Step #4. Run FitHiC2
+
+                    fithic \
+                        --interactions /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        --fragments /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        --outdir /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4 \
+                        --resolution 1600 \
+                        --biases /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.bias.txt.gz \
+                        --contactType All \
+                        --mappabilityThres 1 \
+                        --lib G1.1600.ds-to-Q.XII-all \
+                        --visual
+
+
+
+GIVEN FIT-HI-C ARGUMENTS
+=========================
+Reading fragments file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.frag.txt.gz
+Reading interactions file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.ia.txt.gz
+Output path being used from /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4
+Fixed size option detected... Fast version of FitHiC will be used
+Resolution is 1.6 kb
+Reading bias file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.bias.txt.gz
+The number of spline passes is 1
+The number of bins is 100
+The number of reads required to consider an interaction is 1
+The name of the library for outputted files will be G1.1600.ds-to-Q.XII-all
+Upper Distance threshold is inf
+Lower Distance threshold is 0
+Graphs will be outputted
+All genomic regions will be analyzed
+Lower bound of bias values is 0.01
+Upper bound of bias values is 100.0
+All arguments processed. Running FitHiC now...
+=========================
+
+
+Reading the contact counts file to generate bins...
+Interactions file read. Time took 13.691163301467896
+Fragments file read. Time took 0.028168678283691406
+Bias file read. Time took 0.03262066841125488
+Writing /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.fithic_pass1.res1600.txt
+Spline fit Pass 1 starting...
+Plotting /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.spline_pass1.png
+Outlier threshold is... 8.790048891130938e-08
+Writing p-values and q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.spline_pass1.significances.txt
+Plotting q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.spline_pass1.qplot.png
+Number of outliers is... 6999
+Spline fit Pass 1 completed. Time took 160.0023512840271
+=========================
+Fit-Hi-C completed successfully
+
+
+
+                    #  Step #5. Filter significances file to exclude insignificant contacts
+
+                    filter_significances_file \
+                        --input-file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.txt.gz \
+                        --output-file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz \
+                        --q-value-threshold 0.05
+
+Filtered file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz was created successfully.
+
+                    #  Step #6. Create bedpe "arcs" file from filtered significances file
+
+                    create_bedpe_file \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.bedpe \
+                        -r 1600 \
+                        -c1 255,0,0 \
+                        -c2 255,255,0 \
+                        -c3 0,255,0 \
+                        -c4 0,255,255 \
+                        -c5 0,0,255 \
+                        -t1 5 \
+                        -t2 10 \
+                        -t3 50 \
+                        -t4 100
+
+Bedpe file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G1.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.bedpe was created successfully.
+
+                    iter .............................. 3
+                    dir_in ............................ 11_cooler_genome_KR-filt-0.4
+                    dir_out ........................... 13_FitHiC2_genome_KR-filt-0.4
+                    phase ............................. MC-2020_nz_WT_repM
+                    prefix ............................ G2
+                    resolution ........................ 1600
+                    region ............................ XII-all
+                    type .............................. All
+                    file_in ........................... 11_cooler_genome_KR-filt-0.4/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool
+                    file_out .......................... 13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all
+                    scratch ........................... /fh/scratch/delete30/tsukiyama_t
+                    HiCKRy ............................ /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils
+                    HiCKRy_pct ........................ 0.05
+
+
+                    #  Step #4. Run FitHiC2
+
+                    fithic \
+                        --interactions /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        --fragments /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        --outdir /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4 \
+                        --resolution 1600 \
+                        --biases /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.bias.txt.gz \
+                        --contactType All \
+                        --mappabilityThres 1 \
+                        --lib G2.1600.ds-to-Q.XII-all \
+                        --visual
+
+
+
+GIVEN FIT-HI-C ARGUMENTS
+=========================
+Reading fragments file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.frag.txt.gz
+Reading interactions file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.ia.txt.gz
+Output path being used from /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4
+Fixed size option detected... Fast version of FitHiC will be used
+Resolution is 1.6 kb
+Reading bias file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.bias.txt.gz
+The number of spline passes is 1
+The number of bins is 100
+The number of reads required to consider an interaction is 1
+The name of the library for outputted files will be G2.1600.ds-to-Q.XII-all
+Upper Distance threshold is inf
+Lower Distance threshold is 0
+Graphs will be outputted
+All genomic regions will be analyzed
+Lower bound of bias values is 0.01
+Upper bound of bias values is 100.0
+All arguments processed. Running FitHiC now...
+=========================
+
+
+Reading the contact counts file to generate bins...
+Interactions file read. Time took 6.770993232727051
+Fragments file read. Time took 0.02229619026184082
+Bias file read. Time took 0.033159494400024414
+Writing /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.fithic_pass1.res1600.txt
+Spline fit Pass 1 starting...
+Plotting /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.spline_pass1.png
+Outlier threshold is... 1.5944327510518074e-07
+Writing p-values and q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.spline_pass1.significances.txt
+Plotting q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.spline_pass1.qplot.png
+Number of outliers is... 13010
+Spline fit Pass 1 completed. Time took 69.7379560470581
+=========================
+Fit-Hi-C completed successfully
+
+
+
+                    #  Step #5. Filter significances file to exclude insignificant contacts
+
+                    filter_significances_file \
+                        --input-file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.txt.gz \
+                        --output-file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz \
+                        --q-value-threshold 0.05
+
+Filtered file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz was created successfully.
+
+                    #  Step #6. Create bedpe "arcs" file from filtered significances file
+
+                    create_bedpe_file \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.bedpe \
+                        -r 1600 \
+                        -c1 255,0,0 \
+                        -c2 255,255,0 \
+                        -c3 0,255,0 \
+                        -c4 0,255,255 \
+                        -c5 0,0,255 \
+                        -t1 5 \
+                        -t2 10 \
+                        -t3 50 \
+                        -t4 100
+
+Bedpe file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4/G2.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.bedpe was created successfully.
+
+                    iter .............................. 4
+                    dir_in ............................ 11_cooler_genome_KR-filt-0.4_whole-matrix
+                    dir_out ........................... 13_FitHiC2_genome_KR-filt-0.4_whole-matrix
+                    phase ............................. MC-2019_Q_WT_repM
+                    prefix ............................ Q
+                    resolution ........................ 1600
+                    region ............................ XII-all
+                    type .............................. All
+                    file_in ........................... 11_cooler_genome_KR-filt-0.4_whole-matrix/MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool
+                    file_out .......................... 13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all
+                    scratch ........................... /fh/scratch/delete30/tsukiyama_t
+                    HiCKRy ............................ /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils
+                    HiCKRy_pct ........................ 0.05
+
+
+                    #  Step #4. Run FitHiC2
+
+                    fithic \
+                        --interactions /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        --fragments /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        --outdir /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix \
+                        --resolution 1600 \
+                        --biases /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.bias.txt.gz \
+                        --contactType All \
+                        --mappabilityThres 1 \
+                        --lib Q.1600.ds-to-Q.XII-all \
+                        --visual
+
+
+
+GIVEN FIT-HI-C ARGUMENTS
+=========================
+Reading fragments file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.frag.txt.gz
+Reading interactions file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.ia.txt.gz
+Output path being used from /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix
+Fixed size option detected... Fast version of FitHiC will be used
+Resolution is 1.6 kb
+Reading bias file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.bias.txt.gz
+The number of spline passes is 1
+The number of bins is 100
+The number of reads required to consider an interaction is 1
+The name of the library for outputted files will be Q.1600.ds-to-Q.XII-all
+Upper Distance threshold is inf
+Lower Distance threshold is 0
+Graphs will be outputted
+All genomic regions will be analyzed
+Lower bound of bias values is 0.01
+Upper bound of bias values is 100.0
+All arguments processed. Running FitHiC now...
+=========================
+
+
+Reading the contact counts file to generate bins...
+Interactions file read. Time took 16.48289680480957
+Fragments file read. Time took 0.025760650634765625
+Bias file read. Time took 0.033824920654296875
+Writing /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.fithic_pass1.res1600.txt
+Spline fit Pass 1 starting...
+Plotting /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.spline_pass1.png
+Outlier threshold is... 7.726765500239298e-08
+Writing p-values and q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.spline_pass1.significances.txt
+Plotting q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.spline_pass1.qplot.png
+Number of outliers is... 1071
+Spline fit Pass 1 completed. Time took 199.35660862922668
+=========================
+Fit-Hi-C completed successfully
+
+
+
+                    #  Step #5. Filter significances file to exclude insignificant contacts
+
+                    filter_significances_file \
+                        --input-file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.txt.gz \
+                        --output-file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz \
+                        --q-value-threshold 0.05
+
+Filtered file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz was created successfully.
+
+                    #  Step #6. Create bedpe "arcs" file from filtered significances file
+
+                    create_bedpe_file \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.bedpe \
+                        -r 1600 \
+                        -c1 255,0,0 \
+                        -c2 255,255,0 \
+                        -c3 0,255,0 \
+                        -c4 0,255,255 \
+                        -c5 0,0,255 \
+                        -t1 5 \
+                        -t2 10 \
+                        -t3 50 \
+                        -t4 100
+
+Bedpe file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/Q.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.bedpe was created successfully.
+
+                    iter .............................. 5
+                    dir_in ............................ 11_cooler_genome_KR-filt-0.4_whole-matrix
+                    dir_out ........................... 13_FitHiC2_genome_KR-filt-0.4_whole-matrix
+                    phase ............................. MC-2020_30C-a15_WT_repM
+                    prefix ............................ G1
+                    resolution ........................ 1600
+                    region ............................ XII-all
+                    type .............................. All
+                    file_in ........................... 11_cooler_genome_KR-filt-0.4_whole-matrix/MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool
+                    file_out .......................... 13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all
+                    scratch ........................... /fh/scratch/delete30/tsukiyama_t
+                    HiCKRy ............................ /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils
+                    HiCKRy_pct ........................ 0.05
+
+
+                    #  Step #4. Run FitHiC2
+
+                    fithic \
+                        --interactions /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        --fragments /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        --outdir /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix \
+                        --resolution 1600 \
+                        --biases /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.bias.txt.gz \
+                        --contactType All \
+                        --mappabilityThres 1 \
+                        --lib G1.1600.ds-to-Q.XII-all \
+                        --visual
+
+
+
+GIVEN FIT-HI-C ARGUMENTS
+=========================
+Reading fragments file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.frag.txt.gz
+Reading interactions file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.ia.txt.gz
+Output path being used from /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix
+Fixed size option detected... Fast version of FitHiC will be used
+Resolution is 1.6 kb
+Reading bias file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.bias.txt.gz
+The number of spline passes is 1
+The number of bins is 100
+The number of reads required to consider an interaction is 1
+The name of the library for outputted files will be G1.1600.ds-to-Q.XII-all
+Upper Distance threshold is inf
+Lower Distance threshold is 0
+Graphs will be outputted
+All genomic regions will be analyzed
+Lower bound of bias values is 0.01
+Upper bound of bias values is 100.0
+All arguments processed. Running FitHiC now...
+=========================
+
+
+Reading the contact counts file to generate bins...
+Interactions file read. Time took 13.65437388420105
+Fragments file read. Time took 0.025987625122070312
+Bias file read. Time took 0.03322243690490723
+Writing /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.fithic_pass1.res1600.txt
+Spline fit Pass 1 starting...
+Plotting /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.spline_pass1.png
+Outlier threshold is... 8.790048891130938e-08
+Writing p-values and q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.spline_pass1.significances.txt
+Plotting q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.spline_pass1.qplot.png
+Number of outliers is... 6999
+Spline fit Pass 1 completed. Time took 160.57208442687988
+=========================
+Fit-Hi-C completed successfully
+
+
+
+                    #  Step #5. Filter significances file to exclude insignificant contacts
+
+                    filter_significances_file \
+                        --input-file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.txt.gz \
+                        --output-file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz \
+                        --q-value-threshold 0.05
+
+Filtered file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz was created successfully.
+
+                    #  Step #6. Create bedpe "arcs" file from filtered significances file
+
+                    create_bedpe_file \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.bedpe \
+                        -r 1600 \
+                        -c1 255,0,0 \
+                        -c2 255,255,0 \
+                        -c3 0,255,0 \
+                        -c4 0,255,255 \
+                        -c5 0,0,255 \
+                        -t1 5 \
+                        -t2 10 \
+                        -t3 50 \
+                        -t4 100
+
+Bedpe file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G1.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.bedpe was created successfully.
+
+                    iter .............................. 6
+                    dir_in ............................ 11_cooler_genome_KR-filt-0.4_whole-matrix
+                    dir_out ........................... 13_FitHiC2_genome_KR-filt-0.4_whole-matrix
+                    phase ............................. MC-2020_nz_WT_repM
+                    prefix ............................ G2
+                    resolution ........................ 1600
+                    region ............................ XII-all
+                    type .............................. All
+                    file_in ........................... 11_cooler_genome_KR-filt-0.4_whole-matrix/MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.cool
+                    file_out .......................... 13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all
+                    scratch ........................... /fh/scratch/delete30/tsukiyama_t
+                    HiCKRy ............................ /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/src/fithic/fithic/utils
+                    HiCKRy_pct ........................ 0.05
+
+
+                    #  Step #4. Run FitHiC2
+
+                    fithic \
+                        --interactions /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.ia.txt.gz \
+                        --fragments /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.frag.txt.gz \
+                        --outdir /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix \
+                        --resolution 1600 \
+                        --biases /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.bias.txt.gz \
+                        --contactType All \
+                        --mappabilityThres 1 \
+                        --lib G2.1600.ds-to-Q.XII-all \
+                        --visual
+
+
+
+GIVEN FIT-HI-C ARGUMENTS
+=========================
+Reading fragments file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.frag.txt.gz
+Reading interactions file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.ia.txt.gz
+Output path being used from /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix
+Fixed size option detected... Fast version of FitHiC will be used
+Resolution is 1.6 kb
+Reading bias file from: /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.bias.txt.gz
+The number of spline passes is 1
+The number of bins is 100
+The number of reads required to consider an interaction is 1
+The name of the library for outputted files will be G2.1600.ds-to-Q.XII-all
+Upper Distance threshold is inf
+Lower Distance threshold is 0
+Graphs will be outputted
+All genomic regions will be analyzed
+Lower bound of bias values is 0.01
+Upper bound of bias values is 100.0
+All arguments processed. Running FitHiC now...
+=========================
+
+
+Reading the contact counts file to generate bins...
+Interactions file read. Time took 6.4661102294921875
+Fragments file read. Time took 0.022500038146972656
+Bias file read. Time took 0.03177785873413086
+Writing /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.fithic_pass1.res1600.txt
+Spline fit Pass 1 starting...
+Plotting /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.spline_pass1.png
+Outlier threshold is... 1.5944327510518074e-07
+Writing p-values and q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.spline_pass1.significances.txt
+Plotting q-values to file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.spline_pass1.qplot.png
+Number of outliers is... 13010
+Spline fit Pass 1 completed. Time took 69.77412819862366
+=========================
+Fit-Hi-C completed successfully
+
+
+
+                    #  Step #5. Filter significances file to exclude insignificant contacts
+
+                    filter_significances_file \
+                        --input-file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.txt.gz \
+                        --output-file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz \
+                        --q-value-threshold 0.05
+
+Filtered file /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz was created successfully.
+
+                    #  Step #6. Create bedpe "arcs" file from filtered significances file
+
+                    create_bedpe_file \
+                        -i /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.txt.gz \
+                        -o /home/kalavatt/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process/13_FitHiC2_genome_KR-filt-0.4_whole-matrix/G2.1600.ds-to-Q.XII-all.spline_pass1.res1600.significances.filt.bedpe \
+                        -r 1600 \
+                        -c1 255,0,0 \
+                        -c2 255,255,0 \
+                        -c3 0,255,0 \
+                        -c4 0,255,255 \
+                        -c5 0,0,255 \
+                        -t1 5 \
+                        -t2 10 \
+                        -t3 50 \
+                        -t4 100
+```
+</details>
+<br />
 <br />
 
 <a id="help-messages"></a>
 ## Help messages
-<a id="printed-2"></a>
+<a id="printed-4"></a>
 ### Printed
 <details>
 <summary><i>Printed: Help messages</i></summary>

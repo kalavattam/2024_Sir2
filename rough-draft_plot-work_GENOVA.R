@@ -576,8 +576,8 @@ if(base::isTRUE(run_draft_code)) {
 }
 
 
-run_draft_code <- FALSE
-if(base::isTRUE(run_draft_code)) {
+run_test_code <- FALSE
+if(base::isTRUE(run_test_code)) {
     chrom <- "XII"
     
     chrom_start <- 1
@@ -666,36 +666,3 @@ if(base::isTRUE(run_draft_code)) {
         theme(axis.text.x = element_text(angle = 90, hjust = 1))
         # Optional: Rotate x-axis labels for better readability
 }
-
-list.files()
-
-bg <- readr::read_tsv(
-    # "MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.XII-451400-469200_ds-genome_KR-filt-0.4-cis-contacts.bedgraph",
-    "MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.1600.downsample-to-Q.XII-451400-469200_I-1-230217_KR-filt-0.4-all-contacts.bedgraph",
-    col_names = c("chr_a", "start_a", "end_a", "chr_r", "start_r", "end_r", "value")
-) %>%
-    dplyr::group_by(chr_r, start_r, end_r) %>%
-    dplyr::summarize(
-        chr_a = "XII",
-        start_a = min(start_a),
-        end_a = max(end_a),
-        value = mean(value, na.rm = TRUE)
-    ) %>%
-    ungroup()
-
-head(bg)
-
-
-p <- ggplot(bg, aes(x = ((start_r + end_r) / 2), y = value)) +
-# p <- ggplot(bg_avg, aes(x = ((start_r + end_r) / 2), y = value)) +
-# p <- ggplot(bg_avg, aes(x = start_r, y = value)) +
-    geom_line(aes(color = chr_a)) +  # Color by chr_a to differentiate viewpoints, if there are multiple
-    labs(
-        title = "v4C plot, Q",
-        subtitle = "1600-bp resolution",
-        x = "Genomic position",
-        y = "Interactions (KR-balanced values)"
-    ) +
-    coord_cartesian(ylim = c(0, 0.0015)) +
-    theme_minimal()
-print(p)
