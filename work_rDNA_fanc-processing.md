@@ -3257,6 +3257,8 @@ while IFS=" " read -r -d $'\0'; do
     cools+=( "${REPLY}" )
 done  < <(
     find \
+        11_cooler_genome_KR-filt-0.4 \
+        11_cooler_genome_KR-filt-0.4_whole-matrix \
         11_cooler_genome_KR-filt-0.5 \
         11_cooler_genome_KR-filt-0.5_whole-matrix \
         11_cooler_genome_KR-filt-0.6 \
