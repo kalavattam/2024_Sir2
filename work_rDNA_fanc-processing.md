@@ -31,6 +31,7 @@
     1. [Code](#code-8)
 1. [6. Convert `.hic` matrices to `.cool` matrices](#6-convert-hic-matrices-to-cool-matrices)
     1. [Code](#code-9)
+    1. [Printed](#printed)
 1. [7. Run HiCExplorer `hicCompareMatrices`](#7-run-hicexplorer-hiccomparematrices)
     1. [Code](#code-10)
 1. [8. `#TODO` Come up with name for this section](#8-todo-come-up-with-name-for-this-section)
@@ -994,21 +995,40 @@ done
 #!/bin/bash
 
 #  Get situated
-[[ ${CONDA_DEFAULT_ENV} != fanc_pip_env ]] &&
-    source activate fanc_pip_env ||
-    true
+if [[ ${CONDA_DEFAULT_ENV} == fanc_pip_env ]]; then
+    :
+elif [[ ${CONDA_DEFAULT_ENV} != base ]]; then
+    conda deactivate
+    source activate fanc_pip_env
+elif [[ ${CONDA_DEFAULT_ENV} == base ]]; then
+    source activate fanc_pip_env
+fi
 
 cd "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process" ||
     echo "cd'ing failed; check on this"
 
 unset filt && typeset -a filt=(
     # 0.2
-    # 0.3
-    0.4
     # 0.2_whole-matrix
+    # 0.3
     # 0.3_whole-matrix
+    # 0.4
     # 0.4_whole-matrix
+    0.5
+    0.5_whole-matrix
+    0.6
+    0.6_whole-matrix
+    0.7
+    0.7_whole-matrix
+    0.8
+    0.8_whole-matrix
+    0.9
+    0.9_whole-matrix
 )
+
+check_array=true
+if ${check_array}; then echo_test "${filt[@]}"; fi
+
 for i in "${filt[@]}"; do
     if [[ ! "${i}" =~ "whole-matrix" ]]; then
         [[ ! -d 10_fanc_VII_KR-filt-${i} ]] &&
@@ -1022,6 +1042,10 @@ for i in "${filt[@]}"; do
         [[ ! -d 10_fanc_XV_KR-filt-${i} ]] &&
             mkdir -p 10_fanc_XV_KR-filt-${i}/err_out ||
             true
+        
+        [[ ! -d 10_fanc_genome_KR-filt-${i} ]] &&
+            mkdir -p 10_fanc_genome_KR-filt-${i}/err_out ||
+            true
     fi
 
     [[ ! -d 10_fanc_genome_KR-filt-${i} ]] &&
@@ -1031,14 +1055,14 @@ done
 
 threads=1
 # unset chroms && typeset -a chroms=("XII" "gen")
-# unset chroms && typeset chroms="gen"
-unset chroms && typeset chroms=("VII" "XV")
+unset chroms && typeset chroms="gen"
+# unset chroms && typeset chroms=("VII" "XV")
 unset res && typeset -a res=(
     50 100 150 200 300 400 500 800 1600 3200 5000 6400 12800
 )
 
-check_array=true
-if ${check_array}; then
+check_arrays=true
+if ${check_arrays}; then
     echo_test "${filt[@]}"
     echo ""
 
@@ -1057,29 +1081,39 @@ for j in "${chroms[@]}"; do
     if [[ "${j}" == "VII" ]]; then
         unset d_in && typeset d_in="09_fanc_VII"
         unset a_out && typeset -a a_out=(
-            "10_fanc_VII_KR-filt-0.4"
+            # "10_fanc_VII_KR-filt-0.4"
         )
     elif [[ "${j}" == "XII" ]]; then
         unset d_in && typeset d_in="09_fanc_XII"
         unset a_out && typeset -a a_out=(
             # "10_fanc_XII_KR-filt-0.2"
             # "10_fanc_XII_KR-filt-0.3"
-            "10_fanc_XII_KR-filt-0.4"
+            # "10_fanc_XII_KR-filt-0.4"
         )
     elif [[ "${j}" == "XV" ]]; then
         unset d_in && typeset d_in="09_fanc_XV"
         unset a_out && typeset -a a_out=(
-            "10_fanc_XV_KR-filt-0.4"
+            # "10_fanc_XV_KR-filt-0.4"
         )
     elif [[ "${j}" == "gen" ]]; then
         unset d_in && typeset d_in="09_fanc_genome"
         unset a_out && typeset -a a_out=(
             # "10_fanc_genome_KR-filt-0.2"
-            # "10_fanc_genome_KR-filt-0.3"
-            "10_fanc_genome_KR-filt-0.4"
             # "10_fanc_genome_KR-filt-0.2_whole-matrix"
+            # "10_fanc_genome_KR-filt-0.3"
             # "10_fanc_genome_KR-filt-0.3_whole-matrix"
+            # "10_fanc_genome_KR-filt-0.4"
             # "10_fanc_genome_KR-filt-0.4_whole-matrix"
+            "10_fanc_genome_KR-filt-0.5"
+            "10_fanc_genome_KR-filt-0.5_whole-matrix"
+            "10_fanc_genome_KR-filt-0.6"
+            "10_fanc_genome_KR-filt-0.6_whole-matrix"
+            "10_fanc_genome_KR-filt-0.7"
+            "10_fanc_genome_KR-filt-0.7_whole-matrix"
+            "10_fanc_genome_KR-filt-0.8"
+            "10_fanc_genome_KR-filt-0.8_whole-matrix"
+            "10_fanc_genome_KR-filt-0.9"
+            "10_fanc_genome_KR-filt-0.9_whole-matrix"
         )
     fi
 
@@ -1151,11 +1185,21 @@ for l in "${chroms[@]}"; do
     elif [[ "${l}" == "gen" ]]; then
         unset a_in && typeset -a a_in=(
             # "10_fanc_genome_KR-filt-0.2"
-            # "10_fanc_genome_KR-filt-0.3"
-            "10_fanc_genome_KR-filt-0.4"
             # "10_fanc_genome_KR-filt-0.2_whole-matrix"
+            # "10_fanc_genome_KR-filt-0.3"
             # "10_fanc_genome_KR-filt-0.3_whole-matrix"
+            # "10_fanc_genome_KR-filt-0.4"
             # "10_fanc_genome_KR-filt-0.4_whole-matrix"
+            "10_fanc_genome_KR-filt-0.5"
+            "10_fanc_genome_KR-filt-0.5_whole-matrix"
+            "10_fanc_genome_KR-filt-0.6"
+            "10_fanc_genome_KR-filt-0.6_whole-matrix"
+            "10_fanc_genome_KR-filt-0.7"
+            "10_fanc_genome_KR-filt-0.7_whole-matrix"
+            "10_fanc_genome_KR-filt-0.8"
+            "10_fanc_genome_KR-filt-0.8_whole-matrix"
+            "10_fanc_genome_KR-filt-0.9"
+            "10_fanc_genome_KR-filt-0.9_whole-matrix"
         )
     fi
     # echo_test "${a_in[@]}"
@@ -1232,6 +1276,7 @@ for l in "${chroms[@]}"; do
                     #SBATCH --job-name="${job_name}"
                     #SBATCH --nodes=1
                     #SBATCH --cpus-per-task=${threads}
+                    #SBATCH --time=1:00:00
                     #SBATCH --error="${k}/err_out/${job_name}.%A.stderr.txt"
                     #SBATCH --output="${k}/err_out/${job_name}.%A.stdout.txt"
 
@@ -1253,6 +1298,7 @@ sbatch << EOF
 #SBATCH --job-name="${job_name}"
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=${threads}
+#SBATCH --time=1:00:00
 #SBATCH --error="${k}/err_out/${job_name}.%A.stderr.txt"
 #SBATCH --output="${k}/err_out/${job_name}.%A.stdout.txt"
 
@@ -2021,6 +2067,7 @@ cat << EOF
 #SBATCH --job-name="${job_name}"
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=${threads}
+#SBATCH --time=0:15:00
 #SBATCH --error="${err_out_dir}/${job_name}.%A.stderr.txt"
 #SBATCH --output="${err_out_dir}/${job_name}.%A.stdout.txt"
 
@@ -2043,6 +2090,21 @@ EOF
     return 0
 }
 
+check_outfiles=false
+if ${check_outfiles}; then
+    # find ./10_fanc_genome_KR-filt-* -path "*/err_out/*.stderr.txt" -size +0c
+    find \
+        ./10_fanc_genome_KR-filt-* \
+        -path "*/err_out/*.stderr.txt" \
+        -size +0c \
+        -exec grep -i -l "error\|exit\|failure" {} +
+
+    for dir in 10_fanc_genome_KR-filt-*; do
+        echo -n "${dir}: "
+        find "${dir}" -name '*.hic' -type f | wc -l
+    done
+fi
+
 
 #  Configure work environment, directories, and variables =====================
 # #  Start interactive job
@@ -2054,18 +2116,28 @@ change_dir \
 
 #  Set variables, arrays
 unset dirs && typeset -a dirs=(
-    "11_cooler_VII_KR-filt-0.4"
+    # "11_cooler_VII_KR-filt-0.4"
     # "11_cooler_XII_KR-filt-0.2"
     # "11_cooler_XII_KR-filt-0.3"
     # "11_cooler_XII_KR-filt-0.4"
     # "11_cooler_XII_KR-filt-0.4_rDNA-left-array"
-    "11_cooler_XV_KR-filt-0.4"
+    # "11_cooler_XV_KR-filt-0.4"
     # "11_cooler_genome_KR-filt-0.2"
-    # "11_cooler_genome_KR-filt-0.3"
-    # "11_cooler_genome_KR-filt-0.4"
     # "11_cooler_genome_KR-filt-0.2_whole-matrix"
+    # "11_cooler_genome_KR-filt-0.3"
     # "11_cooler_genome_KR-filt-0.3_whole-matrix"
+    # "11_cooler_genome_KR-filt-0.4"
     # "11_cooler_genome_KR-filt-0.4_whole-matrix"
+    "11_cooler_genome_KR-filt-0.5"
+    "11_cooler_genome_KR-filt-0.5_whole-matrix"
+    "11_cooler_genome_KR-filt-0.6"
+    "11_cooler_genome_KR-filt-0.6_whole-matrix"
+    "11_cooler_genome_KR-filt-0.7"
+    "11_cooler_genome_KR-filt-0.7_whole-matrix"
+    "11_cooler_genome_KR-filt-0.8"
+    "11_cooler_genome_KR-filt-0.8_whole-matrix"
+    "11_cooler_genome_KR-filt-0.9"
+    "11_cooler_genome_KR-filt-0.9_whole-matrix"
 )
 #  echo_test "${dirs[@]}"
 
@@ -2202,13 +2274,50 @@ unset dirs && typeset -a dirs=(
 # )
 # # echo_test "${hics[@]}"
 
+# unset hics && typeset -a hics
+# while IFS=" " read -r -d $'\0'; do
+#     hics+=( "${REPLY}" )
+# done < <(
+#     find \
+#         10_fanc_VII_KR-filt-0.4 \
+#         10_fanc_XV_KR-filt-0.4 \
+#         -maxdepth 1 \
+#         -type f \
+#         \( \
+#             -name "*.50.*" -o \
+#             -name "*.100.*" -o \
+#             -name "*.150.*" -o \
+#             -name "*.200.*" -o \
+#             -name "*.300.*" -o \
+#             -name "*.400.*" -o \
+#             -name "*.500.*" -o \
+#             -name "*.800.*" -o \
+#             -name "*.1600.*" -o \
+#             -name "*.3200.*" -o \
+#             -name "*.5000.*" -o \
+#             -name "*.6400.*" -o \
+#             -name "*.12800.*" \
+#         \) \
+#         -print0 |
+#             sort -z
+# )
+# # echo_test "${hics[@]}"
+
 unset hics && typeset -a hics
 while IFS=" " read -r -d $'\0'; do
     hics+=( "${REPLY}" )
 done < <(
     find \
-        10_fanc_VII_KR-filt-0.4 \
-        10_fanc_XV_KR-filt-0.4 \
+        10_fanc_genome_KR-filt-0.5 \
+        10_fanc_genome_KR-filt-0.5_whole-matrix \
+        10_fanc_genome_KR-filt-0.6 \
+        10_fanc_genome_KR-filt-0.6_whole-matrix \
+        10_fanc_genome_KR-filt-0.7 \
+        10_fanc_genome_KR-filt-0.7_whole-matrix \
+        10_fanc_genome_KR-filt-0.8 \
+        10_fanc_genome_KR-filt-0.8_whole-matrix \
+        10_fanc_genome_KR-filt-0.9 \
+        10_fanc_genome_KR-filt-0.9_whole-matrix \
         -maxdepth 1 \
         -type f \
         \( \
@@ -2258,8 +2367,14 @@ change_dir \
     "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process"
 
 #  Source initial work environment that allows access to FAN-C
-activate_env fanc_pip_env
-# activate_env pairtools_env
+if [[ ${CONDA_DEFAULT_ENV} == fanc_pip_env ]]; then
+    :
+elif [[ ${CONDA_DEFAULT_ENV} != base ]]; then
+    conda deactivate
+    source activate fanc_pip_env
+elif [[ ${CONDA_DEFAULT_ENV} == base ]]; then
+    source activate fanc_pip_env
+fi
 
 #  Create outfile directories if they don't exist
 for dir in "${dirs[@]}"; do create_dir_if_none -d "${dir}"; done
@@ -2334,6 +2449,99 @@ done
 #NOTE
 #  Nice! .hic files from fanc subset that were converted to .cool files via
 #+ fanc to-cooler retain balance weights
+```
+</details>
+<br />
+
+<a id="printed"></a>
+#### Printed
+<details>
+<summary><i>Printed: 6. Convert `.hic` matrices to `.cool` matrices (2023-1027)</i></summary>
+
+```txt
+❯ if ${check_outfiles}; then
+>     # find ./10_fanc_genome_KR-filt-* -path "*/err_out/*.stderr.txt" -size +0c
+>     find \
+>         ./10_fanc_genome_KR-filt-* \
+>         -path "*/err_out/*.stderr.txt" \
+>         -size +0c \
+>         -exec grep -i -l "error\|exit\|failure" {} +
+> 
+> 
+>     for dir in 10_fanc_genome_KR-filt-*; do
+>         echo -n "${dir}: "
+>         find "${dir}" -name '*.hic' -type f | wc -l
+>     done
+> fi
+./10_fanc_genome_KR-filt-0.2_whole-matrix/err_out/balance.MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.100.downsample-to-Q.30289484.stderr.txt
+./10_fanc_genome_KR-filt-0.2_whole-matrix/err_out/balance.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.30289480.stderr.txt
+./10_fanc_genome_KR-filt-0.2_whole-matrix/err_out/balance.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.150.downsample-to-Q.30289486.stderr.txt
+./10_fanc_genome_KR-filt-0.2_whole-matrix/err_out/balance.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.100.downsample-to-Q.30289485.stderr.txt
+./10_fanc_genome_KR-filt-0.2_whole-matrix/err_out/balance.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.30289477.stderr.txt
+./10_fanc_genome_KR-filt-0.2_whole-matrix/err_out/balance.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.30289475.stderr.txt
+./10_fanc_genome_KR-filt-0.2_whole-matrix/err_out/balance.MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.30289476.stderr.txt
+
+./10_fanc_genome_KR-filt-0.3_whole-matrix/err_out/balance.MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.100.downsample-to-Q.30289523.stderr.txt
+./10_fanc_genome_KR-filt-0.3_whole-matrix/err_out/balance.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.150.downsample-to-Q.30289527.stderr.txt
+./10_fanc_genome_KR-filt-0.3_whole-matrix/err_out/balance.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.30289519.stderr.txt
+./10_fanc_genome_KR-filt-0.3_whole-matrix/err_out/balance.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.30289521.stderr.txt
+./10_fanc_genome_KR-filt-0.3_whole-matrix/err_out/balance.MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.30289520.stderr.txt
+
+./10_fanc_genome_KR-filt-0.4_whole-matrix/err_out/balance.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.30289560.stderr.txt
+./10_fanc_genome_KR-filt-0.4_whole-matrix/err_out/balance.MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.30289559.stderr.txt
+./10_fanc_genome_KR-filt-0.4_whole-matrix/err_out/balance.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.150.downsample-to-Q.30289564.stderr.txt
+./10_fanc_genome_KR-filt-0.4_whole-matrix/err_out/balance.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.30289558.stderr.txt
+./10_fanc_genome_KR-filt-0.4_whole-matrix/err_out/balance.MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.100.downsample-to-Q.30289562.stderr.txt
+./10_fanc_genome_KR-filt-0.4_whole-matrix/err_out/balance.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.100.downsample-to-Q.30289561.stderr.txt
+
+./10_fanc_genome_KR-filt-0.5_whole-matrix/err_out/balance.MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.100.downsample-to-Q.31161327.stderr.txt
+./10_fanc_genome_KR-filt-0.5_whole-matrix/err_out/balance.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.100.downsample-to-Q.31161324.stderr.txt
+./10_fanc_genome_KR-filt-0.5_whole-matrix/err_out/balance.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.100.downsample-to-Q.31161328.stderr.txt
+./10_fanc_genome_KR-filt-0.5_whole-matrix/err_out/balance.MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.31161322.stderr.txt
+
+./10_fanc_genome_KR-filt-0.6_whole-matrix/err_out/balance.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.150.downsample-to-Q.31161438.stderr.txt
+./10_fanc_genome_KR-filt-0.6_whole-matrix/err_out/balance.MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.31161431.stderr.txt
+./10_fanc_genome_KR-filt-0.6_whole-matrix/err_out/balance.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.31161432.stderr.txt
+./10_fanc_genome_KR-filt-0.6_whole-matrix/err_out/balance.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.31161430.stderr.txt
+./10_fanc_genome_KR-filt-0.6_whole-matrix/err_out/balance.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.100.downsample-to-Q.31161435.stderr.txt
+
+./10_fanc_genome_KR-filt-0.7_whole-matrix/err_out/balance.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.31161519.stderr.txt
+./10_fanc_genome_KR-filt-0.7_whole-matrix/err_out/balance.MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.100.downsample-to-Q.31161523.stderr.txt
+./10_fanc_genome_KR-filt-0.7_whole-matrix/err_out/balance.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.100.downsample-to-Q.31161522.stderr.txt
+
+./10_fanc_genome_KR-filt-0.8_whole-matrix/err_out/balance.MC-2019_Q_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.31161607.stderr.txt
+./10_fanc_genome_KR-filt-0.8_whole-matrix/err_out/balance.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.31161609.stderr.txt
+
+./10_fanc_genome_KR-filt-0.9_whole-matrix/err_out/balance.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.200.downsample-to-Q.31161696.stderr.txt
+./10_fanc_genome_KR-filt-0.9_whole-matrix/err_out/balance.MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.200.downsample-to-Q.31161695.stderr.txt
+./10_fanc_genome_KR-filt-0.9_whole-matrix/err_out/balance.MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.50.downsample-to-Q.31161686.stderr.txt
+./10_fanc_genome_KR-filt-0.9_whole-matrix/err_out/balance.MC-2020_30C-a15_WT_repM.standard-rDNA-complete.mapped.100.downsample-to-Q.31161689.stderr.txt
+./10_fanc_genome_KR-filt-0.9_whole-matrix/err_out/balance.MC-2020_nz_WT_repM.standard-rDNA-complete.mapped.100.downsample-to-Q.31161690.stderr.txt
+
+
+10_fanc_genome_KR-filt-0.2: 39
+10_fanc_genome_KR-filt-0.2_whole-matrix: 39
+
+10_fanc_genome_KR-filt-0.3: 39
+10_fanc_genome_KR-filt-0.3_whole-matrix: 39
+
+10_fanc_genome_KR-filt-0.4: 39
+10_fanc_genome_KR-filt-0.4_whole-matrix: 39
+
+10_fanc_genome_KR-filt-0.5: 39
+10_fanc_genome_KR-filt-0.5_whole-matrix: 39
+
+10_fanc_genome_KR-filt-0.6: 39
+10_fanc_genome_KR-filt-0.6_whole-matrix: 39
+
+10_fanc_genome_KR-filt-0.7: 39
+10_fanc_genome_KR-filt-0.7_whole-matrix: 39
+
+10_fanc_genome_KR-filt-0.8: 39
+10_fanc_genome_KR-filt-0.8_whole-matrix: 39
+
+10_fanc_genome_KR-filt-0.9: 39
+10_fanc_genome_KR-filt-0.9_whole-matrix: 39
 ```
 </details>
 <br />
@@ -2931,6 +3139,7 @@ cat << EOF
 #SBATCH --job-name="${job_name}"
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
+#SBATCH --time=1:00:00
 #SBATCH --error="${err_out_dir}/${job_name}.%A.stderr.txt"
 #SBATCH --output="${err_out_dir}/${job_name}.%A.stdout.txt"
 
@@ -2961,7 +3170,7 @@ EOF
 
 #  Configure work environment, directories, and variables =====================
 #  Set variables, arrays
-# coord="I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI"  # echo "${coord}"
+coord="I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI"  # echo "${coord}"
 # coord="XII:451000-469000"                                      # echo "${coord}"  #NOGOOD
 # coord="XII:451000-469000"                                      # echo "${coord}"  #NOGOOD
 # coord="XII:451000-469400"                                      # echo "${coord}"  #NOGOOD
@@ -2979,7 +3188,7 @@ EOF
 # coord="XII:451200-493000"                                      # echo "${coord}"  #NOGOOD
 # coord="XII:451200-494000"                                      # echo "${coord}"  #NOGOOD
 # coord="XII:451200-500000"                                      # echo "${coord}"  #NOGOOD
-coord="XII:451400-469200"                                      # echo "${coord}"  #GOOD
+# coord="XII:451400-469200"                                      # echo "${coord}"  #GOOD
 # coord="XII:451400-490800"                                      # echo "${coord}"  #GOOD
 # coord="XII:452000-462000"                                      # echo "${coord}"  #NOGOOD
 # coord="XII:451500-461500"                                      # echo "${coord}"  #BETTER
@@ -2996,10 +3205,10 @@ coord="XII:451400-469200"                                      # echo "${coord}"
 # res=6400                                                       # echo "${res}"
 # res=5000                                                       # echo "${res}"
 # res=3200                                                       # echo "${res}"
-# res=1600                                                       # echo "${res}"
+res=1600                                                       # echo "${res}"
 # res=800                                                        # echo "${res}"
 # res=300                                                        # echo "${res}"
-res=200                                                        # echo "${res}"
+# res=200                                                        # echo "${res}"
 
 # vmin=0.0000001  # 10e-7                                        # echo "${vmin}"
 # vmin=0.0000003162278                                           # echo "${vmin}"
@@ -3017,10 +3226,13 @@ matcol="RdPu"                                                  # echo "${matcol}
 
 # date="2023-1019"                                               # echo "${date}"
 # date="2023-1020"                                               # echo "${date}"
-date="2023-1023"                                               # echo "${date}"
+# date="2023-1023"                                               # echo "${date}"
+date="2023-1027"                                               # echo "${date}"
 
 # outdir="pngs/2023-1013_XII-square_whole-genome"                # echo "${outdir}"
-if [[ ${coord} == "XI XII XIII" ]]; then
+if [[ ${coord} == "I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI" ]]; then
+    outdir="pngs/${date}_whole-genome"                         # echo "${outdir}"
+elif [[ ${coord} == "XI XII XIII" ]]; then
     outdir="pngs/${date}_$(sed 's/ /-/g' <(echo "${coord}"))"  # echo "${outdir}"
 else
     outdir="pngs/${date}_$(sed 's/\:/-/g' <(echo "${coord}"))" # echo "${outdir}"
@@ -3045,13 +3257,23 @@ while IFS=" " read -r -d $'\0'; do
     cools+=( "${REPLY}" )
 done  < <(
     find \
-        11_cooler_XII_KR-filt-0.4 \
+        11_cooler_genome_KR-filt-0.5 \
+        11_cooler_genome_KR-filt-0.5_whole-matrix \
+        11_cooler_genome_KR-filt-0.6 \
+        11_cooler_genome_KR-filt-0.6_whole-matrix \
+        11_cooler_genome_KR-filt-0.7 \
+        11_cooler_genome_KR-filt-0.7_whole-matrix \
+        11_cooler_genome_KR-filt-0.8 \
+        11_cooler_genome_KR-filt-0.8_whole-matrix \
+        11_cooler_genome_KR-filt-0.9 \
+        11_cooler_genome_KR-filt-0.9_whole-matrix \
         -maxdepth 1 \
         -type f \
         -name MC*.${res}.*cool \
         -print0 \
             | sort -z
 )
+# 11_cooler_XII_KR-filt-0.4 \
 # 11_cooler_${coord}_KR-filt-0.4 \
 
 check_array=true
@@ -3060,7 +3282,14 @@ if ${check_array}; then echo_test "${cools[@]}"; fi
 
 #  Execute main tasks =========================================================
 #  Activate environment
-activate_env "hicexplorer_764_env"
+if [[ ${CONDA_DEFAULT_ENV} == hicexplorer_764_env ]]; then
+    :
+elif [[ ${CONDA_DEFAULT_ENV} != base ]]; then
+    conda deactivate
+    source activate hicexplorer_764_env
+elif [[ ${CONDA_DEFAULT_ENV} == base ]]; then
+    source activate hicexplorer_764_env
+fi
 
 #  Go to work directory
 change_dir \
@@ -3068,17 +3297,6 @@ change_dir \
 
 #  Make outfile directory if it doesn't exist
 [[ ! -d "${outdir}" ]] && mkdir -p "${outdir}/err_out" || true
-
-# vmin=0.0000001  # 10e-7                                        # echo "${vmin}"
-# vmin=0.0000003162278                                           # echo "${vmin}"
-# vmin=0.000001  # 10e-6                                         # echo "${vmin}"
-# vmin=0.000003162278                                            # echo "${vmin}"
-# vmin=0.00001  # 10e-5                                          # echo "${vmin}"
-# vmin=0.00003162278                                             # echo "${vmin}"
-# vmin=0.0001  # 10e-4                                           # echo "${vmin}"
-# vmin=0.0003162278                                              # echo "${vmin}"
-# vmin=0.001  # 10e-3                                            # echo "${vmin}"
-# vmin=0.003162278                                               # echo "${vmin}"
 
 iter=0
 for i in "${cools[@]}"; do
