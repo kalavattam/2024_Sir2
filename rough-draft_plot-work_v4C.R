@@ -86,12 +86,13 @@ plot_v4c <- function(
     ymin = 0,
     ymax = 0.0015
 ) {
-    debug <- FALSE
+    debug <- TRUE
     if(base::isTRUE(debug)) {
         data <- pro_Q
         chr_limit <- "XII"
         # region_limit <- list(chr_r = "XII", start_r = 400000, end_r = 600000)
-        region_limit <- list(chr_r = "XII", start_r = 100000, end_r = 200000)
+        # region_limit <- list(chr_r = "XII", start_r = 100000, end_r = 200000)
+        region_limit <- NULL
         subtitle <- "1600-bp resolution"
         xlabel <- "Genomic position"
         ylabel <- "Interaction frequency (KR-balanced)"
@@ -111,7 +112,7 @@ plot_v4c <- function(
             stop("chr_limit must be of class 'roman'.")
         }
     }
-
+    
     if(!is.null(region_limit)) {
         if (!is.null(chr_limit)) {
             warning(paste(
@@ -254,10 +255,26 @@ setwd(paste(p_prj, p_exp, sep = "/"))  # getwd()  # list.dirs()
 
 
 #  Set up and load files ------------------------------------------------------
-d_bg <- "pngs/2023-1025_XII-451400-469200_v4C"
-bg_Q <- paste(d_bg, "Q_res-1600_KR-filt-0.4-all-contacts.bg", sep = "/")
-bg_1 <- paste(d_bg, "G1_res-1600_KR-filt-0.4-all-contacts.bg", sep = "/")
-bg_2 <- paste(d_bg, "G2-M_res-1600_KR-filt-0.4-all-contacts.bg", sep = "/")
+# d_bg <- "pngs/2023-1025_XII-451400-469200_v4C"
+
+filt <- 0.4
+d_bg <- "pngs/2023-1028_XII-451400-469200_v4C"
+s_bg <- paste0("KR-filt-", filt)
+bg_Q <- paste(
+    d_bg, s_bg,
+    paste0("Q_res-1600_KR-filt-", filt, "-all-contacts.bg"),
+    sep = "/"
+)
+bg_1 <- paste(
+    d_bg, s_bg,
+    paste0("G1_res-1600_KR-filt-", filt, "-all-contacts.bg"),
+    sep = "/"
+)
+bg_2 <- paste(
+    d_bg, s_bg,
+    paste0("G2-M_res-1600_KR-filt-", filt, "-all-contacts.bg"),
+    sep = "/"
+)
 
 pro_Q <- process_bedgraph(bg_Q, sample = "Q")
 pro_1 <- process_bedgraph(bg_1, sample = "G1")
@@ -270,22 +287,25 @@ adj_a <- dplyr::bind_rows(adj_Q, adj_1, adj_2)
 
 
 #  Draw plots -----------------------------------------------------------------
-chr_XII_Q <- plot_v4c(adj_Q, ymax = 0.0006)
-chr_XII_1 <- plot_v4c(adj_1, ymax = 0.0006)
-chr_XII_2 <- plot_v4c(adj_2, ymax = 0.0006)
-chr_XII_a <- plot_v4c(adj_a, ymax = 0.0006)
-
-print(chr_XII_Q)
-print(chr_XII_1)
-print(chr_XII_2)
-print(chr_XII_a)
+draw_XII <- FALSE
+if(base::isTRUE(draw_XII)) {
+    chr_XII_Q <- plot_v4c(adj_Q, ymax = 0.0006, chr_limit = "XII")
+    chr_XII_1 <- plot_v4c(adj_1, ymax = 0.0006, chr_limit = "XII")
+    chr_XII_2 <- plot_v4c(adj_2, ymax = 0.0006, chr_limit = "XII")
+    chr_XII_a <- plot_v4c(adj_a, ymax = 0.0006, chr_limit = "XII")
+    
+    print(chr_XII_Q)
+    print(chr_XII_1)
+    print(chr_XII_2)
+    print(chr_XII_a)
+}
 
 gen_Q <- plot_v4c_genome(adj_Q)
 gen_1 <- plot_v4c_genome(adj_1)
 gen_2 <- plot_v4c_genome(adj_2)
-gen_a <- plot_v4c_genome(adj_a)
+gen_a <- plot_v4c_genome(adj_a, ymax = 0.0004)
 
-print(gen_Q)
-print(gen_1)
-print(gen_2)
+# print(gen_Q)
+# print(gen_1)
+# print(gen_2)
 print(gen_a)

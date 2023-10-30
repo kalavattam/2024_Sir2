@@ -2660,6 +2660,7 @@ cat << EOF
 #SBATCH --job-name="${job_name}"
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
+#SBATCH --time=0:30:00
 #SBATCH --error="${err_out_dir}/${job_name}.%A.stderr.txt"
 #SBATCH --output="${err_out_dir}/${job_name}.%A.stdout.txt"
 
@@ -2688,11 +2689,16 @@ activate_env "hicexplorer_764_env"
 
 # Directories containing the cooler files
 dirs=(
+    "11_cooler_genome_KR-filt-0.4_whole-matrix"
+    "11_cooler_genome_KR-filt-0.5_whole-matrix"
+    "11_cooler_genome_KR-filt-0.6_whole-matrix"
+    "11_cooler_genome_KR-filt-0.7_whole-matrix"
+    "11_cooler_genome_KR-filt-0.8_whole-matrix"
+    "11_cooler_genome_KR-filt-0.9_whole-matrix"
     # "11_cooler_genome_KR-filt-0.4"
-    # "11_cooler_genome_KR-filt-0.4_whole-matrix"
-    "11_cooler_VII_KR-filt-0.4"
+    # "11_cooler_VII_KR-filt-0.4"
     # "11_cooler_XII_KR-filt-0.4"
-    "11_cooler_XV_KR-filt-0.4"
+    # "11_cooler_XV_KR-filt-0.4"
 )
 # echo_test "${dirs[@]}"
 
@@ -3139,7 +3145,7 @@ cat << EOF
 #SBATCH --job-name="${job_name}"
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
-#SBATCH --time=1:00:00
+#SBATCH --time=0:15:00
 #SBATCH --error="${err_out_dir}/${job_name}.%A.stderr.txt"
 #SBATCH --output="${err_out_dir}/${job_name}.%A.stdout.txt"
 
@@ -3473,9 +3479,11 @@ calc="log2ratio"
 
 # chr="XII"                                                      # echo "${chr}"
 # chr="VII"                                                      # echo "${chr}"
-chr="XV"                                                      # echo "${chr}"
-start=451400                                                   # echo "${start}"
-end=460800                                                     # echo "${end}"
+# chr="XV"                                                       # echo "${chr}"
+# chr="genome"                                                   # echo "${chr}"
+chr="I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI"    # echo "${coord}"
+# start=451400                                                   # echo "${start}"
+# end=460800                                                     # echo "${end}"
 # coord="${chr}:${start}-${end}"                                 # echo "${coord}"  #GOOD
 # coord="XI XII XIII"                                            # echo "${coord}"
 coord="${chr}"                                                 # echo "${coord}"
@@ -3488,9 +3496,12 @@ matcol="PuOr_r"                                                # echo "${matcol}
 
 # date="2023-1019"                                               # echo "${date}"
 # date="2023-1020"                                               # echo "${date}"
-date="2023-1023"                                               # echo "${date}"
+# date="2023-1023"                                               # echo "${date}"
+date="2023-1028"                                               # echo "${date}"
 
-if [[ ${coord} == "XI XII XIII" ]]; then
+if [[ ${coord} == "I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI" ]]; then
+    outdir="pngs/${date}_genome"                               # echo "${outdir}"
+elif [[ ${coord} == "XI XII XIII" ]]; then
     outdir="pngs/${date}_$(sed 's/ /-/g' <(echo "${coord}"))"  # echo "${outdir}"
 else
     outdir="pngs/${date}_$(sed 's/\:/-/g' <(echo "${coord}"))" # echo "${outdir}"
@@ -3501,7 +3512,7 @@ while IFS=" " read -r -d $'\0'; do
     cools+=( "${REPLY}" )
 done < <(
     find \
-        12_hicCompareMatrices_${coord}_KR-filt-0.4/${choice} \
+        12_hicCompareMatrices_genome_KR-filt-0.4_whole-matrix/${choice} \
         -maxdepth 1 \
         -type f \
         -name *.${res}.${calc}.cool \
@@ -3509,6 +3520,7 @@ done < <(
             | sort -z
 )
 # 12_hicCompareMatrices_genome_KR-filt-0.4_whole-matrix/${choice} \
+# 12_hicCompareMatrices_${coord}_KR-filt-0.4/${choice} \
 
 check_array=true
 if ${check_array}; then echo_test "${cools[@]}"; fi
@@ -3522,7 +3534,7 @@ change_dir \
 #  Make outfile directory if it doesn't exist
 [[ ! -d "${outdir}" ]] && mkdir -p "${outdir}/err_out" || true
 
-vmax=2.5
+vmax=3.5
 vmin=-${vmax}
 
 iter=0                                                                           # echo "${iter}"
@@ -3535,12 +3547,15 @@ for i in "${cools[@]}"; do
     
     if [[ ${coord} == "I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI" ]]; then
         what="genome"
+    elif [[ "${coord}" == "genome" ]]; then
+        what="genome"
     elif [[ "${coord}" == *" "* ]]; then
         what=$(echo "${coord}" | sed 's/ /-/g')
     else
         # what="$(echo ${coord} | awk -F ':' '{ print $1 }')"
         what="${coord}"
-    fi                                                                           # echo "${what}"
+    fi
+    # echo "${what}"  # echo "${coord}"
 
     if [[ ${indir} =~ "whole-matrix" ]]; then
         how="$(
@@ -3569,7 +3584,7 @@ for i in "${cools[@]}"; do
             echo ${title} \
                 | awk -F '[;,\\ ]' '{ print $1"_ds-"$10"_"$3"-"$5"-"$6 }' \
                 | sed 's/\:/-/g'
-        )"                                                                       
+        )"
     fi                                                                           # echo "${suffix}"
 
     outfile="${outdir}/$(basename ${i} .cool).${vmax}.pdf"                       # echo "${outfile}"
@@ -3611,8 +3626,7 @@ for i in "${cools[@]}"; do
             -n ${vmin} \\
             -x ${vmax} \\
             -t \"${title}\" \\
-            -p ${dpi} \\
-            -d
+            -p ${dpi}
         """
     fi
 
@@ -4505,6 +4519,7 @@ cat << EOF
 #SBATCH --job-name="${job_name}"
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
+#SBATCH --time=0:30:00
 #SBATCH --error="${err_out_dir}/${job_name}.%A.stderr.txt"
 #SBATCH --output="${err_out_dir}/${job_name}.%A.stdout.txt"
 
@@ -4554,7 +4569,8 @@ anchor="${a_chr}:${a_start}-${a_end}"                            # echo "${coord
 res=1600                                                         # echo "${res}"
 
 # date="2023-1023"                                                 # echo "${date}"
-date="2023-1025"                                                 # echo "${date}"
+# date="2023-1025"                                                 # echo "${date}"
+date="2023-1028"                                                 # echo "${date}"
 
 outdir="pngs/${date}_$(sed 's/\:/-/g' <(echo "${anchor}"))_v4C"  # echo "${outdir}"
 
@@ -4573,7 +4589,11 @@ while IFS=" " read -r -d $'\0'; do
     cools+=( "${REPLY}" )
 done  < <(
     find \
-        11_cooler_genome_KR-filt-0.4_whole-matrix \
+        11_cooler_genome_KR-filt-0.5_whole-matrix \
+        11_cooler_genome_KR-filt-0.6_whole-matrix \
+        11_cooler_genome_KR-filt-0.7_whole-matrix \
+        11_cooler_genome_KR-filt-0.8_whole-matrix \
+        11_cooler_genome_KR-filt-0.9_whole-matrix \
         -maxdepth 1 \
         -type f \
         -name MC*.${res}.*cool \
@@ -4591,7 +4611,7 @@ unset ar_regions && typeset -a ar_regions=(
     "XV" "XVI"
 )
 
-#  For each chromosome, setting the end position as the last bp - 1
+#  For each chromosome, set the end position as the last bp - 1
 unset Ar_regions && typeset -A Ar_regions=(
     ["I"]=230217
     ["II"]=813183
@@ -4733,7 +4753,7 @@ for j in in "${ar_regions[@]}"; do
             """
         fi
         
-        do_dry_run=true
+        do_dry_run=false
         if ${do_dry_run}; then
             run_hicPlotViewpoint \
                 -i "${indir}/${infile}" \
@@ -4765,121 +4785,162 @@ for j in in "${ar_regions[@]}"; do
         sleep 0.2
     done
 done
+#FIXME
+#  This scheme for submitting jobs ultimately works, but there seem to be some
+#+ early jobs in which the anchor is "I:1-" (i.e., )
 
 
 #  Run small workflow to clean up v4C outdirectory ============================
-#TODO #INPROGRESS
-#  Rerun all of the above and the below; in the final concatenated bedgraph
-#+ outfilenames, we need to record the resolution of the data
-
 #  Navigate to the output directory
 cd "${outdir}" || echo "cd'ing failed; check on this"
+
+#  Loop through files matching pattern, make directories, and move the files
+for file in *_KR-filt-{0.5,0.6,0.7,0.8,0.9}-all-contacts.{bedgraph,pdf}; do
+    if [[ -f "$file" ]]; then
+        # Extract the directory name from the filename
+        dir_name=$(echo "${file}" | grep -oE "_KR-filt-[0-9\.]+")
+
+        # Remove the leading '_' character
+        dir_name=${dir_name:1}
+
+        # Create the directory if it doesn't exist
+        mkdir -p "${dir_name}"
+
+        # Move the file to the corresponding directory
+        mv "$file" "${dir_name}/"
+    fi
+done
+
+echo "Files have been moved to their respective directories."
 
 #  Define the sample groups
 unset samples && typeset -a samples=("Q_WT" "30C-a15_WT" "nz_WT")
 
-check_array=false
+check_array=true
 if ${check_array}; then echo_test "${samples[@]}"; fi
 
-#  Loop through each sample group
-for i in "${samples[@]}"; do
-    # i=${samples[2]}                                          # echo "${i}"
-    
-    #  Store the current sample name
-    sample="${i}"                                              # echo "${sample}"
+for h in KR-filt-{0.5,0.6,0.7,0.8,0.9}; do
+    cd "${h}"
 
-    #  Determine the prefix based on the sample name
-    if [[ "${sample}" == "Q_WT" ]]; then
-        prefix="Q"
-    elif [[ "${sample}" == "30C-a15_WT" ]]; then
-        prefix="G1"
-    elif [[ "${sample}" == "nz_WT" ]]; then
-        prefix="G2-M"
-    fi                                                         # echo "${prefix}"
-
-    #  Create an associative array to map file names to their corresponding
-    #+ Roman numeral "regions" (i.e., chromosomes)
-    unset map && typeset -A map
-    
-    #  Loop through bedgraph files with the current sample in the name
-    for j in *${sample}*.bedgraph; do
-        # echo "${j}"
-
-        #  Extract Roman numerals followed by "-1" using sed
-        roman=$(echo "${j}" | sed -n 's/.*reg-\([IVXLCDM]\+-1\)\b.*/\1/p')
+    #  Loop through each sample group
+    for i in "${samples[@]}"; do
+        # i=${samples[2]}                                          # echo "${i}"
         
-        #  Add the file to the map if a Roman numeral (followed by "-1") is
-        #+ found
-        if [[ -n "${roman}" ]]; then map["${j}"]=${roman}; fi
-    done                                                       # echo_test "${map[@]}"
-    
-    #  Use the last element assigned to variable j to determine the suffix
-    #+ for concatenated bedgraph outfiles
-    suffix=$(echo ${j} | awk -F '_' '{ print $6"_"$7 }')       # echo "${suffix}"
+        #  Store the current sample name
+        sample="${i}"                                              # echo "${sample}"
 
-    check_array=false
-    if ${check_array}; then
-        #  Output the contents of the map for debugging
-        for k in "${!map[@]}"; do
-              key="${k}"
-            value="${map[${k}]}"
+        #  Determine the prefix based on the sample name
+        if [[ "${sample}" == "Q_WT" ]]; then
+            prefix="Q"
+        elif [[ "${sample}" == "30C-a15_WT" ]]; then
+            prefix="G1"
+        elif [[ "${sample}" == "nz_WT" ]]; then
+            prefix="G2-M"
+        fi                                                         # echo "${prefix}"
+
+        #  Create an associative array to map file names to their corresponding
+        #+ Roman numeral "regions" (i.e., chromosomes)
+        unset map && typeset -A map
         
-            echo """
-              key  ${key}
-            value  ${value}
-            """
-        done
-    fi
+        #  Loop through bedgraph files with the current sample in the name
+        for j in *${sample}*.bedgraph; do
+            # echo "${j}"
 
-    #  Sort the files based on Roman numerals and concatenate them (only kind
-    #+ of works, but that's fine for the time being)
-    for l in $(echo ${!map[*]} | tr ' ' '\n' | sort -V); do
-        check_command=true
-        if ${check_command}; then
-            echo "\"${l}\" >> \"${prefix}_${suffix/bedgraph/bg}\""
+            #  Extract Roman numerals followed by "-1" using sed
+            roman=$(echo "${j}" | sed -n 's/.*reg-\([IVXLCDM]\+-1\)\b.*/\1/p')
+            
+            #  Add the file to the map if a Roman numeral (followed by "-1") is
+            #+ found
+            if [[ -n "${roman}" ]]; then map["${j}"]=${roman}; fi
+        done                                                       # echo_test "${map[@]}"
+        
+        # #  Use an associative array (hash table) to deduplicate "${map[@]}"
+        # unset map_hash && typeset -A map_hash
+        # for i in "${map[@]}"; do map_hash["$i"]=1; done
+        #
+        # #  Unset "${map[@]}"
+        # unset map && typeset -a map
+        #
+        # #CODEREVIEW
+        # #  Has tables in Bash cannot have duplicate keys. If the same key (i.e.,
+        # #+ the same string value) is encountered again in the loop, it doesn't
+        # #+ create a new key but simply overwrites the existing key's value. So,
+        # #+ after this loop, associative_array will only have unique elements from
+        # #+ original_array as its keys.
+        # for i in "${!map_hash[@]}"; do
+        #     map+=( "${i}" )
+        # done                                                       # echo_test "${map[@]}"
+
+        #  Use the last element assigned to variable j to determine the suffix
+        #+ for concatenated bedgraph outfiles
+        suffix=$(echo ${j} | awk -F '_' '{ print $6"_"$7 }')       # echo "${suffix}"
+
+        check_array=true
+        if ${check_array}; then
+            #  Output the contents of the map for debugging
+            for k in "${!map[@]}"; do
+                  key="${k}"
+                value="${map[${k}]}"
+            
+                echo """
+                  key  ${key}
+                value  ${value}
+                """
+            done
         fi
 
-        run_command=true
+        #  Sort the files based on Roman numerals and concatenate them (only kind
+        #+ of works, but that's fine for the time being)
+        for l in $(echo ${!map[*]} | tr ' ' '\n' | sort -V); do
+            check_command=true
+            if ${check_command}; then
+                echo "\"${l}\" >> \"${prefix}_${suffix/bedgraph/bg}\""
+            fi
+
+            run_command=true
+            if ${run_command}; then
+                cat "${l}" >> "${prefix}_${suffix/bedgraph/bg}"
+            fi
+        done
+
+        #  Check that the concatenated file is not empty
+        if [[ ! -s "${prefix}_${suffix/bedgraph/bg}" ]]; then
+            echo "Error: Concatenation failed for ${sample}. Exiting."
+            return 1
+        else
+            run_clean_up=true
+            # echo "${run_clean_up}"
+        fi
+
         if ${run_command}; then
-            cat "${l}" >> "${prefix}_${suffix/bedgraph/bg}"
+            echo "Concatenation was successful for ${sample}."
+            
+            #  If concatenation is successful, remove individual sample bedgraphs
+            #+ and, below, pdfs
+            for l in ${!map[*]}; do
+                rm "${l}"
+                echo "Deleted ${l}"
+
+                pdf_file="${l%.bedgraph}.pdf"
+                if [[ -e "${pdf_file}" ]]; then
+                    rm "${pdf_file}"
+                    echo "Deleted ${pdf_file}"
+                fi
+            done
+        else
+            echo "Error: Concatenation failed for ${sample}. Exiting."
+            return 1
         fi
     done
 
-    #  Check that the concatenated file is not empty
-    if [[ ! -s "${prefix}_${suffix/bedgraph/bg}" ]]; then
-        echo "Error: Concatenation failed for ${sample}. Exiting."
-        return 1
-    else
-        run_clean_up=true
-        # echo "${run_clean_up}"
-    fi
-
-    if ${run_command}; then
-        echo "Concatenation was successful for ${sample}."
-        
-        #  If concatenation is successful, remove individual sample bedgraphs
-        #+ and, below, pdfs
-        for l in ${!map[*]}; do
-            rm "${l}"
-            echo "Deleted ${l}"
-
-            pdf_file="${l%.bedgraph}.pdf"
-            if [[ -e "${pdf_file}" ]]; then
-                rm "${pdf_file}"
-                echo "Deleted ${pdf_file}"
-            fi
-        done
-    else
-        echo "Error: Concatenation failed for ${sample}. Exiting."
-        return 1
-    fi
+    cd -
 done
 
 #  Check the exit status of the last operation; if it's zero, then return to
 #+ the previous directory
 if [[ $? -eq 0 ]]; then
     echo "Cleanup complete. Individual bedgraphs and pdfs removed."
-    cd -
+    cd ../..
 fi
 ```
 </details>

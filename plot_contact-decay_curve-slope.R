@@ -65,7 +65,7 @@ setwd(paste(p_prj, p_exp, sep = "/"))  # getwd()  # list.dirs()
 
 
 #  Initialize variables, data objects -----------------------------------------
-p_txt <- "pngs/2023-1020_XII-451400-460800"
+p_txt <- "pngs/2023-1020_use_XII-451400-460800"
 f_Q <- "contact-decay_XII-451400-460800.Q.txt"
 f_1 <- "contact-decay_XII-451400-460800.G1.txt"
 f_2 <- "contact-decay_XII-451400-460800.G2-M.txt"
@@ -238,14 +238,21 @@ for(i in 1:nrow(coefficients)) {
             size = 4
         )
 }
-p_rDNA
 
-ggplot2::ggsave(
-    paste(
-        p_txt, "contact-decay_XII-451400-460800.ggplot2-main.loess-span-1.power-law-both.pdf", sep = "/"
-    ),
-    p_rDNA
-)
+print_plot <- TRUE
+if(base::isTRUE(print_plot)) p_rDNA
+
+save_plot <- FALSE
+if(base::isTRUE(save_plot)) {
+    ggplot2::ggsave(
+        paste(
+            p_txt,
+            "contact-decay_XII-451400-460800.ggplot2-main.loess-span-1.power-law-both.pdf",
+            sep = "/"
+        ),
+        p_rDNA
+    )
+}
 
 #  Plot publication-quality contact decay curve slopes using ggplot2
 # span <- 0.5
@@ -305,12 +312,16 @@ p_slope <- c_all %>%
     ) +
     scale_x_continuous(
         breaks = log10(c(100, 1000, 10000)), 
-        labels = c(expression(10^2), expression(10^3), expression(10^4))
+        labels = c(expression(10^2), expression(10^3), expression(10^4)) # ,
+        # limits = c(log10(100), NA)
     ) +
+    xlim(log10(c(100, 10000))) +
     ylim(c(-2, 2)) +
     theme_minimal() +
     theme(panel.grid.minor = element_blank())
-p_slope
+
+print_plot <- TRUE
+if(base::isTRUE(print_plot)) p_slope
 
 ggplot2::ggsave(
     paste(
