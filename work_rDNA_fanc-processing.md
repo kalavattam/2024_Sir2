@@ -3470,9 +3470,9 @@ activate_env "hicexplorer_764_env"
 choice="norm"                                                  # echo "${choice}"
 
 # res=6400                                                       # echo "${res}"
-# res=5000                                                       # echo "${res}"
+res=5000                                                       # echo "${res}"
 # res=3200                                                       # echo "${res}"
-res=1600                                                       # echo "${res}"
+# res=1600                                                       # echo "${res}"
 # res=200                                                        # echo "${res}"
 
 calc="log2ratio"
@@ -3497,7 +3497,8 @@ matcol="PuOr_r"                                                # echo "${matcol}
 # date="2023-1019"                                               # echo "${date}"
 # date="2023-1020"                                               # echo "${date}"
 # date="2023-1023"                                               # echo "${date}"
-date="2023-1028"                                               # echo "${date}"
+# date="2023-1028"                                               # echo "${date}"
+date="2023-1030"                                               # echo "${date}"
 
 if [[ ${coord} == "I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI" ]]; then
     outdir="pngs/${date}_genome"                               # echo "${outdir}"
@@ -3506,6 +3507,12 @@ elif [[ ${coord} == "XI XII XIII" ]]; then
 else
     outdir="pngs/${date}_$(sed 's/\:/-/g' <(echo "${coord}"))" # echo "${outdir}"
 fi
+
+
+#  Execute main tasks =========================================================
+#  Go to work directory
+change_dir \
+    "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process"
 
 unset cools && typeset -a cools
 while IFS=" " read -r -d $'\0'; do
@@ -3525,16 +3532,10 @@ done < <(
 check_array=true
 if ${check_array}; then echo_test "${cools[@]}"; fi
 
-
-#  Execute main tasks =========================================================
-#  Go to work directory
-change_dir \
-    "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process"
-
 #  Make outfile directory if it doesn't exist
 [[ ! -d "${outdir}" ]] && mkdir -p "${outdir}/err_out" || true
 
-vmax=3.5
+vmax=7
 vmin=-${vmax}
 
 iter=0                                                                           # echo "${iter}"
