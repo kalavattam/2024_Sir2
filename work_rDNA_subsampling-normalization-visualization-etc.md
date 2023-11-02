@@ -1,5 +1,5 @@
 
-`#work_rDNA_fanc-processing.md`
+`#work_rDNA_subsampling-normalization-visualization-etc.md`
 <br />
 <br />
 
@@ -39,16 +39,20 @@
         1. [Notes](#notes-1)
     1. [Run HiCExplorer `plotHicMatrix` for negative log-transformed heatmaps](#run-hicexplorer-plothicmatrix-for-negative-log-transformed-heatmaps)
         1. [Code](#code-11)
-    1. [Run HiCExplorer `plotHicMatrix` for log2 ratio heatmaps](#run-hicexplorer-plothicmatrix-for-log2-ratio-heatmaps)
+    1. [Run HiCExplorer `plotHicMatrix` for non-transformed heatmaps](#run-hicexplorer-plothicmatrix-for-non-transformed-heatmaps)
         1. [Code](#code-12)
+    1. [Run HiCExplorer `plotHicMatrix` for log2 ratio heatmaps](#run-hicexplorer-plothicmatrix-for-log2-ratio-heatmaps)
+        1. [Code](#code-13)
+    1. [Run HiCExplorer `plotHicMatrix` for two-sample "subtraction heatmaps"](#run-hicexplorer-plothicmatrix-for-two-sample-subtraction-heatmaps)
+        1. [Code](#code-14)
 1. [9. Draw contact-decay plots for rDNA region](#9-draw-contact-decay-plots-for-rdna-region)
     1. [Notes](#notes-2)
     1. [Call HiCExplorer `hicPlotDistVsCounts`](#call-hicexplorer-hicplotdistvscounts)
-        1. [Code](#code-13)
+        1. [Code](#code-15)
     1. [Wrangle contact-decay table output by `hicPlotDistVsCounts`](#wrangle-contact-decay-table-output-by-hicplotdistvscounts)
-        1. [Code](#code-14)
+        1. [Code](#code-16)
 1. [10. Obtain virtual 4C \(v4C\) data](#10-obtain-virtual-4c-v4c-data)
-    1. [Code](#code-15)
+    1. [Code](#code-17)
 1. [X. Documentation \(partial\)](#x-documentation-partial)
     1. [Notes](#notes-3)
         1. [`fanc to-fanc --help`](#fanc-to-fanc---help)
@@ -2580,7 +2584,15 @@ Dependencies:
   sbatch: Used for job submission
 
 Example:
-  run_hicCompareMatrices -1 matrix_1.cool -2 matrix_2.cool -o output.cool -j compare.matrices -e path/to/logs -p log2ratio -n -d
+  run_hicCompareMatrices
+      -1 matrix_1.cool
+      -2 matrix_2.cool
+      -o output.cool
+      -j compare.matrices
+      -e path/to/logs
+      -p log2ratio
+      -n
+      -d
 EOM
     )
 
@@ -2651,7 +2663,7 @@ EOM
         return 1
     fi
 
-    : ${operation:="log2ratio"}
+    : ${operation:="log2ratio"}  #FIXME Is this needed? Declared above.
 
     local sbatch_script=$(
 cat << EOF
@@ -2690,20 +2702,20 @@ activate_env "hicexplorer_764_env"
 # Directories containing the cooler files
 dirs=(
     "11_cooler_genome_KR-filt-0.4_whole-matrix"
-    "11_cooler_genome_KR-filt-0.5_whole-matrix"
-    "11_cooler_genome_KR-filt-0.6_whole-matrix"
-    "11_cooler_genome_KR-filt-0.7_whole-matrix"
-    "11_cooler_genome_KR-filt-0.8_whole-matrix"
-    "11_cooler_genome_KR-filt-0.9_whole-matrix"
-    # "11_cooler_genome_KR-filt-0.4"
+    # "11_cooler_genome_KR-filt-0.5_whole-matrix"
+    # "11_cooler_genome_KR-filt-0.6_whole-matrix"
+    # "11_cooler_genome_KR-filt-0.7_whole-matrix"
+    # "11_cooler_genome_KR-filt-0.8_whole-matrix"
+    # "11_cooler_genome_KR-filt-0.9_whole-matrix"
+    # # "11_cooler_genome_KR-filt-0.4"
     # "11_cooler_VII_KR-filt-0.4"
     # "11_cooler_XII_KR-filt-0.4"
     # "11_cooler_XV_KR-filt-0.4"
 )
 # echo_test "${dirs[@]}"
 
-operation="log2ratio"
-# operation="diff"
+# operation="log2ratio"
+operation="diff"
 
 
 #  Execute main tasks =========================================================
@@ -2732,7 +2744,8 @@ for dir in "${dirs[@]}"; do
         
         #  Extract the resolution from the file #1 name
         res_1=$(
-            echo "${files[i]}" | grep -oP '\d+(?=.downsample-to-(Q|G1).cool)'
+            echo "${files[i]}" \
+                | grep -oP '\d+(?=.downsample-to-(Q|G1).cool)'
         )  # echo ${res_1}
         
         #  Extract the phase from file #1 name
@@ -2753,8 +2766,9 @@ for dir in "${dirs[@]}"; do
 
             #  Extract the resolution from the file #2 name
             res_2=$(
-                echo "${files[j]}" | grep -oP '\d+(?=.downsample-to-(Q|G1).cool)'
-            )  # echo "${res_2}"
+                echo "${files[j]}" \
+                    | grep -oP '\d+(?=.downsample-to-(Q|G1).cool)'
+            )  # echo ${res_2}
 
             #  Extract the phase from file #2 name
             phase_2=$(
@@ -2791,10 +2805,10 @@ for dir in "${dirs[@]}"; do
                     preposition=over
                 elif [[ "${operation}" == "diff" ]]; then
                     preposition=minus
-                fi
+                fi  # echo "${preposition}"
 
                 outfile="${outdir}/${phase_1}-${preposition}-${phase_2}.${res_1}.${operation}.cool"  # echo "${outfile}"
-                job_name="$(basename "${outfile}" .cool)"                                  # echo "${job_name}"
+                job_name="$(basename "${outfile}" .cool)"                                            # echo "${job_name}"
                 err_out_dir="${outdir}/err_out"
 
                 check_variables=true
@@ -2821,9 +2835,9 @@ for dir in "${dirs[@]}"; do
                         -j "${job_name}" \
                         -e "${err_out_dir}" \
                         -p "${operation}" \
-                        -n \
                         -d
-                        
+
+                        # -n \
                 fi
 
                 run_jobs=true
@@ -2834,9 +2848,9 @@ for dir in "${dirs[@]}"; do
                         -o "${outfile}" \
                         -j "${job_name}" \
                         -e "${err_out_dir}" \
-                        -p "${operation}" \
-                        -n
+                        -p "${operation}"
 
+                        # -n
                 fi
 
                 sleep 0.1
@@ -3083,7 +3097,7 @@ EOM
             -c|--coordinates) 
                 #  Check if the coordinates string contains spaces
                 if [[ "${2}" == *" "* ]]; then
-                    #  If it does, split the string into an array
+                    #  If it does, then split string into array
                     coordinates=(${2})
                 else
                     coordinates="${2}"
@@ -3444,9 +3458,252 @@ done
 </details>
 <br />
 
+<a id="run-hicexplorer-plothicmatrix-for-non-transformed-heatmaps"></a>
+#### Run HiCExplorer `plotHicMatrix` for non-transformed heatmaps
+<a id="code-12"></a>
+##### Code
+<details>
+<summary><i>Code: Run HiCExplorer `plotHicMatrix` for non-transformed heatmaps</i></summary>
+
+```bash
+#!/bin/bash
+
+#  Initialize functions =======================================================
+#  (Initialize the above functions.)
+
+
+#  Configure work environment, directories, and variables =====================
+#  Set variables, arrays
+# coord="I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI"  # echo "${coord}"
+# coord="XII:451200-469400"                                      # echo "${coord}"  #GOOD
+# coord="XII:451200-491000"                                      # echo "${coord}"  #GOOD
+# coord="XII:451400-469200"                                      # echo "${coord}"  #GOOD
+# coord="XII:451400-490800"                                      # echo "${coord}"  #GOOD
+# coord="XII:451500-461500"                                      # echo "${coord}"  #BETTER
+# coord="XII:451500-460500"                                      # echo "${coord}"  #CLOSE
+# coord="XII:451200-460800"                                      # echo "${coord}"  #ALMOST
+# coord="XII:451500-460800"                                      # echo "${coord}"  #GOOD
+# coord="XII:451400-460800"                                      # echo "${coord}"  #GOOD #USE
+# coord="VII"                                                    # echo "${coord}"
+# coord="XII"                                                    # echo "${coord}"
+# coord="XV"                                                     # echo "${coord}"
+coord="XI XII XIII"                                            # echo "${coord}"
+
+# res=6400                                                       # echo "${res}"
+res=5000                                                       # echo "${res}"
+# res=3200                                                       # echo "${res}"
+# res=1600                                                       # echo "${res}"
+# res=800                                                        # echo "${res}"
+# res=300                                                        # echo "${res}"
+# res=200                                                        # echo "${res}"
+
+vmin=0.0                                                       # echo "${vmin}"
+# vmax=0.001                                                     # echo "${vmax}"
+vmax=0.0015                                                    # echo "${vmax}"
+# vmax=0.002                                                     # echo "${vmax}"
+
+dpi=300                                                        # echo "${dpi}"
+matcol="RdPu"                                                  # echo "${matcol}"
+
+date="2023-1102"                                               # echo "${date}"
+
+if [[ ${coord} == "I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI" ]]; then
+    outdir="pngs/${date}_whole-genome"                         # echo "${outdir}"
+elif [[ ${coord} == "XI XII XIII" ]]; then
+    outdir="pngs/${date}_$(sed 's/ /-/g' <(echo "${coord}"))"  # echo "${outdir}"
+else
+    outdir="pngs/${date}_$(sed 's/\:/-/g' <(echo "${coord}"))" # echo "${outdir}"
+fi
+
+check_variables=true
+if ${check_variables}; then
+    echo """
+       res  ${res}
+     coord  ${coord}
+      vmin  ${vmin}
+      vmax  ${vmax}
+       dpi  ${dpi}
+    matcol  ${matcol}
+      date  ${date}
+    outdir  ${outdir}
+    """
+fi
+
+
+#  Execute main tasks =========================================================
+#  Activate environment
+if [[ ${CONDA_DEFAULT_ENV} == hicexplorer_764_env ]]; then
+    :
+elif [[ ${CONDA_DEFAULT_ENV} != base ]]; then
+    conda deactivate
+    source activate hicexplorer_764_env
+elif [[ ${CONDA_DEFAULT_ENV} == base ]]; then
+    source activate hicexplorer_764_env
+fi
+
+#  Go to work directory
+change_dir \
+    "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process"
+
+unset cools && typeset -a cools
+while IFS=" " read -r -d $'\0'; do
+    cools+=( "${REPLY}" )
+done  < <(
+    find \
+        11_cooler_genome_KR-filt-0.4_whole-matrix \
+        -maxdepth 1 \
+        -type f \
+        -name MC*.${res}.*cool \
+        -print0 \
+            | sort -z
+)
+# 11_cooler_XII_KR-filt-0.4 \
+# 11_cooler_${coord}_KR-filt-0.4 \
+
+check_array=true
+if ${check_array}; then echo_test "${cools[@]}"; fi
+
+#  Make outfile directory if it doesn't exist
+[[ ! -d "${outdir}" ]] && mkdir -p "${outdir}/err_out" || true
+
+iter=0
+for i in "${cools[@]}"; do
+    # echo_test "${cools[@]}"
+    # i="${cools[0]}"                                                            # echo "${i}"
+    
+    indir="$(dirname ${i})"                                                      # echo "${indir}"
+    infile="$(basename ${i})"                                                    # echo "${infile}"
+    
+    if [[ ${coord} == "I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI" ]]; then
+        what="genome"
+    elif [[ "${coord}" == *" "* ]]; then
+        what=$(echo "${coord}" | sed 's/ /-/g')
+    else
+        # what="$(echo ${coord} | awk -F ':' '{ print $1 }')"
+        what="${coord}"
+    fi                                                                           # echo "${what}"
+
+    if [[ ${indir} =~ "whole-matrix" ]]; then
+        how="$(
+            echo ${indir} \
+                | awk -F '_' '{ print $4" w all contacts, downsampled wrt "$3 }'
+        )"
+    else
+        how="$(
+            echo ${indir} \
+                | awk -F '_' '{ print $4" w cis contacts, downsampled wrt "$3 }'
+        )"
+    fi
+    # echo "${how}"
+
+    if [[ "${coord}" == *" "* ]]; then
+        title="${what}; ${how}; ${res}-bp res"                                   # echo "${title}"
+        suffix="$(
+            echo ${title} \
+                | awk -F '[;,\\ ]' '{ print $1"_ds-"$10"_"$3"-"$5"-"$6 }' \
+                | sed 's/\:/-/g'
+        )"
+        title="$(echo ${what} | sed 's/-/ /g'); ${how}; ${res}-bp res"           # echo "${title}"
+    else
+        title="${what}; ${how}; ${res}-bp res"                                   # echo "${title}"
+        suffix="$(
+            echo ${title} \
+                | awk -F '[;,\\ ]' '{ print $1"_ds-"$10"_"$3"-"$5"-"$6 }' \
+                | sed 's/\:/-/g'
+        )"                                                                       
+    fi                                                                           # echo "${suffix}"
+    
+    outfile="${outdir}/$(basename ${i} .cool).${suffix}.pdf"                     # echo "${outfile}"
+    job_name="hicPlotMatrix.$(basename ${outfile} .pdf)"                         # echo "${job_name}"
+    err_out_dir="$(dirname ${outfile})/err_out"                                  # echo "${err_out_dir}"
+
+    (( iter++ ))
+
+    check_variables=true
+    if ${check_command}; then
+        echo """
+                \${res}  ${res}
+              \${coord}  ${coord}
+               \${vmin}  ${vmin}
+               \${vmax}  ${vmax}
+                \${dpi}  ${dpi}
+             \${matcol}  ${matcol}
+              \${indir}  ${indir}
+             \${infile}  ${infile}
+             \${outdir}  ${outdir}
+            \${outfile}  ${outfile}
+              \${title}  ${title}
+           \${job_name}  ${job_name}
+        \${err_out_dir}  ${err_out_dir}
+        """
+    fi
+
+    check_command=true
+    if ${check_command}; then
+        echo """
+        ### ${iter} ###
+        run_hicPlotMatrix \\
+            -i \"${indir}/${infile}\" \\
+            -o \"${outfile}\" \\
+            -j \"${job_name}\" \\
+            -e \"${err_out_dir}\" \\
+            -c \"${coord}\" \\
+            -r \"${matcol}\" \\
+            -n ${vmin} \\
+            -x ${vmax} \\
+            -t \"${title}\" \\
+            -p ${dpi} \\
+            -d
+        """
+    fi
+    
+    do_dry_run=true
+    if ${do_dry_run}; then
+        run_hicPlotMatrix \
+            -i "${indir}/${infile}" \
+            -o "${outfile}" \
+            -j "${job_name}" \
+            -e "${err_out_dir}" \
+            -c "${coord}" \
+            -r "${matcol}" \
+            -n ${vmin} \
+            -x ${vmax} \
+            -t "${title}" \
+            -p ${dpi} \
+            -d
+    fi
+
+    run_job=true
+    if ${run_job}; then
+        run_hicPlotMatrix \
+            -i "${indir}/${infile}" \
+            -o "${outfile}" \
+            -j "${job_name}" \
+            -e "${err_out_dir}" \
+            -c "${coord}" \
+            -r "${matcol}" \
+            -n ${vmin} \
+            -x ${vmax} \
+            -t "${title}" \
+            -p ${dpi}
+    fi
+
+    sleep 0.2
+done
+
+#NOTE
+#  - 150- or 200-bp resolution looks best for rDNA (but need to zoom in on
+#+   left-most repeat), either 0.3 or 0.4 filter (probably 0.4 since that
+#+   looks best for the whole XII)
+#+ - For trans analyses, going to want to use KR-all-contact normalization, 0.4
+#+   filter
+```
+</details>
+<br />
+
 <a id="run-hicexplorer-plothicmatrix-for-log2-ratio-heatmaps"></a>
 #### Run HiCExplorer `plotHicMatrix` for log2 ratio heatmaps
-<a id="code-12"></a>
+<a id="code-13"></a>
 ##### Code
 <details>
 <summary><i>Code: Run HiCExplorer `plotHicMatrix` for log2 ratio heatmaps</i></summary>
@@ -3668,6 +3925,263 @@ done
 </details>
 <br />
 
+<a id="run-hicexplorer-plothicmatrix-for-two-sample-subtraction-heatmaps"></a>
+#### Run HiCExplorer `plotHicMatrix` for two-sample "subtraction heatmaps"
+<a id="code-14"></a>
+##### Code
+<details>
+<summary><i>Code: Run HiCExplorer `plotHicMatrix` for two-sample "subtraction heatmaps"</i></summary>
+
+```bash
+#!/bin/bash
+
+#  Initialize functions =======================================================
+#  (See above.)
+
+
+#  Configure work environment, directories, and variables =====================
+activate_env "hicexplorer_764_env"
+
+#  Set variables, arrays
+
+#NOTE 2023-1019
+#  Choice of doing hicCompareMatrice internal normalization largely does not
+#+ matter because of how we have subsampled the matrices
+# choice="no-norm"                                               # echo "${choice}"
+choice="norm"                                                  # echo "${choice}"
+
+# res=6400                                                       # echo "${res}"
+res=5000                                                       # echo "${res}"
+# res=3200                                                       # echo "${res}"
+# res=1600                                                       # echo "${res}"
+# res=200                                                        # echo "${res}"
+
+calc="diff"
+
+# chr="XII"                                                      # echo "${chr}"
+# chr="VII"                                                      # echo "${chr}"
+# chr="XV"                                                       # echo "${chr}"
+# chr="genome"                                                   # echo "${chr}"
+# chr="I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI"    # echo "${coord}"
+# start=451400                                                   # echo "${start}"
+# end=460800                                                     # echo "${end}"
+# coord="${chr}:${start}-${end}"                                 # echo "${coord}"  #GOOD
+chr="XI XII XIII"                                              # echo "${coord}"
+coord="${chr}"                                                 # echo "${coord}"
+
+# vmax=0.0006                                                    # echo "${vmax}"
+vmax=0.0000009                                                 # echo "${vmax}"
+vmin=-${vmax}                                                  # echo "${vmin}"
+# vmin=-0.0000001                                                # echo "${vmin}"
+# vmin=-0.0003                                                   # echo "${vmin}"
+
+dpi=300                                                        # echo "${dpi}"
+matcol="PuOr_r"                                                # echo "${matcol}"
+
+date="2023-1103"                                               # echo "${date}"
+
+if [[ ${coord} == "I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI" ]]; then
+    outdir="pngs/${date}_genome"                               # echo "${outdir}"
+elif [[ ${coord} == "XI XII XIII" ]]; then
+    outdir="pngs/${date}_$(sed 's/ /-/g' <(echo "${coord}"))"  # echo "${outdir}"
+else
+    outdir="pngs/${date}_$(sed 's/\:/-/g' <(echo "${coord}"))" # echo "${outdir}"
+fi
+
+
+#  Execute main tasks =========================================================
+#  Go to work directory
+change_dir \
+    "${HOME}/tsukiyamalab/kalavatt/2023_rDNA/results/2023-0307_work_Micro-C_align-process"
+
+unset cools && typeset -a cools
+while IFS=" " read -r -d $'\0'; do
+    cools+=( "${REPLY}" )
+done < <(
+    find \
+        12_hicCompareMatrices_genome_KR-filt-0.4_whole-matrix/${choice} \
+        -maxdepth 1 \
+        -type f \
+        -name *.${res}.${calc}.cool \
+        -print0 \
+            | sort -z
+)
+# 12_hicCompareMatrices_genome_KR-filt-0.4_whole-matrix/${choice} \
+# 12_hicCompareMatrices_${coord}_KR-filt-0.4/${choice} \
+
+check_array=true
+if ${check_array}; then echo_test "${cools[@]}"; fi
+
+#  Make outfile directory if it doesn't exist
+[[ ! -d "${outdir}" ]] && mkdir -p "${outdir}/err_out" || true
+
+iter=0                                                                           # echo "${iter}"
+for i in "${cools[@]}"; do
+    # echo_test "${cools[@]}"
+    # i="${cools[0]}"                                                            # echo "${i}"
+    
+    indir="$(dirname ${i})"                                                      # echo "${indir}"
+    infile="$(basename ${i})"                                                    # echo "${infile}"
+    
+    if [[ ${coord} == "I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI" ]]; then
+        what="genome"
+    elif [[ "${coord}" == "genome" ]]; then
+        what="genome"
+    elif [[ "${coord}" == *" "* ]]; then
+        what=$(echo "${coord}" | sed 's/ /-/g')
+    else
+        # what="$(echo ${coord} | awk -F ':' '{ print $1 }')"
+        what="${coord}"
+    fi
+    # echo "${what}"  # echo "${coord}"
+
+    if [[ ${indir} =~ "whole-matrix" ]]; then
+        how="$(
+            echo ${indir} \
+                | awk -F '_' '{ print $4" w all contacts, downsampled wrt "$3 }'
+        )"
+    else
+        how="$(
+            echo ${indir} \
+                | awk -F '_' '{ print $4" w cis contacts, downsampled wrt "$3 }'
+        )"
+    fi
+    # echo "${how}"
+
+    if [[ "${coord}" == *" "* ]]; then
+        title="${what}; ${how}; ${res}-bp res"                                   # echo "${title}"
+        suffix="$(
+            echo ${title} \
+                | awk -F '[;,\\ ]' '{ print $1"_ds-"$10"_"$3"-"$5"-"$6 }' \
+                | sed 's/\:/-/g'
+        )"
+        title="$(echo ${what} | sed 's/-/ /g'); ${how}; ${res}-bp res"           # echo "${title}"
+    else
+        title="${what}; ${how}; ${res}-bp res"                                   # echo "${title}"
+        suffix="$(
+            echo ${title} \
+                | awk -F '[;,\\ ]' '{ print $1"_ds-"$10"_"$3"-"$5"-"$6 }' \
+                | sed 's/\:/-/g'
+        )"
+    fi                                                                           # echo "${suffix}"
+
+    outfile="${outdir}/$(basename ${i} .cool).${vmax}.pdf"                       # echo "${outfile}"
+    job_name="hicPlotMatrix.$(basename ${outfile} .pdf)"                         # echo "${job_name}"
+    err_out_dir="$(dirname ${outfile})/err_out"                                  # echo "${err_out_dir}"
+
+    (( iter++ ))
+
+    check_variables=true
+    if ${check_command}; then
+        echo """
+                \${res}  ${res}
+              \${coord}  ${coord}
+               \${vmin}  ${vmin}
+               \${vmax}  ${vmax}
+                \${dpi}  ${dpi}
+             \${matcol}  ${matcol}
+              \${indir}  ${indir}
+             \${infile}  ${infile}
+             \${outdir}  ${outdir}
+            \${outfile}  ${outfile}
+              \${title}  ${title}
+           \${job_name}  ${job_name}
+        \${err_out_dir}  ${err_out_dir}
+        """
+    fi
+
+    check_command=true
+    if ${check_command}; then
+        echo """
+        ### ${iter} ###
+        run_hicPlotMatrix \\
+            -i \"${indir}/${infile}\" \\
+            -o \"${outfile}\" \\
+            -j \"${job_name}\" \\
+            -e \"${err_out_dir}\" \\
+            -c \"${coord}\" \\
+            -r \"${matcol}\" \\
+            -n ${vmin} \\
+            -x ${vmax} \\
+            -t \"${title}\" \\
+            -p ${dpi}
+        """
+    fi
+
+    do_dry_run=true
+    if ${do_dry_run}; then
+        run_hicPlotMatrix \
+            -i "${indir}/${infile}" \
+            -o "${outfile}" \
+            -j "${job_name}" \
+            -e "${err_out_dir}" \
+            -c "${coord}" \
+            -r "${matcol}" \
+            -n ${vmin} \
+            -x ${vmax} \
+            -t "${title}" \
+            -p ${dpi} \
+            -d
+    fi
+
+    run_job=true
+    if ${run_job}; then
+        run_hicPlotMatrix \
+            -i "${indir}/${infile}" \
+            -o "${outfile}" \
+            -j "${job_name}" \
+            -e "${err_out_dir}" \
+            -c "${coord}" \
+            -r "${matcol}" \
+            -n ${vmin} \
+            -x ${vmax} \
+            -t "${title}" \
+            -p ${dpi}
+    fi
+
+    sleep 0.2
+done
+
+#  2023-1102
+#+ 
+#+ Scratch-work: For norm/, determined that color values need to be between
+#+ 0.000001 and 0.0000001; consistent with Seungsoo's work, 0.0000003 looks
+#+ best
+# vmax=0.0000003
+# vmin=-${vmax}
+#
+# run_hicPlotMatrix \
+#     -i "12_hicCompareMatrices_genome_KR-filt-0.4_whole-matrix/norm/Q-minus-G2.5000.diff.cool" \
+#     -o "pngs/2023-1103_genome/Q-minus-G2.5000.diff.${vmax}.pdf" \
+#     -j "hicPlotMatrix.Q-minus-G2.5000.diff.${vmax}" \
+#     -e "pngs/2023-1103_genome/err_out" \
+#     -c "I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI" \
+#     -r "PuOr_r" \
+#     -n ${vmin} \
+#     -x ${vmax} \
+#     -t "genome; KR-filt-0.4 w all contacts, downsampled wrt genome; 5000-bp res" \
+#     -p 300
+
+#+ Scratch-work: For no-norm/, determined that color values need to be between
+#+ 0.003 and 0.0003; 0.0006 looks best
+# vmax=0.0006
+# vmin=-${vmax}
+#
+# run_hicPlotMatrix \
+#     -i "12_hicCompareMatrices_genome_KR-filt-0.4_whole-matrix/no-norm/Q-minus-G2.5000.diff.cool" \
+#     -o "pngs/2023-1103_genome/Q-minus-G2.5000.diff.${vmax}.pdf" \
+#     -j "hicPlotMatrix.Q-minus-G2.5000.diff.${vmax}" \
+#     -e "pngs/2023-1103_genome/err_out" \
+#     -c "I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI" \
+#     -r "PuOr_r" \
+#     -n ${vmin} \
+#     -x ${vmax} \
+#     -t "genome; KR-filt-0.4 w all contacts, downsampled wrt genome; 5000-bp res" \
+#     -p 300
+```
+</details>
+<br />
+
 <a id="9-draw-contact-decay-plots-for-rdna-region"></a>
 ### 9. Draw contact-decay plots for rDNA region
 <a id="notes-2"></a>
@@ -3710,7 +4224,7 @@ done
 
 <a id="call-hicexplorer-hicplotdistvscounts"></a>
 #### Call HiCExplorer `hicPlotDistVsCounts`
-<a id="code-13"></a>
+<a id="code-15"></a>
 ##### Code
 <details>
 <summary><i>Code: Call HiCExplorer `hicPlotDistVsCounts`</i></summary>
@@ -4160,7 +4674,7 @@ fi
 
 <a id="wrangle-contact-decay-table-output-by-hicplotdistvscounts"></a>
 #### Wrangle contact-decay table output by `hicPlotDistVsCounts`
-<a id="code-14"></a>
+<a id="code-16"></a>
 ##### Code
 <details>
 <summary><i>Code: Wrangle contact-decay table output by `hicPlotDistVsCounts`</i></summary>
@@ -4244,7 +4758,7 @@ cat "${a_txt}" \
 
 <a id="10-obtain-virtual-4c-v4c-data"></a>
 ### 10. Obtain virtual 4C (v4C) data
-<a id="code-15"></a>
+<a id="code-17"></a>
 #### Code
 <details>
 <summary><i>Code: 10. Obtain virtual 4C (v4C) data</i></summary>
