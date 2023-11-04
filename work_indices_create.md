@@ -25,6 +25,7 @@
 <!-- /MarkdownTOC -->
 </details>
 <br />
+<br />
 
 <a id="download-and-process-s288c_reference_genome_r64-3-1_20210421tgz"></a>
 ## Download and process [`S288C_reference_genome_R64-3-1_20210421.tgz`](http://sgd-archive.yeastgenome.org/sequence/S288C_reference/genome_releases)
@@ -38,8 +39,7 @@
 ```bash
 #!/bin/bash
 
-cd "${HOME}/genomes" ||
-    echo "cd'ing failed; check on this..."
+cd "${HOME}/genomes" || echo "cd'ing failed; check on this..."
 ```
 </details>
 <br />
@@ -54,19 +54,18 @@ cd "${HOME}/genomes" ||
 ```bash
 #!/bin/bash
 
-run=FALSE
-[[ "${run}" == TRUE ]] &&
-    {
-        url_1="http://sgd-archive.yeastgenome.org/sequence"
-        url_2="S288C_reference/genome_releases"
-        f_tgz="S288C_reference_genome_R64-3-1_20210421.tgz"
+run=false
+if ${run}; then
+    url_1="http://sgd-archive.yeastgenome.org/sequence"
+    url_2="S288C_reference/genome_releases"
+    f_tgz="S288C_reference_genome_R64-3-1_20210421.tgz"
 
-        curl "${url_1}/${url_2}/${f_tgz}" > "${f_tgz}"
+    curl "${url_1}/${url_2}/${f_tgz}" > "${f_tgz}"
 
-        tar -xzf "${f_tgz}"
+    tar -xzf "${f_tgz}"
 
-        .,
-    }
+    ls -lhaFG
+fi
 ```
 </details>
 <br />
@@ -111,13 +110,11 @@ grabnode  # 16
 module purge
 ml SAMtools/1.17-GCC-12.2.0
 
-cd "Saccharomyces_cerevisiae/" ||
-    echo "cd'ing failed; check on this..."
+cd "Saccharomyces_cerevisiae/" || echo "cd'ing failed; check on this..."
 
 
 #  Index "processed" fasta file -----------------------------------------------
-cd "fasta-processed/" ||
-    echo "cd'ing failed; check on this..."
+cd "fasta-processed/" || echo "cd'ing failed; check on this..."
 
 if [[ ! -f "S288C_reference_sequence_R64-3-1_20210421.fa" ]]; then
     gzip -dk "S288C_reference_sequence_R64-3-1_20210421.fa.gz"
@@ -125,17 +122,16 @@ fi
 
 samtools faidx "S288C_reference_sequence_R64-3-1_20210421.fa"
 
-run=FALSE
-[[ "${run}" == TRUE ]] &&
-    {
-        if [[
-            -f "S288C_reference_sequence_R64-3-1_20210421.fa.fai" && \
-            -f "S288C_reference_sequence_R64-3-1_20210421.fa" && \
-            -f "S288C_reference_sequence_R64-3-1_20210421.fa.gz"
-        ]]; then
-            rm "S288C_reference_sequence_R64-3-1_20210421.fa"
-        fi
-    }
+run=false
+if ${run}; then
+    if [[
+        -f "S288C_reference_sequence_R64-3-1_20210421.fa.fai" && \
+        -f "S288C_reference_sequence_R64-3-1_20210421.fa" && \
+        -f "S288C_reference_sequence_R64-3-1_20210421.fa.gz"
+    ]]; then
+        rm "S288C_reference_sequence_R64-3-1_20210421.fa"
+    fi
+fi
 
 cd ..
 
@@ -171,7 +167,7 @@ bwa index S288C_R64-3-1.fa \
 
 
 #  How does everything look? --------------------------------------------------
-cd .. && .,s
+cd .. && ls -lhaFG ./*
 ```
 </details>
 <br />
