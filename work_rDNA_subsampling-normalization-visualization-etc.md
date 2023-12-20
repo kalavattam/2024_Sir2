@@ -5177,7 +5177,7 @@ change_dir \
 [[ ! -d "${outdir}" ]] && mkdir -p "${outdir}/err_out" || true
 
 iter=0
-for j in in "${ar_regions[@]}"; do
+for j in "${ar_regions[@]}"; do
     # j="${ar_regions[0]}"                                                           # echo "${j}"
     
     r_chr="${j}"                                                                     # echo "${r_chr}"
